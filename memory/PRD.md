@@ -24,6 +24,7 @@ Double-entry ledger with balanced debit=credit invariant, chart of accounts, jou
 - Cost tracking by category (material/labor/equipment/subcontractor/other); labor by hours×rate with technician; material-from-inventory relieves 1300. **Every cost/revenue posts exactly ONE journal entry** (no duplicates) into the double-entry engine.
 - Change orders, job invoicing (revenue → 4300 Contract Revenue), estimate-vs-actual variance.
 - Profitability engine: revenue/cost/gross profit/margin per job; reports grouped by job / customer / technician / service type; unprofitable jobs flagged. Verified spec example (JOB-0001 $8,000→$5,500→$2,500→31.25%). Books stay balanced.
+- **Job Profitability Dashboard** (`GET /jobs/reports/dashboard`): KPI tiles (total GP, avg margin, profitable vs unprofitable counts) + a "Jobs Needing Attention" panel listing loss-making and low-margin (<20%) jobs + top profitable jobs. Completes Priority 1.
 - New accounts: 4300, 5000/5005/5006/5007/5008 (job costs), 2320 Wages Payable, 2330 Customer Deposits.
 
 ### Accounting core & add-ons

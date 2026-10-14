@@ -89,6 +89,50 @@ async def list_jobs(user: dict = Depends(get_current_user)):
     return out
 
 
+@router.get("/reports/dashboard")
+async def job_dashboard(user: dict = Depends(require("ledger:read"))):
+    rows = await jobs(user).find_list(sort=[("created_at", -1)], limit=1000)
+    enriched = [{**j, "profit": await _profit(user, j)} for j in rows]
+
+    def card(j):
+        p = j["profit"]
+        return {"job_number": j["job_number"], "customer": j["customer_name"], "status": j["status"],
+                "job_type": j["job_type"], "revenue": p["revenue"], "cost": p["cost"],
+                "gross_profit": p["gross_profit"], "margin": p["gross_margin_pct"]}
+
+    total_rev = sum(j["profit"]["actual_revenue_cents"] for j in enriched)
+    total_cost = sum(j["profit"]["actual_cost_cents"] for j in enriched)
+    total_gp = total_rev - total_cost
+    billed = [j for j in enriched if j["profit"]["actual_revenue_cents"] > 0]
+    profitable = [j for j in billed if j["profit"]["gross_profit_cents"] > 0]
+    unprofitable = [j for j in billed if j["profit"]["gross_profit_cents"] < 0]
+    # at-risk: active jobs with costs logged but margin under 20% (or revenue not yet billed but cost > est)
+    at_risk = []
+    for j in enriched:
+        p = j["profit"]
+        if j["status"] in ("active", "completed") and p["actual_revenue_cents"] > 0 and 0 <= p["gross_margin_pct"] < 20:
+            at_risk.append(card(j))
+    avg_margin = round(sum(j["profit"]["gross_margin_pct"] for j in billed) / len(billed), 2) if billed else 0.0
+
+    return {
+        "kpis": {
+            "total_jobs": len(enriched),
+            "active": len([j for j in enriched if j["status"] == "active"]),
+            "estimates": len([j for j in enriched if j["status"] == "estimate"]),
+            "completed": len([j for j in enriched if j["status"] in ("completed", "closed")]),
+            "revenue": cents_to_dollars(total_rev),
+            "cost": cents_to_dollars(total_cost),
+            "gross_profit": cents_to_dollars(total_gp),
+            "avg_margin": avg_margin,
+            "profitable_count": len(profitable),
+            "unprofitable_count": len(unprofitable),
+        },
+        "unprofitable": sorted([card(j) for j in unprofitable], key=lambda x: x["gross_profit"]),
+        "at_risk": at_risk,
+        "top_jobs": sorted([card(j) for j in profitable], key=lambda x: x["gross_profit"], reverse=True)[:5],
+    }
+
+
 @router.get("/reports/profitability")
 async def profitability_report(group_by: str = "job", user: dict = Depends(require("ledger:read"))):
     rows = await jobs(user).find_list(sort=[("created_at", -1)], limit=1000)

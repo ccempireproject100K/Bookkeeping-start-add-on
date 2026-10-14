@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import { dollars } from "@/lib/format";
 import { PageHeader, Card, Loading } from "@/components/Page";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, TrendingUp, TrendingDown, DollarSign, Briefcase } from "lucide-react";
 
 const TABS = [
   { key: "job", label: "By Job" },
@@ -14,7 +14,9 @@ const TABS = [
 export default function JobProfitability() {
   const [tab, setTab] = useState("job");
   const [data, setData] = useState(null);
+  const [dash, setDash] = useState(null);
 
+  useEffect(() => { api.get("/jobs/reports/dashboard").then(setDash); }, []);
   useEffect(() => {
     setData(null);
     api.get(`/jobs/reports/profitability?group_by=${tab}`).then(setData);
@@ -25,6 +27,47 @@ export default function JobProfitability() {
   return (
     <div className="animate-rise">
       <PageHeader title="Job Profitability" subtitle="Where you make — and lose — money" testid="job-profitability-page" />
+
+      {dash && (
+        <>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-5" data-testid="job-dashboard-kpis">
+            {[
+              { l: "Total Gross Profit", v: dollars(dash.kpis.gross_profit), i: DollarSign, c: dash.kpis.gross_profit < 0 ? "text-rose-400" : "text-emerald-400" },
+              { l: "Avg Margin", v: `${dash.kpis.avg_margin}%`, i: TrendingUp, c: marginCls(dash.kpis.avg_margin) },
+              { l: "Profitable Jobs", v: dash.kpis.profitable_count, i: TrendingUp, c: "text-emerald-400" },
+              { l: "Unprofitable Jobs", v: dash.kpis.unprofitable_count, i: TrendingDown, c: dash.kpis.unprofitable_count ? "text-rose-400" : "text-gray-300" },
+            ].map((k) => (
+              <Card key={k.l} className="hover:border-[#34404f] transition-colors">
+                <div className="flex items-start justify-between">
+                  <span className="text-xs uppercase tracking-wider text-gray-500">{k.l}</span>
+                  <k.i size={18} className={k.c} />
+                </div>
+                <div className={`mt-3 font-mono text-2xl font-semibold ${k.c}`}>{k.v}</div>
+              </Card>
+            ))}
+          </div>
+
+          {(dash.unprofitable.length > 0 || dash.at_risk.length > 0) && (
+            <Card className="mb-5 border-rose-500/30" data-testid="jobs-needing-attention">
+              <h3 className="font-display font-semibold mb-3 flex items-center gap-2 text-rose-300"><AlertTriangle size={16} /> Jobs Needing Attention</h3>
+              <div className="space-y-2">
+                {dash.unprofitable.map((j) => (
+                  <div key={j.job_number} className="flex items-center justify-between py-2 px-3 rounded-lg bg-rose-500/5 border border-rose-500/20 text-sm">
+                    <span><span className="font-mono text-amber-400">{j.job_number}</span> <span className="text-gray-300">{j.customer}</span> <span className="text-rose-400 text-xs ml-1">LOSS</span></span>
+                    <span className="font-mono text-rose-400">{dollars(j.gross_profit)} · {j.margin}%</span>
+                  </div>
+                ))}
+                {dash.at_risk.map((j) => (
+                  <div key={j.job_number} className="flex items-center justify-between py-2 px-3 rounded-lg bg-amber-500/5 border border-amber-500/20 text-sm">
+                    <span><span className="font-mono text-amber-400">{j.job_number}</span> <span className="text-gray-300">{j.customer}</span> <span className="text-amber-400 text-xs ml-1">LOW MARGIN</span></span>
+                    <span className="font-mono text-amber-400">{dollars(j.gross_profit)} · {j.margin}%</span>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          )}
+        </>
+      )}
 
       <div className="flex gap-2 mb-4 flex-wrap">
         {TABS.map((t) => (
