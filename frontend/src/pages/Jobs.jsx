@@ -27,11 +27,12 @@ export default function Jobs() {
   const [rows, setRows] = useState(null);
   const [customers, setCustomers] = useState([]);
   const [team, setTeam] = useState([]);
+  const [supplies, setSupplies] = useState([]);
   const [createOpen, setCreateOpen] = useState(false);
   const [detail, setDetail] = useState(null);
 
   const [form, setForm] = useState({ customer_name: "", job_type: "installation", description: "", estimated_revenue: "", material: "", labor: "", equipment: "", subcontractor: "", other: "" });
-  const [cost, setCost] = useState({ category: "material", description: "", amount: "", hours: "", rate: "", technician_id: "", paid: false });
+  const [cost, setCost] = useState({ category: "material", description: "", amount: "", hours: "", rate: "", technician_id: "", paid: false, product_id: "", qty: "1" });
   const [co, setCo] = useState({ description: "", revenue_delta: "", cost_delta: "" });
   const [invAmt, setInvAmt] = useState("");
 
@@ -39,6 +40,7 @@ export default function Jobs() {
   useEffect(() => {
     load();
     api.get("/customers").then(setCustomers);
+    api.get("/products").then(setSupplies).catch(() => {});
     api.get("/auth/team").then((t) => setTeam(t.filter((u) => u.role === "barber")));
   }, []);
 
@@ -67,14 +69,18 @@ export default function Jobs() {
 
   const addCost = async () => {
     try {
+      const useStock = cost.category === "material" && cost.product_id;
       await api.post(`/jobs/${detail.id}/costs`, {
         category: cost.category, description: cost.description,
-        amount: parseFloat(cost.amount) || 0, hours: parseFloat(cost.hours) || 0, rate: parseFloat(cost.rate) || 0,
+        amount: useStock ? 0 : parseFloat(cost.amount) || 0,
+        hours: parseFloat(cost.hours) || 0, rate: parseFloat(cost.rate) || 0,
         technician_id: cost.technician_id || null, paid: cost.paid,
+        product_id: useStock ? cost.product_id : null, qty: useStock ? parseInt(cost.qty) || 1 : 1,
       });
-      toast.success("Cost logged & posted to GL");
-      setCost({ category: "material", description: "", amount: "", hours: "", rate: "", technician_id: "", paid: false });
+      toast.success(useStock ? "Material pulled from stock & posted to GL" : "Cost logged & posted to GL");
+      setCost({ category: "material", description: "", amount: "", hours: "", rate: "", technician_id: "", paid: false, product_id: "", qty: "1" });
       openDetail(detail.id); load();
+      api.get("/products").then(setSupplies);
     } catch (e) { toast.error(errMsg(e)); }
   };
 

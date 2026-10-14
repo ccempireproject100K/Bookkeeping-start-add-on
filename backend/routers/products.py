@@ -28,6 +28,7 @@ class ProductBody(BaseModel):
     price: float = 0
     unit_cost: float = 0
     quantity_on_hand: int = 0
+    reorder_point: int = 0
     commissionable: bool = True
     image_url: Optional[str] = None
 
@@ -38,11 +39,44 @@ async def create_product(body: ProductBody, user: dict = Depends(require("ops:ma
         "id": new_id(), "name": body.name, "type": body.type,
         "revenue_code": body.revenue_code, "price_cents": to_cents(body.price),
         "unit_cost_cents": to_cents(body.unit_cost), "quantity_on_hand": int(body.quantity_on_hand),
+        "reorder_point": int(body.reorder_point),
         "commissionable": body.commissionable, "image_url": body.image_url, "created_at": now_iso(),
     }
     await coll(user).insert_one(doc)
     doc.pop("_id", None)
     return doc
+
+
+class ProductPatch(BaseModel):
+    name: Optional[str] = None
+    price: Optional[float] = None
+    reorder_point: Optional[int] = None
+    type: Optional[str] = None
+
+
+@router.patch("/{product_id}")
+async def update_product(product_id: str, body: ProductPatch, user: dict = Depends(require("ops:manage"))):
+    p = await coll(user).find_one({"id": product_id})
+    if not p:
+        raise HTTPException(status_code=404, detail="Product not found")
+    updates = {}
+    if body.name is not None:
+        updates["name"] = body.name
+    if body.price is not None:
+        updates["price_cents"] = to_cents(body.price)
+    if body.reorder_point is not None:
+        updates["reorder_point"] = int(body.reorder_point)
+    if body.type is not None:
+        updates["type"] = body.type
+    if updates:
+        await coll(user).update_one({"id": product_id}, {"$set": updates})
+    return {"id": product_id, **updates}
+
+
+@router.get("/low-stock")
+async def low_stock(user: dict = Depends(get_current_user)):
+    rows = await coll(user).find_list(sort=[("name", 1)])
+    return [p for p in rows if int(p.get("reorder_point", 0)) > 0 and int(p["quantity_on_hand"]) <= int(p.get("reorder_point", 0))]
 
 
 class RestockBody(BaseModel):
