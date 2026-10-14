@@ -63,8 +63,8 @@ export default function Layout() {
         <div className="h-16 flex items-center gap-3 px-5 border-b border-[#1b2230]">
           <div className="w-9 h-9 rounded-lg barber-pole shadow-inner" />
           <div>
-            <div className="font-display font-bold text-[15px] leading-tight text-gray-50">Mind at Ease HVAC</div>
-            <div className="text-[10px] uppercase tracking-widest text-amber-500/80">Job Costing &amp; Books</div>
+            <div className="font-display font-bold text-[15px] leading-tight text-gray-50">Mind at Ease Solutions</div>
+            <div className="text-[10px] uppercase tracking-widest text-amber-500/80">HVAC • Job Costing</div>
           </div>
         </div>
         <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-5">

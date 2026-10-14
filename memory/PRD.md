@@ -18,7 +18,16 @@ Build "The Barber's Ledger", a double-entry bookkeeping + POS platform for barbe
 Double-entry ledger with balanced debit=credit invariant, chart of accounts, journal entries (draft/post/reverse, append-only), general ledger, trial balance, balance sheet, P&L, fiscal periods with soft-close/lock (423 on locked post), opening-balance migration, tenant isolation, role permissions.
 
 ## Implemented (2026-06)
-- ✅ JWT auth (email/password) + demo logins + Role Switcher + tenant isolation
+### HVAC Contractor pivot — Phase 1: Advanced Job Costing (NEW, tested 16/16)
+- App rebranded to **Mind at Ease Solutions HVAC**; `barber` role surfaced as "Technician".
+- Jobs: unique gapless `JOB-####`, customers + service locations, types installation/maintenance/repair, estimate→active→completed→closed lifecycle.
+- Cost tracking by category (material/labor/equipment/subcontractor/other); labor by hours×rate with technician; material-from-inventory relieves 1300. **Every cost/revenue posts exactly ONE journal entry** (no duplicates) into the double-entry engine.
+- Change orders, job invoicing (revenue → 4300 Contract Revenue), estimate-vs-actual variance.
+- Profitability engine: revenue/cost/gross profit/margin per job; reports grouped by job / customer / technician / service type; unprofitable jobs flagged. Verified spec example (JOB-0001 $8,000→$5,500→$2,500→31.25%). Books stay balanced.
+- New accounts: 4300, 5000/5005/5006/5007/5008 (job costs), 2320 Wages Payable, 2330 Customer Deposits.
+
+### Accounting core & add-ons
+- JWT auth (email/password) + demo logins + Role Switcher + tenant isolation
 - ✅ Chart of Accounts (39 barbershop accounts seeded) + custom account create/archive
 - ✅ Journal Entries: balanced-only posting, gapless `JE-{FY}-{seq}` numbering, draft→post, linked reversals
 - ✅ Reports: Trial Balance, Balance Sheet, Profit & Loss, General Ledger (all balance to the cent)

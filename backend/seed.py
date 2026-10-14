@@ -193,9 +193,10 @@ async def seed_fade():
             "phone": None, "locations": [{"label": "Primary", "address": loc}], "created_at": now_iso()})
         cust[name] = cid
 
-    async def mk_job(num_seq, customer, jtype, desc, est_rev, est_costs, status, days_ago):
+    async def mk_job(customer, jtype, desc, est_rev, est_costs, status, days_ago):
         jid = new_id()
-        job = {"id": jid, "tenant_id": tid, "job_number": f"JOB-{num_seq:04d}",
+        seq = await Scoped(db.jobs, tid).next_seq(db.counters, "job")
+        job = {"id": jid, "tenant_id": tid, "job_number": f"JOB-{seq:04d}",
             "customer_id": cust[customer], "customer_name": customer, "service_location": "Primary",
             "job_type": jtype, "description": desc, "status": status,
             "estimated_revenue_cents": est_rev,
@@ -225,7 +226,7 @@ async def seed_fade():
             "total_cents": amount_cents, "status": "issued", "due_date": None, "issue_entry": e["number"],
             "paid_entry": None, "created_at": now_iso()})
 
-    jA = await mk_job(1, "Northgate Office Park", "installation", "5-ton rooftop AC unit install",
+    jA = await mk_job("Northgate Office Park", "installation", "5-ton rooftop AC unit install",
         800000, {"material": 250000, "labor": 150000, "equipment": 100000, "subcontractor": 50000}, "completed", 18)
     await add_cost(jA, "material", "Condenser, coil, ductwork", 250000, days_ago=16)
     await add_cost(jA, "labor", "Install crew (24 hrs)", 150000, tech=b1["id"], days_ago=15)
@@ -233,13 +234,13 @@ async def seed_fade():
     await add_cost(jA, "subcontractor", "Electrical hookup", 50000, days_ago=14)
     await add_job_invoice(jA, 800000, days_ago=12)
 
-    jB = await mk_job(2, "Rosa Martinez", "repair", "Compressor replacement",
+    jB = await mk_job("Rosa Martinez", "repair", "Compressor replacement",
         120000, {"material": 30000, "labor": 60000}, "active", 6)
     await add_cost(jB, "material", "Compressor + refrigerant", 30000, days_ago=4)
     await add_cost(jB, "labor", "Repair (6 hrs)", 60000, tech=b2["id"], days_ago=4)
     await add_job_invoice(jB, 120000, days_ago=2)
 
-    jC = await mk_job(3, "Belmont Retail Center", "maintenance", "Seasonal tune-up (overran)",
+    jC = await mk_job("Belmont Retail Center", "maintenance", "Seasonal tune-up (overran)",
         60000, {"labor": 40000}, "completed", 10)
     await add_cost(jC, "labor", "Tune-up + unexpected coil clean (overrun)", 55000, tech=b1["id"], days_ago=8)
     await add_cost(jC, "material", "Coil cleaner + belts", 10000, days_ago=8)

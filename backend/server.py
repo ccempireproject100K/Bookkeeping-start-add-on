@@ -47,11 +47,19 @@ app.add_middleware(
 
 @app.on_event("startup")
 async def startup():
-    await db.users.create_index("email", unique=True)
-    await db.accounts.create_index([("tenant_id", 1), ("code", 1)], unique=True)
-    await db.journal_entries.create_index([("tenant_id", 1), ("status", 1), ("entry_date", 1)])
-    await db.journal_lines.create_index([("tenant_id", 1), ("account_code", 1), ("entry_date", 1)])
-    await db.fiscal_periods.create_index([("tenant_id", 1), ("key", 1)], unique=True)
+    indexes = [
+        (db.users, "email", {"unique": True}),
+        (db.accounts, [("tenant_id", 1), ("code", 1)], {"unique": True}),
+        (db.journal_entries, [("tenant_id", 1), ("status", 1), ("entry_date", 1)], {}),
+        (db.journal_lines, [("tenant_id", 1), ("account_code", 1), ("entry_date", 1)], {}),
+        (db.fiscal_periods, [("tenant_id", 1), ("key", 1)], {"unique": True}),
+        (db.jobs, [("tenant_id", 1), ("job_number", 1)], {"unique": True}),
+    ]
+    for coll, keys, opts in indexes:
+        try:
+            await coll.create_index(keys, **opts)
+        except Exception as e:
+            logger.warning(f"Index on {coll.name} skipped: {e}")
     logger.info("Barber's Ledger started; indexes ensured.")
 
 
