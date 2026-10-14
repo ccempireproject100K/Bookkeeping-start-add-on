@@ -1,7 +1,7 @@
 """Auth: register (new workspace), login, logout, me, demo role switch."""
 import os
 from fastapi import APIRouter, Response, HTTPException, Depends, Request
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, field_validator
 
 from db import db
 from lib.base import Scoped, new_id, now_iso
@@ -19,6 +19,23 @@ class RegisterBody(BaseModel):
     password: str
     name: str
     shop_name: str = "My Barbershop"
+
+    @field_validator("password")
+    @classmethod
+    def validate_password(cls, password: str) -> str:
+        # bcrypt hashes only the first 72 bytes; reject longer values rather than
+        # silently treating distinct supplied passwords as equivalent.
+        if not 12 <= len(password.encode("utf-8")) <= 72:
+            raise ValueError("Password must be between 12 and 72 UTF-8 bytes")
+        return password
+
+    @field_validator("name", "shop_name")
+    @classmethod
+    def validate_names(cls, value: str) -> str:
+        value = value.strip()
+        if not value or len(value) > 120:
+            raise ValueError("Name must be between 1 and 120 characters")
+        return value
 
 
 class LoginBody(BaseModel):
