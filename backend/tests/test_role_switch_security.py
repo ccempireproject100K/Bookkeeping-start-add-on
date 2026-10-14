@@ -71,3 +71,24 @@ def test_role_switch_allowed_only_in_opted_in_demo(monkeypatch):
         {"tenant_id": "workspace-1", "role": "owner"}
     )
     issue.assert_awaited_once()
+
+
+def test_role_switch_never_looks_outside_current_workspace(monkeypatch):
+    action, find_tenant, find_user, issue = run_switch(
+        monkeypatch, flag="true", tenant={"access": "demo"}, role="manager"
+    )
+    asyncio.run(action)
+    find_user.assert_awaited_once_with(
+        {"tenant_id": "workspace-1", "role": "manager"}
+    )
+
+
+def test_role_switch_missing_target_does_not_issue_session(monkeypatch):
+    action, find_tenant, find_user, issue = run_switch(
+        monkeypatch, flag="true", tenant={"access": "demo"}
+    )
+    find_user.return_value = None
+    with pytest.raises(HTTPException) as error:
+        asyncio.run(action)
+    assert error.value.status_code == 404
+    issue.assert_not_awaited()
