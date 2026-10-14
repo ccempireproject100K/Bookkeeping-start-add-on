@@ -18,7 +18,18 @@ Build "The Barber's Ledger", a double-entry bookkeeping + POS platform for barbe
 Double-entry ledger with balanced debit=credit invariant, chart of accounts, journal entries (draft/post/reverse, append-only), general ledger, trial balance, balance sheet, P&L, fiscal periods with soft-close/lock (423 on locked post), opening-balance migration, tenant isolation, role permissions.
 
 ## Implemented (2026-06)
-### HVAC Contractor pivot — Phase 1: Advanced Job Costing (NEW, tested 16/16)
+### QuickBooks-Plus expansion (NEW — tested 26/26 new + 40/40 regression, ledger stays balanced)
+All features post exactly ONE balanced journal entry into the shared double-entry engine (no duplicate accounting systems). New COA accounts: 1021/1022/1023 bank, 1060 Undeposited Funds, 2050/2051/2052 credit cards.
+- **Banking & Reconciliation** (`routers/banking.py`, `pages/Banking.jsx`): multiple bank/credit-card accounts bound to GL codes; CSV import with header auto-detection + duplicate detection (dedupe_hash, unique index); manual txns; bank rules (contains→category auto-suggest); categorize→posts JE and marks cleared (idempotency_key=bank:{id}); match to existing entry; transfers; reconciliation with opening/cleared/difference + history.
+- **Expenses & Vendors** (`routers/vendors.py`, `pages/Expenses.jsx`): vendor CRUD (1099 flag + tax id), direct expenses with receipt metadata (no file storage) + optional job-cost link, vendor credits (dr 2010 / cr expense), 1099 report ($600 threshold).
+- **Bills / AP depth** (`routers/bills.py`, `pages/Bills.jsx`): multi-line bills, partial payments (paid_cents/balance/status open→partial→paid), vendor-credit application on payment, recurring bills (manual generate-next).
+- **Invoices / AR depth** (`routers/invoices.py`, `pages/Invoices.jsx`): partial payments, overpayment→auto customer credit (2210), credit-note issuance, credit refund, customer-credit application; Customer Credits tab.
+- **Estimates** (`routers/estimates.py`, `pages/Estimates.jsx`): EST-#### quotes, status lifecycle, estimate→invoice conversion, recurring-invoice templates (manual generate).
+- **Customer statements** (`customers.py` /{id}/statement, dialog in `Customers.jsx`): invoice+payment ledger with running balance & outstanding.
+- **Advanced reports** (`routers/reports.py`): Cash Flow Statement (operating/investing/financing + opening/closing), Budget vs Actual (budgets CRUD per year/account), Income by Customer, Expenses by Vendor; CSV exports for all plus P&L and Balance Sheet. Pages: `CashFlow.jsx`, `BudgetVsActual.jsx`, `BusinessReports.jsx`.
+- Nav regrouped: Overview / Job Costing / Ledger / Banking / Reports / Operations.
+
+### HVAC Contractor pivot — Phase 1: Advanced Job Costing (tested 16/16)
 - App rebranded to **Mind at Ease Solutions HVAC**; `barber` role surfaced as "Technician".
 - Jobs: unique gapless `JOB-####`, customers + service locations, types installation/maintenance/repair, estimate→active→completed→closed lifecycle.
 - Cost tracking by category (material/labor/equipment/subcontractor/other); labor by hours×rate with technician; material-from-inventory relieves 1300. **Every cost/revenue posts exactly ONE journal entry** (no duplicates) into the double-entry engine.

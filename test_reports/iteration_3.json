@@ -1,0 +1,35 @@
+{
+  "summary": "Full-stack test of QBO-Plus expansion (Banking + Expenses/Vendors + Bills + Estimates + Invoices partial/overpay + Reports). Backend: 26/26 pytests PASS in /app/backend/tests/test_qbo_expansion.py; regression suite 40/40 PASS (backend_test.py + test_hvac_jobs.py). ACCOUNTING INTEGRITY confirmed: trial balance stayed balanced (total_debit==total_credit) after every operation (banking import+categorize+transfer+reconcile, expense create, vendor credit, bill partial-pay+full-pay+recurring, invoice partial+overpay→$50 customer credit auto-created, estimate convert, recurring template generate). No duplicate journal-entry numbers; every entry balanced (dr==cr) across 300+ entries. UI: Playwright confirmed all new sidebar nav items load (/banking, /estimates, /bills, /expenses, /cash-flow, /budget-vs-actual, /business-reports, /customers, /invoices). Banking import dialog accepts CSV with duplicates and reports counts; Categorize posts to GL and marks txn cleared. Expenses page tabs work; Run 1099 for 2026 lists 3 seeded vendors. Vendor create (with 1099 + tax id) OK; direct expense create OK. Budget vs Actual renders rows for 2026 seeded budgets. Cash Flow shows opening/closing ($50,119.87). Business Reports tabs (Income by Customer, Expenses by Vendor) render. Customer Statement dialog shows outstanding $400.00 with charge/payment table.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_qbo_expansion.py",
+    "/app/test_reports/pytest/qbo_results.xml"
+  ],
+  "action_items": [
+    "LOW: The review-request references data-testid 'nav-budget-vs-actual' for the Budget vs Actual sidebar link, but the actual testid in Layout.jsx is 'nav-budget'. Either update Layout.jsx to 'nav-budget-vs-actual' for spec alignment, or update docs. Not a functional bug — the link navigates to /budget-vs-actual and the page works."
+  ],
+  "critical_code_review_comments": [
+    "bills.py pay_bill: when a vendor credit is applied, the subledger paid_cents is incremented by `target` (including credit_applied) but ONLY the cash_portion is debited to AP (2010) in a new JE. The credit's original creation already debited 2010 vs expense. Net effect over the two postings is correct (AP net reduced by full target), but the bill subledger's paid_cents may not reconcile line-for-line with the sum of ap_payment JEs if a cash-portion of 0 occurs — in that case entry_number is None and no new JE is posted at pay time, which is correct, but worth adding a lightweight audit check.",
+    "invoices.py pay_invoice: logic for overpayment uses received+credit_applied vs balance; works for the tested paths (partial, overpay). Edge case: if body.amount is None (full balance) AND credit_id supplied, received=balance so no overpayment path is reachable even if credit_applied would exceed balance — the min(remaining, balance) caps it. OK.",
+    "banking.py categorize uses idempotency_key=f'bank:{txn_id}' — good, prevents duplicate postings on retry. Other posting endpoints (bills.pay, invoices.pay, vendors.expenses, vendor_credits, estimates.convert, bills.generate-next, transfer, invoices.issue) do NOT pass idempotency_key, so a client retry could post duplicates. Consider adding idempotency_key=source_type:source_ref:action for all posting paths.",
+    "reports.py _cashflow attribution: cash delta is distributed across non-cash legs by amount weight — fine as an approximation. For an entry that mixes operating + investing legs, this can mis-classify cash movement proportionally; acceptable for Phase-3 scope.",
+    "banking.py reconcile with empty txn_ids and ending_balance=0: endpoint accepts and returns status 'completed' (difference 0). May allow a 'no-op reconciliation' to mark last_reconciled_date forward — consider requiring at least one txn or non-zero ending balance.",
+    "customers.py statement: matches invoices by `customer_id OR client_name` — if a customer renames or two customers share a name, statement will include/miss rows. Prefer strict customer_id when provided.",
+    "estimates.py convert_to_invoice is NOT wrapped in idempotency guard; a double-click could create two invoices before the status update lands. Current code mitigates via `if e.get('invoice_id'): 409` on the second call, but there is a small race window."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_qbo_expansion.py"
+  ],
+  "success_rate": {"backend": "100% (26/26 new, 40/40 regression)", "frontend": "100% of nav + core flows verified"},
+  "test_credentials": "Owner: onelovellc@outlook.com / Owner123! (demo-login-owner button). See /app/memory/test_credentials.md.",
+  "seed_data_creation": "Ran /app/backend/seed.py once at start of this iteration to establish a clean fixture; tests prefix new data with TEST_ / UI_. 1099 report, budgets, banking accts all come from seed.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Backend regression suite is three files: backend/tests/backend_test.py (core), test_hvac_jobs.py (job costing), test_qbo_expansion.py (QBO Plus). Run all with: pytest backend/tests/ -o addopts='' --tb=short. Trial balance endpoint returns {balanced:true, total_debit, total_credit}. Journal-entries listing defaults limit=200 — pass ?limit=10000 for integrity scans. UI testid for Budget vs Actual sidebar is 'nav-budget' (not 'nav-budget-vs-actual' as the review request shows). Overpayment on invoice automatically posts cr 2210 for the delta and creates a customer_credits doc with source='overpayment'. Vendor credit creation debits 2010/credits expense code — do not re-debit AP at pay time for the credit portion.",
+  "rca of the issue": "No bugs reproduced in this iteration — all 26 new backend tests and 40 regression tests pass. Only cosmetic deviation found: review request listed sidebar testid 'nav-budget-vs-actual' but actual implementation uses 'nav-budget'."
+}
