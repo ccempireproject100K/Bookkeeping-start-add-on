@@ -1,11 +1,12 @@
-"""Vendor bills (accounts payable sub-ledger). Each bill posts to the GL."""
+"""Vendor bills (accounts payable sub-ledger). Supports partial payments, recurring
+bills and vendor-credit application. Each cash movement posts to the GL."""
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 from datetime import date, timedelta
 
 from db import db
-from lib.base import Scoped, new_id, now_iso, today_str, to_cents
+from lib.base import Scoped, new_id, now_iso, today_str, to_cents, cents_to_dollars
 from lib.auth import require, get_current_user
 from lib import ledger as L
 from lib import posting as P
@@ -17,42 +18,79 @@ def coll(user):
     return Scoped(db.bills, user["tenant_id"])
 
 
+def credits(user):
+    return Scoped(db.vendor_credits, user["tenant_id"])
+
+
+class BillLine(BaseModel):
+    expense_code: str = "5700"
+    description: str = ""
+    amount: float
+
+
 class BillBody(BaseModel):
     vendor: str
-    amount: float
+    vendor_id: Optional[str] = None
+    amount: float = 0
     expense_code: str = "5700"
+    lines: Optional[List[BillLine]] = None
     bill_date: Optional[str] = None
     due_date: Optional[str] = None
+    recurring: bool = False
+    frequency: Optional[str] = None     # monthly | weekly | quarterly
+
+
+def _enrich(b):
+    b["paid_cents"] = b.get("paid_cents", b["amount_cents"] if b.get("status") == "paid" else 0)
+    b["balance_cents"] = b["amount_cents"] - b["paid_cents"]
+    b["balance"] = cents_to_dollars(b["balance_cents"])
+    b["amount"] = cents_to_dollars(b["amount_cents"])
+    return b
 
 
 @router.get("")
 async def list_bills(user: dict = Depends(get_current_user)):
-    return await coll(user).find_list(sort=[("created_at", -1)], limit=300)
+    rows = await coll(user).find_list(sort=[("created_at", -1)], limit=500)
+    return [_enrich(b) for b in rows]
 
 
 @router.post("")
 async def create_bill(body: BillBody, user: dict = Depends(require("ops:manage"))):
     bdate = body.bill_date or today_str()
     due = body.due_date or (date.fromisoformat(bdate) + timedelta(days=30)).isoformat()
-    amount = to_cents(body.amount)
+    if body.lines:
+        line_items = [{"expense_code": l.expense_code, "description": l.description,
+                       "amount_cents": to_cents(l.amount)} for l in body.lines]
+    else:
+        line_items = [{"expense_code": body.expense_code, "description": body.vendor,
+                       "amount_cents": to_cents(body.amount)}]
+    amount = sum(li["amount_cents"] for li in line_items)
+    if amount <= 0:
+        raise HTTPException(status_code=422, detail="Bill amount must be positive")
     bill_id = new_id()
+    jl = [P.dr(li["expense_code"], li["amount_cents"], li["description"]) for li in line_items]
+    jl.append(P.cr("2010", amount, "Accounts payable"))
     entry = await L.post_journal_entry(db, user["tenant_id"], user, {
         "entry_date": bdate, "source": "bill", "source_ref": bill_id,
-        "memo": f"Bill — {body.vendor}",
-        "lines": [P.dr(body.expense_code, amount, body.vendor), P.cr("2010", amount, "Accounts payable")],
+        "memo": f"Bill — {body.vendor}", "lines": jl,
     }, status="posted")
     doc = {
-        "id": bill_id, "vendor": body.vendor, "amount_cents": amount, "expense_code": body.expense_code,
-        "bill_date": bdate, "due_date": due, "status": "open",
-        "issue_entry": entry["number"], "paid_entry": None, "created_at": now_iso(),
+        "id": bill_id, "vendor": body.vendor, "vendor_id": body.vendor_id,
+        "amount_cents": amount, "expense_code": line_items[0]["expense_code"],
+        "line_items": line_items, "bill_date": bdate, "due_date": due, "status": "open",
+        "paid_cents": 0, "payments": [], "recurring": body.recurring, "frequency": body.frequency,
+        "issue_entry": entry["number"], "created_at": now_iso(),
     }
     await coll(user).insert_one(doc)
     doc.pop("_id", None)
-    return doc
+    return _enrich(doc)
 
 
 class PayBody(BaseModel):
     payment_method: str = "bank"
+    amount: Optional[float] = None       # None = pay full remaining balance
+    credit_id: Optional[str] = None      # apply a vendor credit
+    pay_date: Optional[str] = None
 
 
 @router.post("/{bill_id}/pay")
@@ -60,13 +98,61 @@ async def pay_bill(bill_id: str, body: PayBody, user: dict = Depends(require("op
     bill = await coll(user).find_one({"id": bill_id})
     if not bill:
         raise HTTPException(status_code=404, detail="Bill not found")
-    if bill["status"] == "paid":
-        raise HTTPException(status_code=409, detail="Bill already paid")
+    paid = bill.get("paid_cents", 0)
+    balance = bill["amount_cents"] - paid
+    if balance <= 0:
+        raise HTTPException(status_code=409, detail="Bill already fully paid")
+
+    target = to_cents(body.amount) if body.amount is not None else balance
+    if target <= 0 or target > balance:
+        raise HTTPException(status_code=422, detail="Invalid payment amount")
+
+    credit_applied = 0
+    if body.credit_id:
+        cr = await credits(user).find_one({"id": body.credit_id})
+        if not cr:
+            raise HTTPException(status_code=404, detail="Vendor credit not found")
+        credit_applied = min(cr.get("remaining_cents", 0), target)
+
+    cash_portion = target - credit_applied
     cash = P._cash_account(body.payment_method)
-    entry = await L.post_journal_entry(db, user["tenant_id"], user, {
-        "entry_date": today_str(), "source": "ap_payment", "source_ref": bill_id,
-        "memo": f"Pay bill — {bill['vendor']}",
-        "lines": [P.dr("2010", bill["amount_cents"], "AP settled"), P.cr(cash, bill["amount_cents"], "Payment")],
-    }, status="posted")
-    await coll(user).update_one({"id": bill_id}, {"$set": {"status": "paid", "paid_entry": entry["number"], "paid_at": now_iso()}})
-    return {"status": "paid", "paid_entry": entry["number"]}
+    entry_number = None
+    if cash_portion > 0:
+        entry = await L.post_journal_entry(db, user["tenant_id"], user, {
+            "entry_date": body.pay_date or today_str(), "source": "ap_payment", "source_ref": bill_id,
+            "memo": f"Pay bill — {bill['vendor']}",
+            "lines": [P.dr("2010", cash_portion, "AP settled"), P.cr(cash, cash_portion, "Payment")],
+        }, status="posted")
+        entry_number = entry["number"]
+
+    if credit_applied > 0:
+        await credits(user).update_one({"id": body.credit_id},
+                                       {"$inc": {"remaining_cents": -credit_applied}})
+
+    new_paid = paid + target
+    status = "paid" if new_paid >= bill["amount_cents"] else "partial"
+    pmt = {"date": (body.pay_date or today_str()), "amount_cents": target,
+           "cash_cents": cash_portion, "credit_cents": credit_applied,
+           "method": body.payment_method, "entry": entry_number}
+    await coll(user).update_one({"id": bill_id}, {"$set": {"status": status, "paid_cents": new_paid},
+                                                  "$push": {"payments": pmt}})
+    return {"status": status, "paid_cents": new_paid, "balance_cents": bill["amount_cents"] - new_paid,
+            "entry_number": entry_number, "credit_applied_cents": credit_applied}
+
+
+@router.post("/{bill_id}/generate-next")
+async def generate_recurring(bill_id: str, user: dict = Depends(require("ops:manage"))):
+    """Create the next occurrence of a recurring bill (manual trigger; no scheduler)."""
+    bill = await coll(user).find_one({"id": bill_id})
+    if not bill or not bill.get("recurring"):
+        raise HTTPException(status_code=404, detail="Recurring bill not found")
+    freq = bill.get("frequency") or "monthly"
+    days = {"weekly": 7, "monthly": 30, "quarterly": 90}.get(freq, 30)
+    bdate = (date.fromisoformat(bill["bill_date"]) + timedelta(days=days)).isoformat()
+    body = BillBody(vendor=bill["vendor"], vendor_id=bill.get("vendor_id"),
+                    expense_code=bill["expense_code"],
+                    lines=[BillLine(expense_code=li["expense_code"], description=li.get("description", ""),
+                                    amount=cents_to_dollars(li["amount_cents"])) for li in bill.get("line_items", [])] or None,
+                    amount=cents_to_dollars(bill["amount_cents"]),
+                    bill_date=bdate, recurring=True, frequency=freq)
+    return await create_bill(body, user)

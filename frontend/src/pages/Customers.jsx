@@ -7,7 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Plus, MapPin, Phone, Mail } from "lucide-react";
+import { Plus, MapPin, Phone, Mail, FileText } from "lucide-react";
+import { money, dollars, fmtDate } from "@/lib/format";
 
 export default function Customers() {
   const { user } = useAuth();
@@ -15,9 +16,14 @@ export default function Customers() {
   const [rows, setRows] = useState(null);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", phone: "", address: "" });
+  const [stmt, setStmt] = useState(null);
 
   const load = () => api.get("/customers").then(setRows).catch(() => setRows([]));
   useEffect(() => { load(); }, []);
+
+  const openStatement = async (id) => {
+    try { setStmt(await api.get(`/customers/${id}/statement`)); } catch (e) { toast.error(errMsg(e)); }
+  };
 
   const create = async () => {
     try {
@@ -47,6 +53,7 @@ export default function Customers() {
               {c.phone && <div className="flex items-center gap-2"><Phone size={14} className="text-gray-500" />{c.phone}</div>}
               {c.email && <div className="flex items-center gap-2"><Mail size={14} className="text-gray-500" />{c.email}</div>}
             </div>
+            <Button size="sm" variant="outline" data-testid={`statement-${c.id}`} onClick={() => openStatement(c.id)} className="mt-4 border-[#222838] h-8"><FileText size={13} className="mr-1" />Statement</Button>
           </Card>
         ))}
         {rows.length === 0 && <Card><div className="text-gray-500 text-sm text-center py-6">No customers yet</div></Card>}
@@ -64,6 +71,32 @@ export default function Customers() {
             </div>
           </div>
           <DialogFooter><Button data-testid="customer-save" onClick={create} className="bg-amber-600 hover:bg-amber-500 text-black">Add</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!stmt} onOpenChange={(o) => !o && setStmt(null)}>
+        <DialogContent className="bg-[#14171E] border-[#222838] max-w-2xl">
+          <DialogHeader><DialogTitle>Statement — {stmt?.customer?.name}</DialogTitle></DialogHeader>
+          <div className="text-sm text-gray-400 mb-2">Outstanding balance: <span className="font-mono text-amber-400" data-testid="stmt-outstanding">{dollars(stmt?.outstanding || 0)}</span></div>
+          <div className="max-h-96 overflow-y-auto">
+            <table className="w-full text-sm" data-testid="table-statement">
+              <thead><tr className="text-xs uppercase tracking-wider text-gray-500 border-b border-[#222838]">
+                <th className="px-3 py-2 text-left font-medium">Date</th><th className="px-3 py-2 text-left font-medium">Type</th>
+                <th className="px-3 py-2 text-right font-medium">Charge</th><th className="px-3 py-2 text-right font-medium">Payment</th>
+                <th className="px-3 py-2 text-right font-medium">Balance</th></tr></thead>
+              <tbody>
+                {stmt?.events?.map((e, i) => (
+                  <tr key={i} className="border-b border-[#171c26]">
+                    <td className="px-3 py-2 text-gray-400">{fmtDate(e.date)}</td><td className="px-3 py-2 text-gray-200">{e.type}</td>
+                    <td className="px-3 py-2 text-right font-mono text-gray-300">{e.charge_cents ? dollars(e.charge) : "—"}</td>
+                    <td className="px-3 py-2 text-right font-mono text-emerald-400">{e.payment_cents ? dollars(e.payment) : "—"}</td>
+                    <td className="px-3 py-2 text-right font-mono text-gray-100">{dollars(e.balance)}</td>
+                  </tr>
+                ))}
+                {stmt?.events?.length === 0 && <tr><td colSpan={5} className="px-3 py-8 text-center text-gray-500">No activity.</td></tr>}
+              </tbody>
+            </table>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

@@ -1,10 +1,11 @@
-"""Invoices: issue (AR) and pay. Each transition posts a balanced journal entry."""
+"""Invoices (accounts receivable): issue, partial payments, overpayments → customer
+credits, credit application, and refunds. Each transition posts a balanced entry."""
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from typing import Optional, List
 
 from db import db
-from lib.base import Scoped, new_id, now_iso, today_str, to_cents
+from lib.base import Scoped, new_id, now_iso, today_str, to_cents, cents_to_dollars
 from lib.auth import require, get_current_user
 from lib import ledger as L
 from lib import posting as P
@@ -16,8 +17,12 @@ def coll(user):
     return Scoped(db.invoices, user["tenant_id"])
 
 
+def credits(user):
+    return Scoped(db.customer_credits, user["tenant_id"])
+
+
 class InvLine(BaseModel):
-    kind: str = "service"            # service | product
+    kind: str = "service"
     name: str
     revenue_code: str = "4020"
     amount: float
@@ -25,14 +30,26 @@ class InvLine(BaseModel):
 
 class InvoiceBody(BaseModel):
     client_name: str
+    customer_id: Optional[str] = None
     lines: List[InvLine]
     tax: float = 0
     due_date: Optional[str] = None
+    terms: Optional[str] = "Net 30"
+
+
+def _enrich(inv):
+    paid = inv.get("paid_cents", inv["total_cents"] if inv.get("status") == "paid" else 0)
+    inv["paid_cents"] = paid
+    inv["balance_cents"] = inv["total_cents"] - paid
+    inv["balance"] = cents_to_dollars(inv["balance_cents"])
+    inv["total"] = cents_to_dollars(inv["total_cents"])
+    return inv
 
 
 @router.get("")
 async def list_invoices(user: dict = Depends(get_current_user)):
-    return await coll(user).find_list(sort=[("created_at", -1)], limit=200)
+    rows = await coll(user).find_list(sort=[("created_at", -1)], limit=500)
+    return [_enrich(i) for i in rows]
 
 
 @router.post("")
@@ -52,19 +69,22 @@ async def issue_invoice(body: InvoiceBody, user: dict = Depends(require("ops:man
         memo=f"Invoice — {body.client_name}",
     ), status="posted")
     doc = {
-        "id": inv_id, "client_name": body.client_name,
+        "id": inv_id, "client_name": body.client_name, "customer_id": body.customer_id,
         "lines": [l.model_dump() for l in body.lines],
         "subtotal_cents": subtotal, "tax_cents": tax_cents, "total_cents": gross,
-        "status": "issued", "due_date": body.due_date, "issue_entry": entry["number"],
-        "paid_entry": None, "created_at": now_iso(),
+        "status": "issued", "paid_cents": 0, "payments": [], "due_date": body.due_date,
+        "terms": body.terms, "issue_entry": entry["number"], "created_at": now_iso(),
     }
     await coll(user).insert_one(doc)
     doc.pop("_id", None)
-    return doc
+    return _enrich(doc)
 
 
 class PayBody(BaseModel):
     payment_method: str = "bank"
+    amount: Optional[float] = None       # None = full remaining balance
+    credit_id: Optional[str] = None      # apply a customer credit
+    pay_date: Optional[str] = None
 
 
 @router.post("/{invoice_id}/pay")
@@ -72,14 +92,114 @@ async def pay_invoice(invoice_id: str, body: PayBody, user: dict = Depends(requi
     inv = await coll(user).find_one({"id": invoice_id})
     if not inv:
         raise HTTPException(status_code=404, detail="Invoice not found")
-    if inv["status"] == "paid":
-        raise HTTPException(status_code=409, detail="Invoice already paid")
-    entry = await L.post_journal_entry(db, user["tenant_id"], user, P.build_invoice_paid(
-        amount_cents=inv["total_cents"], payment_method=body.payment_method,
-        entry_date=today_str(), source_ref=invoice_id,
-        memo=f"Payment — {inv['client_name']}",
-    ), status="posted")
-    await coll(user).update_one({"id": invoice_id}, {"$set": {
-        "status": "paid", "paid_entry": entry["number"], "paid_at": now_iso(),
-    }})
-    return {"status": "paid", "paid_entry": entry["number"]}
+    paid = inv.get("paid_cents", 0)
+    balance = inv["total_cents"] - paid
+    if balance <= 0:
+        raise HTTPException(status_code=409, detail="Invoice already fully paid")
+
+    received = to_cents(body.amount) if body.amount is not None else balance
+    if received <= 0:
+        raise HTTPException(status_code=422, detail="Invalid payment amount")
+
+    credit_applied = 0
+    if body.credit_id:
+        c = await credits(user).find_one({"id": body.credit_id})
+        if not c:
+            raise HTTPException(status_code=404, detail="Customer credit not found")
+        credit_applied = min(c.get("remaining_cents", 0), balance)
+
+    cash = P._cash_account(body.payment_method)
+    cash_received = received
+    applied_to_ar = min(cash_received + credit_applied, balance)
+    overpay = (cash_received + credit_applied) - applied_to_ar
+
+    jl = []
+    if cash_received > 0:
+        jl.append(P.dr(cash, cash_received, "Invoice payment"))
+    if credit_applied > 0:
+        jl.append(P.dr("2210", credit_applied, "Customer credit applied"))
+    jl.append(P.cr("1200", applied_to_ar, "AR cleared"))
+    if overpay > 0:
+        jl.append(P.cr("2210", overpay, "Overpayment → customer credit"))
+
+    entry = await L.post_journal_entry(db, user["tenant_id"], user, {
+        "entry_date": body.pay_date or today_str(), "source": "invoice_paid", "source_ref": invoice_id,
+        "memo": f"Payment — {inv['client_name']}", "lines": jl,
+    }, status="posted")
+
+    if credit_applied > 0:
+        await credits(user).update_one({"id": body.credit_id}, {"$inc": {"remaining_cents": -credit_applied}})
+    if overpay > 0:
+        oc_id = new_id()
+        await credits(user).insert_one({
+            "id": oc_id, "client_name": inv["client_name"], "customer_id": inv.get("customer_id"),
+            "amount_cents": overpay, "remaining_cents": overpay, "source": "overpayment",
+            "memo": f"Overpayment on {inv.get('issue_entry')}", "entry_number": entry["number"],
+            "created_at": now_iso()})
+
+    new_paid = paid + applied_to_ar
+    status = "paid" if new_paid >= inv["total_cents"] else "partial"
+    pmt = {"date": body.pay_date or today_str(), "amount_cents": applied_to_ar,
+           "cash_cents": cash_received - overpay, "credit_cents": credit_applied,
+           "method": body.payment_method, "entry": entry["number"]}
+    await coll(user).update_one({"id": invoice_id}, {"$set": {"status": status, "paid_cents": new_paid},
+                                                     "$push": {"payments": pmt}})
+    return {"status": status, "paid_cents": new_paid, "balance_cents": inv["total_cents"] - new_paid,
+            "entry_number": entry["number"], "credit_applied_cents": credit_applied,
+            "overpayment_cents": overpay}
+
+
+# ---------------- Customer credits / credit notes ----------------
+class CreditNoteBody(BaseModel):
+    client_name: str
+    customer_id: Optional[str] = None
+    amount: float
+    revenue_code: str = "4020"
+    memo: str = ""
+
+
+@router.get("/customer-credits")
+async def list_customer_credits(user: dict = Depends(require("ledger:read"))):
+    return await credits(user).find_list(sort=[("created_at", -1)], limit=300)
+
+
+@router.post("/customer-credits")
+async def issue_credit_note(body: CreditNoteBody, user: dict = Depends(require("ops:manage"))):
+    amount = to_cents(body.amount)
+    if amount <= 0:
+        raise HTTPException(status_code=422, detail="Amount must be positive")
+    cid = new_id()
+    entry = await L.post_journal_entry(db, user["tenant_id"], user, {
+        "entry_date": today_str(), "source": "credit_note", "source_ref": cid,
+        "memo": f"Credit note — {body.client_name}: {body.memo}".strip(),
+        "lines": [P.dr(body.revenue_code, amount, "Revenue reduced"),
+                  P.cr("2210", amount, "Customer credit issued")],
+    }, status="posted")
+    doc = {"id": cid, "client_name": body.client_name, "customer_id": body.customer_id,
+           "amount_cents": amount, "remaining_cents": amount, "source": "credit_note",
+           "memo": body.memo, "entry_number": entry["number"], "created_at": now_iso()}
+    await credits(user).insert_one(doc)
+    doc.pop("_id", None)
+    return doc
+
+
+class RefundBody(BaseModel):
+    payment_method: str = "bank"
+
+
+@router.post("/customer-credits/{credit_id}/refund")
+async def refund_credit(credit_id: str, body: RefundBody, user: dict = Depends(require("ops:manage"))):
+    c = await credits(user).find_one({"id": credit_id})
+    if not c:
+        raise HTTPException(status_code=404, detail="Credit not found")
+    amount = c.get("remaining_cents", 0)
+    if amount <= 0:
+        raise HTTPException(status_code=409, detail="No remaining credit to refund")
+    cash = P._cash_account(body.payment_method)
+    entry = await L.post_journal_entry(db, user["tenant_id"], user, {
+        "entry_date": today_str(), "source": "refund", "source_ref": credit_id,
+        "memo": f"Refund — {c['client_name']}",
+        "lines": [P.dr("2210", amount, "Customer credit refunded"), P.cr(cash, amount, "Refund paid")],
+    }, status="posted")
+    await credits(user).update_one({"id": credit_id}, {"$set": {"remaining_cents": 0, "status": "refunded"}})
+    return {"refunded_cents": amount, "entry_number": entry["number"]}

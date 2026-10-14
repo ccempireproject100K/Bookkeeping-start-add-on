@@ -3,7 +3,8 @@ import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, BookOpen, FileText, Scale, ScrollText, Landmark,
   TrendingUp, Lock, Scissors, Receipt, Wallet, Package, LogOut, ShieldCheck,
-  Hourglass, Gift, Coins, Briefcase, PieChart, Users,
+  Hourglass, Gift, Coins, Briefcase, PieChart, Users, Building2, FileSignature,
+  Waves, Target, BarChart3, ReceiptText,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import {
@@ -12,24 +13,32 @@ import {
 import { toast } from "sonner";
 import { errMsg } from "@/lib/api";
 
+const ALL = ["owner", "accountant", "bookkeeper"];
 const NAV = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard, testid: "nav-dashboard", roles: ["owner", "accountant", "bookkeeper", "barber"], group: "Overview" },
-  { to: "/jobs", label: "Jobs", icon: Briefcase, testid: "nav-jobs", roles: ["owner", "accountant", "bookkeeper"], group: "Job Costing" },
-  { to: "/job-profitability", label: "Job Profitability", icon: PieChart, testid: "nav-job-profitability", roles: ["owner", "accountant", "bookkeeper"], group: "Job Costing" },
-  { to: "/customers", label: "Customers", icon: Users, testid: "nav-customers", roles: ["owner", "accountant", "bookkeeper"], group: "Job Costing" },
-  { to: "/accounts", label: "Chart of Accounts", icon: BookOpen, testid: "nav-chart-of-accounts", roles: ["owner", "accountant", "bookkeeper"], group: "Ledger" },
-  { to: "/journal", label: "Journal Entries", icon: FileText, testid: "nav-journal-entries", roles: ["owner", "accountant", "bookkeeper"], group: "Ledger" },
-  { to: "/general-ledger", label: "General Ledger", icon: ScrollText, testid: "nav-general-ledger", roles: ["owner", "accountant", "bookkeeper"], group: "Ledger" },
-  { to: "/trial-balance", label: "Trial Balance", icon: Scale, testid: "nav-trial-balance", roles: ["owner", "accountant", "bookkeeper"], group: "Reports" },
-  { to: "/balance-sheet", label: "Balance Sheet", icon: Landmark, testid: "nav-balance-sheet", roles: ["owner", "accountant", "bookkeeper"], group: "Reports" },
-  { to: "/profit-loss", label: "Profit & Loss", icon: TrendingUp, testid: "nav-profit-loss", roles: ["owner", "accountant", "bookkeeper"], group: "Reports" },
-  { to: "/periods", label: "Fiscal Periods", icon: Lock, testid: "nav-fiscal-periods", roles: ["owner", "accountant", "bookkeeper"], group: "Reports" },
-  { to: "/aging", label: "AR / AP Aging", icon: Hourglass, testid: "nav-aging", roles: ["owner", "accountant", "bookkeeper"], group: "Reports" },
+  { to: "/jobs", label: "Jobs", icon: Briefcase, testid: "nav-jobs", roles: ALL, group: "Job Costing" },
+  { to: "/job-profitability", label: "Job Profitability", icon: PieChart, testid: "nav-job-profitability", roles: ALL, group: "Job Costing" },
+  { to: "/customers", label: "Customers", icon: Users, testid: "nav-customers", roles: ALL, group: "Job Costing" },
+  { to: "/estimates", label: "Estimates", icon: FileSignature, testid: "nav-estimates", roles: ALL, group: "Job Costing" },
+  { to: "/accounts", label: "Chart of Accounts", icon: BookOpen, testid: "nav-chart-of-accounts", roles: ALL, group: "Ledger" },
+  { to: "/journal", label: "Journal Entries", icon: FileText, testid: "nav-journal-entries", roles: ALL, group: "Ledger" },
+  { to: "/general-ledger", label: "General Ledger", icon: ScrollText, testid: "nav-general-ledger", roles: ALL, group: "Ledger" },
+  { to: "/banking", label: "Banking", icon: Building2, testid: "nav-banking", roles: ALL, group: "Banking" },
+  { to: "/trial-balance", label: "Trial Balance", icon: Scale, testid: "nav-trial-balance", roles: ALL, group: "Reports" },
+  { to: "/balance-sheet", label: "Balance Sheet", icon: Landmark, testid: "nav-balance-sheet", roles: ALL, group: "Reports" },
+  { to: "/profit-loss", label: "Profit & Loss", icon: TrendingUp, testid: "nav-profit-loss", roles: ALL, group: "Reports" },
+  { to: "/cash-flow", label: "Cash Flow", icon: Waves, testid: "nav-cash-flow", roles: ALL, group: "Reports" },
+  { to: "/budget-vs-actual", label: "Budget vs Actual", icon: Target, testid: "nav-budget", roles: ALL, group: "Reports" },
+  { to: "/business-reports", label: "Business Reports", icon: BarChart3, testid: "nav-business-reports", roles: ALL, group: "Reports" },
+  { to: "/aging", label: "AR / AP Aging", icon: Hourglass, testid: "nav-aging", roles: ALL, group: "Reports" },
+  { to: "/periods", label: "Fiscal Periods", icon: Lock, testid: "nav-fiscal-periods", roles: ALL, group: "Reports" },
+  { to: "/invoices", label: "Invoices", icon: Receipt, testid: "nav-invoices", roles: ALL, group: "Operations" },
+  { to: "/bills", label: "Bills", icon: ReceiptText, testid: "nav-bills", roles: ALL, group: "Operations" },
+  { to: "/expenses", label: "Expenses & Vendors", icon: Coins, testid: "nav-expenses", roles: ALL, group: "Operations" },
   { to: "/quick-sell", label: "Quick Sell", icon: Scissors, testid: "nav-quick-sell", roles: ["owner", "barber"], group: "Operations" },
-  { to: "/inventory", label: "Inventory", icon: Package, testid: "nav-inventory", roles: ["owner", "accountant", "bookkeeper"], group: "Operations" },
-  { to: "/invoices", label: "Invoices", icon: Receipt, testid: "nav-invoices", roles: ["owner", "accountant", "bookkeeper"], group: "Operations" },
-  { to: "/gift-cards", label: "Gift Cards", icon: Gift, testid: "nav-gift-cards", roles: ["owner", "accountant", "bookkeeper"], group: "Operations" },
-  { to: "/commissions", label: "Commissions", icon: Coins, testid: "nav-commissions", roles: ["owner", "accountant", "bookkeeper"], group: "Operations" },
+  { to: "/inventory", label: "Inventory", icon: Package, testid: "nav-inventory", roles: ALL, group: "Operations" },
+  { to: "/gift-cards", label: "Gift Cards", icon: Gift, testid: "nav-gift-cards", roles: ALL, group: "Operations" },
+  { to: "/commissions", label: "Commissions", icon: Coins, testid: "nav-commissions", roles: ALL, group: "Operations" },
   { to: "/cash-close", label: "Cash Close", icon: Wallet, testid: "nav-cash-close", roles: ["owner"], group: "Operations" },
 ];
 

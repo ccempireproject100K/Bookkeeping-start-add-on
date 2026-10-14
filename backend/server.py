@@ -9,7 +9,8 @@ from starlette.middleware.cors import CORSMiddleware
 
 from db import db, get_client
 from routers import (auth, ledger, products, pos, invoices, cashclose, dashboard,
-                     bills, aging, giftcards, commissions, customers, jobs)
+                     bills, aging, giftcards, commissions, customers, jobs,
+                     banking, vendors, reports, estimates)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("barbers_ledger")
@@ -31,7 +32,8 @@ async def health():
 for r in (auth.router, ledger.router, products.router, pos.router,
           invoices.router, cashclose.router, dashboard.router,
           bills.router, aging.router, giftcards.router, commissions.router,
-          customers.router, jobs.router):
+          customers.router, jobs.router, banking.router, vendors.router,
+          reports.router, estimates.router):
     api_router.include_router(r)
 
 app.include_router(api_router)
@@ -54,6 +56,8 @@ async def startup():
         (db.journal_lines, [("tenant_id", 1), ("account_code", 1), ("entry_date", 1)], {}),
         (db.fiscal_periods, [("tenant_id", 1), ("key", 1)], {"unique": True}),
         (db.jobs, [("tenant_id", 1), ("job_number", 1)], {"unique": True}),
+        (db.bank_transactions, [("tenant_id", 1), ("dedupe_hash", 1)], {"unique": True}),
+        (db.bank_accounts, [("tenant_id", 1), ("gl_code", 1)], {}),
     ]
     for coll, keys, opts in indexes:
         try:

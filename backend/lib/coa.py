@@ -6,7 +6,11 @@ from lib.base import Scoped, new_id, now_iso
 COA = [
     ("1010", "Cash — Register", "asset", "debit"),
     ("1020", "Cash — Bank Checking", "asset", "debit"),
+    ("1021", "Cash — Bank Savings", "asset", "debit"),
+    ("1022", "Cash — Bank #2", "asset", "debit"),
+    ("1023", "Cash — Bank #3", "asset", "debit"),
     ("1050", "Stripe Clearing", "asset", "debit"),
+    ("1060", "Undeposited Funds", "asset", "debit"),
     ("1200", "Accounts Receivable", "asset", "debit"),
     ("1300", "Inventory — Retail", "asset", "debit"),
     ("1310", "Inventory — Supply", "asset", "debit"),
@@ -20,6 +24,9 @@ COA = [
     ("2300", "Tips / Commissions Payable", "liability", "credit"),
     ("2320", "Wages Payable", "liability", "credit"),
     ("2330", "Customer Deposits", "liability", "credit"),
+    ("2050", "Credit Card #1", "liability", "credit"),
+    ("2051", "Credit Card #2", "liability", "credit"),
+    ("2052", "Credit Card #3", "liability", "credit"),
     ("2500", "Loan Payable", "liability", "credit"),
     ("3010", "Owner's Equity", "equity", "credit"),
     ("3020", "Owner's Draw", "equity", "debit"),           # contra-equity

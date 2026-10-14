@@ -19,7 +19,10 @@ random.seed(42)
 COLLECTIONS = ["tenants", "users", "accounts", "journal_entries", "journal_lines",
                "fiscal_periods", "products", "sales", "invoices", "cash_closes",
                "counters", "audit_log", "migration_markers", "bills", "gift_cards",
-               "commission_payouts", "customers", "jobs", "job_costs"]
+               "commission_payouts", "customers", "jobs", "job_costs",
+               "bank_accounts", "bank_transactions", "bank_rules", "reconciliations",
+               "vendors", "expenses", "vendor_credits", "customer_credits",
+               "budgets", "estimates", "recurring_invoices"]
 
 SERVICES = [("service", "AC Diagnostic", 12900, "4300"),
             ("service", "Filter Replacement", 4900, "4020"),
@@ -245,6 +248,53 @@ async def seed_fade():
     await add_cost(jC, "labor", "Tune-up + unexpected coil clean (overrun)", 55000, tech=b1["id"], days_ago=8)
     await add_cost(jC, "material", "Coil cleaner + belts", 10000, days_ago=8)
     await add_job_invoice(jC, 40000, days_ago=6)
+
+    # ---- Banking demo ----
+    ba_check = new_id()
+    await db.bank_accounts.insert_one({"id": ba_check, "tenant_id": tid, "name": "Operating Checking",
+        "kind": "bank", "gl_code": "1020", "gl_name": "Cash — Bank Checking", "institution": "First National",
+        "last_reconciled_date": None, "last_reconciled_balance_cents": 0, "created_at": now_iso()})
+    ba_card = new_id()
+    await db.bank_accounts.insert_one({"id": ba_card, "tenant_id": tid, "name": "Fuel & Supplies Card",
+        "kind": "credit_card", "gl_code": "2050", "gl_name": "Credit Card #1", "institution": "Chase",
+        "last_reconciled_date": None, "last_reconciled_balance_cents": 0, "created_at": now_iso()})
+    await db.bank_rules.insert_one({"id": new_id(), "tenant_id": tid, "contains": "shell",
+        "category_code": "5990", "category_name": "Other / Miscellaneous", "created_at": now_iso()})
+    import hashlib
+    def _dh(aid, d, cents, desc):
+        return hashlib.sha1(f"{aid}|{d}|{cents}|{desc[:48].lower().strip()}".encode()).hexdigest()
+    for d_ago, desc, cents in [(3, "Shell Fuel Station", -8500), (5, "Grainger Tools", -21500), (7, "ACH Customer Payment", 450000)]:
+        dt = (today - timedelta(days=d_ago)).isoformat()
+        await db.bank_transactions.insert_one({"id": new_id(), "tenant_id": tid, "bank_account_id": ba_check,
+            "txn_date": dt, "description": desc, "amount_cents": cents, "dedupe_hash": _dh(ba_check, dt, cents, desc),
+            "status": "unmatched", "category_code": ("5990" if "shell" in desc.lower() else None),
+            "suggested_code": ("5990" if "shell" in desc.lower() else None), "entry_id": None,
+            "matched_entry_id": None, "reconciled": False, "import_batch": "seed", "created_at": now_iso()})
+
+    # ---- Vendors, expenses, credits ----
+    for vname, is1099, taxid in [("Ferguson HVAC Supply", True, "47-1122334"),
+                                 ("CoolAir Distributors", True, "82-9988776"),
+                                 ("City Utilities", False, None)]:
+        await db.vendors.insert_one({"id": new_id(), "tenant_id": tid, "name": vname, "email": None,
+            "phone": None, "address": None, "is_1099": is1099, "tax_id": taxid,
+            "default_expense_code": "5000", "created_at": now_iso()})
+    for vend, code, cents, desc, method in [("Ferguson HVAC Supply", "5000", 68000, "Copper line sets", "card"),
+                                            ("City Utilities", "5400", 24000, "Shop electricity", "bank")]:
+        ex_id = new_id()
+        e = await L.post_journal_entry(db, tid, owner, {"entry_date": (today - timedelta(days=9)).isoformat(),
+            "source": "expense", "source_ref": ex_id, "memo": f"Expense — {vend}: {desc}",
+            "lines": [P.dr(code, cents, desc), P.cr(P._cash_account(method), cents, "Paid")]}, status="posted")
+        await db.expenses.insert_one({"id": ex_id, "tenant_id": tid, "vendor": vend, "vendor_id": None,
+            "category_code": code, "category_name": None, "amount_cents": cents, "payment_method": method,
+            "expense_date": (today - timedelta(days=9)).isoformat(), "description": desc, "billable_job_id": None,
+            "receipt": {"merchant": vend, "total": cents / 100, "tax": 0}, "entry_number": e["number"],
+            "created_at": now_iso()})
+
+    # ---- Budgets (annual) ----
+    for code, amt in [("4300", 5000000), ("5000", 1200000), ("5005", 900000), ("5400", 300000)]:
+        await db.budgets.insert_one({"id": new_id(), "tenant_id": tid, "year": str(today.year),
+            "account_code": code, "account_name": None, "amount_cents": amt, "created_at": now_iso()})
+    print("  Fade & Co.: + banking (2 accts), 3 vendors, 2 expenses, 4 budgets")
 
 
 async def seed_sharp():

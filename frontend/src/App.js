@@ -22,6 +22,13 @@ import Commissions from "@/pages/Commissions";
 import Jobs from "@/pages/Jobs";
 import JobProfitability from "@/pages/JobProfitability";
 import Customers from "@/pages/Customers";
+import Banking from "@/pages/Banking";
+import Bills from "@/pages/Bills";
+import Expenses from "@/pages/Expenses";
+import Estimates from "@/pages/Estimates";
+import CashFlow from "@/pages/CashFlow";
+import BudgetVsActual from "@/pages/BudgetVsActual";
+import BusinessReports from "@/pages/BusinessReports";
 
 function Protected({ children }) {
   const { user, loading } = useAuth();
@@ -43,16 +50,23 @@ function App() {
               <Route path="jobs" element={<Jobs />} />
               <Route path="job-profitability" element={<JobProfitability />} />
               <Route path="customers" element={<Customers />} />
+              <Route path="estimates" element={<Estimates />} />
               <Route path="accounts" element={<ChartOfAccounts />} />
               <Route path="journal" element={<JournalEntries />} />
               <Route path="general-ledger" element={<GeneralLedger />} />
+              <Route path="banking" element={<Banking />} />
               <Route path="trial-balance" element={<TrialBalance />} />
               <Route path="balance-sheet" element={<BalanceSheet />} />
               <Route path="profit-loss" element={<ProfitLoss />} />
+              <Route path="cash-flow" element={<CashFlow />} />
+              <Route path="budget-vs-actual" element={<BudgetVsActual />} />
+              <Route path="business-reports" element={<BusinessReports />} />
               <Route path="periods" element={<FiscalPeriods />} />
               <Route path="inventory" element={<Inventory />} />
               <Route path="quick-sell" element={<QuickSell />} />
               <Route path="invoices" element={<Invoices />} />
+              <Route path="bills" element={<Bills />} />
+              <Route path="expenses" element={<Expenses />} />
               <Route path="aging" element={<Aging />} />
               <Route path="gift-cards" element={<GiftCards />} />
               <Route path="commissions" element={<Commissions />} />
