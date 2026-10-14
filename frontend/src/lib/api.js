@@ -18,4 +18,16 @@ export const api = {
   patch: (p, b) => client.patch(p, b).then((r) => r.data),
 };
 
+export async function downloadCsv(path, filename) {
+  const res = await client.get(path, { responseType: "blob" });
+  const url = window.URL.createObjectURL(new Blob([res.data]));
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  window.URL.revokeObjectURL(url);
+}
+
 export default client;

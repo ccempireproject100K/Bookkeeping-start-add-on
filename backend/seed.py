@@ -18,12 +18,13 @@ random.seed(42)
 
 COLLECTIONS = ["tenants", "users", "accounts", "journal_entries", "journal_lines",
                "fiscal_periods", "products", "sales", "invoices", "cash_closes",
-               "counters", "audit_log", "migration_markers"]
+               "counters", "audit_log", "migration_markers", "bills", "gift_cards",
+               "commission_payouts", "customers", "jobs", "job_costs"]
 
-SERVICES = [("haircut", "Signature Haircut", 3500, "4000"),
-            ("beard", "Beard Trim & Line-up", 2000, "4010"),
-            ("service", "Hot Towel Shave", 4000, "4020"),
-            ("haircut", "Skin Fade", 4000, "4000")]
+SERVICES = [("service", "AC Diagnostic", 12900, "4300"),
+            ("service", "Filter Replacement", 4900, "4020"),
+            ("service", "AC Tune-Up", 18900, "4300"),
+            ("service", "Thermostat Install", 24900, "4300")]
 
 
 async def make_user(tenant_id, email, name, role, pw, rate=0):
@@ -82,8 +83,9 @@ async def do_sale(tenant_id, owner, d, barbers, products, tax_rate):
 
 async def seed_fade():
     tid = new_id()
-    await db.tenants.insert_one({"id": tid, "name": "Fade & Co. Barbers",
-        "settings": {"inventory_enabled": True, "sales_tax_rate": 0.0725, "double_entry_mode": "primary"},
+    await db.tenants.insert_one({"id": tid, "name": "Mind at Ease Solutions HVAC",
+        "settings": {"inventory_enabled": True, "sales_tax_rate": 0.0725, "double_entry_mode": "primary",
+                     "industry": "hvac"},
         "created_at": now_iso()})
     await seed_coa(Scoped(db.accounts, tid))
     owner = await make_user(tid, "onelovellc@outlook.com", "Darnell Price", "owner", "Owner123!")
@@ -94,10 +96,10 @@ async def seed_fade():
     barbers = [b1, b2]
 
     products = [
-        await make_product(tid, "Matte Clay Pomade", "retail", 2200, 900, 160, "4100"),
-        await make_product(tid, "Beard Oil — Cedar", "retail", 1800, 700, 140, "4100"),
-        await make_product(tid, "Styling Cream", "retail", 2000, 800, 120, "4100"),
-        await make_product(tid, "Barbicide Disinfectant", "supply", 0, 400, 50, "4100"),
+        await make_product(tid, "Air Filter 20x25x1 (MERV 11)", "retail", 2400, 900, 160, "4100"),
+        await make_product(tid, "Capacitor 45/5 MFD", "retail", 4500, 1800, 140, "4100"),
+        await make_product(tid, "Programmable Thermostat", "retail", 13900, 6200, 120, "4100"),
+        await make_product(tid, "R-410A Refrigerant (per lb)", "supply", 0, 900, 50, "4100"),
     ]
     retail = [p for p in products if p["type"] == "retail"]
 
@@ -156,6 +158,92 @@ async def seed_fade():
         "due_date": None, "issue_entry": e["number"], "paid_entry": e2b["number"], "created_at": now_iso()})
 
     print(f"  Fade & Co.: owner+4 staff, {len(products)} products, ~90 days of sales, 2 invoices")
+
+    # gift cards (deferred revenue)
+    for amt, who in [(10000, "Jordan M."), (5000, "Alex R.")]:
+        gc_id = new_id()
+        e = await L.post_journal_entry(db, tid, owner, {
+            "entry_date": (today - timedelta(days=12)).isoformat(), "source": "giftcard_issue", "source_ref": gc_id,
+            "memo": f"Gift card — {who}", "lines": [P.dr("1050", amt, "Gift card sold"), P.cr("2200", amt, "Unearned revenue")],
+        }, status="posted")
+        await db.gift_cards.insert_one({"id": gc_id, "tenant_id": tid, "code": "GC-" + gc_id[:8].upper(),
+            "recipient": who, "initial_cents": amt, "balance_cents": amt, "status": "active",
+            "issue_entry": e["number"], "created_at": now_iso()})
+
+    # vendor bills (accounts payable), one overdue
+    for vendor, amt, days, code in [("Clipper Supply Co.", 32000, -20, "5700"), ("Fresh Towel Service", 8500, 10, "5700")]:
+        b_id = new_id()
+        bdate = (today - timedelta(days=max(days + 30, 5))).isoformat()
+        due = (today + timedelta(days=days)).isoformat()
+        e = await L.post_journal_entry(db, tid, owner, {
+            "entry_date": bdate, "source": "bill", "source_ref": b_id, "memo": f"Bill — {vendor}",
+            "lines": [P.dr(code, amt, vendor), P.cr("2010", amt, "Accounts payable")],
+        }, status="posted")
+        await db.bills.insert_one({"id": b_id, "tenant_id": tid, "vendor": vendor, "amount_cents": amt,
+            "expense_code": code, "bill_date": bdate, "due_date": due, "status": "open",
+            "issue_entry": e["number"], "paid_entry": None, "created_at": now_iso()})
+
+    # ---- HVAC job costing demo ----
+    cust = {}
+    for name, loc in [("Northgate Office Park", "4400 Northgate Blvd, Suite 200"),
+                      ("Rosa Martinez", "812 Elm Street"),
+                      ("Belmont Retail Center", "15 Belmont Ave")]:
+        cid = new_id()
+        await db.customers.insert_one({"id": cid, "tenant_id": tid, "name": name, "email": None,
+            "phone": None, "locations": [{"label": "Primary", "address": loc}], "created_at": now_iso()})
+        cust[name] = cid
+
+    async def mk_job(num_seq, customer, jtype, desc, est_rev, est_costs, status, days_ago):
+        jid = new_id()
+        job = {"id": jid, "tenant_id": tid, "job_number": f"JOB-{num_seq:04d}",
+            "customer_id": cust[customer], "customer_name": customer, "service_location": "Primary",
+            "job_type": jtype, "description": desc, "status": status,
+            "estimated_revenue_cents": est_rev,
+            "estimated_costs_cents": {c: est_costs.get(c, 0) for c in ["material", "labor", "equipment", "subcontractor", "other"]},
+            "change_orders": [], "created_at": (today - timedelta(days=days_ago)).isoformat()}
+        await db.jobs.insert_one(job)
+        return job
+
+    async def add_cost(job, category, desc, amt, tech=None, days_ago=5):
+        debit = {"material": "5000", "labor": "5005", "equipment": "5006", "subcontractor": "5007", "other": "5008"}[category]
+        e = await L.post_journal_entry(db, tid, owner, {"entry_date": (today - timedelta(days=days_ago)).isoformat(),
+            "source": "job_cost", "source_ref": job["id"], "memo": f"{job['job_number']} {category}",
+            "lines": [P.dr(debit, amt, desc), P.cr("2010", amt, "Job cost")]}, status="posted")
+        await db.job_costs.insert_one({"id": new_id(), "tenant_id": tid, "job_id": job["id"],
+            "job_number": job["job_number"], "category": category, "description": desc, "amount_cents": amt,
+            "hours": 0, "rate": 0, "technician_id": tech, "entry_number": e["number"], "created_at": now_iso()})
+
+    async def add_job_invoice(job, amount_cents, days_ago=3):
+        inv_id = new_id()
+        e = await L.post_journal_entry(db, tid, owner, P.build_invoice_issue(
+            revenue_lines=[{"revenue_code": "4300", "amount_cents": amount_cents}], tax_cents=0, cogs_cents=0,
+            gross_cents=amount_cents, entry_date=(today - timedelta(days=days_ago)).isoformat(),
+            source_ref=inv_id, memo=f"{job['job_number']} — {job['customer_name']}"), status="posted")
+        await db.invoices.insert_one({"id": inv_id, "tenant_id": tid, "job_id": job["id"],
+            "client_name": job["customer_name"], "lines": [{"kind": "job", "name": f"{job['job_number']} contract",
+            "revenue_code": "4300", "amount": amount_cents / 100}], "subtotal_cents": amount_cents, "tax_cents": 0,
+            "total_cents": amount_cents, "status": "issued", "due_date": None, "issue_entry": e["number"],
+            "paid_entry": None, "created_at": now_iso()})
+
+    jA = await mk_job(1, "Northgate Office Park", "installation", "5-ton rooftop AC unit install",
+        800000, {"material": 250000, "labor": 150000, "equipment": 100000, "subcontractor": 50000}, "completed", 18)
+    await add_cost(jA, "material", "Condenser, coil, ductwork", 250000, days_ago=16)
+    await add_cost(jA, "labor", "Install crew (24 hrs)", 150000, tech=b1["id"], days_ago=15)
+    await add_cost(jA, "equipment", "Crane rental", 100000, days_ago=15)
+    await add_cost(jA, "subcontractor", "Electrical hookup", 50000, days_ago=14)
+    await add_job_invoice(jA, 800000, days_ago=12)
+
+    jB = await mk_job(2, "Rosa Martinez", "repair", "Compressor replacement",
+        120000, {"material": 30000, "labor": 60000}, "active", 6)
+    await add_cost(jB, "material", "Compressor + refrigerant", 30000, days_ago=4)
+    await add_cost(jB, "labor", "Repair (6 hrs)", 60000, tech=b2["id"], days_ago=4)
+    await add_job_invoice(jB, 120000, days_ago=2)
+
+    jC = await mk_job(3, "Belmont Retail Center", "maintenance", "Seasonal tune-up (overran)",
+        60000, {"labor": 40000}, "completed", 10)
+    await add_cost(jC, "labor", "Tune-up + unexpected coil clean (overrun)", 55000, tech=b1["id"], days_ago=8)
+    await add_cost(jC, "material", "Coil cleaner + belts", 10000, days_ago=8)
+    await add_job_invoice(jC, 40000, days_ago=6)
 
 
 async def seed_sharp():

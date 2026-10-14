@@ -12,7 +12,7 @@ const DEMOS = [
   { role: "Owner", email: "onelovellc@outlook.com", password: "Owner123!" },
   { role: "Accountant", email: "accountant@fadeco.com", password: "Books123!" },
   { role: "Bookkeeper", email: "bookkeeper@fadeco.com", password: "Books123!" },
-  { role: "Barber", email: "marcus@fadeco.com", password: "Barber123!" },
+  { role: "Technician", email: "marcus@fadeco.com", password: "Barber123!" },
 ];
 
 export default function Login() {
@@ -43,25 +43,25 @@ export default function Login() {
       {/* Brand side */}
       <div className="hidden lg:flex relative flex-col justify-between p-12 overflow-hidden">
         <img
-          src="https://images.unsplash.com/photo-1585747860715-2ba37e788b70?crop=entropy&cs=srgb&fm=jpg&q=85&w=1400"
-          alt="Barbershop"
+          src="https://images.unsplash.com/photo-1698479603408-1a66a6d9e80f?crop=entropy&cs=srgb&fm=jpg&q=85&w=1400"
+          alt="HVAC equipment"
           className="absolute inset-0 w-full h-full object-cover opacity-30"
         />
         <div className="absolute inset-0 bg-gradient-to-br from-[#0B0D10] via-[#0B0D10]/85 to-[#0B0D10]/40" />
         <div className="relative flex items-center gap-3">
           <div className="w-10 h-10 rounded-lg barber-pole" />
-          <span className="font-display font-bold text-xl">The Barber's Ledger</span>
+          <span className="font-display font-bold text-xl">Mind at Ease Solutions HVAC</span>
         </div>
         <div className="relative max-w-md">
           <h1 className="font-display text-4xl font-bold leading-tight mb-4">
-            Books that <span className="text-amber-500">balance</span> themselves.
+            Know your profit on <span className="text-amber-500">every job</span>.
           </h1>
           <p className="text-gray-400 leading-relaxed">
-            True double-entry accounting built for barbershops — every cut, product, and
-            payout posts a balanced journal entry. Trial balance to the cent, always.
+            Contractor job costing wired straight into a true double-entry ledger — materials,
+            labor, equipment and subs tracked live, with estimate-vs-actual profitability the moment a job updates.
           </p>
         </div>
-        <div className="relative text-xs text-gray-500 font-mono">Assets = Liabilities + Equity</div>
+        <div className="relative text-xs text-gray-500 font-mono">Revenue − Job Costs = Gross Profit</div>
       </div>
 
       {/* Form side */}
@@ -69,7 +69,7 @@ export default function Login() {
         <div className="w-full max-w-sm animate-rise">
           <div className="lg:hidden flex items-center gap-3 mb-8">
             <div className="w-9 h-9 rounded-lg barber-pole" />
-            <span className="font-display font-bold text-lg">The Barber's Ledger</span>
+            <span className="font-display font-bold text-lg">Mind at Ease HVAC</span>
           </div>
           <h2 className="font-display text-2xl font-bold mb-1">Sign in</h2>
           <p className="text-sm text-gray-500 mb-6">Access your workspace</p>

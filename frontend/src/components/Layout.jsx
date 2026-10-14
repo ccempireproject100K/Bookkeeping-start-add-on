@@ -3,6 +3,7 @@ import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, BookOpen, FileText, Scale, ScrollText, Landmark,
   TrendingUp, Lock, Scissors, Receipt, Wallet, Package, LogOut, ShieldCheck,
+  Hourglass, Gift, Coins, Briefcase, PieChart, Users,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import {
@@ -13,6 +14,9 @@ import { errMsg } from "@/lib/api";
 
 const NAV = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard, testid: "nav-dashboard", roles: ["owner", "accountant", "bookkeeper", "barber"], group: "Overview" },
+  { to: "/jobs", label: "Jobs", icon: Briefcase, testid: "nav-jobs", roles: ["owner", "accountant", "bookkeeper"], group: "Job Costing" },
+  { to: "/job-profitability", label: "Job Profitability", icon: PieChart, testid: "nav-job-profitability", roles: ["owner", "accountant", "bookkeeper"], group: "Job Costing" },
+  { to: "/customers", label: "Customers", icon: Users, testid: "nav-customers", roles: ["owner", "accountant", "bookkeeper"], group: "Job Costing" },
   { to: "/accounts", label: "Chart of Accounts", icon: BookOpen, testid: "nav-chart-of-accounts", roles: ["owner", "accountant", "bookkeeper"], group: "Ledger" },
   { to: "/journal", label: "Journal Entries", icon: FileText, testid: "nav-journal-entries", roles: ["owner", "accountant", "bookkeeper"], group: "Ledger" },
   { to: "/general-ledger", label: "General Ledger", icon: ScrollText, testid: "nav-general-ledger", roles: ["owner", "accountant", "bookkeeper"], group: "Ledger" },
@@ -20,13 +24,16 @@ const NAV = [
   { to: "/balance-sheet", label: "Balance Sheet", icon: Landmark, testid: "nav-balance-sheet", roles: ["owner", "accountant", "bookkeeper"], group: "Reports" },
   { to: "/profit-loss", label: "Profit & Loss", icon: TrendingUp, testid: "nav-profit-loss", roles: ["owner", "accountant", "bookkeeper"], group: "Reports" },
   { to: "/periods", label: "Fiscal Periods", icon: Lock, testid: "nav-fiscal-periods", roles: ["owner", "accountant", "bookkeeper"], group: "Reports" },
+  { to: "/aging", label: "AR / AP Aging", icon: Hourglass, testid: "nav-aging", roles: ["owner", "accountant", "bookkeeper"], group: "Reports" },
   { to: "/quick-sell", label: "Quick Sell", icon: Scissors, testid: "nav-quick-sell", roles: ["owner", "barber"], group: "Operations" },
   { to: "/inventory", label: "Inventory", icon: Package, testid: "nav-inventory", roles: ["owner", "accountant", "bookkeeper"], group: "Operations" },
   { to: "/invoices", label: "Invoices", icon: Receipt, testid: "nav-invoices", roles: ["owner", "accountant", "bookkeeper"], group: "Operations" },
+  { to: "/gift-cards", label: "Gift Cards", icon: Gift, testid: "nav-gift-cards", roles: ["owner", "accountant", "bookkeeper"], group: "Operations" },
+  { to: "/commissions", label: "Commissions", icon: Coins, testid: "nav-commissions", roles: ["owner", "accountant", "bookkeeper"], group: "Operations" },
   { to: "/cash-close", label: "Cash Close", icon: Wallet, testid: "nav-cash-close", roles: ["owner"], group: "Operations" },
 ];
 
-const ROLE_LABEL = { owner: "Owner / Admin", accountant: "Accountant", bookkeeper: "Bookkeeper", barber: "Barber / Staff" };
+const ROLE_LABEL = { owner: "Owner / Admin", accountant: "Accountant", bookkeeper: "Bookkeeper", barber: "Technician" };
 
 export default function Layout() {
   const { user, logout, switchRole } = useAuth();
@@ -56,8 +63,8 @@ export default function Layout() {
         <div className="h-16 flex items-center gap-3 px-5 border-b border-[#1b2230]">
           <div className="w-9 h-9 rounded-lg barber-pole shadow-inner" />
           <div>
-            <div className="font-display font-bold text-[15px] leading-tight text-gray-50">The Barber's Ledger</div>
-            <div className="text-[10px] uppercase tracking-widest text-amber-500/80">Double-Entry Books</div>
+            <div className="font-display font-bold text-[15px] leading-tight text-gray-50">Mind at Ease HVAC</div>
+            <div className="text-[10px] uppercase tracking-widest text-amber-500/80">Job Costing &amp; Books</div>
           </div>
         </div>
         <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-5">

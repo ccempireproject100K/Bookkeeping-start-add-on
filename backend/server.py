@@ -8,7 +8,8 @@ from fastapi import FastAPI, APIRouter
 from starlette.middleware.cors import CORSMiddleware
 
 from db import db, get_client
-from routers import auth, ledger, products, pos, invoices, cashclose, dashboard
+from routers import (auth, ledger, products, pos, invoices, cashclose, dashboard,
+                     bills, aging, giftcards, commissions, customers, jobs)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("barbers_ledger")
@@ -28,7 +29,9 @@ async def health():
 
 
 for r in (auth.router, ledger.router, products.router, pos.router,
-          invoices.router, cashclose.router, dashboard.router):
+          invoices.router, cashclose.router, dashboard.router,
+          bills.router, aging.router, giftcards.router, commissions.router,
+          customers.router, jobs.router):
     api_router.include_router(r)
 
 app.include_router(api_router)

@@ -16,6 +16,12 @@ import Inventory from "@/pages/Inventory";
 import QuickSell from "@/pages/QuickSell";
 import Invoices from "@/pages/Invoices";
 import CashClose from "@/pages/CashClose";
+import Aging from "@/pages/Aging";
+import GiftCards from "@/pages/GiftCards";
+import Commissions from "@/pages/Commissions";
+import Jobs from "@/pages/Jobs";
+import JobProfitability from "@/pages/JobProfitability";
+import Customers from "@/pages/Customers";
 
 function Protected({ children }) {
   const { user, loading } = useAuth();
@@ -34,6 +40,9 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/" element={<Protected><Layout /></Protected>}>
               <Route index element={<Dashboard />} />
+              <Route path="jobs" element={<Jobs />} />
+              <Route path="job-profitability" element={<JobProfitability />} />
+              <Route path="customers" element={<Customers />} />
               <Route path="accounts" element={<ChartOfAccounts />} />
               <Route path="journal" element={<JournalEntries />} />
               <Route path="general-ledger" element={<GeneralLedger />} />
@@ -44,6 +53,9 @@ function App() {
               <Route path="inventory" element={<Inventory />} />
               <Route path="quick-sell" element={<QuickSell />} />
               <Route path="invoices" element={<Invoices />} />
+              <Route path="aging" element={<Aging />} />
+              <Route path="gift-cards" element={<GiftCards />} />
+              <Route path="commissions" element={<Commissions />} />
               <Route path="cash-close" element={<CashClose />} />
             </Route>
           </Routes>
