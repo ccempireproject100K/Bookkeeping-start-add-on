@@ -264,3 +264,74 @@ async def opening_balances(body: OpeningBody, user: dict = Depends(require("ledg
         "entry_id": entry["id"], "at": now_iso(),
     })
     return {"entry": entry, "trial_balance_balanced": tb["balanced"]}
+
+
+# ---------------- Year-end close ----------------
+class YearCloseBody(BaseModel):
+    year: str
+
+
+@router.get("/year-close/status")
+async def year_close_status(user: dict = Depends(require("ledger:read"))):
+    rows = await db.migration_markers.find(
+        {"tenant_id": user["tenant_id"], "type": {"$regex": "^year_close:"}}, {"_id": 0}
+    ).to_list(50)
+    return [{"year": r["type"].split(":")[1], "entry_id": r.get("entry_id"), "at": r.get("at")} for r in rows]
+
+
+@router.post("/year-close")
+async def year_close(body: YearCloseBody, user: dict = Depends(require("ledger:admin"))):
+    tenant_id = user["tenant_id"]
+    year = body.year
+    mtype = f"year_close:{year}"
+    if await db.migration_markers.find_one({"tenant_id": tenant_id, "type": mtype}):
+        raise HTTPException(status_code=409, detail=f"Fiscal year {year} is already closed")
+
+    as_of = f"{year}-12-31"
+    date_from = f"{year}-01-01"
+    bals = await L._balances(db, tenant_id, as_of=as_of, date_from=date_from)
+    before = await L.trial_balance(db, tenant_id, as_of)
+
+    lines = []
+    net_income = 0
+    for code, v in bals.items():
+        t = ACCOUNT_TYPE_OF.get(code)
+        if t not in ("revenue", "expense"):
+            continue
+        net_debit = v["debit"] - v["credit"]
+        if net_debit == 0:
+            continue
+        if net_debit > 0:  # expense balance -> credit to zero it
+            lines.append(P.cr(code, net_debit, f"Close FY{year}"))
+            net_income -= net_debit
+        else:              # revenue balance -> debit to zero it
+            lines.append(P.dr(code, -net_debit, f"Close FY{year}"))
+            net_income += -net_debit
+    if not lines:
+        raise HTTPException(status_code=422, detail=f"No revenue or expense activity to close for {year}")
+    if net_income > 0:
+        lines.append(P.cr("3100", net_income, "Net income to Retained Earnings"))
+    elif net_income < 0:
+        lines.append(P.dr("3100", -net_income, "Net loss to Retained Earnings"))
+
+    entry = await L.post_journal_entry(db, tenant_id, user, {
+        "entry_date": as_of, "source": "year_close",
+        "memo": f"Fiscal year-end close {year}", "lines": lines,
+    }, status="posted")
+
+    periods = Scoped(db.fiscal_periods, tenant_id)
+    for m in range(1, 13):
+        key = f"{year}-{m:02d}"
+        await L.ensure_period(db, tenant_id, f"{key}-01")
+        await periods.update_one({"key": key}, {"$set": {
+            "status": "locked", "year_closed": True,
+            "locked_by": user["email"], "locked_at": now_iso(),
+        }})
+
+    await db.migration_markers.insert_one({
+        "tenant_id": tenant_id, "type": mtype, "status": "complete",
+        "entry_id": entry["id"], "at": now_iso(),
+    })
+    after = await L.trial_balance(db, tenant_id, as_of)
+    await L.audit(db, tenant_id, user, "year.closed", {"year": year, "net_income_cents": net_income})
+    return {"entry": entry, "net_income_cents": net_income, "before": before, "after": after}
