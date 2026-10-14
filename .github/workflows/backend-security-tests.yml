@@ -1,0 +1,28 @@
+name: Backend security tests
+
+on:
+  pull_request:
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-security-tests.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  security-regressions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install backend dependencies
+        working-directory: backend
+        run: python -m pip install --upgrade pip && pip install -r requirements.txt
+      - name: Run role switching and registration security tests
+        working-directory: backend
+        run: |
+          python -m pytest -q tests/test_role_switch_security.py tests/test_registration_validation.py tests/test_registration_workspace.py
