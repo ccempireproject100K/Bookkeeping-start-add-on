@@ -40,10 +40,13 @@ async def _audit(user, action, entity, entity_id, details=None):
 
 @router.post("/export")
 async def export_backup(encrypted: bool = Query(True),
+                        offsite: bool = Query(False),
                         user: dict = Depends(require("ledger:admin"))):
     """Return a dump of the tenant's main collections as a downloadable file.
     Encrypted (Fernet) by default; pass ?encrypted=0 for a plaintext JSON
-    export (debugging only — never store or send those)."""
+    export (debugging only — never store or send those).
+    Pass ?offsite=1 to also upload the encrypted payload to the configured
+    S3 bucket (see lib/offsite.py). Plaintext is never uploaded offsite."""
     tenant_id = user["tenant_id"]
     dump = {"format": "bookkeeping-backup", "version": 1,
             "tenant_id": tenant_id, "exported_at": now_iso(),
@@ -53,21 +56,28 @@ async def export_backup(encrypted: bool = Query(True),
         docs = await db[name].find({"tenant_id": tenant_id}, {"_id": 0}).to_list(length=200000)
         dump["collections"][name] = docs
         total += len(docs)
-    await _audit(user, "backup.export", "backup", tenant_id,
-                 {"documents": total, "encrypted": encrypted})
     body = json.dumps(dump, default=str)
+    filename = f"bookkeeping-backup-{tenant_id[:8]}-{date.today().isoformat()}"
     if encrypted:
         from lib.pii import pii_encrypt_bytes
         raw = pii_encrypt_bytes(body.encode())
+        detail = {"documents": total, "encrypted": True}
+        if offsite:
+            from lib.offsite import upload_encrypted_backup
+            status, err = upload_encrypted_backup(raw, filename + ".enc")
+            detail["offsite"] = status if not err else f"failed: {err}"
+        await _audit(user, "backup.export", "backup", tenant_id, detail)
         return Response(
             content=raw, media_type="application/octet-stream",
             headers={"Content-Disposition":
-                     f'attachment; filename="bookkeeping-backup-{date.today().isoformat()}.enc"'},
+                     f'attachment; filename="{filename}.enc"'},
         )
+    await _audit(user, "backup.export", "backup", tenant_id,
+                 {"documents": total, "encrypted": False})
     return Response(
         content=body, media_type="application/json",
         headers={"Content-Disposition":
-                 f'attachment; filename="bookkeeping-backup-{date.today().isoformat()}.json"'},
+                 f'attachment; filename="{filename}.json"'},
     )
 
 

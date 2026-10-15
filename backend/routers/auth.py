@@ -12,6 +12,8 @@ from lib.auth import (
 )
 from lib.coa import seed_coa
 from lib.pii import last4, pii_decrypt, pii_encrypt
+from lib.pwned import is_pwned
+from lib.devices import check_device
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -77,6 +79,10 @@ async def create_workspace(email, password, name, shop_name, role="owner", tenan
 
 @router.post("/register")
 async def register(body: RegisterBody, response: Response):
+    if is_pwned(body.password):
+        raise HTTPException(
+            400, "This password has appeared in a data breach. "
+                 "Please choose a different one.")
     user = await create_workspace(body.email, body.password, body.name, body.shop_name)
     await _issue(response, user)
     return _public(user)
@@ -110,6 +116,7 @@ async def login(body: LoginBody, response: Response, request: Request):
     await db.login_attempts.delete_many({"email": email})
     await _issue(response, user)
     await _audit(user, "auth.login", "user", user["id"], {"ip": ip})
+    await check_device(user, request)
     return _public(user)
 
 

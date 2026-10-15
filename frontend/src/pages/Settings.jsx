@@ -7,6 +7,8 @@ import { toast } from "sonner";
 import { LogOut, Package } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import TotpSettings from "@/components/TotpSettings";
+import PasskeySettings from "@/components/PasskeySettings";
+import SecurityAlerts from "@/components/SecurityAlerts";
 
 function InventoryCard() {
   const { user, refresh } = useAuth();
@@ -82,7 +84,9 @@ export default function Settings() {
         testid="settings-page"
       />
       <div className="space-y-4">
+        <SecurityAlerts />
         <TotpSettings />
+        <PasskeySettings />
         <InventoryCard />
         <SessionsCard />
       </div>
