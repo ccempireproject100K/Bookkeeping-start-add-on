@@ -36,6 +36,7 @@ import CpaPackage from "@/pages/CpaPackage";
 import Pulse from "@/pages/Pulse";
 import Pricing from "@/pages/Pricing";
 import TaxForecast from "@/pages/TaxForecast";
+import Playground from "@/pages/Playground";
 import Estimates from "@/pages/Estimates";
 import CashFlow from "@/pages/CashFlow";
 import BudgetVsActual from "@/pages/BudgetVsActual";
@@ -101,6 +102,7 @@ function App() {
               <Route path="pulse" element={<Pulse />} />
               <Route path="pricing" element={<Pricing />} />
               <Route path="tax-forecast" element={<TaxForecast />} />
+              <Route path="playground" element={<Playground />} />
               <Route path="aging" element={<Aging />} />
               <Route path="gift-cards" element={<GiftCards />} />
               <Route path="commissions" element={<Commissions />} />
