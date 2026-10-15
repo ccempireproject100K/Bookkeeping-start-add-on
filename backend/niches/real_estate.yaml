@@ -1,0 +1,41 @@
+id: real_estate
+trade: Real Estate
+product_name: "The Agent's Ledger"
+tagline: "Bookkeeping built for real estate agents"
+terms:
+  worker: Agent
+  worker_plural: Agents
+  shop: brokerage
+  job: transaction
+  job_plural: transactions
+  customer: client
+  customer_plural: clients
+colors:
+  accent: "#d4af37"
+subdomains: [realestate, realtor, agent]
+revenue_accounts:
+  - {code: "4000", name: "Commission Income — Buyer Side"}
+  - {code: "4010", name: "Commission Income — Listing Side"}
+  - {code: "4020", name: "Commission Income — Leases"}
+  - {code: "4030", name: "Referral Income"}
+trade_expense_accounts:
+  - {code: "5030", name: "Brokerage Splits & Desk Fees"}
+  - {code: "5040", name: "MLS & Association Dues"}
+services:
+  - {name: "Buyer Representation", kind: service}
+  - {name: "Listing — Marketing Plan", kind: service}
+  - {name: "Lease Transaction", kind: service}
+  - {name: "Referral Fee", kind: service}
+checklist:
+  - {id: team, label: "Add your team", hint: "Agents and assistants show up once they have a workspace login", link: "/team", check: team}
+  - {id: services, label: "Add your services", hint: "Buyer rep, listings, leases, referrals", link: "/inventory", check: services}
+  - {id: bank, label: "Add a bank account", hint: "Reconcile commission deposits in Banking", link: "/banking", check: bank}
+  - {id: tax, label: "Set up 1099 tracking", hint: "You're 1099 — track every income stream for quarterly estimates", link: "/tax", check: tax}
+  - {id: sale, label: "Record your first closing", hint: "Invoice a commission to see the full flow", link: "/invoices", check: sale}
+copilot_notes: |
+  Agents are 1099: commission splits with the brokerage, desk fees,
+  and cap tracking are the core math — know your true split on every
+  deal. Pipeline is everything: track pending closings, not just closed
+  revenue. Marketing spend per listing should tie to closed volume;
+  mileage is a major deduction — log it. Referral fees are easy to
+  forget; reconcile them quarterly.
