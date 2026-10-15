@@ -10,6 +10,9 @@ from lib.base import Scoped, new_id, now_iso, today_str, to_cents, cents_to_doll
 from lib.auth import require, get_current_user
 from lib import ledger as L
 from lib import posting as P
+from lib import fx as FX
+from lib import fx_posting as FXP
+from lib import currencies as C
 from lib.currencies import normalize as normalize_currency
 
 router = APIRouter(prefix="/bills", tags=["bills"])
@@ -98,6 +101,7 @@ class PayBody(BaseModel):
     amount: Optional[float] = None       # None = pay full remaining balance
     credit_id: Optional[str] = None      # apply a vendor credit
     pay_date: Optional[str] = None
+    payment_currency: Optional[str] = None  # currency actually moved; defaults to the bill currency
 
 
 @router.post("/{bill_id}/pay")
@@ -109,8 +113,34 @@ async def pay_bill(bill_id: str, body: PayBody, user: dict = Depends(require("op
     balance = bill["amount_cents"] - paid
     if balance <= 0:
         raise HTTPException(status_code=409, detail="Bill already fully paid")
+    bill_currency = normalize_currency(bill.get("currency") or "USD")
+    try:
+        pay_currency = normalize_currency(body.payment_currency or bill_currency)
+    except ValueError:
+        raise HTTPException(status_code=422, detail=f"Unsupported currency: {body.payment_currency!r}")
+    pay_date = body.pay_date or today_str()
 
     target = to_cents(body.amount) if body.amount is not None else balance
+    if pay_currency != bill_currency and body.amount is not None:
+        # body.amount is denominated in pay_currency; price it in bill terms
+        try:
+            target = await FX.convert(
+                C.to_minor_units(body.amount, pay_currency),
+                pay_currency, bill_currency, pay_date, db=db)
+        except FX.FXRateError:
+            raise HTTPException(status_code=422, detail=(
+                "No exchange rate available to convert this payment"))
+        pay_minor_for_fx = C.to_minor_units(body.amount, pay_currency)
+    elif pay_currency != bill_currency:
+        # full balance: the pay-currency equivalent is derived at pay-date rate
+        try:
+            pay_minor_for_fx = await FX.convert(
+                balance, bill_currency, pay_currency, pay_date, db=db)
+        except FX.FXRateError:
+            raise HTTPException(status_code=422, detail=(
+                "No exchange rate available to price this payment's currency"))
+    else:
+        pay_minor_for_fx = target
     if target <= 0 or target > balance:
         raise HTTPException(status_code=422, detail="Invalid payment amount")
 
@@ -126,21 +156,41 @@ async def pay_bill(bill_id: str, body: PayBody, user: dict = Depends(require("op
     entry_number = None
     if cash_portion > 0:
         entry = await L.post_journal_entry(db, user["tenant_id"], user, {
-            "entry_date": body.pay_date or today_str(), "source": "ap_payment", "source_ref": bill_id,
+            "entry_date": pay_date, "source": "ap_payment", "source_ref": bill_id,
             "memo": f"Pay bill — {bill['vendor']}",
             "lines": [P.dr("2010", cash_portion, "AP settled"), P.cr(cash, cash_portion, "Payment")],
+            "currency": bill_currency,
         }, status="posted")
         entry_number = entry["number"]
+        # Realized FX on the cash that settled AP (best-effort; never breaks
+        # the payment). Vendor credits applied carry no FX.
+        ap_cash_doc = cash_portion
+        pay_for_ap = (int(round(pay_minor_for_fx * ap_cash_doc / target))
+                      if pay_currency != bill_currency and target > 0
+                      else ap_cash_doc)
+        await FXP.post_realized_fx(
+            db=db, tenant_id=user["tenant_id"], user=user, kind="bill",
+            doc=bill, pay_currency=pay_currency,
+            pay_amount_minor=pay_for_ap, applied_doc_minor=ap_cash_doc,
+            pay_date=pay_date)
 
     if credit_applied > 0:
         await credits(user).update_one({"id": body.credit_id},
                                        {"$inc": {"remaining_cents": -credit_applied}})
+        if cash_portion == 0:
+            # Settled entirely by vendor credit: no cash moved, but reverse
+            # any outstanding unrealized FX on the bill.
+            await FXP.post_realized_fx(
+                db=db, tenant_id=user["tenant_id"], user=user, kind="bill",
+                doc=bill, pay_currency=bill_currency,
+                pay_amount_minor=0, pay_date=pay_date)
 
     new_paid = paid + target
     status = "paid" if new_paid >= bill["amount_cents"] else "partial"
-    pmt = {"date": (body.pay_date or today_str()), "amount_cents": target,
+    pmt = {"date": pay_date, "amount_cents": target,
            "cash_cents": cash_portion, "credit_cents": credit_applied,
-           "method": body.payment_method, "entry": entry_number}
+           "method": body.payment_method, "pay_currency": pay_currency,
+           "entry": entry_number}
     await coll(user).update_one({"id": bill_id}, {"$set": {"status": status, "paid_cents": new_paid},
                                                   "$push": {"payments": pmt}})
     return {"status": status, "paid_cents": new_paid, "balance_cents": bill["amount_cents"] - new_paid,
