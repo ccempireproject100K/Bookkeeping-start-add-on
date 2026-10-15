@@ -83,6 +83,16 @@ PERMISSIONS = {
     "ops:sell": {"owner", "barber"},
     "ops:manage": {"owner"},              # products, invoices, cash close
     "dashboard:read": {"owner", "accountant", "bookkeeper", "barber"},
+    # ---- Ported feature permissions (adapted from public repo) ----
+    "time:manage": {"owner", "accountant", "bookkeeper", "barber"},  # clock in/out, own entries
+    "time:approve": {"owner"},            # view anyone's entries, approve, close
+    "payroll:read": {"owner", "accountant"},
+    "payroll:write": {"owner"},
+    "budget:read": {"owner", "accountant", "bookkeeper"},
+    "budget:write": {"owner"},
+    "tax:read": {"owner", "accountant", "bookkeeper"},
+    "tax:write": {"owner"},
+    "pii:read": {"owner", "accountant"},  # full PII values (tax IDs, payout accounts)
 }
 
 

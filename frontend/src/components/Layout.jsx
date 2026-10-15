@@ -4,7 +4,8 @@ import {
   LayoutDashboard, BookOpen, FileText, Scale, ScrollText, Landmark,
   TrendingUp, Lock, Scissors, Receipt, Wallet, Package, LogOut, ShieldCheck,
   Hourglass, Gift, Coins, Briefcase, PieChart, Users, Building2, FileSignature,
-  Waves, Target, BarChart3, ReceiptText,
+  Waves, Target, BarChart3, ReceiptText, Repeat, DatabaseBackup, Bot, Clock,
+  FileCheck2,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import {
@@ -40,6 +41,14 @@ const NAV = [
   { to: "/gift-cards", label: "Gift Cards", icon: Gift, testid: "nav-gift-cards", roles: ALL, group: "Operations" },
   { to: "/commissions", label: "Commissions", icon: Coins, testid: "nav-commissions", roles: ALL, group: "Operations" },
   { to: "/cash-close", label: "Cash Close", icon: Wallet, testid: "nav-cash-close", roles: ["owner"], group: "Operations" },
+  { to: "/recurring-invoices", label: "Recurring Invoices", icon: Repeat, testid: "nav-recurring-invoices", roles: ALL, group: "Operations" },
+  { to: "/time", label: "Time Tracking", icon: Clock, testid: "nav-time", roles: ["owner", "accountant", "bookkeeper", "barber"], group: "Operations" },
+  { to: "/payroll", label: "Payroll", icon: Users, testid: "nav-payroll", roles: ["owner", "accountant"], group: "Operations" },
+  { to: "/copilot", label: "AI Copilot", icon: Bot, testid: "nav-copilot", roles: ["owner"], group: "Operations" },
+  { to: "/budget", label: "Budget & Forecast", icon: TrendingUp, testid: "nav-budget-forecast", roles: ALL, group: "Reports" },
+  { to: "/tax", label: "Tax & 1099s", icon: FileCheck2, testid: "nav-tax", roles: ALL, group: "Reports" },
+  { to: "/backup", label: "Backup & Restore", icon: DatabaseBackup, testid: "nav-backup", roles: ["owner"], group: "Operations" },
+  { to: "/settings", label: "Settings", icon: ShieldCheck, testid: "nav-settings", roles: ["owner"], group: "Operations" },
 ];
 
 const ROLE_LABEL = { owner: "Owner / Admin", accountant: "Accountant", bookkeeper: "Bookkeeper", barber: "Technician" };
