@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { errMsg } from "@/lib/api";
-import { Scissors, ArrowRight } from "lucide-react";
+import { Scissors, ArrowRight, Fingerprint } from "lucide-react";
+import { loginWithPasskey, passkeysSupported } from "@/lib/webauthn";
 
 const DEMOS = [
   { role: "Owner", email: "onelovellc@outlook.com", password: "Owner123!" },
@@ -16,23 +17,48 @@ const DEMOS = [
 ];
 
 export default function Login() {
-  const { user, login } = useAuth();
+  const { user, login, refresh } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [totpCode, setTotpCode] = useState("");
+  const [totpNeeded, setTotpNeeded] = useState(false);
   const [busy, setBusy] = useState(false);
 
   useEffect(() => { if (user) navigate("/"); }, [user, navigate]);
+
+  const passkeyLogin = async () => {
+    if (!email.trim()) { toast.error("Enter your email first, then use your passkey"); return; }
+    setBusy(true);
+    try {
+      await loginWithPasskey(email.trim());
+      await refresh();
+      toast.success("Welcome back");
+      navigate("/");
+    } catch (err) {
+      toast.error(errMsg(err));
+    } finally {
+      setBusy(false);
+    }
+  };
 
   const submit = async (e, creds) => {
     e?.preventDefault?.();
     setBusy(true);
     try {
-      await login(creds?.email || email, creds?.password || password);
+      await login(creds?.email || email, creds?.password || password, totpCode);
       toast.success("Welcome back");
+      setTotpNeeded(false);
+      setTotpCode("");
       navigate("/");
     } catch (err) {
-      toast.error(errMsg(err));
+      if (err?.response?.data?.detail === "TOTP_REQUIRED") {
+        setTotpNeeded(true);
+        toast.error("Two-factor code required — enter the 6-digit code from your authenticator app");
+      } else {
+        setTotpNeeded(false);
+        toast.error(errMsg(err));
+      }
     } finally {
       setBusy(false);
     }
@@ -93,6 +119,17 @@ export default function Login() {
                 className="mt-1 bg-[#14171E] border-[#222838]"
               />
             </div>
+            {totpNeeded && (
+              <div>
+                <Label className="text-xs text-gray-400">Authenticator code</Label>
+                <Input
+                  data-testid="login-totp"
+                  inputMode="numeric" value={totpCode} onChange={(e) => setTotpCode(e.target.value)}
+                  placeholder="123456" maxLength={8} autoFocus
+                  className="mt-1 bg-[#14171E] border-[#222838] font-mono tracking-widest"
+                />
+              </div>
+            )}
             <Button
               data-testid="login-submit" type="submit" disabled={busy}
               className="w-full bg-amber-600 hover:bg-amber-500 text-black font-semibold"
@@ -100,6 +137,15 @@ export default function Login() {
               {busy ? "Signing in…" : "Sign in"} <ArrowRight size={16} className="ml-1" />
             </Button>
           </form>
+
+          {passkeysSupported() && (
+            <Button
+              data-testid="login-passkey" onClick={passkeyLogin} disabled={busy}
+              variant="outline" className="w-full mt-3 border-[#222838]"
+            >
+              <Fingerprint size={16} className="mr-2" /> Sign in with passkey
+            </Button>
+          )}
 
           <div className="mt-8">
             <div className="text-[10px] uppercase tracking-widest text-gray-500 mb-3 flex items-center gap-2">
