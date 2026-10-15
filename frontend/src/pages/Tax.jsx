@@ -40,6 +40,11 @@ export default function Tax() {
   const [pay, setPay] = useState({ date: today(), amount: "", description: "" });
   const [preview, setPreview] = useState(null);
   const [revealedTin, setRevealedTin] = useState({});
+  const [historyFor, setHistoryFor] = useState(null);
+  const [history, setHistory] = useState([]);
+  const [efileFor, setEfileFor] = useState(null);
+  const [efileDetail, setEfileDetail] = useState(null);
+  const [efileBusy, setEfileBusy] = useState(false);
 
   const revealTin = async (cid) => {
     try {
@@ -100,6 +105,32 @@ export default function Tax() {
   const loadPreview = async () => {
     try { setPreview(await api.get(`/tax/1099-preview?year=${year}`)); }
     catch (e) { toast.error(errMsg(e)); }
+  };
+
+  const openHistory = async (c) => {
+    setHistoryFor(c); setHistory([]);
+    try { setHistory(await api.get(`/tax/contractors/${c.id}/payments?year=${year}`)); }
+    catch (e) { toast.error(errMsg(e)); }
+  };
+
+  const deletePayment = async (p) => {
+    if (!window.confirm(`Delete this ${money(p.amount_cents)} payment dated ${p.date}? The year total will update.`)) return;
+    try {
+      await api.del(`/tax/payments/${p.id}`);
+      toast.success("Payment deleted"); openHistory(historyFor); load();
+    } catch (e) { toast.error(errMsg(e)); }
+  };
+
+  const openEfile = (c) => { setEfileFor(c); setEfileDetail(c.efile || {}); };
+
+  const refreshEfile = async () => {
+    if (!efileFor) return;
+    setEfileBusy(true);
+    try {
+      const r = await api.get(`/tax/efile-1099/${efileFor.id}/status`);
+      setEfileDetail(r.efile || {}); load(); toast.success("Status refreshed");
+    } catch (e) { toast.error(errMsg(e)); }
+    setEfileBusy(false);
   };
 
   if (summary === null) return <Loading />;
@@ -194,7 +225,9 @@ export default function Tax() {
                   <div className="text-gray-100 font-medium">{c.name}</div>
                   <div className="text-xs text-gray-500">{ENTITY_LABEL[c.entity_type]}{c.business_name ? ` · ${c.business_name}` : ""}{c.tax_id_last4 ? ` · •••${c.tax_id_last4}` : ""}</div>
                 </td>
-                <td className="px-5 py-3 text-right font-mono text-gray-200">{money(c.year_total_cents)}</td>
+                <td className="px-5 py-3 text-right">
+                  <button onClick={() => openHistory(c)} title="View payment history" className="font-mono text-gray-200 hover:text-amber-300 hover:underline" data-testid={`tax-history-${c.id}`}>{money(c.year_total_cents)}</button>
+                </td>
                 <td className="px-5 py-3">
                   {canWrite
                     ? <button onClick={() => toggleW9(c)} title="Toggle W-9 received" data-testid={`tax-w9-${c.id}`} className={`px-2 py-0.5 rounded-full text-xs border ${c.w9_received ? PILL_OK : PILL_WARN}`}>{c.w9_received ? "Received" : "Missing"}</button>
@@ -202,7 +235,13 @@ export default function Tax() {
                 </td>
                 <td className="px-5 py-3">{c.needs_1099 ? <span className={`px-2 py-0.5 rounded-full text-xs border ${PILL_INFO}`}>Required</span> : <span className="text-xs text-gray-600">—</span>}</td>
                 <td className="px-5 py-3 text-xs text-gray-500">
-                  {c.efile?.submission_id ? <span>{c.efile.status}{c.efile.sandbox ? " (sandbox)" : ""}</span> : <span className="text-gray-600">Not filed</span>}
+                  {c.efile?.submission_id
+                    ? <button onClick={() => openEfile(c)} title="View filing status" className="hover:underline text-gray-300" data-testid={`tax-efile-status-${c.id}`}>
+                        <span className={`px-2 py-0.5 rounded-full border ${/accept|transmit|filed/i.test(c.efile.status || "") ? PILL_OK : /reject|fail|error/i.test(c.efile.status || "") ? "bg-rose-500/10 text-rose-400 border-rose-500/20" : PILL_INFO}`}>
+                          {c.efile.status || "Filed"}{c.efile.sandbox ? " · sandbox" : ""}
+                        </span>
+                      </button>
+                    : <span className="text-gray-600">Not filed</span>}
                 </td>
                 {canWrite && (
                   <td className="px-5 py-3 text-right">
@@ -285,6 +324,74 @@ export default function Tax() {
           </div>
           <div><Label className="text-xs">Description</Label><Input value={pay.description} onChange={(e) => setPay({ ...pay, description: e.target.value })} placeholder="e.g. March booth rent payout" className={INPUT_CLS} /></div>
           <DialogFooter><Button onClick={recordPayment} className="bg-amber-600 hover:bg-amber-500 text-black font-semibold" data-testid="tax-pay-save">Record</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!historyFor} onOpenChange={(o) => !o && setHistoryFor(null)}>
+        <DialogContent className="bg-[#14171E] border-[#222838] max-w-lg" data-testid="tax-history-dialog">
+          <DialogHeader><DialogTitle>Payment history — {historyFor?.name} ({year})</DialogTitle></DialogHeader>
+          {history.length === 0
+            ? <p className="text-sm text-gray-500 py-6 text-center">No payments recorded for {year}.</p>
+            : (
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="text-xs uppercase tracking-wider text-gray-500 border-b border-[#222838]">
+                    <th className="py-2 text-left font-medium">Date</th>
+                    <th className="py-2 text-left font-medium">Description</th>
+                    <th className="py-2 text-right font-medium">Amount</th>
+                    {canWrite && <th className="py-2 text-right font-medium"> </th>}
+                  </tr>
+                </thead>
+                <tbody>
+                  {history.map((p) => (
+                    <tr key={p.id} className="border-b border-[#171c26]" data-testid={`tax-payment-${p.id}`}>
+                      <td className="py-2 text-gray-300">{fmtDate(p.date)}</td>
+                      <td className="py-2 text-gray-400">{p.description || <span className="text-gray-600">—</span>}</td>
+                      <td className="py-2 text-right font-mono text-gray-100">{money(p.amount_cents)}</td>
+                      {canWrite && (
+                        <td className="py-2 text-right">
+                          <button onClick={() => deletePayment(p)} className="text-gray-600 hover:text-rose-400" title="Delete payment" data-testid={`tax-payment-del-${p.id}`}><Trash2 size={14} /></button>
+                        </td>
+                      )}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          <DialogFooter className="flex justify-between">
+            <span className="text-sm text-gray-400 mr-auto">Year total: <strong className="font-mono text-gray-100">{money((history || []).reduce((s, p) => s + (p.amount_cents || 0), 0))}</strong></span>
+            {canWrite && <Button onClick={() => { setPayFor(historyFor); setHistoryFor(null); setPay({ date: today(), amount: "", description: "" }); }} className="bg-amber-600 hover:bg-amber-500 text-black font-semibold" data-testid="tax-history-record"><Plus size={14} className="mr-1" /> Record payment</Button>}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!efileFor} onOpenChange={(o) => !o && setEfileFor(null)}>
+        <DialogContent className="bg-[#14171E] border-[#222838] max-w-md" data-testid="tax-efile-dialog">
+          <DialogHeader><DialogTitle>1099-NEC filing — {efileFor?.name}</DialogTitle></DialogHeader>
+          {efileDetail && (
+            <div className="space-y-2 text-sm">
+              {[
+                ["Status", efileDetail.status || "—"],
+                ["Submission ID", <span key="s" className="font-mono">{efileDetail.submission_id || "—"}</span>],
+                ["Record ID", <span key="r" className="font-mono">{efileDetail.record_id || "—"}</span>],
+                ["Tax year", efileDetail.year || "—"],
+                ["Amount (Box 1)", money(efileDetail.amount_cents)],
+                ["Environment", efileDetail.sandbox ? "Sandbox (test)" : "Production"],
+                ["Last updated", efileDetail.updated_at ? fmtDate(efileDetail.updated_at) : "—"],
+              ].map(([k, v]) => (
+                <div key={k} className="flex justify-between gap-4 py-1.5 border-b border-[#171c26]">
+                  <span className="text-gray-500">{k}</span>
+                  <span className="text-gray-200 text-right">{v}</span>
+                </div>
+              ))}
+              <p className="text-xs text-gray-600 pt-1">This draft lives in TaxBandits — review and Transmit there to file with the IRS. This app never files in-house.</p>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={refreshEfile} disabled={efileBusy} data-testid="tax-efile-refresh">
+              {efileBusy ? "Refreshing…" : "Refresh status"}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 
