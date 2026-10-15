@@ -40,6 +40,7 @@ BASE_COA = [
     ("3030", "Owner's Contribution", "equity", "credit"),
     ("3100", "Retained Earnings", "equity", "credit"),
     ("4900", "Discounts & Promos", "revenue", "debit"),    # contra-revenue
+    ("4090", "Late Fee Income", "revenue", "credit"),
     ("5000", "Job Cost — Materials", "expense", "debit"),
     ("5005", "Job Cost — Labor", "expense", "debit"),
     ("5006", "Job Cost — Equipment", "expense", "debit"),
