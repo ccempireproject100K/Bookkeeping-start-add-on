@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { errMsg } from "@/lib/api";
-import { Scissors, ArrowRight } from "lucide-react";
+import { Scissors, ArrowRight, Fingerprint } from "lucide-react";
+import { loginWithPasskey, passkeysSupported } from "@/lib/webauthn";
 
 const DEMOS = [
   { role: "Owner", email: "onelovellc@outlook.com", password: "Owner123!" },
@@ -16,7 +17,7 @@ const DEMOS = [
 ];
 
 export default function Login() {
-  const { user, login } = useAuth();
+  const { user, login, refresh } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -25,6 +26,21 @@ export default function Login() {
   const [busy, setBusy] = useState(false);
 
   useEffect(() => { if (user) navigate("/"); }, [user, navigate]);
+
+  const passkeyLogin = async () => {
+    if (!email.trim()) { toast.error("Enter your email first, then use your passkey"); return; }
+    setBusy(true);
+    try {
+      await loginWithPasskey(email.trim());
+      await refresh();
+      toast.success("Welcome back");
+      navigate("/");
+    } catch (err) {
+      toast.error(errMsg(err));
+    } finally {
+      setBusy(false);
+    }
+  };
 
   const submit = async (e, creds) => {
     e?.preventDefault?.();
@@ -121,6 +137,15 @@ export default function Login() {
               {busy ? "Signing in…" : "Sign in"} <ArrowRight size={16} className="ml-1" />
             </Button>
           </form>
+
+          {passkeysSupported() && (
+            <Button
+              data-testid="login-passkey" onClick={passkeyLogin} disabled={busy}
+              variant="outline" className="w-full mt-3 border-[#222838]"
+            >
+              <Fingerprint size={16} className="mr-2" /> Sign in with passkey
+            </Button>
+          )}
 
           <div className="mt-8">
             <div className="text-[10px] uppercase tracking-widest text-gray-500 mb-3 flex items-center gap-2">
