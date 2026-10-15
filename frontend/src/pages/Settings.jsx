@@ -9,6 +9,7 @@ import { useAuth } from "@/context/AuthContext";
 import TotpSettings from "@/components/TotpSettings";
 import PasskeySettings from "@/components/PasskeySettings";
 import SecurityAlerts from "@/components/SecurityAlerts";
+import TeamInvites from "@/components/TeamInvites";
 
 function InventoryCard() {
   const { user, refresh } = useAuth();
@@ -87,6 +88,7 @@ export default function Settings() {
         <SecurityAlerts />
         <TotpSettings />
         <PasskeySettings />
+        <TeamInvites />
         <InventoryCard />
         <SessionsCard />
       </div>

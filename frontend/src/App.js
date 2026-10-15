@@ -40,6 +40,7 @@ import Budget from "@/pages/Budget";
 import Tax from "@/pages/Tax";
 import Settings from "@/pages/Settings";
 import AuditLog from "@/pages/AuditLog";
+import InviteAccept from "@/pages/InviteAccept";
 
 function Protected({ children }) {
   const { user, loading } = useAuth();
@@ -56,6 +57,7 @@ function App() {
         <BrowserRouter>
           <Routes>
             <Route path="/login" element={<Login />} />
+            <Route path="/invite" element={<InviteAccept />} />
             <Route path="/p/:token" element={<PortalView />} />
             <Route path="/" element={<Protected><Layout /></Protected>}>
               <Route index element={<Dashboard />} />

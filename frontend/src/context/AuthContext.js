@@ -36,9 +36,13 @@ export function AuthProvider({ children }) {
     await api.post("/auth/switch-role", { role });
     await refresh();
   };
+  const switchWorkspace = async (tenant_id) => {
+    await api.post("/auth/switch", { tenant_id });
+    await refresh();
+  };
 
   return (
-    <AuthCtx.Provider value={{ user, loading, login, register, logout, switchRole, refresh }}>
+    <AuthCtx.Provider value={{ user, loading, login, register, logout, switchRole, switchWorkspace, refresh }}>
       {children}
     </AuthCtx.Provider>
   );
