@@ -14,6 +14,7 @@ from lib.auth import require, get_current_user
 from lib.coa import NAME_OF, ACCOUNT_TYPE_OF
 from lib import ledger as L
 from lib import posting as P
+from lib.currencies import normalize as normalize_currency
 
 router = APIRouter(prefix="/banking", tags=["banking"])
 
@@ -49,6 +50,7 @@ class BankAccountBody(BaseModel):
     kind: str = "bank"            # bank | credit_card
     gl_code: Optional[str] = None
     institution: str = ""
+    currency: str = "USD"         # ISO 4217; validated on create
 
 
 @router.get("/accounts")
@@ -64,6 +66,10 @@ async def list_accounts(user: dict = Depends(require("ledger:read"))):
 
 @router.post("/accounts")
 async def create_account(body: BankAccountBody, user: dict = Depends(require("ledger:admin"))):
+    try:
+        currency = normalize_currency(body.currency)
+    except ValueError:
+        raise HTTPException(status_code=422, detail=f"Unsupported currency: {body.currency!r}")
     pool = CARD_CODES if body.kind == "credit_card" else BANK_CODES
     used = {a["gl_code"] for a in await accounts(user).find_list()}
     gl = body.gl_code
@@ -76,6 +82,7 @@ async def create_account(body: BankAccountBody, user: dict = Depends(require("le
     doc = {
         "id": new_id(), "name": body.name, "kind": body.kind, "gl_code": gl,
         "gl_name": NAME_OF.get(gl, gl), "institution": body.institution,
+        "currency": currency,
         "last_reconciled_date": None, "last_reconciled_balance_cents": 0,
         "created_at": now_iso(),
     }

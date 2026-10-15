@@ -9,6 +9,7 @@ from lib.base import Scoped, new_id, now_iso, today_str, to_cents, cents_to_doll
 from lib.auth import require, get_current_user
 from lib import ledger as L
 from lib import posting as P
+from lib.currencies import normalize as normalize_currency
 
 router = APIRouter(prefix="/invoices", tags=["invoices"])
 
@@ -36,6 +37,7 @@ class InvoiceBody(BaseModel):
     tax_jurisdiction_id: Optional[str] = None
     due_date: Optional[str] = None
     terms: Optional[str] = "Net 30"
+    currency: str = "USD"          # ISO 4217; validated on issue
 
 
 def _enrich(inv):
@@ -55,6 +57,10 @@ async def list_invoices(user: dict = Depends(get_current_user)):
 
 @router.post("")
 async def issue_invoice(body: InvoiceBody, user: dict = Depends(require("ops:manage"))):
+    try:
+        currency = normalize_currency(body.currency)
+    except ValueError:
+        raise HTTPException(status_code=422, detail=f"Unsupported currency: {body.currency!r}")
     rev_lines = []
     subtotal = 0
     for ln in body.lines:
@@ -73,12 +79,13 @@ async def issue_invoice(body: InvoiceBody, user: dict = Depends(require("ops:man
     entry = await L.post_journal_entry(db, user["tenant_id"], user, P.build_invoice_issue(
         revenue_lines=rev_lines, tax_cents=tax_cents, cogs_cents=0,
         gross_cents=gross, entry_date=today_str(), source_ref=inv_id,
-        memo=f"Invoice — {body.client_name}",
+        memo=f"Invoice — {body.client_name}", currency=currency,
     ), status="posted")
     doc = {
         "id": inv_id, "client_name": body.client_name, "customer_id": body.customer_id,
         "lines": [l.model_dump() for l in body.lines],
         "subtotal_cents": subtotal, "tax_cents": tax_cents, "total_cents": gross,
+        "currency": currency,
         "tax_jurisdiction_id": jid,
         "status": "issued", "paid_cents": 0, "payments": [], "due_date": body.due_date,
         "terms": body.terms, "issue_entry": entry["number"], "created_at": now_iso(),

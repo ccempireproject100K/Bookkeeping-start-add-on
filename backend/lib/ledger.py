@@ -6,6 +6,7 @@ from fastapi import HTTPException
 
 from lib.base import Scoped, new_id, now_iso, today_str, period_key_of, fiscal_year_of
 from lib.coa import ACCOUNT_TYPE_OF, NORMAL_BALANCE_OF, NAME_OF, TYPE_ORDER
+from lib.currencies import normalize as normalize_currency
 
 
 def _scoped(db, tenant_id):
@@ -114,6 +115,12 @@ async def post_journal_entry(db, tenant_id, user, draft, status="posted", idempo
     total = _validate_lines(lines)
     await _assert_accounts_active(s, lines)
 
+    try:
+        currency = normalize_currency(draft.get("currency"))
+    except ValueError:
+        raise HTTPException(status_code=422,
+                            detail=f"Unsupported currency: {draft.get('currency')!r}")
+
     entry_date = draft.get("entry_date") or today_str()
     if idempotency_key:
         dup = await s["entries"].find_one({"idempotency_key": idempotency_key})
@@ -141,6 +148,7 @@ async def post_journal_entry(db, tenant_id, user, draft, status="posted", idempo
         "period_key": period["key"],
         "idempotency_key": idempotency_key,
         "total_cents": total,
+        "currency": currency,
         "created_at": now_iso(),
     }
     await s["entries"].insert_one(entry)
