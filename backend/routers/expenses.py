@@ -129,4 +129,4 @@ async def scan_receipt(body: ReceiptIn, p: Principal = Depends(require("txn:writ
     cat = data.get("category")
     return {"vendor": data.get("vendor", ""), "date": data.get("date", ""),
             "amount": data.get("amount", 0), "tax": data.get("tax", 0),
-            "category": cat if cat in EXPENSE_CATEGORIES else "Other", "description": data.get("description", "")} a 
+            "category": cat if cat in EXPENSE_CATEGORIES else "Other", "description": data.get("description", "")} 
