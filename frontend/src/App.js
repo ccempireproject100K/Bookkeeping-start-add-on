@@ -2,6 +2,7 @@ import "@/App.css";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
+import { NicheProvider } from "@/context/NicheContext";
 import Layout from "@/components/Layout";
 import InventoryGate from "@/components/InventoryGate";
 import Login from "@/pages/Login";
@@ -54,6 +55,7 @@ function App() {
   return (
     <div className="App app-bg">
       <AuthProvider>
+        <NicheProvider>
         <BrowserRouter>
           <Routes>
             <Route path="/login" element={<Login />} />
@@ -97,6 +99,7 @@ function App() {
             </Route>
           </Routes>
         </BrowserRouter>
+        </NicheProvider>
         <Toaster position="top-right" theme="dark" richColors />
       </AuthProvider>
     </div>

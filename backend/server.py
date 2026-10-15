@@ -42,6 +42,7 @@ for r in (auth.router, ledger.router, products.router, pos.router,
           recurring_invoices.router, reminders.router, backup.router,
           bankfeed.router, copilot.router, time.router, portal.router,
           payroll.router, budget.router, tax.router, sales_tax.router, edition.router,
+          edition.public_router,
           totp.router, audit.router, webauthn.router, alerts.router,
           invites.router):
     api_router.include_router(r)
