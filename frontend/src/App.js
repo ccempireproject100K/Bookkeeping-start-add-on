@@ -40,6 +40,7 @@ import Playground from "@/pages/Playground";
 import Combo from "@/pages/Combo";
 import Kpis from "@/pages/Kpis";
 import Benchmarks from "@/pages/Benchmarks";
+import Voice from "@/pages/Voice";
 import Estimates from "@/pages/Estimates";
 import CashFlow from "@/pages/CashFlow";
 import BudgetVsActual from "@/pages/BudgetVsActual";
@@ -109,6 +110,7 @@ function App() {
               <Route path="combo" element={<Combo />} />
               <Route path="kpis" element={<Kpis />} />
               <Route path="benchmarks" element={<Benchmarks />} />
+              <Route path="voice" element={<Voice />} />
               <Route path="aging" element={<Aging />} />
               <Route path="gift-cards" element={<GiftCards />} />
               <Route path="commissions" element={<Commissions />} />
