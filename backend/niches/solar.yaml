@@ -1,0 +1,37 @@
+id: solar
+trade: Solar
+product_name: "The Solar Ledger"
+tagline: "Bookkeeping built for solar installers"
+terms:
+  worker: Installer
+  worker_plural: Installers
+  shop: company
+  job: project
+  job_plural: projects
+  customer: homeowner
+  customer_plural: homeowners
+colors:
+  accent: "#fbbf24"
+subdomains: [solar]
+revenue_accounts:
+  - {code: "4000", name: "Service Revenue — Installations"}
+  - {code: "4010", name: "Service Revenue — Service & Maintenance"}
+  - {code: "4020", name: "Service Revenue — Site Surveys"}
+trade_expense_accounts:
+  - {code: "5100", name: "Installer Commissions"}
+  - {code: "5030", name: "Job Cost — Panels & Equipment"}
+services:
+  - {name: "Site Survey", kind: service}
+  - {name: "Residential Installation", kind: service}
+  - {name: "Panel Service Visit", kind: service}
+checklist:
+  - {id: team, label: "Add your installers", hint: "Installers show up once they have a workspace login", link: "/team", check: team}
+  - {id: services, label: "Add services & packages", hint: "Surveys, installs, and service plans", link: "/inventory", check: services}
+  - {id: bank, label: "Add a bank account", hint: "Reconcile deposits against projects in Banking", link: "/banking", check: bank}
+  - {id: tax, label: "Set up contractor tracking", hint: "W-9s and 1099-NECs for subs and sales reps", link: "/tax", check: tax}
+  - {id: sale, label: "Book your first project", hint: "Invoice a survey to see the full flow", link: "/invoices", check: sale}
+copilot_notes: |
+  Solar is project-based with long sales cycles: track pipeline value,
+  not just booked revenue. Equipment (panels, inverters) is the big
+  cost — lock supplier pricing. Tax credits drive demand; policy
+  changes move the whole market. Referrals are gold; track their source.
