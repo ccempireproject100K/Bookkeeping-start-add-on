@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { api, errMsg } from "@/lib/api";
-import { money, fmtDate } from "@/lib/format";
+import { money, moneyFor, fmtDate } from "@/lib/format";
+import CurrencyPicker from "@/components/CurrencyPicker";
 import { PageHeader, Card, Loading } from "@/components/Page";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -34,6 +35,7 @@ export default function Invoices() {
   const [pay, setPay] = useState({ amount: "", payment_method: "bank", credit_id: "" });
   const [juris, setJuris] = useState([]);
   const [jurisId, setJurisId] = useState("");
+  const [invCurrency, setInvCurrency] = useState("USD");
   const [creditOpen, setCreditOpen] = useState(false);
   const [creditForm, setCreditForm] = useState({ client_name: "", amount: "", memo: "" });
   const [refundFor, setRefundFor] = useState(null);
@@ -70,11 +72,11 @@ export default function Invoices() {
     try {
       await api.post("/invoices", {
         client_name: client, tax: parseFloat(tax) || 0,
-        tax_jurisdiction_id: jurisId || null,
+        tax_jurisdiction_id: jurisId || null, currency: invCurrency,
         lines: lines.filter((l) => l.name && l.amount).map((l) => ({ kind: "service", name: l.name, revenue_code: l.revenue_code, amount: parseFloat(l.amount) || 0 })),
       });
       toast.success("Invoice issued");
-      setOpen(false); setClient(""); setTax(""); setJurisId(""); setLines([{ name: "", revenue_code: "4020", amount: "" }]); load();
+      setOpen(false); setClient(""); setTax(""); setJurisId(""); setInvCurrency("USD"); setLines([{ name: "", revenue_code: "4020", amount: "" }]); load();
     } catch (e) { toast.error(errMsg(e)); }
   };
   const openNewInvoice = () => {
@@ -132,8 +134,8 @@ export default function Invoices() {
                   <tr key={inv.id} className="border-b border-[#171c26] hover:bg-[#161b25]">
                     <td className="px-5 py-3 text-gray-100">{inv.client_name}</td>
                     <td className="px-5 py-3 text-gray-400">{fmtDate(inv.created_at?.slice(0, 10))}</td>
-                    <td className="px-5 py-3 text-right font-mono text-gray-200">{money(inv.total_cents)}</td>
-                    <td className="px-5 py-3 text-right font-mono text-amber-400">{money(inv.balance_cents)}</td>
+                    <td className="px-5 py-3 text-right font-mono text-gray-200">{moneyFor(inv.total_cents, inv.currency)}</td>
+                    <td className="px-5 py-3 text-right font-mono text-amber-400">{moneyFor(inv.balance_cents, inv.currency)}</td>
                     <td className="px-5 py-3"><span className={`px-2 py-0.5 rounded-full text-xs border capitalize ${STATUS_CLS[inv.status] || ""}`}>{inv.status}</span></td>
                     {isOwner && (
                       <td className="px-5 py-3 text-right">
@@ -205,6 +207,7 @@ export default function Invoices() {
         <DialogContent className="bg-[#14171E] border-[#222838] max-w-lg">
           <DialogHeader><DialogTitle>New Invoice</DialogTitle></DialogHeader>
           <div><Label className="text-xs">Client</Label><Input data-testid="invoice-client" value={client} onChange={(e) => setClient(e.target.value)} className="bg-[#0F1218] border-[#222838]" /></div>
+          <CurrencyPicker value={invCurrency} onChange={setInvCurrency} testid="invoice-currency" />
           <div className="space-y-2">
             <Label className="text-xs">Line items</Label>
             {lines.map((l, i) => (
