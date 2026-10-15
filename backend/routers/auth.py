@@ -22,7 +22,8 @@ class RegisterBody(BaseModel):
     email: EmailStr
     password: str
     name: str
-    shop_name: str = "My Barbershop"
+    shop_name: str = "My Shop"
+    niche_id: Optional[str] = None
 
 
 class LoginBody(BaseModel):
@@ -55,19 +56,22 @@ async def _audit(user, action, entity, entity_id, details=None):
     })
 
 
-async def create_workspace(email, password, name, shop_name, role="owner", tenant_id=None, commission_rate=0):
+async def create_workspace(email, password, name, shop_name, role="owner", tenant_id=None, commission_rate=0, niche_id=None):
+    from lib.niches import get_pack, DEFAULT_NICHE
     email = email.lower().strip()
     if await db.users.find_one({"email": email}):
         raise HTTPException(status_code=409, detail="An account with this email already exists")
+    pack = get_pack(niche_id)
+    niche_id = pack.get("id") or DEFAULT_NICHE
     if tenant_id is None:
         tenant_id = new_id()
         await db.tenants.insert_one({
-            "id": tenant_id, "name": shop_name,
+            "id": tenant_id, "name": shop_name, "niche_id": niche_id,
             "settings": {"inventory_enabled": True, "sales_tax_rate": 0.0725,
                          "double_entry_mode": "primary"},
             "created_at": now_iso(),
         })
-        await seed_coa(Scoped(db.accounts, tenant_id))
+        await seed_coa(Scoped(db.accounts, tenant_id), niche_id)
     user = {
         "id": new_id(), "tenant_id": tenant_id, "email": email,
         "password_hash": hash_password(password), "name": name,
@@ -83,7 +87,8 @@ async def register(body: RegisterBody, response: Response):
         raise HTTPException(
             400, "This password has appeared in a data breach. "
                  "Please choose a different one.")
-    user = await create_workspace(body.email, body.password, body.name, body.shop_name)
+    user = await create_workspace(body.email, body.password, body.name, body.shop_name,
+                                  niche_id=body.niche_id)
     await _issue(response, user)
     return _public(user)
 

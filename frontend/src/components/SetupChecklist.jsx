@@ -14,7 +14,7 @@ export default function SetupChecklist() {
     <Card className="p-5 mb-4" data-testid="setup-checklist">
       <div className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-2 font-medium text-gray-100">
-          <Scissors size={16} className="text-amber-400" /> Get your shop set up
+          <Scissors size={16} className="text-amber-400" /> Get your {data.shop_label || "shop"} set up
         </div>
         <span className="text-xs text-gray-500">{data.done}/{data.total} done</span>
       </div>
