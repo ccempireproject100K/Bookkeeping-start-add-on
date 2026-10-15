@@ -1,0 +1,40 @@
+id: plumbing
+trade: Plumbing
+product_name: "The Plumber's Ledger"
+tagline: "Bookkeeping built for plumbing shops"
+terms:
+  worker: Technician
+  worker_plural: Technicians
+  shop: shop
+  job: job
+  job_plural: jobs
+  customer: customer
+  customer_plural: customers
+colors:
+  accent: "#60a5fa"
+subdomains: [plumbing, plumber]
+revenue_accounts:
+  - {code: "4000", name: "Service Revenue — Service Calls"}
+  - {code: "4010", name: "Service Revenue — Repipes & Remodels"}
+  - {code: "4020", name: "Service Revenue — Drain Cleaning"}
+  - {code: "4030", name: "Service Revenue — Maintenance Plans"}
+  - {code: "4100", name: "Product Revenue — Fixtures & Parts"}
+trade_expense_accounts:
+  - {code: "5100", name: "Technician Commissions"}
+  - {code: "5030", name: "Job Cost — Pipe, Fixtures & Parts"}
+services:
+  - {name: "Service Call — Diagnostic", kind: service}
+  - {name: "Drain Cleaning", kind: service}
+  - {name: "Water Heater Installation", kind: service}
+  - {name: "Leak Repair", kind: service}
+checklist:
+  - {id: team, label: "Add your technicians", hint: "Techs show up once they have a workspace login; commissions split automatically", link: "/team", check: team}
+  - {id: services, label: "Add services & price book", hint: "Calls, drains, heaters, and your flat-rate price book", link: "/inventory", check: services}
+  - {id: bank, label: "Add a bank account", hint: "Reconcile deposits against jobs in Banking", link: "/banking", check: bank}
+  - {id: tax, label: "Set up contractor tracking", hint: "W-9s and 1099-NECs for subs and helpers", link: "/tax", check: tax}
+  - {id: sale, label: "Book your first job", hint: "Invoice a service call to see the full flow", link: "/invoices", check: sale}
+copilot_notes: |
+  Plumbing is emergency-driven: after-hours calls carry premium rates —
+  make sure they land in the right revenue line. Drain cleaning is high
+  volume, lower ticket; repipes and remodels are the big jobs. Track
+  parts costs per job; fixture markups are a quiet margin driver.

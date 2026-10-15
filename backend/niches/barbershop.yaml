@@ -1,0 +1,40 @@
+id: barbershop
+trade: Barbershop
+product_name: "The Barber's Ledger"
+tagline: "Bookkeeping built for barbershops"
+terms:
+  worker: Barber
+  worker_plural: Barbers
+  shop: shop
+  job: appointment
+  job_plural: appointments
+  customer: client
+  customer_plural: clients
+colors:
+  accent: "#f59e0b"
+subdomains: [barber, barbershop]
+revenue_accounts:
+  - {code: "4000", name: "Service Revenue — Haircuts"}
+  - {code: "4010", name: "Service Revenue — Beard & Detail"}
+  - {code: "4020", name: "Service Revenue — Other"}
+  - {code: "4100", name: "Product Revenue — Retail"}
+  - {code: "4200", name: "Chair Rental Income"}
+trade_expense_accounts:
+  - {code: "5100", name: "Barber Commissions"}
+  - {code: "5200", name: "Chair Rent — Paid Out"}
+services:
+  - {name: "Haircut", kind: service}
+  - {name: "Beard Trim", kind: service}
+  - {name: "Hot Towel Shave", kind: service}
+  - {name: "Kids Cut", kind: service}
+checklist:
+  - {id: team, label: "Add your barbers", hint: "Barbers show up once they have a workspace login; commissions split automatically", link: "/team", check: team}
+  - {id: services, label: "Add services & products", hint: "Cuts, color, and your product shelf", link: "/inventory", check: services}
+  - {id: bank, label: "Add a bank account", hint: "Reconcile payouts against deposits in Banking", link: "/banking", check: bank}
+  - {id: tax, label: "Set up contractor tracking", hint: "W-9s and 1099-NECs for your booth renters or freelancers", link: "/tax", check: tax}
+  - {id: sale, label: "Run your first sale", hint: "QuickSell at the chair", link: "/quick-sell", check: sale}
+copilot_notes: |
+  Barbershops live on chair economics: cuts per day, average ticket,
+  retail attach rate, and booth-rent vs commission splits. Tips are
+  significant — track them separately from service revenue. Watch for
+  no-show gaps in the book and slow retail shelves.

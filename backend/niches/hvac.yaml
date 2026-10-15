@@ -1,0 +1,39 @@
+id: hvac
+trade: HVAC
+product_name: "The HVAC Ledger"
+tagline: "Bookkeeping built for HVAC shops"
+terms:
+  worker: Technician
+  worker_plural: Technicians
+  shop: shop
+  job: job
+  job_plural: jobs
+  customer: customer
+  customer_plural: customers
+colors:
+  accent: "#38bdf8"
+subdomains: [hvac]
+revenue_accounts:
+  - {code: "4000", name: "Service Revenue — Service Calls"}
+  - {code: "4010", name: "Service Revenue — Installations"}
+  - {code: "4020", name: "Service Revenue — Maintenance Agreements"}
+  - {code: "4100", name: "Product Revenue — Parts & Equipment"}
+trade_expense_accounts:
+  - {code: "5100", name: "Technician Commissions"}
+  - {code: "5030", name: "Job Cost — Refrigerant & Parts"}
+services:
+  - {name: "Diagnostic Service Call", kind: service}
+  - {name: "AC Tune-Up", kind: service}
+  - {name: "Furnace Installation", kind: service}
+  - {name: "Maintenance Plan Visit", kind: service}
+checklist:
+  - {id: team, label: "Add your technicians", hint: "Techs show up once they have a workspace login; commissions split automatically", link: "/team", check: team}
+  - {id: services, label: "Add services & price book", hint: "Diagnostics, installs, and your flat-rate price book", link: "/inventory", check: services}
+  - {id: bank, label: "Add a bank account", hint: "Reconcile deposits against jobs in Banking", link: "/banking", check: bank}
+  - {id: tax, label: "Set up contractor tracking", hint: "W-9s and 1099-NECs for subs and helpers", link: "/tax", check: tax}
+  - {id: sale, label: "Book your first job", hint: "Invoice a service call to see the full flow", link: "/invoices", check: sale}
+copilot_notes: |
+  HVAC shops live and die by season: installs spike in summer/winter,
+  maintenance agreements smooth the shoulders. Track install vs service
+  revenue separately — installs are lumpy, service is the baseline.
+  Watch refrigerant costs and callback rates; callbacks eat margin fast.

@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { errMsg } from "@/lib/api";
 import MusicPlayer from "./MusicPlayer";
 import WorkspaceSwitcher from "./WorkspaceSwitcher";
+import { useNiche } from "@/context/NicheContext";
 
 const ALL = ["owner", "accountant", "bookkeeper"];
 const NAV = [
@@ -54,12 +55,15 @@ const NAV = [
   { to: "/settings", label: "Settings", icon: ShieldCheck, testid: "nav-settings", roles: ["owner"], group: "Operations" },
 ];
 
-const ROLE_LABEL = { owner: "Owner / Admin", accountant: "Accountant", bookkeeper: "Bookkeeper", barber: "Technician" };
+const ROLE_LABEL_STATIC = { owner: "Owner / Admin", accountant: "Accountant", bookkeeper: "Bookkeeper" };
 
 export default function Layout() {
   const { user, logout, switchRole } = useAuth();
+  const { pack, t } = useNiche();
   const navigate = useNavigate();
   const [switching, setSwitching] = useState(false);
+  const accent = pack?.colors?.accent || "#f59e0b";
+  const ROLE_LABEL = { ...ROLE_LABEL_STATIC, barber: t("worker", "Technician") };
 
   const role = user?.role;
   const groups = [...new Set(NAV.filter((n) => n.roles.includes(role)).map((n) => n.group))];
@@ -84,8 +88,8 @@ export default function Layout() {
         <div className="h-16 flex items-center gap-3 px-5 border-b border-[#1b2230]">
           <div className="w-9 h-9 rounded-lg barber-pole shadow-inner" />
           <div>
-            <div className="font-display font-bold text-[15px] leading-tight text-gray-50">Mind at Ease Solutions</div>
-            <div className="text-[10px] uppercase tracking-widest text-amber-500/80">HVAC • Job Costing</div>
+            <div className="font-display font-bold text-[15px] leading-tight text-gray-50">{pack?.product_name || "Mind at Ease Solutions"}</div>
+            <div className="text-[10px] uppercase tracking-widest" style={{ color: `${accent}cc` }}>{pack?.tagline || "Bookkeeping"}</div>
           </div>
         </div>
         <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-5">

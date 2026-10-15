@@ -1,9 +1,15 @@
-"""Chart of Accounts seed (barbershop-specific) + fiscal period helpers."""
+"""Chart of Accounts seed: shared base + niche-pack trade lines.
+
+The base covers assets, liabilities, equity, and generic expenses/revenue
+adjustments. Each niche pack contributes its own revenue accounts and
+trade-specific expense accounts (see backend/niches/*.yaml), so a new
+workspace opens with a chart of accounts that speaks its trade.
+"""
 from lib.base import Scoped, new_id, now_iso
 
 # (code, name, type, normal_balance, is_system)
-# normal_balance overrides for contra accounts are explicit.
-COA = [
+# Shared by every niche. Niche packs add revenue + trade expense lines.
+BASE_COA = [
     ("1010", "Cash — Register", "asset", "debit"),
     ("1020", "Cash — Bank Checking", "asset", "debit"),
     ("1021", "Cash — Bank Savings", "asset", "debit"),
@@ -33,12 +39,6 @@ COA = [
     ("3020", "Owner's Draw", "equity", "debit"),           # contra-equity
     ("3030", "Owner's Contribution", "equity", "credit"),
     ("3100", "Retained Earnings", "equity", "credit"),
-    ("4000", "Service Revenue — Haircuts", "revenue", "credit"),
-    ("4010", "Service Revenue — Beard", "revenue", "credit"),
-    ("4020", "Service Revenue — Other", "revenue", "credit"),
-    ("4100", "Product Revenue — Retail", "revenue", "credit"),
-    ("4200", "Chair Rental Income", "revenue", "credit"),
-    ("4300", "Contract Revenue — HVAC", "revenue", "credit"),
     ("4900", "Discounts & Promos", "revenue", "debit"),    # contra-revenue
     ("5000", "Job Cost — Materials", "expense", "debit"),
     ("5005", "Job Cost — Labor", "expense", "debit"),
@@ -47,8 +47,6 @@ COA = [
     ("5008", "Job Cost — Other", "expense", "debit"),
     ("5010", "COGS — Retail", "expense", "debit"),
     ("5020", "COGS — Supply Used", "expense", "debit"),
-    ("5100", "Barber Commissions", "expense", "debit"),
-    ("5200", "Chair Rent — Paid Out", "expense", "debit"),
     ("5300", "Shop Rent", "expense", "debit"),
     ("5400", "Utilities", "expense", "debit"),
     ("5500", "Merchant Fees — Card", "expense", "debit"),
@@ -62,18 +60,57 @@ COA = [
     ("6110", "Wages & Salaries", "expense", "debit"),
 ]
 
-ACCOUNT_TYPE_OF = {c[0]: c[2] for c in COA}
-NORMAL_BALANCE_OF = {c[0]: c[3] for c in COA}
-NAME_OF = {c[0]: c[1] for c in COA}
+# Backwards-compatible alias for anything still importing COA directly.
+def full_coa(niche_id: str = "barbershop"):
+    """Base chart + the niche pack's revenue and trade-expense lines."""
+    from lib.niches import get_pack
+    pack = get_pack(niche_id)
+    rows = list(BASE_COA)
+    for a in pack.get("revenue_accounts", []):
+        rows.append((a["code"], a["name"], "revenue", "credit"))
+    for a in pack.get("trade_expense_accounts", []):
+        rows.append((a["code"], a["name"], "expense", "debit"))
+    return rows
+
+
+# Backwards-compatible alias for anything still importing COA directly.
+def __getattr__(name):
+    if name == "COA":
+        return full_coa("barbershop")
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+
+def _account_type_map():
+    """Type lookup covering the base chart AND every niche pack's lines,
+    so pack revenue codes (e.g. an HVAC pack's 4000) validate everywhere
+    the legacy chart did."""
+    from lib.niches import all_packs
+    m = {c[0]: c[2] for c in BASE_COA}
+    for p in all_packs():
+        for a in p.get("revenue_accounts", []):
+            m.setdefault(a["code"], "revenue")
+        for a in p.get("trade_expense_accounts", []):
+            m.setdefault(a["code"], "expense")
+    return m
+
+
+ACCOUNT_TYPE_OF = _account_type_map()
+NORMAL_BALANCE_OF = {c[0]: c[3] for c in BASE_COA}
+NAME_OF = {c[0]: c[1] for c in BASE_COA}
 
 TYPE_ORDER = {"asset": 0, "liability": 1, "equity": 2, "revenue": 3, "expense": 4}
 
 
-async def seed_coa(accounts: Scoped):
-    """Idempotent: creates any missing system accounts for this tenant."""
+async def seed_coa(accounts: Scoped, niche_id: str = "barbershop"):
+    """Idempotent: creates any missing system accounts for this tenant.
+
+    The chart is the shared base plus the niche pack's revenue and
+    trade-expense lines, so a new workspace opens speaking its trade.
+    """
+    rows = full_coa(niche_id)
     existing = {a["code"] for a in await accounts.find_list()}
     created = 0
-    for code, name, atype, normal in COA:
+    for code, name, atype, normal in rows:
         if code in existing:
             continue
         await accounts.insert_one({

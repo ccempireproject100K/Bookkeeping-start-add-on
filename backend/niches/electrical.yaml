@@ -1,0 +1,40 @@
+id: electrical
+trade: Electrical
+product_name: "The Electrician's Ledger"
+tagline: "Bookkeeping built for electrical shops"
+terms:
+  worker: Electrician
+  worker_plural: Electricians
+  shop: shop
+  job: job
+  job_plural: jobs
+  customer: customer
+  customer_plural: customers
+colors:
+  accent: "#facc15"
+subdomains: [electrical, electrician]
+revenue_accounts:
+  - {code: "4000", name: "Service Revenue — Service Calls"}
+  - {code: "4010", name: "Service Revenue — Panel Upgrades"}
+  - {code: "4020", name: "Service Revenue — Rewires & Remodels"}
+  - {code: "4030", name: "Service Revenue — Maintenance Plans"}
+  - {code: "4100", name: "Product Revenue — Fixtures & Materials"}
+trade_expense_accounts:
+  - {code: "5100", name: "Electrician Commissions"}
+  - {code: "5030", name: "Job Cost — Wire, Panels & Fixtures"}
+services:
+  - {name: "Service Call — Diagnostic", kind: service}
+  - {name: "Panel Upgrade", kind: service}
+  - {name: "EV Charger Installation", kind: service}
+  - {name: "Lighting Installation", kind: service}
+checklist:
+  - {id: team, label: "Add your electricians", hint: "Electricians show up once they have a workspace login; commissions split automatically", link: "/team", check: team}
+  - {id: services, label: "Add services & price book", hint: "Calls, panels, and your flat-rate price book", link: "/inventory", check: services}
+  - {id: bank, label: "Add a bank account", hint: "Reconcile deposits against jobs in Banking", link: "/banking", check: bank}
+  - {id: tax, label: "Set up contractor tracking", hint: "W-9s and 1099-NECs for subs and helpers", link: "/tax", check: tax}
+  - {id: sale, label: "Book your first job", hint: "Invoice a service call to see the full flow", link: "/invoices", check: sale}
+copilot_notes: |
+  Electrical mixes quick service calls with big-ticket panel upgrades
+  and rewires — keep them in separate revenue lines or the average
+  ticket lies to you. Permits and inspections add cost; track them per
+  job. EV charger installs are a growing high-margin line.

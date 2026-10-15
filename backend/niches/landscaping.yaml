@@ -1,0 +1,39 @@
+id: landscaping
+trade: Landscaping
+product_name: "The Landscaper's Ledger"
+tagline: "Bookkeeping built for landscaping companies"
+terms:
+  worker: Crew Member
+  worker_plural: Crew
+  shop: company
+  job: job
+  job_plural: jobs
+  customer: customer
+  customer_plural: customers
+colors:
+  accent: "#22c55e"
+subdomains: [landscaping, lawn]
+revenue_accounts:
+  - {code: "4000", name: "Service Revenue — Recurring Maintenance"}
+  - {code: "4010", name: "Service Revenue — Installations"}
+  - {code: "4020", name: "Service Revenue — Irrigation"}
+  - {code: "4030", name: "Service Revenue — Seasonal Cleanup"}
+trade_expense_accounts:
+  - {code: "5100", name: "Crew Commissions"}
+  - {code: "5030", name: "Job Cost — Plants & Materials"}
+services:
+  - {name: "Weekly Mow & Edge", kind: service}
+  - {name: "Mulch Installation", kind: service}
+  - {name: "Seasonal Cleanup", kind: service}
+  - {name: "Irrigation Repair", kind: service}
+checklist:
+  - {id: team, label: "Add your crew", hint: "Crew members show up once they have a workspace login", link: "/team", check: team}
+  - {id: services, label: "Add services & packages", hint: "Mowing routes, installs, and seasonal packages", link: "/inventory", check: services}
+  - {id: bank, label: "Add a bank account", hint: "Reconcile deposits against routes in Banking", link: "/banking", check: bank}
+  - {id: tax, label: "Set up contractor tracking", hint: "W-9s and 1099-NECs for subs and seasonal help", link: "/tax", check: tax}
+  - {id: sale, label: "Book your first job", hint: "Invoice a cleanup to see the full flow", link: "/invoices", check: sale}
+copilot_notes: |
+  Landscaping splits into recurring maintenance (mowing routes — the
+  annuity) and project work (installs — lumpy, higher ticket). Track
+  them separately. Winter is the valley — cash reserves matter. Fuel
+  and labor are the big variable costs; watch them per route.
