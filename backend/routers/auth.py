@@ -313,7 +313,12 @@ class SwitchBody(BaseModel):
 
 @router.post("/switch-role")
 async def switch_role(body: SwitchBody, response: Response, user: dict = Depends(get_current_user)):
-    """Demo convenience: log in as the seeded user with the requested role in the same workspace."""
+    """Role switching is restricted to an explicitly enabled demo workspace."""
+    if os.environ.get("ENABLE_DEMO_ROLE_SWITCH", "").lower() != "true":
+        raise HTTPException(status_code=403, detail="Role switching is disabled")
+    tenant = await db.tenants.find_one({"id": user["tenant_id"]}, {"_id": 0, "access": 1})
+    if not tenant or tenant.get("access") != "demo":
+        raise HTTPException(status_code=403, detail="Role switching is only allowed in demo workspaces")
     target = await db.users.find_one({"tenant_id": user["tenant_id"], "role": body.role})
     if not target:
         raise HTTPException(status_code=404, detail=f"No {body.role} user in this workspace")
