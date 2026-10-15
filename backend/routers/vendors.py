@@ -59,6 +59,28 @@ async def update_vendor(vendor_id: str, body: VendorBody, user: dict = Depends(r
     return {"id": vendor_id, **body.model_dump()}
 
 
+@router.delete("/{vendor_id}")
+async def delete_vendor(vendor_id: str, force: bool = False,
+                        user: dict = Depends(require("ops:manage"))):
+    """Delete a vendor. Refused (409) while the vendor still has bills or recorded
+    expenses, unless ?force=true. Expenses already recorded keep their vendor name."""
+    v = await vendors(user).find_one({"id": vendor_id})
+    if not v:
+        raise HTTPException(status_code=404, detail="Vendor not found")
+    if not force:
+        q = {"$or": [{"vendor_id": vendor_id}, {"vendor": v["name"]}]}
+        bill_refs = await Scoped(db.bills, user["tenant_id"]).count(q)
+        exp_refs = await expenses(user).count(q)
+        if bill_refs or exp_refs:
+            raise HTTPException(
+                status_code=409,
+                detail=(f"Vendor has {bill_refs} bill(s) and {exp_refs} expense(s) on record. "
+                        "Delete anyway? Re-submit with ?force=true."),
+            )
+    await db.vendors.delete_one({"id": vendor_id, "tenant_id": user["tenant_id"]})
+    return {"ok": True, "deleted_id": vendor_id}
+
+
 # ---------------- Direct expenses ----------------
 class ReceiptMeta(BaseModel):
     merchant: Optional[str] = None
