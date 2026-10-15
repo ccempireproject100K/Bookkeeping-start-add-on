@@ -1,5 +1,6 @@
 """Auth: register (new workspace), login, logout, me, demo role switch."""
 import os
+from datetime import datetime, timezone, timedelta
 from fastapi import APIRouter, Response, HTTPException, Depends, Request
 from pydantic import BaseModel, EmailStr, Field
 
@@ -29,7 +30,8 @@ class LoginBody(BaseModel):
 
 
 async def _issue(response: Response, user: dict):
-    token = create_access_token(user["id"], user["email"])
+    token = create_access_token(user["id"], user["email"],
+                                user.get("token_version", 0))
     set_session_cookie(response, token)
 
 
@@ -81,9 +83,20 @@ async def register(body: RegisterBody, response: Response):
 
 
 @router.post("/login")
-async def login(body: LoginBody, response: Response):
-    user = await db.users.find_one({"email": body.email.lower().strip()})
+async def login(body: LoginBody, response: Response, request: Request):
+    email = body.email.lower().strip()
+    ip = request.client.host if request.client else "unknown"
+    # Brute-force protection: 5 bad tries per email or 20 per IP in 15 min.
+    cutoff = datetime.now(timezone.utc) - timedelta(minutes=15)
+    window = {"at": {"$gte": cutoff}}
+    n_email = await db.login_attempts.count_documents({**window, "email": email})
+    n_ip = await db.login_attempts.count_documents({**window, "ip": ip})
+    if n_email >= 5 or n_ip >= 20:
+        raise HTTPException(status_code=429,
+                            detail="Too many failed login attempts. Try again in 15 minutes.")
+    user = await db.users.find_one({"email": email})
     if not user or not verify_password(body.password, user["password_hash"]):
+        await _record_failed_login(email, ip)
         raise HTTPException(status_code=401, detail="Invalid email or password")
     if user.get("totp_enabled"):
         # Password is fine, but 2FA is on: require the authenticator code.
@@ -91,9 +104,38 @@ async def login(body: LoginBody, response: Response):
         from routers.totp import totp_verify
         enc = user.get("totp_secret_enc")
         if not enc or not totp_verify(pii_decrypt(enc), body.totp_code):
+            await _record_failed_login(email, ip)
             raise HTTPException(status_code=401, detail="TOTP_REQUIRED")
+    # Success: clear this email's failure history.
+    await db.login_attempts.delete_many({"email": email})
     await _issue(response, user)
+    await _audit(user, "auth.login", "user", user["id"], {"ip": ip})
     return _public(user)
+
+
+async def _record_failed_login(email: str, ip: str):
+    await db.login_attempts.insert_one({
+        "id": new_id(), "email": email, "ip": ip,
+        "at": datetime.now(timezone.utc),
+    })
+    # Opportunistic cleanup so the collection stays small.
+    await db.login_attempts.delete_many(
+        {"at": {"$lt": datetime.now(timezone.utc) - timedelta(hours=1)}})
+
+
+@router.post("/sessions/revoke-all")
+async def revoke_all_sessions(response: Response,
+                              user: dict = Depends(get_current_user)):
+    """Sign out everywhere: bumps the token version so every previously issued
+    JWT stops validating. The current device is re-issued a fresh token and
+    stays signed in."""
+    new_v = user.get("token_version", 0) + 1
+    await db.users.update_one({"id": user["id"]},
+                              {"$set": {"token_version": new_v}})
+    user = {**user, "token_version": new_v}
+    await _audit(user, "auth.sessions.revoke_all", "user", user["id"], {})
+    await _issue(response, user)
+    return {"ok": True}
 
 
 @router.post("/logout")

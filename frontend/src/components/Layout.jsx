@@ -48,6 +48,7 @@ const NAV = [
   { to: "/budget", label: "Budget & Forecast", icon: TrendingUp, testid: "nav-budget-forecast", roles: ALL, group: "Reports" },
   { to: "/tax", label: "Tax & 1099s", icon: FileCheck2, testid: "nav-tax", roles: ALL, group: "Reports" },
   { to: "/backup", label: "Backup & Restore", icon: DatabaseBackup, testid: "nav-backup", roles: ["owner"], group: "Operations" },
+  { to: "/audit", label: "Audit Log", icon: FileText, testid: "nav-audit", roles: ["owner", "accountant"], group: "Operations" },
   { to: "/settings", label: "Settings", icon: ShieldCheck, testid: "nav-settings", roles: ["owner"], group: "Operations" },
 ];
 

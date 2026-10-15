@@ -27,6 +27,7 @@ const INPUT_CLS = "bg-[#0F1218] border-[#222838]";
 export default function Tax() {
   const { user } = useAuth();
   const canWrite = user?.role === "owner";
+  const canRevealPii = user?.role === "owner" || user?.role === "accountant";
   const curYear = new Date().getFullYear();
   const [year, setYear] = useState(curYear);
   const [summary, setSummary] = useState(null);
@@ -36,6 +37,14 @@ export default function Tax() {
   const [payFor, setPayFor] = useState(null);
   const [pay, setPay] = useState({ date: today(), amount: "", description: "" });
   const [preview, setPreview] = useState(null);
+  const [revealedTin, setRevealedTin] = useState({});
+
+  const revealTin = async (cid) => {
+    try {
+      const r = await api.get(`/tax/contractors/${cid}/tax-id`);
+      setRevealedTin((m) => ({ ...m, [cid]: r.tax_id }));
+    } catch (e) { toast.error(errMsg(e)); }
+  };
   const [busy, setBusy] = useState(false);
 
   const load = async () => {
@@ -212,7 +221,7 @@ export default function Tax() {
           <div className="flex flex-wrap items-center justify-between gap-3 mb-2">
             <div>
               <div className="font-medium text-gray-100 flex items-center gap-2"><FileCheck2 size={16} className="text-amber-400" /> 1099-NEC data preview</div>
-              <p className="text-xs text-gray-500 mt-1">Recipient + Box 1 data shaped for e-filing. Carries full tax IDs — only visible to owners. Draft data only, nothing is filed in-house.</p>
+              <p className="text-xs text-gray-500 mt-1">Recipient + Box 1 data shaped for e-filing. Tax IDs stay masked — reveal needs PII access. Draft data only, nothing is filed in-house.</p>
             </div>
             <Button size="sm" variant="outline" onClick={loadPreview} data-testid="tax-preview-btn">Load preview</Button>
           </div>
@@ -231,7 +240,22 @@ export default function Tax() {
                 {preview.recipients.map((r) => (
                   <tr key={r.contractor_id} className="border-b border-[#171c26]">
                     <td className="py-2 text-gray-100">{r.name}{r.business_name ? <span className="block text-xs text-gray-500">{r.business_name} · {ENTITY_LABEL[r.entity_type]}</span> : null}</td>
-                    <td className="py-2 font-mono text-gray-300">{r.tin || <span className="text-amber-400">missing</span>}</td>
+                    <td className="py-2 font-mono text-gray-300">
+                      {revealedTin[r.contractor_id] ? (
+                        <span>{revealedTin[r.contractor_id]}</span>
+                      ) : r.tin_last4 ? (
+                        <span>•••{r.tin_last4}</span>
+                      ) : (
+                        <span className="text-amber-400">missing</span>
+                      )}
+                      {!revealedTin[r.contractor_id] && r.tin_last4 && canRevealPii && (
+                        <button onClick={() => revealTin(r.contractor_id)}
+                          className="ml-2 text-xs text-sky-400 hover:underline"
+                          data-testid={`tax-reveal-${r.contractor_id}`}>
+                          reveal
+                        </button>
+                      )}
+                    </td>
                     <td className="py-2 text-gray-400 text-xs">{[r.address?.street, r.address?.city, r.address?.state, r.address?.zip].filter(Boolean).join(", ") || "—"}</td>
                     <td className="py-2 text-right font-mono text-gray-200">{money(r.box1_cents)}</td>
                     <td className="py-2"><span className={`px-2 py-0.5 rounded-full text-xs border ${r.w9_received ? PILL_OK : PILL_WARN}`}>{r.w9_received ? "Received" : "Missing"}</span></td>
