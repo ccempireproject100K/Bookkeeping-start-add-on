@@ -1,0 +1,39 @@
+id: tree_service
+trade: Tree Service
+product_name: "The Tree Pro's Ledger"
+tagline: "Bookkeeping built for tree service companies"
+terms:
+  worker: Crew Member
+  worker_plural: Crew
+  shop: company
+  job: job
+  job_plural: jobs
+  customer: homeowner
+  customer_plural: homeowners
+colors:
+  accent: "#4ade80"
+subdomains: [tree, treeservice]
+revenue_accounts:
+  - {code: "4000", name: "Service Revenue — Removals"}
+  - {code: "4010", name: "Service Revenue — Trimming & Pruning"}
+  - {code: "4020", name: "Service Revenue — Stump Grinding"}
+  - {code: "4030", name: "Service Revenue — Emergency Storm Work"}
+trade_expense_accounts:
+  - {code: "5100", name: "Crew Commissions"}
+  - {code: "5030", name: "Job Cost — Equipment & Disposal"}
+services:
+  - {name: "Tree Removal", kind: service}
+  - {name: "Trimming & Pruning", kind: service}
+  - {name: "Stump Grinding", kind: service}
+  - {name: "Storm Cleanup", kind: service}
+checklist:
+  - {id: team, label: "Add your crew", hint: "Crew members show up once they have a workspace login", link: "/team", check: team}
+  - {id: services, label: "Add services & price book", hint: "Removals, trimming, and storm work", link: "/inventory", check: services}
+  - {id: bank, label: "Add a bank account", hint: "Reconcile deposits against jobs in Banking", link: "/banking", check: bank}
+  - {id: tax, label: "Set up contractor tracking", hint: "W-9s and 1099-NECs for subs and climbers", link: "/tax", check: tax}
+  - {id: sale, label: "Book your first job", hint: "Invoice a trim to see the full flow", link: "/invoices", check: sale}
+copilot_notes: |
+  Tree service is high-ticket and often urgent: removals can run
+  into the thousands. Storm work spikes demand — and prices.
+  Equipment (chippers, cranes) is the big fixed cost; utilization
+  is everything. Insurance is non-negotiable in this trade.
