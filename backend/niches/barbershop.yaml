@@ -38,3 +38,9 @@ copilot_notes: |
   retail attach rate, and booth-rent vs commission splits. Tips are
   significant — track them separately from service revenue. Watch for
   no-show gaps in the book and slow retail shelves.
+
+kpis:
+  - {id: avg_ticket, label: "Average ticket", hint: "Per-visit average"}
+  - {id: repeat_rate, label: "Rebooking rate", hint: "Clients with 2+ visits"}
+  - {id: revenue_trend, label: "Revenue trend", hint: "Last 30 days vs prior 30"}
+  - {id: jobs_per_day, label: "Cuts per day", hint: "Chair throughput"}

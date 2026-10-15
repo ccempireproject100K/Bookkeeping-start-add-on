@@ -37,3 +37,9 @@ copilot_notes: |
   maintenance agreements smooth the shoulders. Track install vs service
   revenue separately — installs are lumpy, service is the baseline.
   Watch refrigerant costs and callback rates; callbacks eat margin fast.
+
+kpis:
+  - {id: callback_rate, label: "Callback rate", hint: "Return visits within 30 days — callbacks eat margin"}
+  - {id: avg_ticket, label: "Average ticket", hint: "Per-invoice average, trailing period"}
+  - {id: close_rate, label: "Close rate", hint: "Estimates won vs decided"}
+  - {id: revenue_trend, label: "Revenue trend", hint: "Last 30 days vs prior 30"}

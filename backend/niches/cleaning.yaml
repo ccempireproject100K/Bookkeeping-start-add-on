@@ -36,3 +36,9 @@ copilot_notes: |
   cleaners per route and minutes per home. Recurring residential
   is the annuity; commercial contracts are bigger but bid-competed.
   Watch labor cost as a share of revenue weekly — it drifts fast.
+
+kpis:
+  - {id: jobs_per_day, label: "Cleans per day", hint: "Crew throughput"}
+  - {id: recurring_share, label: "Recurring revenue", hint: "Recurring clients share"}
+  - {id: repeat_rate, label: "Retention", hint: "Clients with 2+ invoices"}
+  - {id: avg_ticket, label: "Average clean", hint: "Per-visit average"}

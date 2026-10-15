@@ -38,3 +38,9 @@ copilot_notes: |
   make sure they land in the right revenue line. Drain cleaning is high
   volume, lower ticket; repipes and remodels are the big jobs. Track
   parts costs per job; fixture markups are a quiet margin driver.
+
+kpis:
+  - {id: callback_rate, label: "Callback rate", hint: "Return visits within 30 days"}
+  - {id: avg_ticket, label: "Average ticket", hint: "Per-invoice average"}
+  - {id: close_rate, label: "Close rate", hint: "Estimates won vs decided"}
+  - {id: repeat_rate, label: "Repeat customers", hint: "Customers with 2+ invoices"}
