@@ -1,0 +1,41 @@
+id: freelancer
+trade: Independent Professional
+product_name: "The Freelancer's Ledger"
+tagline: "Bookkeeping built for independent professionals"
+terms:
+  worker: Contractor
+  worker_plural: Contractors
+  shop: business
+  job: project
+  job_plural: projects
+  customer: client
+  customer_plural: clients
+colors:
+  accent: "#fda4af"
+subdomains: [freelance, freelancer]
+revenue_accounts:
+  - {code: "4000", name: "Client Income — Services"}
+  - {code: "4010", name: "Client Income — Retainers"}
+  - {code: "4020", name: "Affiliate & Referral Income"}
+  - {code: "4030", name: "Product & Digital Sales"}
+trade_expense_accounts:
+  - {code: "5030", name: "Subcontractors & VAs"}
+  - {code: "5040", name: "Software & Subscriptions"}
+services:
+  - {name: "Consulting — Hourly", kind: service}
+  - {name: "Monthly Retainer", kind: service}
+  - {name: "Fixed-Fee Project", kind: service}
+checklist:
+  - {id: team, label: "Add collaborators", hint: "Subcontractors and VAs show up once they have a workspace login", link: "/team", check: team}
+  - {id: services, label: "Add your services", hint: "Hourly, retainers, and fixed-fee packages", link: "/inventory", check: services}
+  - {id: bank, label: "Add a bank account", hint: "Keep business money separate from personal — future you says thanks", link: "/banking", check: bank}
+  - {id: tax, label: "Set up quarterly tax tracking", hint: "1099 income means quarterly estimates — track every stream", link: "/tax", check: tax}
+  - {id: sale, label: "Invoice your first client", hint: "Send an invoice to see the full flow", link: "/invoices", check: sale}
+copilot_notes: |
+  Independent professionals live on 1099 income across multiple streams
+  — track each stream separately for clean quarterly estimates. The big
+  three deductions: home office, mileage, and health insurance premiums.
+  Retainers are the annuity; project work is lumpy — know your baseline.
+  Travel nurses: stipends vs taxable wages must stay separated, tax-home
+  rules determine what's deductible, and multi-state assignments mean
+  multi-state filings — keep assignment dates and locations on record.
