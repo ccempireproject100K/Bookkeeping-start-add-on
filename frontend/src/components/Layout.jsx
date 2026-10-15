@@ -5,7 +5,7 @@ import {
   TrendingUp, Lock, Scissors, Receipt, Wallet, Package, LogOut, ShieldCheck,
   Hourglass, Gift, Coins, Briefcase, PieChart, Users, Building2, FileSignature,
   Waves, Target, BarChart3, ReceiptText, Repeat, DatabaseBackup, Bot, Clock,
-  FileCheck2, Camera, Car,
+  FileCheck2, Camera, Car, HandCoins,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import {
@@ -41,6 +41,7 @@ const NAV = [
   { to: "/expenses", label: "Expenses & Vendors", icon: Coins, testid: "nav-expenses", roles: ALL, group: "Operations" },
   { to: "/receipts", label: "Receipt Inbox", icon: Camera, testid: "nav-receipts", roles: ALL, group: "Operations" },
   { to: "/mileage", label: "Mileage Log", icon: Car, testid: "nav-mileage", roles: ALL, group: "Operations" },
+  { to: "/collections", label: "Collections", icon: HandCoins, testid: "nav-collections", roles: ALL, group: "Operations" },
   { to: "/quick-sell", label: "Quick Sell", icon: Scissors, testid: "nav-quick-sell", roles: ["owner", "barber"], group: "Operations" },
   { to: "/inventory", label: "Inventory", icon: Package, testid: "nav-inventory", roles: ALL, group: "Operations" },
   { to: "/gift-cards", label: "Gift Cards", icon: Gift, testid: "nav-gift-cards", roles: ALL, group: "Operations" },
