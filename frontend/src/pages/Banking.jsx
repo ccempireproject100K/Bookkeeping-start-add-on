@@ -14,7 +14,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Plus, Upload, Landmark, CreditCard, ArrowLeftRight, Wand2, CheckCircle2, Trash2 } from "lucide-react";
+import { Plus, Upload, Landmark, CreditCard, ArrowLeftRight, Wand2, CheckCircle2, Trash2, RefreshCw, Unplug } from "lucide-react";
 
 const STATUS_CLS = {
   unmatched: "bg-gray-500/10 text-gray-400 border-gray-500/20",
@@ -44,15 +44,65 @@ export default function Banking() {
   const [ruleForm, setRuleForm] = useState({ contains: "", category_code: "" });
   const [recOpen, setRecOpen] = useState(false);
   const [recForm, setRecForm] = useState({ statement_date: today(), statement_ending_balance: "", txn_ids: [] });
+  const [feed, setFeed] = useState(null);
+  const [feedBusy, setFeedBusy] = useState(false);
 
   const loadAccounts = () => api.get("/banking/accounts").then((a) => {
     setAccounts(a);
     if (a.length && !selected) setSelected(a[0].id);
   }).catch(() => setAccounts([]));
   const loadTxns = (id) => api.get(`/banking/transactions?bank_account_id=${id}`).then(setTxns).catch(() => setTxns([]));
+  const loadFeed = () => api.get("/bankfeed/status").then(setFeed).catch(() => setFeed({ configured: false, connections: [] }));
+
+  const loadPlaid = () => new Promise((res, rej) => {
+    if (window.Plaid) return res();
+    const s = document.createElement("script");
+    s.src = "https://cdn.plaid.com/link/v2/stable/link-initialize.js";
+    s.onload = () => res();
+    s.onerror = () => rej(new Error("Could not load Plaid Link"));
+    document.head.appendChild(s);
+  });
+  const connectBank = async () => {
+    setFeedBusy(true);
+    try {
+      const { link_token } = await api.post("/bankfeed/link-token", {});
+      await loadPlaid();
+      const handler = window.Plaid.create({
+        token: link_token,
+        onSuccess: async (public_token) => {
+          try {
+            await api.post("/bankfeed/exchange", { public_token });
+            toast.success("Bank connected — syncing now");
+            await api.post("/bankfeed/sync", {});
+            loadFeed(); loadAccounts();
+            if (selected) loadTxns(selected);
+          } catch (e) { toast.error(errMsg(e)); }
+        },
+        onExit: () => { /* user closed Link */ },
+      });
+      handler.open();
+    } catch (e) { toast.error(errMsg(e)); }
+    setFeedBusy(false);
+  };
+  const syncFeed = async () => {
+    setFeedBusy(true);
+    try {
+      const r = await api.post("/bankfeed/sync", {});
+      toast.success(`Synced: ${r.added} new, ${r.duplicates} duplicate(s) skipped`);
+      loadFeed();
+      if (selected) loadTxns(selected);
+    } catch (e) { toast.error(errMsg(e)); }
+    setFeedBusy(false);
+  };
+  const disconnectFeed = async (id) => {
+    if (!confirm("Disconnect this bank? Already-imported transactions stay in your books.")) return;
+    try { await api.del(`/bankfeed/connection/${id}`); toast.success("Disconnected"); loadFeed(); }
+    catch (e) { toast.error(errMsg(e)); }
+  };
 
   useEffect(() => {
     loadAccounts();
+    loadFeed();
     api.get("/ledger/accounts").then(setCoa).catch(() => {});
     api.get("/banking/rules").then(setRules).catch(() => {});
   }, []);
@@ -103,6 +153,62 @@ export default function Banking() {
           <Button data-testid="btn-add-account" onClick={() => setAddOpen(true)} className="bg-amber-600 hover:bg-amber-500 text-black font-semibold"><Plus size={16} className="mr-1" />Add Account</Button>
         </>}
       </PageHeader>
+
+      {/* Live bank feeds (Plaid) */}
+      {feed && (
+        <Card className="mb-6" data-testid="bankfeed-panel">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex-1 min-w-56">
+              <div className="text-xs uppercase tracking-wider text-gray-500">Live bank feeds</div>
+              {feed.configured ? (
+                <div className="text-sm text-gray-300 mt-1">
+                  {feed.connections.length === 0
+                    ? "No banks connected yet. Connect one and new transactions will appear in the register below for review."
+                    : `${feed.connections.length} bank connection(s) · ${feed.env}`}
+                </div>
+              ) : (
+                <div className="text-sm text-gray-400 mt-1">
+                  Connect a bank once and transactions import automatically — no more CSV uploads.
+                  To enable, set <code className="font-mono text-xs text-amber-400">PLAID_CLIENT_ID</code>,{" "}
+                  <code className="font-mono text-xs text-amber-400">PLAID_SECRET</code> and{" "}
+                  <code className="font-mono text-xs text-amber-400">TOKEN_ENCRYPTION_KEY</code> on the server
+                  (see <code className="font-mono text-xs text-amber-400">PLAID_SETUP.md</code>), then come back here.
+                </div>
+              )}
+            </div>
+            {feed.configured && canManage && (
+              <div className="flex gap-2">
+                {feed.connections.length > 0 && (
+                  <Button data-testid="bankfeed-sync" variant="outline" size="sm" disabled={feedBusy} onClick={syncFeed} className="border-[#222838]">
+                    <RefreshCw size={14} className="mr-1" /> Sync now
+                  </Button>
+                )}
+                <Button data-testid="bankfeed-connect" size="sm" disabled={feedBusy} onClick={connectBank} className="bg-amber-600 hover:bg-amber-500 text-black">
+                  <Landmark size={14} className="mr-1" /> Connect bank
+                </Button>
+              </div>
+            )}
+          </div>
+          {feed.configured && feed.connections.length > 0 && (
+            <div className="mt-3 space-y-2">
+              {feed.connections.map((c) => (
+                <div key={c.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-[#0F1218] border border-[#222838] px-4 py-2 text-sm">
+                  <div>
+                    <div className="text-gray-100 font-medium">{(c.accounts || []).map((a) => `${a.name} ••${a.mask || ""}`).join(", ") || "Bank account"}</div>
+                    <div className="text-xs text-gray-500">Last sync: {c.last_sync ? new Date(c.last_sync).toLocaleString() : "never"}</div>
+                  </div>
+                  {canManage && (
+                    <button onClick={() => disconnectFeed(c.id)} data-testid={`bankfeed-disconnect-${c.id}`}
+                      className="text-gray-600 hover:text-rose-400 text-xs flex items-center gap-1">
+                      <Unplug size={13} /> Disconnect
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </Card>
+      )}
 
       {/* Account cards */}
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6" data-testid="bank-account-cards">
