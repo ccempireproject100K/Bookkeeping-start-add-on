@@ -12,7 +12,8 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Plus, Trash2, FilePlus } from "lucide-react";
+import { Plus, Trash2, FilePlus, Link2 } from "lucide-react";
+import PortalLinksTab, { quickPaymentLink } from "@/components/PortalLinksTab";
 
 const STATUS_CLS = {
   issued: "bg-amber-500/10 text-amber-400 border-amber-500/20",
@@ -68,6 +69,7 @@ export default function Invoices() {
           <TabsTrigger value="invoices" data-testid="tab-invoices">Invoices</TabsTrigger>
           <TabsTrigger value="credits" data-testid="tab-customer-credits">Customer Credits</TabsTrigger>
           <TabsTrigger value="reminders" data-testid="tab-reminders">Reminders</TabsTrigger>
+          {isOwner && <TabsTrigger value="links" data-testid="tab-payment-links">Payment Links</TabsTrigger>}
         </TabsList>
 
         <TabsContent value="invoices" className="mt-4">
@@ -93,7 +95,16 @@ export default function Invoices() {
                     <td className="px-5 py-3"><span className={`px-2 py-0.5 rounded-full text-xs border capitalize ${STATUS_CLS[inv.status] || ""}`}>{inv.status}</span></td>
                     {isOwner && (
                       <td className="px-5 py-3 text-right">
-                        {inv.balance_cents > 0 && <Button size="sm" className="h-7 bg-emerald-600 hover:bg-emerald-500 text-black" onClick={() => { setPayInv(inv); setPay({ amount: "", payment_method: "bank", credit_id: "" }); }} data-testid={`pay-${inv.id}`}>Receive Payment</Button>}
+                        <div className="flex justify-end gap-1">
+                          {inv.balance_cents > 0 && (
+                            <>
+                              <Button size="sm" variant="ghost" title="Copy a 7-day payment link for this invoice" onClick={async () => { try { await quickPaymentLink(inv.id); } catch (e) { toast.error(errMsg(e)); } }} data-testid={`plink-${inv.id}`}>
+                                <Link2 size={14} />
+                              </Button>
+                              <Button size="sm" className="h-7 bg-emerald-600 hover:bg-emerald-500 text-black" onClick={() => { setPayInv(inv); setPay({ amount: "", payment_method: "bank", credit_id: "" }); }} data-testid={`pay-${inv.id}`}>Receive Payment</Button>
+                            </>
+                          )}
+                        </div>
                       </td>
                     )}
                   </tr>
@@ -126,6 +137,11 @@ export default function Invoices() {
         <TabsContent value="reminders" className="mt-4">
           <RemindersTab isOwner={isOwner} />
         </TabsContent>
+        {isOwner && (
+          <TabsContent value="links" className="mt-4">
+            <PortalLinksTab invoices={invoices} />
+          </TabsContent>
+        )}
       </Tabs>
 
       <Dialog open={open} onOpenChange={setOpen}>

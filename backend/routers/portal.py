@@ -92,9 +92,21 @@ async def create_link(body: LinkIn, user: dict = Depends(require("ops:manage")))
 
 @router.get("/links")
 async def list_links(user: dict = Depends(require("ops:manage"))):
+    """All links (newest first) with a computed status for the management UI:
+    active | expired | used | revoked."""
     rows = await Scoped(db.portal_links, user["tenant_id"]).find_list(
-        {"revoked": False}, sort=[("created_at", -1)], limit=200,
+        {}, sort=[("created_at", -1)], limit=200,
         projection={"_id": 0, "token_hash": 0})
+    now = now_iso()
+    for r in rows:
+        if r.get("revoked"):
+            r["status"] = "revoked"
+        elif r.get("used"):
+            r["status"] = "used"
+        elif r.get("expires_at", "") <= now:
+            r["status"] = "expired"
+        else:
+            r["status"] = "active"
     return rows
 
 
