@@ -141,6 +141,19 @@ export default function Copilot() {
                   <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium border capitalize ${STATUS_CLS[a.status] || ""}`}>{a.status}</span>
                 </div>
                 <p className="mt-1 text-xs text-gray-400">{a.detail}</p>
+                {a.brief && (a.brief.what_happened || a.brief.recommendation) && (
+                  <div className="mt-2 rounded-md bg-[#141926] border border-[#222838] p-2.5 space-y-1.5" data-testid={`copilot-brief-${a.id}`}>
+                    <div className="text-[10px] uppercase tracking-wider text-blue-400 font-medium">AI brief</div>
+                    {a.brief.what_happened && <p className="text-xs text-gray-300"><span className="text-gray-500">What happened: </span>{a.brief.what_happened}</p>}
+                    {a.brief.what_noticed && <p className="text-xs text-gray-300"><span className="text-gray-500">What the AI noticed: </span>{a.brief.what_noticed}</p>}
+                    {a.brief.recommendation && <p className="text-xs text-gray-300"><span className="text-gray-500">Recommendation: </span><span className="text-emerald-400">{a.brief.recommendation}</span></p>}
+                    {a.brief.reasoning && <p className="text-xs text-gray-500">{a.brief.reasoning}</p>}
+                    {a.brief.confidence && (
+                      <p className="text-[10px] text-gray-600">Confidence: <span className={`font-medium ${a.brief.confidence === "high" ? "text-emerald-400" : a.brief.confidence === "medium" ? "text-amber-400" : "text-gray-400"}`}>{a.brief.confidence}</span>
+                      {a.brief.confidence_basis ? ` — ${a.brief.confidence_basis}` : ""}</p>
+                    )}
+                  </div>
+                )}
                 {a.result && <p className="mt-1 text-xs text-emerald-400">{a.result}</p>}
                 {a.decided_by && <p className="mt-1 text-[10px] text-gray-600">by {a.decided_by}{a.decided_at ? ` · ${fmtDate(a.decided_at.slice(0, 10))}` : ""}</p>}
                 {a.status === "pending" && canManage && (
