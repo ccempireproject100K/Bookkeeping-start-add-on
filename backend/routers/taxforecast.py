@@ -2,7 +2,9 @@
 transaction.
 
 Takes year-to-date net income, annualizes it, and estimates:
-- Self-employment tax (15.3% x 92.35% — statutory)
+- Self-employment tax (statutory: 12.4% OASDI up to the 2026 SS wage base
+  $184,500 + 2.9% Medicare uncapped, on 92.35% of net; +0.9% Additional
+  Medicare Tax above $200k)
 - Federal income tax (simplified brackets on taxable income after the
   standard deduction and half of SE tax)
 
@@ -24,18 +26,30 @@ from lib import ledger as L
 
 router = APIRouter(prefix="/tax-forecast", tags=["tax-forecast"])
 
-# 2025 federal single-filer brackets as defaults (2026 IRS figures adjustable
-# in config when published). Rates apply to taxable income.
+# 2026 federal single-filer brackets as defaults (IRS IR-2025-103).
+# Rates apply to taxable income.
 DEFAULT_BRACKETS = [
-    {"up_to": 11925, "rate": 0.10},
-    {"up_to": 48475, "rate": 0.12},
-    {"up_to": 103350, "rate": 0.22},
-    {"up_to": 197300, "rate": 0.24},
-    {"up_to": 250525, "rate": 0.32},
-    {"up_to": 626350, "rate": 0.35},
+    {"up_to": 12400, "rate": 0.10},
+    {"up_to": 50400, "rate": 0.12},
+    {"up_to": 105700, "rate": 0.22},
+    {"up_to": 201775, "rate": 0.24},
+    {"up_to": 256225, "rate": 0.32},
+    {"up_to": 640600, "rate": 0.35},
     {"up_to": None, "rate": 0.37},
 ]
-DEFAULT_STD_DEDUCTION = 15750  # single, est. 2026
+DEFAULT_STD_DEDUCTION = 16100  # single, 2026 (IRS IR-2025-103)
+
+# 2026 Social Security wage base (SSA). Only the 12.4% OASDI portion of SE
+# tax caps at the wage base; the 2.9% Medicare portion has no cap.
+SS_WAGE_BASE_2026 = 184500
+# Additional Medicare Tax: 0.9% on self-employment earnings above $200k.
+# Single-filer threshold shown; the app is single-filer only by design
+# ("filing" is fixed to "single" in settings).
+ADDITIONAL_MEDICARE_THRESHOLD = 200000
+ADDITIONAL_MEDICARE_RATE = 0.009
+# Estimated-tax safe harbor: 110% of prior-year tax when prior-year AGI
+# exceeds $150k, otherwise 100%.
+SAFE_HARBOR_AGI_THRESHOLD_CENTS = 15_000_000
 
 QUARTERS_2026 = [
     {"q": "Q1", "from": "2026-01-01", "to": "2026-03-31", "due": "2026-04-15"},
@@ -56,7 +70,8 @@ def _payments(user):
 async def _settings(user) -> dict:
     doc = await _cfg(user).find_one({"id": "settings"})
     base = {"brackets": DEFAULT_BRACKETS, "std_deduction": DEFAULT_STD_DEDUCTION,
-            "filing": "single", "prior_year_tax_cents": 0, "ytd_other_income_cents": 0}
+            "filing": "single", "prior_year_tax_cents": 0, "prior_year_agi_cents": 0,
+            "ytd_other_income_cents": 0}
     if doc:
         base.update({k: v for k, v in doc.items() if k not in ("_id", "id", "tenant_id")})
     return base
@@ -75,10 +90,25 @@ def _income_tax(taxable: float, brackets: list) -> float:
     return tax
 
 
+def _se_tax(se_taxable: float) -> float:
+    """2026 self-employment tax on 92.35% of net earnings."""
+    oasdi = 0.124 * min(se_taxable, SS_WAGE_BASE_2026)
+    medicare = 0.029 * se_taxable
+    additional = ADDITIONAL_MEDICARE_RATE * max(0.0, se_taxable - ADDITIONAL_MEDICARE_THRESHOLD)
+    return max(0.0, oasdi + medicare + additional)
+
+
+def _safe_harbor(prior_year_tax_cents: int, prior_year_agi_cents: int) -> int:
+    """Estimated-tax safe-harbor target in cents."""
+    if prior_year_tax_cents and prior_year_agi_cents > SAFE_HARBOR_AGI_THRESHOLD_CENTS:
+        return int(round(prior_year_tax_cents * 1.10))
+    return prior_year_tax_cents
+
+
 def _estimate(net_cents: int, settings: dict) -> dict:
     net = net_cents / 100
     se_taxable = net * 0.9235
-    se_tax = max(0, se_taxable * 0.153)
+    se_tax = _se_tax(se_taxable)
     taxable = max(0, net - se_tax / 2 - settings["std_deduction"]
                   + settings["ytd_other_income_cents"] / 100)
     fed = _income_tax(taxable, settings["brackets"])
@@ -129,7 +159,8 @@ async def forecast(year: str = Query("2026"), user: dict = Depends(require("tax:
         pace_note = (f"You're on pace to owe ~${cq['owed_cents']/100:,.0f} for {cur['q']} "
                      f"(due {cur['due']}).")
 
-    safe_harbor = settings["prior_year_tax_cents"]
+    safe_harbor = _safe_harbor(settings["prior_year_tax_cents"],
+                               settings.get("prior_year_agi_cents", 0))
     return {
         "year": year, "as_of": today,
         "ytd_net_cents": ytd_net,
@@ -180,6 +211,7 @@ class SettingsBody(BaseModel):
     filing: str = "single"
     std_deduction: float = DEFAULT_STD_DEDUCTION
     prior_year_tax_cents: int = 0
+    prior_year_agi_cents: int = 0
     ytd_other_income_cents: int = 0
 
 
