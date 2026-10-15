@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { api, errMsg } from "@/lib/api";
-import { money, dollars } from "@/lib/format";
+import { money, dollars, fmtDate } from "@/lib/format";
 import { PageHeader, Card, Loading } from "@/components/Page";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -27,12 +27,16 @@ export default function QuickSell() {
   const [payment, setPayment] = useState("cash");
   const [discount, setDiscount] = useState("");
   const [busy, setBusy] = useState(false);
+  const [history, setHistory] = useState([]);
+
+  const loadHistory = () => api.get("/pos/sales").then(setHistory).catch(() => setHistory([]));
 
   const rate = user?.tenant?.settings?.sales_tax_rate || 0;
 
   useEffect(() => {
     api.get("/products").then((p) => setProducts(p.filter((x) => x.type === "retail")));
     api.get("/auth/team").then((t) => setTeam(t.filter((u) => u.role === "barber")));
+    loadHistory();
   }, []);
 
   const addService = (s) => setCart((c) => [...c, { kind: "service", ...s, qty: 1 }]);
@@ -70,6 +74,7 @@ export default function QuickSell() {
       toast.success(`Sale complete — ${dollars(totals.total)}`);
       setCart([]); setDiscount("");
       api.get("/products").then((p) => setProducts(p.filter((x) => x.type === "retail")));
+      loadHistory();
     } catch (e) { toast.error(errMsg(e)); } finally { setBusy(false); }
   };
 
@@ -176,6 +181,29 @@ export default function QuickSell() {
           </Card>
         </div>
       </div>
+
+      <Card className="p-0 overflow-hidden mt-6">
+        <div className="px-5 py-3 text-sm font-semibold text-gray-100 border-b border-[#222838]">Recent sales</div>
+        <table className="w-full text-sm" data-testid="pos-history">
+          <thead><tr className="text-xs uppercase tracking-wider text-gray-500 border-b border-[#222838]">
+            <th className="px-5 py-2 text-left font-medium">When</th>
+            <th className="px-5 py-2 text-left font-medium">Items</th>
+            <th className="px-5 py-2 text-left font-medium">Method</th>
+            <th className="px-5 py-2 text-right font-medium">Total</th>
+          </tr></thead>
+          <tbody>
+            {history.slice(0, 20).map((s) => (
+              <tr key={s.id} className="border-b border-[#171c26]">
+                <td className="px-5 py-2 text-gray-400 text-xs">{s.created_at ? fmtDate(s.created_at.slice(0, 10)) : "—"}</td>
+                <td className="px-5 py-2 text-gray-300 text-xs">{(s.cart || []).map((i) => `${i.qty > 1 ? `${i.qty}× ` : ""}${i.name}`).slice(0, 3).join(", ") || "—"}</td>
+                <td className="px-5 py-2 text-gray-400 text-xs capitalize">{s.payment_method || "—"}</td>
+                <td className="px-5 py-2 text-right font-mono text-gray-100">{money(s.total_cents)}</td>
+              </tr>
+            ))}
+            {history.length === 0 && <tr><td colSpan={4} className="px-5 py-8 text-center text-gray-500 text-sm">No sales yet today.</td></tr>}
+          </tbody>
+        </table>
+      </Card>
     </div>
   );
 }

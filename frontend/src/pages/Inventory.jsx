@@ -10,7 +10,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Plus, PackagePlus, Sliders } from "lucide-react";
+import { Plus, PackagePlus, Sliders, AlertTriangle } from "lucide-react";
 
 export default function Inventory() {
   const { user } = useAuth();
@@ -23,8 +23,12 @@ export default function Inventory() {
   const [form, setForm] = useState({ name: "", type: "retail", price: "", unit_cost: "", quantity_on_hand: "" });
   const [restock, setRestock] = useState({ quantity: "", unit_cost: "" });
   const [adjust, setAdjust] = useState({ quantity_delta: "", reason: "" });
+  const [lowStock, setLowStock] = useState([]);
 
-  const load = () => api.get("/products").then(setProducts).catch(() => setProducts([]));
+  const load = () => {
+    api.get("/products").then(setProducts).catch(() => setProducts([]));
+    api.get("/products/low-stock").then(setLowStock).catch(() => setLowStock([]));
+  };
   useEffect(() => { load(); }, []);
 
   const createProduct = async () => {
@@ -61,6 +65,23 @@ export default function Inventory() {
       <PageHeader title="Inventory" subtitle={`${products.length} products • ${money(totalValue)} at cost`} testid="inventory-page">
         {isOwner && <Button data-testid="btn-add-product" onClick={() => setAddOpen(true)} className="bg-amber-600 hover:bg-amber-500 text-black font-semibold"><Plus size={16} className="mr-1" /> Add Product</Button>}
       </PageHeader>
+
+      {lowStock.length > 0 && (
+        <div className="mb-4 rounded-lg border border-amber-500/30 bg-amber-500/10 p-4" data-testid="low-stock-alert">
+          <div className="flex items-center gap-2 text-sm font-semibold text-amber-300 mb-2">
+            <AlertTriangle size={15} /> Low stock — {lowStock.length} item{lowStock.length === 1 ? "" : "s"} at or below reorder point
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {lowStock.map((p) => (
+              <button key={p.id} onClick={() => { setRestockFor(p); setRestock({ quantity: "", unit_cost: "" }); }}
+                className="rounded-full border border-amber-500/30 bg-[#14171E] px-3 py-1 text-xs text-gray-200 hover:border-amber-400"
+                title="Open restock" data-testid={`low-stock-${p.id}`}>
+                {p.name} — <span className="font-mono text-amber-300">{p.quantity_on_hand}</span> left
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       <Card className="p-0 overflow-hidden">
         <div className="overflow-x-auto">
