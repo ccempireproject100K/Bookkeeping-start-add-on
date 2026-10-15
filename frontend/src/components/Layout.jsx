@@ -5,7 +5,7 @@ import {
   TrendingUp, Lock, Scissors, Receipt, Wallet, Package, LogOut, ShieldCheck,
   Hourglass, Gift, Coins, Briefcase, PieChart, Users, Building2, FileSignature,
   Waves, Target, BarChart3, ReceiptText, Repeat, DatabaseBackup, Bot, Clock,
-  FileCheck2, Camera, Car, HandCoins, Calculator, ShieldCheck, Package, Activity, Tag, Landmark, SlidersHorizontal, Rocket, Gauge,
+  FileCheck2, Camera, Car, HandCoins, Calculator, ShieldCheck, Package, Activity, Tag, Landmark, SlidersHorizontal, Rocket, Gauge, Users,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import {
@@ -51,6 +51,7 @@ const NAV = [
   { to: "/playground", label: "Scenario Playground", icon: SlidersHorizontal, testid: "nav-playground", roles: ALL, group: "Planning" },
   { to: "/combo", label: "Empire Combo", icon: Rocket, testid: "nav-combo", roles: ALL, group: "Growth" },
   { to: "/kpis", label: "Trade KPIs", icon: Gauge, testid: "nav-kpis", roles: ALL, group: "Overview" },
+  { to: "/benchmarks", label: "Benchmarks", icon: Users, testid: "nav-benchmarks", roles: ALL, group: "Overview" },
   { to: "/quick-sell", label: "Quick Sell", icon: Scissors, testid: "nav-quick-sell", roles: ["owner", "barber"], group: "Operations" },
   { to: "/inventory", label: "Inventory", icon: Package, testid: "nav-inventory", roles: ALL, group: "Operations" },
   { to: "/gift-cards", label: "Gift Cards", icon: Gift, testid: "nav-gift-cards", roles: ALL, group: "Operations" },
