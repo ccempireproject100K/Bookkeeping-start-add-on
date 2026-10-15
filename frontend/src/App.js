@@ -34,6 +34,7 @@ import Simulator from "@/pages/Simulator";
 import SubCompliance from "@/pages/SubCompliance";
 import CpaPackage from "@/pages/CpaPackage";
 import Pulse from "@/pages/Pulse";
+import Pricing from "@/pages/Pricing";
 import Estimates from "@/pages/Estimates";
 import CashFlow from "@/pages/CashFlow";
 import BudgetVsActual from "@/pages/BudgetVsActual";
@@ -97,6 +98,7 @@ function App() {
               <Route path="sub-compliance" element={<SubCompliance />} />
               <Route path="cpa-package" element={<CpaPackage />} />
               <Route path="pulse" element={<Pulse />} />
+              <Route path="pricing" element={<Pricing />} />
               <Route path="aging" element={<Aging />} />
               <Route path="gift-cards" element={<GiftCards />} />
               <Route path="commissions" element={<Commissions />} />
