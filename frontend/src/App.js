@@ -60,18 +60,23 @@ import Tax from "@/pages/Tax";
 import Settings from "@/pages/Settings";
 import AuditLog from "@/pages/AuditLog";
 import InviteAccept from "@/pages/InviteAccept";
-
-function Protected({ children }) {
-  const { user, loading } = useAuth();
-  if (loading || user === null)
-    return <div className="app-bg min-h-screen flex items-center justify-center text-amber-500 font-display">Loading…</div>;
+import { useTranslation } from "react-i18next";
+function Protected({
+  children
+}) {
+  const {
+    t
+  } = useTranslation();
+  const {
+    user,
+    loading
+  } = useAuth();
+  if (loading || user === null) return <div className="app-bg min-h-screen flex items-center justify-center text-amber-500 font-display">{t("app.loading")}</div>;
   if (!user) return <Navigate to="/login" replace />;
   return children;
 }
-
 function App() {
-  return (
-    <div className="App app-bg">
+  return <div className="App app-bg">
       <AuthProvider>
         <NicheProvider>
         <BrowserRouter>
@@ -138,8 +143,6 @@ function App() {
         </NicheProvider>
         <Toaster position="top-right" theme="dark" richColors />
       </AuthProvider>
-    </div>
-  );
+    </div>;
 }
-
 export default App;
