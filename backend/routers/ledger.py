@@ -163,20 +163,39 @@ async def reverse(entry_id: str, user: dict = Depends(require("ledger:approve"))
 
 
 # ---------------- Reports ----------------
+async def _target_currency(user: dict, currency: Optional[str]) -> str:
+    """Resolve the report target currency: explicit ?currency= wins, else the
+    workspace base_currency. Raises 422 on unknown codes."""
+    from lib.currencies import normalize as _norm, get_base_currency
+    if currency:
+        try:
+            return _norm(currency)
+        except ValueError:
+            raise HTTPException(status_code=422, detail=f"Unsupported currency: {currency!r}")
+    tenant = await db.tenants.find_one({"id": user["tenant_id"]}, {"_id": 0, "settings": 1})
+    return get_base_currency((tenant or {}).get("settings"))
+
+
 @router.get("/trial-balance")
-async def trial_balance(as_of: Optional[str] = None, user: dict = Depends(require("ledger:read"))):
-    return await L.trial_balance(db, user["tenant_id"], as_of or today_str())
+async def trial_balance(as_of: Optional[str] = None, currency: Optional[str] = None,
+                        user: dict = Depends(require("ledger:read"))):
+    return await L.trial_balance(db, user["tenant_id"], as_of or today_str(),
+                                 target_currency=await _target_currency(user, currency))
 
 
 @router.get("/balance-sheet")
-async def balance_sheet(as_of: Optional[str] = None, user: dict = Depends(require("ledger:read"))):
-    return await L.balance_sheet(db, user["tenant_id"], as_of or today_str())
+async def balance_sheet(as_of: Optional[str] = None, currency: Optional[str] = None,
+                        user: dict = Depends(require("ledger:read"))):
+    return await L.balance_sheet(db, user["tenant_id"], as_of or today_str(),
+                                 target_currency=await _target_currency(user, currency))
 
 
 @router.get("/pnl")
 async def pnl(date_from: Optional[str] = None, date_to: Optional[str] = None,
-             user: dict = Depends(require("ledger:read"))):
-    return await L.pnl(db, user["tenant_id"], date_from or "2000-01-01", date_to or today_str())
+              currency: Optional[str] = None, user: dict = Depends(require("ledger:read"))):
+    return await L.pnl(db, user["tenant_id"], date_from or "2000-01-01",
+                       date_to or today_str(),
+                       target_currency=await _target_currency(user, currency))
 
 
 @router.get("/general-ledger")
