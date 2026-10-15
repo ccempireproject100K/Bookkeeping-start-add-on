@@ -28,6 +28,11 @@ app = FastAPI(title="The Barber's Ledger")
 api_router = APIRouter(prefix="/api")
 
 
+@api_router.get("/healthz")
+async def healthz():
+    return {"status": "ok"}
+
+
 @api_router.get("/health")
 async def health():
     try:
