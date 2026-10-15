@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import Layout from "@/components/Layout";
+import InventoryGate from "@/components/InventoryGate";
 import Login from "@/pages/Login";
 import Dashboard from "@/pages/Dashboard";
 import ChartOfAccounts from "@/pages/ChartOfAccounts";
@@ -29,6 +30,16 @@ import Estimates from "@/pages/Estimates";
 import CashFlow from "@/pages/CashFlow";
 import BudgetVsActual from "@/pages/BudgetVsActual";
 import BusinessReports from "@/pages/BusinessReports";
+import RecurringInvoices from "@/pages/RecurringInvoices";
+import Backup from "@/pages/Backup";
+import Copilot from "@/pages/Copilot";
+import Time from "@/pages/Time";
+import PortalView from "@/pages/PortalView";
+import Payroll from "@/pages/Payroll";
+import Budget from "@/pages/Budget";
+import Tax from "@/pages/Tax";
+import Settings from "@/pages/Settings";
+import AuditLog from "@/pages/AuditLog";
 
 function Protected({ children }) {
   const { user, loading } = useAuth();
@@ -45,6 +56,7 @@ function App() {
         <BrowserRouter>
           <Routes>
             <Route path="/login" element={<Login />} />
+            <Route path="/p/:token" element={<PortalView />} />
             <Route path="/" element={<Protected><Layout /></Protected>}>
               <Route index element={<Dashboard />} />
               <Route path="jobs" element={<Jobs />} />
@@ -62,7 +74,7 @@ function App() {
               <Route path="budget-vs-actual" element={<BudgetVsActual />} />
               <Route path="business-reports" element={<BusinessReports />} />
               <Route path="periods" element={<FiscalPeriods />} />
-              <Route path="inventory" element={<Inventory />} />
+              <Route path="inventory" element={<InventoryGate><Inventory /></InventoryGate>} />
               <Route path="quick-sell" element={<QuickSell />} />
               <Route path="invoices" element={<Invoices />} />
               <Route path="bills" element={<Bills />} />
@@ -71,6 +83,15 @@ function App() {
               <Route path="gift-cards" element={<GiftCards />} />
               <Route path="commissions" element={<Commissions />} />
               <Route path="cash-close" element={<CashClose />} />
+              <Route path="recurring-invoices" element={<RecurringInvoices />} />
+              <Route path="backup" element={<Backup />} />
+              <Route path="copilot" element={<Copilot />} />
+              <Route path="time" element={<Time />} />
+              <Route path="payroll" element={<Payroll />} />
+              <Route path="budget" element={<Budget />} />
+              <Route path="tax" element={<Tax />} />
+              <Route path="audit" element={<AuditLog />} />
+              <Route path="settings" element={<Settings />} />
             </Route>
           </Routes>
         </BrowserRouter>
