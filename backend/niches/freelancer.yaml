@@ -39,3 +39,9 @@ copilot_notes: |
   Travel nurses: stipends vs taxable wages must stay separated, tax-home
   rules determine what's deductible, and multi-state assignments mean
   multi-state filings — keep assignment dates and locations on record.
+
+kpis:
+  - {id: avg_ticket, label: "Avg project value", hint: "Per-invoice average"}
+  - {id: repeat_rate, label: "Repeat clients", hint: "Clients with 2+ projects"}
+  - {id: close_rate, label: "Close rate", hint: "Proposals won vs decided"}
+  - {id: revenue_trend, label: "Revenue trend", hint: "Last 30 days vs prior 30"}

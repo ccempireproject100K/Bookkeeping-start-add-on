@@ -37,3 +37,9 @@ copilot_notes: |
   route density is everything. Chemical costs fluctuate — watch them.
   Green cleanups and equipment installs are the high-ticket upsells
   off the route base. Track churn on weekly plans monthly.
+
+kpis:
+  - {id: jobs_per_day, label: "Stops per day", hint: "Route density"}
+  - {id: recurring_share, label: "Recurring revenue", hint: "Active agreements vs invoiced"}
+  - {id: repeat_rate, label: "Retention", hint: "Customers with 2+ invoices"}
+  - {id: avg_ticket, label: "Average ticket", hint: "Per-visit average"}

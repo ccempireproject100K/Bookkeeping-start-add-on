@@ -35,3 +35,9 @@ copilot_notes: |
   estimated vs actual labor hours per job — that's where margin is
   won or lost. Exteriors are seasonal in many markets. Photos of
   finished work drive the next bid; they're marketing gold.
+
+kpis:
+  - {id: avg_ticket, label: "Average ticket", hint: "Per-invoice average"}
+  - {id: close_rate, label: "Close rate", hint: "Estimates won vs decided"}
+  - {id: repeat_rate, label: "Repeat customers", hint: "Customers with 2+ invoices"}
+  - {id: revenue_trend, label: "Revenue trend", hint: "Last 30 days vs prior 30"}
