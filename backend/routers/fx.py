@@ -12,8 +12,19 @@ from db import db
 from lib.auth import require
 from lib.base import today_str
 from lib import fx_posting as FXP
+from lib import currencies as C
 
 router = APIRouter(prefix="/fx", tags=["fx"])
+
+# Separate router (no /fx prefix) for the public currency list.
+currencies_router = APIRouter(prefix="/currencies", tags=["currencies"])
+
+
+@currencies_router.get("")
+async def list_currencies():
+    """The supported currencies with symbols and decimal metadata
+    (multi-currency Phase 4 — feeds the UI pickers)."""
+    return [{"code": code, **meta} for code, meta in C.CURRENCIES.items()]
 
 
 class RevalueBody(BaseModel):

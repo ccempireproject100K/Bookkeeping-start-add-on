@@ -5,6 +5,17 @@ export const money = (cents) =>
 export const dollars = (d) =>
   Number(d || 0).toLocaleString("en-US", { style: "currency", currency: "USD" });
 
+// Multi-currency Phase 4: format a x100-stored amount in any supported
+// currency. Intl handles per-currency decimals automatically (JPY: no cents).
+export const moneyFor = (cents, currency = "USD") => {
+  const code = String(currency || "USD").toUpperCase();
+  try {
+    return Number((cents || 0) / 100).toLocaleString("en-US", { style: "currency", currency: code });
+  } catch {
+    return money(cents); // unknown code -> fall back to USD formatting
+  }
+};
+
 export const fmtDate = (s) => {
   if (!s) return "—";
   try {
