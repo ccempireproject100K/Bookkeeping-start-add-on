@@ -13,9 +13,10 @@ import hashlib
 import secrets
 from datetime import datetime, timedelta, timezone
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field
 from typing import Optional
+import os
 
 from db import db
 from lib.base import Scoped, new_id, now_iso, today_str, to_cents
@@ -204,3 +205,124 @@ async def portal_pay(token: str, body: PortalPayIn):
     return {"ok": True, "status": status, "paid_cents": new_paid,
             "balance_cents": inv["total_cents"] - new_paid,
             "entry_number": entry["number"]}
+
+
+# ---------------------------------------------------------------- Stripe card checkout (live payments)
+
+
+class PortalCheckoutIn(BaseModel):
+    origin_url: str = ""  # e.g. https://books.example.com — used for success/cancel URLs
+
+
+def _stripe_configured() -> bool:
+    key = os.environ.get("STRIPE_SECRET_KEY") or ""
+    return bool(key) and key != "sk_test_emergent"
+
+
+@router.post("/checkout/{token}")
+async def portal_checkout(token: str, body: PortalCheckoutIn, request: Request):
+    """Public: create a Stripe Checkout session for the invoice's balance.
+
+    The customer pays on Stripe; the `checkout.session.completed` webhook
+    fulfills it (ledger entry + invoice totals). Idempotent-ish: creating
+    another session for the same invoice just makes another link — the
+    fulfill step clamps to the remaining balance exactly once per session.
+    """
+    import stripe
+    if not _stripe_configured():
+        raise HTTPException(
+            status_code=501,
+            detail="Card payments aren't connected yet — ask the business for another way to pay.")
+    stripe.api_key = os.environ.get("STRIPE_SECRET_KEY")
+    link = await _lookup_link(token)
+    tid = link["tenant_id"]
+    inv = await db.invoices.find_one({"tenant_id": tid, "id": link["invoice_id"]})
+    if not inv:
+        raise HTTPException(status_code=404, detail="Invoice not found")
+    balance = inv["total_cents"] - inv.get("paid_cents", 0)
+    if balance <= 0:
+        raise HTTPException(status_code=409, detail="Invoice already fully paid")
+    origin = (body.origin_url or request.headers.get("origin") or "").rstrip("/")
+    if not origin or not origin.startswith("http"):
+        raise HTTPException(status_code=422, detail="origin_url is required")
+    tenant = await db.tenants.find_one({"id": tid}, {"_id": 0, "name": 1, "settings": 1})
+    settings = (tenant or {}).get("settings", {})
+    currency = str(settings.get("currency", "USD")).lower()
+    business = (tenant or {}).get("name", "")
+    label = f"Invoice {inv.get('issue_entry') or inv['id']}"
+    if business:
+        label = f"{business} — {label}"
+    try:
+        session = stripe.checkout.Session.create(
+            mode="payment",
+            line_items=[{
+                "price_data": {
+                    "currency": currency,
+                    "unit_amount": balance,
+                    "product_data": {"name": label,
+                                     "description": f"Balance due: {inv.get('client_name', '')}"},
+                },
+                "quantity": 1,
+            }],
+            success_url=f"{origin}/p/{token}?paid=1&session_id={{CHECKOUT_SESSION_ID}}",
+            cancel_url=f"{origin}/p/{token}",
+            metadata={"kind": "portal_invoice", "tenant_id": tid,
+                      "invoice_id": inv["id"], "token_hash": _digest(token)},
+        )
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"Card payment unavailable: {e}")
+    await db.payment_transactions.insert_one({
+        "session_id": session.id, "tenant_id": tid, "kind": "portal_invoice",
+        "invoice_id": inv["id"], "token_hash": _digest(token),
+        "amount_cents": balance, "currency": currency,
+        "status": "initiated", "payment_status": "pending", "fulfilled": False,
+        "created_at": now_iso(), "updated_at": now_iso(),
+    })
+    return {"checkout_url": session.url, "session_id": session.id}
+
+
+async def fulfill_portal_invoice(session_id: str) -> None:
+    """Exactly-once: claim the paid session, post Dr 1050 / Cr 1200 AR,
+    update the invoice totals, and mark the portal link used when paid."""
+    rec = await db.payment_transactions.find_one_and_update(
+        {"session_id": session_id, "kind": "portal_invoice",
+         "payment_status": "paid", "fulfilled": False, "fulfilling": {"$ne": True}},
+        {"$set": {"fulfilling": True, "updated_at": now_iso()}})
+    if not rec:
+        return
+    err, tid, inv_id = "", rec["tenant_id"], rec["invoice_id"]
+    try:
+        inv = await db.invoices.find_one({"tenant_id": tid, "id": inv_id})
+        if not inv:
+            raise ValueError("Invoice no longer exists")
+        balance = inv["total_cents"] - inv.get("paid_cents", 0)
+        if balance <= 0:
+            raise ValueError("Invoice was already paid in full — refund the card payment manually in Stripe")
+        cents = min(rec["amount_cents"], balance)
+        actor = {"id": "portal", "email": "portal@client", "name": "Client portal",
+                 "role": "owner", "tenant_id": tid}
+        entry = await L.post_journal_entry(db, tid, actor, {
+            "entry_date": today_str(), "source": "stripe_portal", "source_ref": inv_id,
+            "memo": f"Stripe card payment — {inv.get('client_name', '')}",
+            "lines": [P.dr("1050", cents, "Stripe card payment"),
+                      P.cr("1200", cents, "AR cleared")],
+        }, status="posted")
+        new_paid = inv.get("paid_cents", 0) + cents
+        status = "paid" if new_paid >= inv["total_cents"] else "partial"
+        pmt = {"date": today_str(), "amount_cents": cents, "cash_cents": cents,
+               "credit_cents": 0, "method": "card", "processor": "stripe",
+               "reference": rec["session_id"], "entry": entry["number"],
+               "source": "stripe_portal"}
+        await db.invoices.update_one(
+            {"tenant_id": tid, "id": inv_id},
+            {"$set": {"status": status, "paid_cents": new_paid},
+             "$push": {"payments": pmt}})
+        if status == "paid":
+            await db.portal_links.update_one(
+                {"token_hash": rec.get("token_hash")}, {"$set": {"used": True}})
+    except Exception as e:
+        err = str(e)
+    await db.payment_transactions.update_one(
+        {"session_id": session_id},
+        {"$set": {"fulfilled": not err, "fulfilling": False, "error": err,
+                  "updated_at": now_iso()}})
