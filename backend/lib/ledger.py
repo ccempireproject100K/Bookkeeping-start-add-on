@@ -151,6 +151,10 @@ async def post_journal_entry(db, tenant_id, user, draft, status="posted", idempo
         "currency": currency,
         "created_at": now_iso(),
     }
+    # Structured audit detail (e.g. forex postings) rides along when provided;
+    # entries posted without it are byte-identical to before.
+    if draft.get("details") is not None:
+        entry["details"] = draft["details"]
     await s["entries"].insert_one(entry)
     await _write_lines(s, entry, lines, status)
     await audit(db, tenant_id, user, f"journal.{status}", {"number": number, "source": entry["source"], "total_cents": total})

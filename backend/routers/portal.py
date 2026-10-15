@@ -23,6 +23,8 @@ from lib.base import Scoped, new_id, now_iso, today_str, to_cents
 from lib.auth import require
 from lib import ledger as L
 from lib import posting as P
+from lib import fx_posting as FXP
+from lib.currencies import normalize as normalize_currency
 from lib.currencies import get_base_currency
 
 router = APIRouter(prefix="/portal", tags=["portal"])
@@ -182,12 +184,19 @@ async def portal_pay(token: str, body: PortalPayIn):
     actor = {"id": "portal", "email": "portal@client", "name": "Client portal",
              "role": "owner", "tenant_id": link["tenant_id"]}
     cash = P._cash_account(body.payment_method)
+    inv_currency = normalize_currency(inv.get("currency") or "USD")
     entry = await L.post_journal_entry(db, link["tenant_id"], actor, {
         "entry_date": today_str(), "source": "portal_payment", "source_ref": inv["id"],
         "memo": f"Client portal payment — {inv['client_name']}",
         "lines": [P.dr(cash, cents, "Client portal payment"),
                   P.cr("1200", cents, "AR cleared")],
+        "currency": inv_currency,
     }, status="posted")
+    # Realized FX vs the invoice currency (best-effort; never breaks payment).
+    await FXP.post_realized_fx(
+        db=db, tenant_id=link["tenant_id"], user=actor, kind="invoice",
+        doc=inv, pay_currency=inv_currency, pay_amount_minor=cents,
+        applied_doc_minor=cents, pay_date=today_str())
 
     new_paid = paid + cents
     status = "paid" if new_paid >= inv["total_cents"] else "partial"
@@ -302,12 +311,20 @@ async def fulfill_portal_invoice(session_id: str) -> None:
         cents = min(rec["amount_cents"], balance)
         actor = {"id": "portal", "email": "portal@client", "name": "Client portal",
                  "role": "owner", "tenant_id": tid}
+        inv_currency = normalize_currency(inv.get("currency") or "USD")
+        pay_currency = normalize_currency(rec.get("currency") or inv_currency)
         entry = await L.post_journal_entry(db, tid, actor, {
             "entry_date": today_str(), "source": "stripe_portal", "source_ref": inv_id,
             "memo": f"Stripe card payment — {inv.get('client_name', '')}",
             "lines": [P.dr("1050", cents, "Stripe card payment"),
                       P.cr("1200", cents, "AR cleared")],
+            "currency": inv_currency,
         }, status="posted")
+        # Realized FX: Stripe settled in pay_currency vs the invoice currency.
+        await FXP.post_realized_fx(
+            db=db, tenant_id=tid, user=actor, kind="invoice", doc=inv,
+            pay_currency=pay_currency, pay_amount_minor=cents,
+            applied_doc_minor=cents, pay_date=today_str())
         new_paid = inv.get("paid_cents", 0) + cents
         status = "paid" if new_paid >= inv["total_cents"] else "partial"
         pmt = {"date": today_str(), "amount_cents": cents, "cash_cents": cents,

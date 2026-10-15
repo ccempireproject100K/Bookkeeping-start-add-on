@@ -18,7 +18,8 @@ from routers import (auth, ledger, products, pos, invoices, cashclose, dashboard
                      webauthn, alerts, invites, receipts, mileage, collections,
                      simulator, subcompliance, cpa, pulse, pricing, taxforecast,
                      playground, combo, kpis, benchmarks, voice, taxposture,
-                     whitelabel, entities, cleanup, purchase_orders)
+                     whitelabel, entities, cleanup, purchase_orders,
+                     fx)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("barbers_ledger")
@@ -52,7 +53,7 @@ for r in (auth.router, ledger.router, products.router, pos.router,
           pricing.router, taxforecast.router, playground.router, combo.router,
           kpis.router, benchmarks.router, voice.router, taxposture.router,
           whitelabel.router, entities.router, cleanup.router,
-          purchase_orders.router):
+          purchase_orders.router, fx.router):
     api_router.include_router(r)
 
 app.include_router(api_router)

@@ -9,6 +9,9 @@ from lib.base import Scoped, new_id, now_iso, today_str, to_cents, cents_to_doll
 from lib.auth import require, get_current_user
 from lib import ledger as L
 from lib import posting as P
+from lib import fx as FX
+from lib import fx_posting as FXP
+from lib import currencies as C
 from lib.currencies import normalize as normalize_currency
 
 router = APIRouter(prefix="/invoices", tags=["invoices"])
@@ -100,6 +103,7 @@ class PayBody(BaseModel):
     amount: Optional[float] = None       # None = full remaining balance
     credit_id: Optional[str] = None      # apply a customer credit
     pay_date: Optional[str] = None
+    payment_currency: Optional[str] = None  # currency actually moved; defaults to the invoice currency
 
 
 @router.post("/{invoice_id}/pay")
@@ -111,9 +115,36 @@ async def pay_invoice(invoice_id: str, body: PayBody, user: dict = Depends(requi
     balance = inv["total_cents"] - paid
     if balance <= 0:
         raise HTTPException(status_code=409, detail="Invoice already fully paid")
+    inv_currency = normalize_currency(inv.get("currency") or "USD")
+    try:
+        pay_currency = normalize_currency(body.payment_currency or inv_currency)
+    except ValueError:
+        raise HTTPException(status_code=422, detail=f"Unsupported currency: {body.payment_currency!r}")
 
-    received = to_cents(body.amount) if body.amount is not None else balance
-    if received <= 0:
+    pay_date = body.pay_date or today_str()
+    # body.amount is denominated in pay_currency; the JE stays in the invoice
+    # currency (AR must clear in invoice terms). Same-currency path is
+    # byte-identical to the pre-multi-currency behavior.
+    if pay_currency == inv_currency:
+        cash_received = to_cents(body.amount) if body.amount is not None else balance
+        pay_minor_for_fx = cash_received
+    else:
+        if body.amount is not None:
+            pay_minor_for_fx = C.to_minor_units(body.amount, pay_currency)
+        else:
+            try:
+                pay_minor_for_fx = await FX.convert(
+                    balance, inv_currency, pay_currency, pay_date, db=db)
+            except FX.FXRateError:
+                raise HTTPException(status_code=422, detail=(
+                    "No exchange rate available to price this payment's currency"))
+        try:
+            cash_received = await FX.convert(
+                pay_minor_for_fx, pay_currency, inv_currency, pay_date, db=db)
+        except FX.FXRateError:
+            raise HTTPException(status_code=422, detail=(
+                "No exchange rate available to convert this payment"))
+    if cash_received <= 0:
         raise HTTPException(status_code=422, detail="Invalid payment amount")
 
     credit_applied = 0
@@ -124,7 +155,6 @@ async def pay_invoice(invoice_id: str, body: PayBody, user: dict = Depends(requi
         credit_applied = min(c.get("remaining_cents", 0), balance)
 
     cash = P._cash_account(body.payment_method)
-    cash_received = received
     applied_to_ar = min(cash_received + credit_applied, balance)
     overpay = (cash_received + credit_applied) - applied_to_ar
 
@@ -138,9 +168,22 @@ async def pay_invoice(invoice_id: str, body: PayBody, user: dict = Depends(requi
         jl.append(P.cr("2210", overpay, "Overpayment → customer credit"))
 
     entry = await L.post_journal_entry(db, user["tenant_id"], user, {
-        "entry_date": body.pay_date or today_str(), "source": "invoice_paid", "source_ref": invoice_id,
+        "entry_date": pay_date, "source": "invoice_paid", "source_ref": invoice_id,
         "memo": f"Payment — {inv['client_name']}", "lines": jl,
+        "currency": inv_currency,
     }, status="posted")
+
+    # Realized FX on the cash portion that settled AR (best-effort; never
+    # breaks the payment). Overpayments parked in 2210 carry no FX yet.
+    ar_cash_doc = applied_to_ar - credit_applied
+    if ar_cash_doc > 0 and cash_received > 0:
+        pay_for_ar = (int(round(pay_minor_for_fx * ar_cash_doc / cash_received))
+                      if pay_currency != inv_currency else ar_cash_doc)
+        await FXP.post_realized_fx(
+            db=db, tenant_id=user["tenant_id"], user=user, kind="invoice",
+            doc=inv, pay_currency=pay_currency,
+            pay_amount_minor=pay_for_ar, applied_doc_minor=ar_cash_doc,
+            pay_date=pay_date)
 
     if credit_applied > 0:
         await credits(user).update_one({"id": body.credit_id}, {"$inc": {"remaining_cents": -credit_applied}})
@@ -154,9 +197,10 @@ async def pay_invoice(invoice_id: str, body: PayBody, user: dict = Depends(requi
 
     new_paid = paid + applied_to_ar
     status = "paid" if new_paid >= inv["total_cents"] else "partial"
-    pmt = {"date": body.pay_date or today_str(), "amount_cents": applied_to_ar,
+    pmt = {"date": pay_date, "amount_cents": applied_to_ar,
            "cash_cents": cash_received - overpay, "credit_cents": credit_applied,
-           "method": body.payment_method, "entry": entry["number"]}
+           "method": body.payment_method, "pay_currency": pay_currency,
+           "entry": entry["number"]}
     await coll(user).update_one({"id": invoice_id}, {"$set": {"status": status, "paid_cents": new_paid},
                                                      "$push": {"payments": pmt}})
     return {"status": status, "paid_cents": new_paid, "balance_cents": inv["total_cents"] - new_paid,

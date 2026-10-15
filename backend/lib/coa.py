@@ -99,6 +99,24 @@ ACCOUNT_TYPE_OF = _account_type_map()
 NORMAL_BALANCE_OF = {c[0]: c[3] for c in BASE_COA}
 NAME_OF = {c[0]: c[1] for c in BASE_COA}
 
+# Foreign-exchange accounts (multi-currency Phase 3). NOT part of BASE_COA:
+# they are created per workspace on first use via ensure_fx_accounts(),
+# so existing charts are untouched until a workspace actually needs them.
+FX_GAIN_CODE = "4080"
+FX_GAIN_NAME = "Foreign Exchange Gain"
+FX_LOSS_CODE = "5960"
+FX_LOSS_NAME = "Foreign Exchange Loss"
+FX_ACCOUNTS = [
+    (FX_GAIN_CODE, FX_GAIN_NAME, "revenue", "credit"),
+    (FX_LOSS_CODE, FX_LOSS_NAME, "expense", "debit"),
+]
+
+for _code, _name, _type, _normal in FX_ACCOUNTS:
+    ACCOUNT_TYPE_OF.setdefault(_code, _type)
+    NORMAL_BALANCE_OF.setdefault(_code, _normal)
+    NAME_OF.setdefault(_code, _name)
+del _code, _name, _type, _normal
+
 TYPE_ORDER = {"asset": 0, "liability": 1, "equity": 2, "revenue": 3, "expense": 4}
 
 
@@ -127,4 +145,31 @@ async def seed_coa(accounts: Scoped, niche_id: str = "barbershop"):
             "created_at": now_iso(),
         })
         created += 1
+    return created
+
+
+async def ensure_fx_accounts(accounts: Scoped):
+    """Idempotent: create the FX gain/loss accounts for this tenant on first use.
+
+    Workspaces that never touch foreign currency never get these accounts,
+    keeping existing charts byte-identical.
+    """
+    existing = {a["code"] for a in await accounts.find_list()}
+    created = []
+    for code, name, atype, normal in FX_ACCOUNTS:
+        if code in existing:
+            continue
+        await accounts.insert_one({
+            "id": new_id(),
+            "code": code,
+            "name": name,
+            "type": atype,
+            "normal_balance": normal,
+            "parent_code": None,
+            "is_system": True,
+            "archived": False,
+            "description": None,
+            "created_at": now_iso(),
+        })
+        created.append(code)
     return created
