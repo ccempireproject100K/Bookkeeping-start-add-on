@@ -79,6 +79,7 @@ async def startup():
         (db.jobs, [("tenant_id", 1), ("job_number", 1)], {"unique": True}),
         (db.bank_transactions, [("tenant_id", 1), ("dedupe_hash", 1)], {"unique": True}),
         (db.bank_accounts, [("tenant_id", 1), ("gl_code", 1)], {}),
+        (db.rates, [("base", 1), ("quote", 1), ("date", 1)], {"unique": True}),
     ]
     for coll, keys, opts in indexes:
         try:
@@ -93,9 +94,19 @@ async def startup():
             logger.info(f"Currency backfill stamped {stamped} doc(s): {report}")
     except Exception as e:
         logger.warning(f"Currency backfill skipped: {e}")
+    try:
+        from lib import scheduler as _sched
+        await _sched.start()
+    except Exception as e:
+        logger.warning(f"Scheduler not started: {e}")
     logger.info("Barber's Ledger started; indexes ensured.")
 
 
 @app.on_event("shutdown")
 async def shutdown():
+    try:
+        from lib import scheduler as _sched
+        await _sched.stop()
+    except Exception:
+        pass
     get_client().close()

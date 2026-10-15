@@ -1,7 +1,7 @@
 """In-app scheduler for background jobs (APScheduler).
 
-Currently runs one job: the daily collections autopilot. The scheduler is
-guarded three ways:
+Currently runs two jobs: the daily collections autopilot and the daily
+FX-rate refresh. The scheduler is guarded three ways:
 
 1. It only starts when ``ENABLE_SCHEDULER=true`` (default off).
 2. A MongoDB distributed lock (``scheduler_locks``) means only one app
@@ -11,11 +11,14 @@ guarded three ways:
    (``scheduler_runs``), so overlapping or retried schedules can't
    double-process a workspace. The autopilot itself is also
    stage-idempotent (it records ``autopilot_stages`` per invoice and
-   caps late fees to one per month).
+   caps late fees to one per month). FX-rate storage is upsert-based,
+   so re-runs are no-ops.
 
 Env vars:
     ENABLE_SCHEDULER      "true" to start the scheduler (default "false")
     COLLECTIONS_RUN_TIME  "HH:MM" 24h daily run time (default "06:00")
+    FX_RATES_ENABLED      "true" to run the FX job (default "true")
+    FX_RATES_RUN_TIME     "HH:MM" 24h daily run time (default "07:00")
     SCHEDULER_TZ          IANA timezone for the schedule
                           (default "America/Chicago")
 """
@@ -33,6 +36,7 @@ from pymongo.errors import DuplicateKeyError
 
 from db import db
 from lib.base import now_iso, today_str
+from lib.fx import refresh_rates
 from routers.collections import autopilot_run, get_config
 
 logger = logging.getLogger("barbers_ledger.scheduler")
@@ -40,12 +44,15 @@ logger = logging.getLogger("barbers_ledger.scheduler")
 LOCK_ID = "collections-scheduler"
 LOCK_TTL_SECONDS = 900  # 15 min; the heartbeat renews every 5
 JOB_ID = "collections-autopilot"
+FX_JOB_ID = "fx-rates-daily"
 
 _state = {
     "running": False,
     "instance_id": None,
     "next_run": None,
     "last_outcome": None,
+    "fx_next_run": None,
+    "fx_last_outcome": None,
 }
 
 _scheduler: AsyncIOScheduler | None = None
@@ -58,6 +65,10 @@ def scheduler_enabled() -> bool:
 
 def _run_time() -> tuple:
     raw = os.environ.get("COLLECTIONS_RUN_TIME", "06:00")
+    return _parse_hhmm(raw, "COLLECTIONS_RUN_TIME", (6, 0))
+
+
+def _parse_hhmm(raw: str, name: str, default: tuple) -> tuple:
     try:
         hour, minute = raw.split(":")
         hour, minute = int(hour), int(minute)
@@ -65,8 +76,17 @@ def _run_time() -> tuple:
             return hour, minute
     except (ValueError, AttributeError):
         pass
-    logger.warning("Bad COLLECTIONS_RUN_TIME=%r, using 06:00", raw)
-    return 6, 0
+    logger.warning("Bad %s=%r, using %02d:%02d", name, raw, *default)
+    return default
+
+
+def fx_rates_enabled() -> bool:
+    return os.environ.get("FX_RATES_ENABLED", "true").lower() == "true"
+
+
+def _fx_run_time() -> tuple:
+    raw = os.environ.get("FX_RATES_RUN_TIME", "07:00")
+    return _parse_hhmm(raw, "FX_RATES_RUN_TIME", (7, 0))
 
 
 def _tz() -> str:
@@ -185,6 +205,23 @@ async def run_collections_autopilot() -> dict:
     return outcome
 
 
+# ---------------- the daily FX job ----------------
+async def run_fx_rates() -> dict:
+    """Refresh exchange rates: seed history on first run, then fetch today.
+
+    Storage is upsert-based, so re-runs are safe no-ops. Network
+    failures are logged by lib.fx and recorded here, never raised.
+    """
+    try:
+        report = await refresh_rates()
+    except Exception as exc:  # belt and suspenders; fx already degrades gracefully
+        logger.exception("FX rate refresh failed")
+        report = {"error": str(exc)[:300]}
+    _state["fx_last_outcome"] = {"at": now_iso(), **report}
+    logger.info("FX rate refresh finished: %s", report)
+    return report
+
+
 # ---------------- lifecycle ----------------
 async def start() -> bool:
     """Start the scheduler if enabled and the instance lock is acquired."""
@@ -208,6 +245,26 @@ async def start() -> bool:
         coalesce=True,
         misfire_grace_time=3600,
     )
+    if fx_rates_enabled():
+        fx_hour, fx_minute = _fx_run_time()
+        _scheduler.add_job(
+            run_fx_rates,
+            CronTrigger(hour=fx_hour, minute=fx_minute),
+            id=FX_JOB_ID,
+            replace_existing=True,
+            max_instances=1,
+            coalesce=True,
+            misfire_grace_time=3600,
+        )
+        fx_job = _scheduler.get_job(FX_JOB_ID)
+        _state["fx_next_run"] = (
+            fx_job.next_run_time.isoformat()
+            if fx_job and fx_job.next_run_time else None)
+        logger.info("Scheduler: FX rates daily at %02d:%02d %s",
+                    fx_hour, fx_minute, _tz())
+    else:
+        logger.info("Scheduler: FX rate refresh disabled "
+                    "(FX_RATES_ENABLED != true).")
     _scheduler.start()
     job = _scheduler.get_job(JOB_ID)
     _state.update(
