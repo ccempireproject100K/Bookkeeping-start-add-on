@@ -2,7 +2,7 @@
 import os
 from datetime import datetime, timezone, timedelta
 from fastapi import APIRouter, Response, HTTPException, Depends, Request
-from pydantic import BaseModel, EmailStr, Field, field_validator
+from pydantic import BaseModel, EmailStr, Field
 
 from db import db
 from lib.base import Scoped, new_id, now_iso
@@ -24,23 +24,6 @@ class RegisterBody(BaseModel):
     name: str
     shop_name: str = "My Shop"
     niche_id: Optional[str] = None
-
-    @field_validator("password")
-    @classmethod
-    def validate_password(cls, password: str) -> str:
-        # bcrypt hashes only the first 72 bytes; reject longer values rather than
-        # silently treating distinct supplied passwords as equivalent.
-        if not 12 <= len(password.encode("utf-8")) <= 72:
-            raise ValueError("Password must be between 12 and 72 UTF-8 bytes")
-        return password
-
-    @field_validator("name", "shop_name")
-    @classmethod
-    def validate_names(cls, value: str) -> str:
-        value = value.strip()
-        if not value or len(value) > 120:
-            raise ValueError("Name must be between 1 and 120 characters")
-        return value
 
 
 class LoginBody(BaseModel):
@@ -85,7 +68,7 @@ async def create_workspace(email, password, name, shop_name, role="owner", tenan
         await db.tenants.insert_one({
             "id": tenant_id, "name": shop_name, "niche_id": niche_id,
             "settings": {"inventory_enabled": True, "sales_tax_rate": 0.0725,
-                         "double_entry_mode": "primary"},
+                         "double_entry_mode": "primary", "base_currency": "USD"},
             "created_at": now_iso(),
         })
         await seed_coa(Scoped(db.accounts, tenant_id), niche_id)

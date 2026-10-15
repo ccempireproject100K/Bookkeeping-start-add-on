@@ -23,6 +23,7 @@ from lib.base import Scoped, new_id, now_iso, today_str, to_cents
 from lib.auth import require
 from lib import ledger as L
 from lib import posting as P
+from lib.currencies import get_base_currency
 
 router = APIRouter(prefix="/portal", tags=["portal"])
 
@@ -247,7 +248,7 @@ async def portal_checkout(token: str, body: PortalCheckoutIn, request: Request):
         raise HTTPException(status_code=422, detail="origin_url is required")
     tenant = await db.tenants.find_one({"id": tid}, {"_id": 0, "name": 1, "settings": 1})
     settings = (tenant or {}).get("settings", {})
-    currency = str(settings.get("currency", "USD")).lower()
+    currency = get_base_currency(settings).lower()
     business = (tenant or {}).get("name", "")
     label = f"Invoice {inv.get('issue_entry') or inv['id']}"
     if business:

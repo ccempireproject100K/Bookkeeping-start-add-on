@@ -10,6 +10,7 @@ from lib.base import Scoped, new_id, now_iso, today_str, to_cents, cents_to_doll
 from lib.auth import require, get_current_user
 from lib import ledger as L
 from lib import posting as P
+from lib.currencies import normalize as normalize_currency
 
 router = APIRouter(prefix="/bills", tags=["bills"])
 
@@ -38,6 +39,7 @@ class BillBody(BaseModel):
     due_date: Optional[str] = None
     recurring: bool = False
     frequency: Optional[str] = None     # monthly | weekly | quarterly
+    currency: str = "USD"               # ISO 4217; validated on create
 
 
 def _enrich(b):
@@ -56,6 +58,10 @@ async def list_bills(user: dict = Depends(get_current_user)):
 
 @router.post("")
 async def create_bill(body: BillBody, user: dict = Depends(require("ops:manage"))):
+    try:
+        currency = normalize_currency(body.currency)
+    except ValueError:
+        raise HTTPException(status_code=422, detail=f"Unsupported currency: {body.currency!r}")
     bdate = body.bill_date or today_str()
     due = body.due_date or (date.fromisoformat(bdate) + timedelta(days=30)).isoformat()
     if body.lines:
@@ -72,11 +78,12 @@ async def create_bill(body: BillBody, user: dict = Depends(require("ops:manage")
     jl.append(P.cr("2010", amount, "Accounts payable"))
     entry = await L.post_journal_entry(db, user["tenant_id"], user, {
         "entry_date": bdate, "source": "bill", "source_ref": bill_id,
-        "memo": f"Bill — {body.vendor}", "lines": jl,
+        "memo": f"Bill — {body.vendor}", "lines": jl, "currency": currency,
     }, status="posted")
     doc = {
         "id": bill_id, "vendor": body.vendor, "vendor_id": body.vendor_id,
-        "amount_cents": amount, "expense_code": line_items[0]["expense_code"],
+        "amount_cents": amount, "currency": currency,
+        "expense_code": line_items[0]["expense_code"],
         "line_items": line_items, "bill_date": bdate, "due_date": due, "status": "open",
         "paid_cents": 0, "payments": [], "recurring": body.recurring, "frequency": body.frequency,
         "issue_entry": entry["number"], "created_at": now_iso(),

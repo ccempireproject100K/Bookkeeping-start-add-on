@@ -88,7 +88,7 @@ async def seed_fade():
     tid = new_id()
     await db.tenants.insert_one({"id": tid, "name": "Mind at Ease Solutions HVAC",
         "settings": {"inventory_enabled": True, "sales_tax_rate": 0.0725, "double_entry_mode": "primary",
-                     "industry": "hvac"},
+                     "industry": "hvac", "base_currency": "USD"},
         "created_at": now_iso()})
     await seed_coa(Scoped(db.accounts, tid))
     owner = await make_user(tid, "onelovellc@outlook.com", "Darnell Price", "owner", "Owner123!")
@@ -300,7 +300,8 @@ async def seed_fade():
 async def seed_sharp():
     tid = new_id()
     await db.tenants.insert_one({"id": tid, "name": "Sharp Lines Studio",
-        "settings": {"inventory_enabled": True, "sales_tax_rate": 0.06, "double_entry_mode": "primary"},
+        "settings": {"inventory_enabled": True, "sales_tax_rate": 0.06, "double_entry_mode": "primary",
+                     "base_currency": "USD"},
         "created_at": now_iso()})
     await seed_coa(Scoped(db.accounts, tid))
     await make_user(tid, "owner@sharplines.com", "Jordan Cole", "owner", "Owner123!")
