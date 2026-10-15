@@ -16,7 +16,7 @@ from routers import (auth, ledger, products, pos, invoices, cashclose, dashboard
                      recurring_invoices, reminders, backup, bankfeed, copilot,
                      time, portal, payroll, budget, tax, sales_tax, edition, totp, audit,
                      webauthn, alerts, invites, receipts, mileage, collections,
-                     simulator, subcompliance)
+                     simulator, subcompliance, cpa)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("barbers_ledger")
@@ -46,7 +46,7 @@ for r in (auth.router, ledger.router, products.router, pos.router,
           edition.public_router,
           totp.router, audit.router, webauthn.router, alerts.router,
           invites.router, receipts.router, mileage.router, collections.router,
-          simulator.router, subcompliance.router):
+          simulator.router, subcompliance.router, cpa.router):
     api_router.include_router(r)
 
 app.include_router(api_router)
