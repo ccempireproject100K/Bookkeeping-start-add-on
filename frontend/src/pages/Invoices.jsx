@@ -67,6 +67,7 @@ export default function Invoices() {
         <TabsList className="bg-[#14171E] border border-[#222838]">
           <TabsTrigger value="invoices" data-testid="tab-invoices">Invoices</TabsTrigger>
           <TabsTrigger value="credits" data-testid="tab-customer-credits">Customer Credits</TabsTrigger>
+          <TabsTrigger value="reminders" data-testid="tab-reminders">Reminders</TabsTrigger>
         </TabsList>
 
         <TabsContent value="invoices" className="mt-4">
@@ -122,6 +123,9 @@ export default function Invoices() {
             </table>
           </Card>
         </TabsContent>
+        <TabsContent value="reminders" className="mt-4">
+          <RemindersTab isOwner={isOwner} />
+        </TabsContent>
       </Tabs>
 
       <Dialog open={open} onOpenChange={setOpen}>
@@ -160,6 +164,101 @@ export default function Invoices() {
               <SelectContent className="bg-[#14171E] border-[#222838] text-gray-100">{invCredits.map((c) => <SelectItem key={c.id} value={c.id}>{money(c.remaining_cents)} available</SelectItem>)}</SelectContent>
             </Select></div>}
           <DialogFooter><Button data-testid="payinv-save" onClick={doPay} className="bg-emerald-600 hover:bg-emerald-500 text-black">Record Payment</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+function RemindersTab({ isOwner }) {
+  const [overdue, setOverdue] = useState(null);
+  const [hist, setHist] = useState([]);
+  const [draftInv, setDraftInv] = useState(null);
+  const [msg, setMsg] = useState("");
+
+  const load = () => {
+    api.get("/reminders/overdue").then(setOverdue).catch(() => setOverdue([]));
+    api.get("/reminders").then(setHist).catch(() => setHist([]));
+  };
+  useEffect(() => { load(); }, []);
+
+  const openDraft = async (inv) => {
+    try {
+      const d = await api.post("/reminders/draft", { invoice_id: inv.invoice_id });
+      setDraftInv(inv); setMsg(d.message);
+    } catch (e) { toast.error(errMsg(e)); }
+  };
+  const send = async () => {
+    try {
+      await api.post("/reminders/send", { invoice_id: draftInv.invoice_id, message: msg });
+      toast.success("Reminder recorded as sent");
+      setDraftInv(null); setMsg(""); load();
+    } catch (e) { toast.error(errMsg(e)); }
+  };
+
+  if (overdue === null) return <Loading />;
+  return (
+    <div className="space-y-6">
+      <Card className="p-0 overflow-hidden">
+        <table className="w-full text-sm" data-testid="table-overdue">
+          <thead><tr className="text-xs uppercase tracking-wider text-gray-500 border-b border-[#222838]">
+            <th className="px-5 py-3 text-left font-medium">Client</th>
+            <th className="px-5 py-3 text-left font-medium">Due</th>
+            <th className="px-5 py-3 text-right font-medium">Days overdue</th>
+            <th className="px-5 py-3 text-right font-medium">Balance</th>
+            <th className="px-5 py-3 text-right font-medium">Reminders</th>
+            {isOwner && <th className="px-5 py-3 text-right font-medium">Actions</th>}</tr></thead>
+          <tbody>
+            {overdue.map((o) => (
+              <tr key={o.invoice_id} className="border-b border-[#171c26] hover:bg-[#161b25]">
+                <td className="px-5 py-3 text-gray-100">{o.client_name}</td>
+                <td className="px-5 py-3 text-gray-400">{fmtDate(o.due_date)}</td>
+                <td className="px-5 py-3 text-right font-mono text-rose-400">{o.days_overdue}</td>
+                <td className="px-5 py-3 text-right font-mono text-amber-400">{money(o.balance_cents)}</td>
+                <td className="px-5 py-3 text-right text-gray-400">{o.reminders_count}</td>
+                {isOwner && (
+                  <td className="px-5 py-3 text-right">
+                    <Button size="sm" variant="outline" className="h-7 border-[#222838]" onClick={() => openDraft(o)} data-testid={`remind-${o.invoice_id}`}>Draft reminder</Button>
+                  </td>
+                )}
+              </tr>
+            ))}
+            {overdue.length === 0 && <tr><td colSpan={isOwner ? 6 : 5} className="px-5 py-12 text-center text-gray-500">No overdue invoices.</td></tr>}
+          </tbody>
+        </table>
+      </Card>
+
+      <div>
+        <h3 className="text-sm font-semibold text-gray-200 mb-2">Reminder history</h3>
+        <Card className="p-0 overflow-hidden">
+          <table className="w-full text-sm" data-testid="table-reminders">
+            <thead><tr className="text-xs uppercase tracking-wider text-gray-500 border-b border-[#222838]">
+              <th className="px-5 py-3 text-left font-medium">Sent</th>
+              <th className="px-5 py-3 text-left font-medium">Client</th>
+              <th className="px-5 py-3 text-left font-medium">By</th>
+              <th className="px-5 py-3 text-left font-medium">Message</th></tr></thead>
+            <tbody>
+              {hist.map((r) => (
+                <tr key={r.id} className="border-b border-[#171c26]">
+                  <td className="px-5 py-3 text-gray-400 text-xs whitespace-nowrap">{fmtDate(r.sent_at?.slice(0, 10))}</td>
+                  <td className="px-5 py-3 text-gray-100">{r.client_name}</td>
+                  <td className="px-5 py-3 text-gray-400">{r.sent_by || "—"}</td>
+                  <td className="px-5 py-3 text-gray-400 text-xs max-w-md truncate" title={r.message}>{r.message}</td>
+                </tr>
+              ))}
+              {hist.length === 0 && <tr><td colSpan={4} className="px-5 py-10 text-center text-gray-500">No reminders sent yet.</td></tr>}
+            </tbody>
+          </table>
+        </Card>
+      </div>
+
+      <Dialog open={!!draftInv} onOpenChange={(o) => !o && setDraftInv(null)}>
+        <DialogContent className="bg-[#14171E] border-[#222838] max-w-lg">
+          <DialogHeader><DialogTitle>Payment reminder — {draftInv?.client_name}</DialogTitle></DialogHeader>
+          <p className="text-xs text-gray-500">No email is sent automatically. Copy the text into your own mail app, then record it below.</p>
+          <textarea value={msg} onChange={(e) => setMsg(e.target.value)} rows={8}
+            className="w-full rounded-md bg-[#0F1218] border border-[#222838] p-3 text-sm text-gray-100" data-testid="reminder-message" />
+          <DialogFooter><Button data-testid="reminder-send" onClick={send} className="bg-amber-600 hover:bg-amber-500 text-black">Mark as sent</Button></DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
