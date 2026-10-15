@@ -66,29 +66,41 @@ def _trade_categories(pack: dict) -> list:
 
 
 # ---------------- Upload & inbox ----------------
-@router.post("/upload")
-async def upload_receipt(file: UploadFile = File(...),
-                         user: dict = Depends(require("ops:manage"))):
-    if file.content_type not in ALLOWED_TYPES:
-        raise HTTPException(422, f"Unsupported file type: {file.content_type}. Use JPG, PNG, WEBP or PDF.")
-    data = await file.read()
+async def ingest_receipt(user: dict, filename: str, content_type: str,
+                         data: bytes, source: str = "upload") -> dict:
+    """Shared ingestion path: validate, store the file, create the inbox doc.
+
+    Used by the manual upload endpoint and by the inbound-email webhook, so
+    both flows file receipts identically. Raises HTTPException(422) on bad
+    input.
+    """
+    if content_type not in ALLOWED_TYPES:
+        raise HTTPException(422, f"Unsupported file type: {content_type}. Use JPG, PNG, WEBP or PDF.")
     if len(data) > MAX_BYTES:
         raise HTTPException(422, "File too large (10 MB max).")
     if not data:
         raise HTTPException(422, "Empty file.")
     ext = {"image/jpeg": "jpg", "image/png": "png", "image/webp": "webp",
-           "application/pdf": "pdf"}[file.content_type]
+           "application/pdf": "pdf"}[content_type]
     rid = new_id()
     stored = f"{rid}.{ext}"
     (_upload_dir(user) / stored).write_bytes(data)
-    doc = {"id": rid, "filename": file.filename or stored, "stored": stored,
-           "content_type": file.content_type, "size_bytes": len(data),
+    doc = {"id": rid, "filename": filename or stored, "stored": stored,
+           "content_type": content_type, "size_bytes": len(data),
            "status": "uploaded", "extracted": None, "expense_id": None,
-           "created_at": now_iso()}
+           "source": source, "created_at": now_iso()}
     await receipts(user).insert_one(doc)
-    await audit(user, "receipt.upload", "receipt", rid, {"filename": doc["filename"]})
+    await audit(user, f"receipt.{source}", "receipt", rid, {"filename": doc["filename"]})
     doc.pop("_id", None)
     return doc
+
+
+@router.post("/upload")
+async def upload_receipt(file: UploadFile = File(...),
+                         user: dict = Depends(require("ops:manage"))):
+    data = await file.read()
+    return await ingest_receipt(user, file.filename, file.content_type, data,
+                                source="upload")
 
 
 @router.get("")
