@@ -11,6 +11,7 @@ import PasskeySettings from "@/components/PasskeySettings";
 import SecurityAlerts from "@/components/SecurityAlerts";
 import TeamInvites from "@/components/TeamInvites";
 import NicheSwitcher from "@/components/NicheSwitcher";
+import OpeningBalances from "@/components/OpeningBalances";
 
 function InventoryCard() {
   const { user, refresh } = useAuth();
@@ -91,6 +92,7 @@ export default function Settings() {
         <PasskeySettings />
         <TeamInvites />
         <NicheSwitcher />
+        <OpeningBalances />
         <InventoryCard />
         <SessionsCard />
       </div>
