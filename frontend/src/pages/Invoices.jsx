@@ -34,6 +34,33 @@ export default function Invoices() {
   const [pay, setPay] = useState({ amount: "", payment_method: "bank", credit_id: "" });
   const [juris, setJuris] = useState([]);
   const [jurisId, setJurisId] = useState("");
+  const [creditOpen, setCreditOpen] = useState(false);
+  const [creditForm, setCreditForm] = useState({ client_name: "", amount: "", memo: "" });
+  const [refundFor, setRefundFor] = useState(null);
+  const [refundMethod, setRefundMethod] = useState("bank");
+
+  const issueCredit = async () => {
+    if (!creditForm.client_name.trim() || !(parseFloat(creditForm.amount) > 0)) {
+      toast.error("Customer and a positive amount are required"); return;
+    }
+    try {
+      await api.post("/invoices/customer-credits", {
+        client_name: creditForm.client_name.trim(),
+        amount: parseFloat(creditForm.amount), memo: creditForm.memo.trim(),
+      });
+      toast.success("Credit issued"); setCreditOpen(false);
+      setCreditForm({ client_name: "", amount: "", memo: "" }); loadCredits();
+    } catch (e) { toast.error(errMsg(e)); }
+  };
+
+  const refundCredit = async () => {
+    if (!refundFor) return;
+    if (!window.confirm(`Refund ${money(refundFor.remaining_cents)} to ${refundFor.client_name} via ${refundMethod}?`)) return;
+    try {
+      const r = await api.post(`/invoices/customer-credits/${refundFor.id}/refund`, { payment_method: refundMethod });
+      toast.success(`Refunded ${money(r.refunded_cents)}`); setRefundFor(null); loadCredits();
+    } catch (e) { toast.error(errMsg(e)); }
+  };
 
   const load = () => api.get("/invoices").then(setInvoices).catch(() => setInvoices([]));
   const loadCredits = () => api.get("/invoices/customer-credits").then(setCredits).catch(() => {});
@@ -131,20 +158,35 @@ export default function Invoices() {
         </TabsContent>
 
         <TabsContent value="credits" className="mt-4">
+          {isOwner && (
+            <div className="flex justify-end mb-3">
+              <Button onClick={() => setCreditOpen(true)} className="bg-amber-600 hover:bg-amber-500 text-black font-semibold" data-testid="credit-issue-open">
+                <Plus size={15} className="mr-1" /> Issue credit
+              </Button>
+            </div>
+          )}
           <Card className="p-0 overflow-hidden">
             <table className="w-full text-sm" data-testid="table-cust-credits">
               <thead><tr className="text-xs uppercase tracking-wider text-gray-500 border-b border-[#222838]">
                 <th className="px-5 py-3 text-left font-medium">Customer</th><th className="px-5 py-3 text-left font-medium">Source</th>
-                <th className="px-5 py-3 text-right font-medium">Amount</th><th className="px-5 py-3 text-right font-medium">Remaining</th></tr></thead>
+                <th className="px-5 py-3 text-right font-medium">Amount</th><th className="px-5 py-3 text-right font-medium">Remaining</th>
+                {isOwner && <th className="px-5 py-3 text-right font-medium">Actions</th>}</tr></thead>
               <tbody>
                 {credits.map((c) => (
                   <tr key={c.id} className="border-b border-[#171c26]">
                     <td className="px-5 py-3 text-gray-100">{c.client_name}</td><td className="px-5 py-3 text-gray-400 capitalize">{(c.source || "").replace("_", " ")}</td>
                     <td className="px-5 py-3 text-right font-mono text-gray-300">{money(c.amount_cents)}</td>
                     <td className="px-5 py-3 text-right font-mono text-emerald-400">{money(c.remaining_cents)}</td>
+                    {isOwner && (
+                      <td className="px-5 py-3 text-right">
+                        {c.remaining_cents > 0 && (c.status !== "refunded") && (
+                          <Button size="sm" variant="outline" className="h-7" onClick={() => setRefundFor(c)} data-testid={`credit-refund-${c.id}`}>Refund</Button>
+                        )}
+                      </td>
+                    )}
                   </tr>
                 ))}
-                {credits.length === 0 && <tr><td colSpan={4} className="px-5 py-12 text-center text-gray-500">No customer credits. Overpayments create credits automatically.</td></tr>}
+                {credits.length === 0 && <tr><td colSpan={isOwner ? 5 : 4} className="px-5 py-12 text-center text-gray-500">No customer credits. Overpayments create credits automatically.</td></tr>}
               </tbody>
             </table>
           </Card>
@@ -204,6 +246,36 @@ export default function Invoices() {
               <SelectContent className="bg-[#14171E] border-[#222838] text-gray-100">{invCredits.map((c) => <SelectItem key={c.id} value={c.id}>{money(c.remaining_cents)} available</SelectItem>)}</SelectContent>
             </Select></div>}
           <DialogFooter><Button data-testid="payinv-save" onClick={doPay} className="bg-emerald-600 hover:bg-emerald-500 text-black">Record Payment</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={creditOpen} onOpenChange={setCreditOpen}>
+        <DialogContent className="bg-[#14171E] border-[#222838]" data-testid="credit-issue-dialog">
+          <DialogHeader><DialogTitle>Issue customer credit</DialogTitle></DialogHeader>
+          <div className="grid grid-cols-2 gap-3">
+            <div><Label className="text-xs">Customer *</Label><Input value={creditForm.client_name} onChange={(e) => setCreditForm({ ...creditForm, client_name: e.target.value })} className="bg-[#0F1218] border-[#222838]" data-testid="credit-client" /></div>
+            <div><Label className="text-xs">Amount $ *</Label><Input type="number" step="0.01" min={0.01} value={creditForm.amount} onChange={(e) => setCreditForm({ ...creditForm, amount: e.target.value })} className="bg-[#0F1218] border-[#222838] font-mono" data-testid="credit-amount" /></div>
+          </div>
+          <div><Label className="text-xs">Memo</Label><Input value={creditForm.memo} onChange={(e) => setCreditForm({ ...creditForm, memo: e.target.value })} placeholder="e.g. Goodwill credit for late service" className="bg-[#0F1218] border-[#222838]" /></div>
+          <p className="text-[11px] text-gray-600">Posts Dr revenue / Cr customer credits (2210). The customer can apply it to a future invoice.</p>
+          <DialogFooter><Button onClick={issueCredit} className="bg-amber-600 hover:bg-amber-500 text-black font-semibold" data-testid="credit-issue-save">Issue credit</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!refundFor} onOpenChange={(o) => !o && setRefundFor(null)}>
+        <DialogContent className="bg-[#14171E] border-[#222838]" data-testid="credit-refund-dialog">
+          <DialogHeader><DialogTitle>Refund credit — {refundFor?.client_name}</DialogTitle></DialogHeader>
+          <p className="text-sm text-gray-300">Refund the remaining <strong className="font-mono">{money(refundFor?.remaining_cents)}</strong> back to the customer. Posts Dr customer credits / Cr cash.</p>
+          <div><Label className="text-xs">Pay from</Label>
+            <Select value={refundMethod} onValueChange={setRefundMethod}>
+              <SelectTrigger className="bg-[#0F1218] border-[#222838]" data-testid="credit-refund-method"><SelectValue /></SelectTrigger>
+              <SelectContent className="bg-[#14171E] border-[#222838] text-gray-100">
+                <SelectItem value="bank">Bank account</SelectItem>
+                <SelectItem value="cash">Cash</SelectItem>
+                <SelectItem value="card">Card</SelectItem>
+              </SelectContent>
+            </Select></div>
+          <DialogFooter><Button onClick={refundCredit} className="bg-amber-600 hover:bg-amber-500 text-black font-semibold" data-testid="credit-refund-confirm">Refund {money(refundFor?.remaining_cents)}</Button></DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

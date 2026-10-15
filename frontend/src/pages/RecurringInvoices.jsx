@@ -13,7 +13,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Plus, Trash2, FilePlus, Play } from "lucide-react";
+import { Plus, Trash2, FilePlus, Play, Pencil } from "lucide-react";
 
 const FREQ_LABEL = { weekly: "Weekly", monthly: "Monthly" };
 
@@ -22,25 +22,43 @@ export default function RecurringInvoices() {
   const isOwner = user?.role === "owner";
   const [tpls, setTpls] = useState(null);
   const [open, setOpen] = useState(false);
+  const [editing, setEditing] = useState(null);
   const [form, setForm] = useState({ name: "", client_name: "", tax: "", frequency: "monthly", next_run: today(), active: true });
   const [lines, setLines] = useState([{ name: "", revenue_code: "4020", amount: "" }]);
+
+  const resetForm = () => {
+    setEditing(null);
+    setForm({ name: "", client_name: "", tax: "", frequency: "monthly", next_run: today(), active: true });
+    setLines([{ name: "", revenue_code: "4020", amount: "" }]);
+  };
 
   const load = () => api.get("/recurring-invoices").then(setTpls).catch(() => setTpls([]));
   useEffect(() => { load(); }, []);
 
-  const create = async () => {
+  const save = async () => {
+    const payload = {
+      name: form.name, client_name: form.client_name, tax: parseFloat(form.tax) || 0,
+      frequency: form.frequency, next_run: form.next_run || null, active: form.active,
+      lines: lines.filter((l) => l.name && l.amount).map((l) => ({ kind: "service", name: l.name, revenue_code: l.revenue_code, amount: parseFloat(l.amount) || 0 })),
+    };
     try {
-      await api.post("/recurring-invoices", {
-        name: form.name, client_name: form.client_name, tax: parseFloat(form.tax) || 0,
-        frequency: form.frequency, next_run: form.next_run || null, active: form.active,
-        lines: lines.filter((l) => l.name && l.amount).map((l) => ({ kind: "service", name: l.name, revenue_code: l.revenue_code, amount: parseFloat(l.amount) || 0 })),
-      });
-      toast.success("Template created");
-      setOpen(false);
-      setForm({ name: "", client_name: "", tax: "", frequency: "monthly", next_run: today(), active: true });
-      setLines([{ name: "", revenue_code: "4020", amount: "" }]);
-      load();
+      if (editing) {
+        await api.patch(`/recurring-invoices/${editing.id}`, payload);
+        toast.success("Template updated");
+      } else {
+        await api.post("/recurring-invoices", payload);
+        toast.success("Template created");
+      }
+      setOpen(false); resetForm(); load();
     } catch (e) { toast.error(errMsg(e)); }
+  };
+  const openEdit = (t) => {
+    setEditing(t);
+    setForm({ name: t.name || "", client_name: t.client_name || "", tax: t.tax || "",
+              frequency: t.frequency || "monthly", next_run: t.next_run || today(),
+              active: t.active !== false });
+    setLines((t.lines || []).map((l) => ({ name: l.name || "", revenue_code: l.revenue_code || "4020", amount: l.amount || "" })));
+    setOpen(true);
   };
   const runDue = async () => {
     try {
@@ -62,7 +80,7 @@ export default function RecurringInvoices() {
         {isOwner && (
           <div className="flex gap-2">
             <Button variant="outline" data-testid="btn-run-due" onClick={runDue} className="border-[#222838]"><Play size={15} className="mr-1" /> Generate due</Button>
-            <Button data-testid="btn-new-template" onClick={() => setOpen(true)} className="bg-amber-600 hover:bg-amber-500 text-black font-semibold"><Plus size={16} className="mr-1" /> New Template</Button>
+            <Button data-testid="btn-new-template" onClick={() => { resetForm(); setOpen(true); }} className="bg-amber-600 hover:bg-amber-500 text-black font-semibold"><Plus size={16} className="mr-1" /> New Template</Button>
           </div>
         )}
       </PageHeader>
@@ -92,8 +110,12 @@ export default function RecurringInvoices() {
                   <td className="px-5 py-3 text-right font-mono text-gray-300">${est.toFixed(2)}</td>
                   {isOwner && (
                     <td className="px-5 py-3 text-right">
-                      <button onClick={() => del(t)} aria-label={`Delete ${t.name}`} data-testid={`template-delete-${t.id}`}
-                        className="inline-flex items-center justify-center w-8 h-8 rounded text-gray-500 hover:text-rose-400 hover:bg-rose-500/10"><Trash2 size={15} /></button>
+                      <div className="flex justify-end gap-1">
+                        <button onClick={() => openEdit(t)} aria-label={`Edit ${t.name}`} data-testid={`template-edit-${t.id}`}
+                          className="inline-flex items-center justify-center w-8 h-8 rounded text-gray-500 hover:text-amber-400 hover:bg-amber-500/10"><Pencil size={15} /></button>
+                        <button onClick={() => del(t)} aria-label={`Delete ${t.name}`} data-testid={`template-delete-${t.id}`}
+                          className="inline-flex items-center justify-center w-8 h-8 rounded text-gray-500 hover:text-rose-400 hover:bg-rose-500/10"><Trash2 size={15} /></button>
+                      </div>
                     </td>
                   )}
                 </tr>
@@ -104,9 +126,9 @@ export default function RecurringInvoices() {
         </table>
       </Card>
 
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) resetForm(); }}>
         <DialogContent className="bg-[#14171E] border-[#222838] max-w-lg">
-          <DialogHeader><DialogTitle>New Recurring Template</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{editing ? "Edit Recurring Template" : "New Recurring Template"}</DialogTitle></DialogHeader>
           <div className="grid grid-cols-2 gap-3">
             <div><Label className="text-xs">Template name</Label><Input data-testid="tpl-name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="bg-[#0F1218] border-[#222838]" /></div>
             <div><Label className="text-xs">Client</Label><Input data-testid="tpl-client" value={form.client_name} onChange={(e) => setForm({ ...form, client_name: e.target.value })} className="bg-[#0F1218] border-[#222838]" /></div>
@@ -131,7 +153,11 @@ export default function RecurringInvoices() {
               </Select></div>
             <div><Label className="text-xs">Next run</Label><Input type="date" data-testid="tpl-next-run" value={form.next_run} onChange={(e) => setForm({ ...form, next_run: e.target.value })} className="bg-[#0F1218] border-[#222838]" /></div>
           </div>
-          <DialogFooter><Button data-testid="tpl-save" onClick={create} className="bg-amber-600 hover:bg-amber-500 text-black">Save Template</Button></DialogFooter>
+          <label className="flex items-center gap-2 text-sm text-gray-300">
+            <input type="checkbox" checked={form.active} onChange={(e) => setForm({ ...form, active: e.target.checked })} className="accent-amber-500" data-testid="tpl-active" />
+            Active — generate invoices on schedule
+          </label>
+          <DialogFooter><Button data-testid="tpl-save" onClick={save} className="bg-amber-600 hover:bg-amber-500 text-black">{editing ? "Save changes" : "Save Template"}</Button></DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
