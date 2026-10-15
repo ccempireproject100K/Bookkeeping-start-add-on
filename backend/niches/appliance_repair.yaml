@@ -36,3 +36,9 @@ copilot_notes: |
   sensitivity drops. Diagnostics convert to repairs — track the
   conversion rate. Parts markups are a quiet margin driver; track
   parts cost per job against the flat-rate price.
+
+kpis:
+  - {id: callback_rate, label: "Callback rate", hint: "Return visits within 30 days"}
+  - {id: avg_ticket, label: "Average ticket", hint: "Per repair"}
+  - {id: close_rate, label: "Close rate", hint: "Estimates won vs decided"}
+  - {id: jobs_per_day, label: "Jobs per day", hint: "Route density"}

@@ -38,3 +38,9 @@ copilot_notes: |
   and rewires — keep them in separate revenue lines or the average
   ticket lies to you. Permits and inspections add cost; track them per
   job. EV charger installs are a growing high-margin line.
+
+kpis:
+  - {id: callback_rate, label: "Callback rate", hint: "Return visits within 30 days"}
+  - {id: avg_ticket, label: "Average ticket", hint: "Per-invoice average"}
+  - {id: close_rate, label: "Close rate", hint: "Estimates won vs decided"}
+  - {id: repeat_rate, label: "Repeat customers", hint: "Customers with 2+ invoices"}

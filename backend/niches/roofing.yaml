@@ -38,3 +38,9 @@ copilot_notes: |
   watch material costs (shingles) against quoted prices; supplier price
   hikes eat margin if bids lag. Insurance-claim jobs have slower pay
   cycles; track aging closely.
+
+kpis:
+  - {id: avg_ticket, label: "Average ticket", hint: "Per-invoice average"}
+  - {id: close_rate, label: "Close rate", hint: "Estimates won vs decided"}
+  - {id: repeat_rate, label: "Repeat customers", hint: "Customers with 2+ invoices"}
+  - {id: revenue_trend, label: "Revenue trend", hint: "Last 30 days vs prior 30"}

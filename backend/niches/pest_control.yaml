@@ -37,3 +37,9 @@ copilot_notes: |
   jewel — track recurring vs one-time revenue separately and watch
   churn like a hawk. Chemical costs are the main variable cost.
   Route density drives margin: more stops per route, lower cost per stop.
+
+kpis:
+  - {id: jobs_per_day, label: "Stops per day", hint: "Route density"}
+  - {id: recurring_share, label: "Recurring revenue", hint: "Active agreements vs invoiced"}
+  - {id: repeat_rate, label: "Retention", hint: "Customers with 2+ invoices"}
+  - {id: callback_rate, label: "Callback rate", hint: "Return visits within 30 days"}

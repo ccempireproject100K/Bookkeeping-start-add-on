@@ -35,3 +35,9 @@ copilot_notes: |
   not just booked revenue. Equipment (panels, inverters) is the big
   cost — lock supplier pricing. Tax credits drive demand; policy
   changes move the whole market. Referrals are gold; track their source.
+
+kpis:
+  - {id: avg_ticket, label: "Average ticket", hint: "Per-invoice average"}
+  - {id: close_rate, label: "Close rate", hint: "Estimates won vs decided"}
+  - {id: repeat_rate, label: "Repeat customers", hint: "Customers with 2+ invoices"}
+  - {id: revenue_trend, label: "Revenue trend", hint: "Last 30 days vs prior 30"}

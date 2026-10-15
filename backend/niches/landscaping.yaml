@@ -37,3 +37,9 @@ copilot_notes: |
   annuity) and project work (installs — lumpy, higher ticket). Track
   them separately. Winter is the valley — cash reserves matter. Fuel
   and labor are the big variable costs; watch them per route.
+
+kpis:
+  - {id: jobs_per_day, label: "Jobs per day", hint: "Crew throughput"}
+  - {id: recurring_share, label: "Recurring revenue", hint: "Maintenance agreements share"}
+  - {id: repeat_rate, label: "Retention", hint: "Customers with 2+ invoices"}
+  - {id: avg_ticket, label: "Average ticket", hint: "Per-job average"}

@@ -39,3 +39,9 @@ copilot_notes: |
   revenue. Marketing spend per listing should tie to closed volume;
   mileage is a major deduction — log it. Referral fees are easy to
   forget; reconcile them quarterly.
+
+kpis:
+  - {id: close_rate, label: "Close rate", hint: "Deals closed vs pursued"}
+  - {id: avg_ticket, label: "Avg commission", hint: "Per-deal average"}
+  - {id: revenue_trend, label: "Revenue trend", hint: "Last 30 days vs prior 30"}
+  - {id: ar_days, label: "Avg days to paid", hint: "Commission collection speed"}

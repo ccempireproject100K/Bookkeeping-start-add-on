@@ -36,3 +36,9 @@ copilot_notes: |
   margin analysis lies. Parts markup is a major profit center.
   The key metrics: average repair order, hours per RO, and
   comeback rate. Fleet accounts are the annuity in this trade.
+
+kpis:
+  - {id: avg_ticket, label: "Average repair order", hint: "Per-invoice average"}
+  - {id: repeat_rate, label: "Repeat customers", hint: "Customers with 2+ visits"}
+  - {id: callback_rate, label: "Comeback rate", hint: "Return visits within 30 days"}
+  - {id: revenue_trend, label: "Revenue trend", hint: "Last 30 days vs prior 30"}
