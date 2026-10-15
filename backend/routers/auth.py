@@ -314,3 +314,45 @@ async def switch_role(body: SwitchBody, response: Response, user: dict = Depends
         raise HTTPException(status_code=404, detail=f"No {body.role} user in this workspace")
     await _issue(response, target)
     return _public(target)
+
+
+class WorkspaceSwitchBody(BaseModel):
+    tenant_id: str = Field(..., max_length=64)
+
+
+@router.get("/workspaces")
+async def list_workspaces(user: dict = Depends(get_current_user)):
+    """Every workspace this login can access (e.g. an accountant serving many
+    clients), with the current one marked. Adapted from the momoempire
+    workspace-switcher pattern."""
+    from lib.memberships import memberships
+    out = []
+    for m in memberships(user):
+        t = await db.tenants.find_one({"id": m["tenant_id"]}, {"name": 1})
+        if not t:
+            continue
+        out.append({"tenant_id": m["tenant_id"],
+                    "tenant_name": t.get("name", "Workspace"),
+                    "role": m["role"],
+                    "is_current": m["tenant_id"] == user.get("tenant_id")})
+    return out
+
+
+@router.post("/switch")
+async def switch_workspace(body: WorkspaceSwitchBody,
+                           user: dict = Depends(get_current_user)):
+    """Hop to another workspace on this login. The session token carries only
+    the user id, so no re-issue is needed — the tenant context is read from
+    the user row on every request."""
+    from lib.memberships import memberships
+    ms = memberships(user)
+    target = next((m for m in ms if m["tenant_id"] == body.tenant_id), None)
+    if not target:
+        raise HTTPException(403, "You don't have access to that workspace")
+    await db.users.update_one(
+        {"id": user["id"]},
+        {"$set": {"tenant_id": target["tenant_id"], "role": target["role"],
+                  "memberships": ms}})
+    await _audit(user, "auth.workspace.switch", "user", user["id"],
+                 {"tenant_id": target["tenant_id"]})
+    return {"ok": True, "tenant_id": target["tenant_id"], "role": target["role"]}

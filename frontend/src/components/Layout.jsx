@@ -14,6 +14,7 @@ import {
 import { toast } from "sonner";
 import { errMsg } from "@/lib/api";
 import MusicPlayer from "./MusicPlayer";
+import WorkspaceSwitcher from "./WorkspaceSwitcher";
 
 const ALL = ["owner", "accountant", "bookkeeper"];
 const NAV = [
@@ -123,6 +124,7 @@ export default function Layout() {
             <span className="font-display font-semibold text-gray-100 truncate">{user?.tenant?.name || "Workspace"}</span>
           </div>
           <div className="flex items-center gap-3">
+            <WorkspaceSwitcher />
             <div className="hidden sm:flex items-center gap-2 text-xs text-gray-400">
               <ShieldCheck size={15} className="text-emerald-400" />
               <span>Preview role</span>
