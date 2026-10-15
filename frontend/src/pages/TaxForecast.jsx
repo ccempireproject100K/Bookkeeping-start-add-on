@@ -13,10 +13,14 @@ import { Landmark, Plus } from "lucide-react";
 export default function TaxForecast() {
   const [loaded, setLoaded] = useState(false);
   const [fc, setFc] = useState(null);
+  const [posture, setPosture] = useState(null);
   const [payOpen, setPayOpen] = useState(false);
   const [pay, setPay] = useState({ quarter: "Q4", amount_cents: "", paid_date: "", note: "" });
 
-  const reload = () => api.get("/tax-forecast?year=2026").then(setFc).catch((e) => toast.error(errMsg(e)));
+  const reload = () => {
+    api.get("/tax-forecast?year=2026").then(setFc).catch((e) => toast.error(errMsg(e)));
+    api.get("/taxposture?year=2026").then(setPosture).catch(() => {});
+  };
   useEffect(() => { reload(); setLoaded(true); }, []);
 
   const savePay = async () => {
@@ -42,6 +46,58 @@ export default function TaxForecast() {
             <p className="text-[15px]">{fc.pace_note}</p>
           </div>
         </Card>
+      )}
+      {posture && (
+        <div className="space-y-4" data-testid="tax-posture">
+          {(posture.nudges || []).map((n, i) => (
+            <Card key={i} className={`p-4 ${n.severity === "high" ? "border-rose-500/30 bg-rose-500/5" : n.severity === "medium" ? "border-amber-500/30 bg-amber-500/5" : "border-[#222838]"}`}>
+              <p className="text-sm text-gray-200">{n.text}</p>
+            </Card>
+          ))}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            <Card className="p-4">
+              <div className="text-xs text-gray-500">Next deadline</div>
+              <div className="text-lg font-semibold">
+                {posture.next_deadline ? `${posture.next_deadline.quarter} · ${posture.next_deadline.due}` : "—"}
+              </div>
+              {posture.next_deadline && (
+                <div className="text-xs text-amber-400">{posture.next_deadline.days_left} days left</div>
+              )}
+            </Card>
+            <Card className="p-4">
+              <div className="text-xs text-gray-500">Recommended payment</div>
+              <div className="text-lg font-semibold text-emerald-400">{money(posture.recommended_payment_cents)}</div>
+              <div className="text-xs text-gray-500">{posture.recommended_basis}</div>
+            </Card>
+            <Card className="p-4">
+              <div className="text-xs text-gray-500">Projected April balance</div>
+              <div className={`text-lg font-semibold ${posture.projected_april_balance_cents > 0 ? "text-rose-400" : "text-emerald-400"}`}>
+                {money(Math.abs(posture.projected_april_balance_cents))} {posture.projected_april_balance_cents > 0 ? "owed" : "refund"}
+              </div>
+              <div className="text-xs text-gray-500">at current pace</div>
+            </Card>
+            <Card className="p-4">
+              <div className="text-xs text-gray-500">Safe harbor</div>
+              <div className="text-lg font-semibold">{money(posture.safe_harbor_cents)}</div>
+              <div className="text-xs text-gray-500">100% of prior-year tax</div>
+            </Card>
+          </div>
+          <Card className="p-4">
+            <div className="text-sm font-medium mb-2">Quarterly deadlines</div>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+              {(posture.deadlines || []).map((d) => (
+                <div key={d.quarter} className={`rounded-md border p-2.5 text-xs ${d.days_left < 0 ? "border-[#222838] opacity-60" : d.days_left <= 14 && d.remaining_cents > 0 ? "border-amber-500/40" : "border-[#222838]"}`}>
+                  <div className="font-medium">{d.quarter} · due {d.due}</div>
+                  <div className="text-gray-500">{d.days_left >= 0 ? `${d.days_left} days left` : "past"}</div>
+                  <div className="mt-1">{d.remaining_cents > 0
+                    ? <span className="text-amber-400">{money(d.remaining_cents)} unpaid</span>
+                    : <span className="text-emerald-400">covered</span>}</div>
+                </div>
+              ))}
+            </div>
+          </Card>
+          <p className="text-[11px] text-gray-600">{posture.disclaimer}</p>
+        </div>
       )}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="p-4"><div className="text-xs text-gray-500">Projected year owed</div>
