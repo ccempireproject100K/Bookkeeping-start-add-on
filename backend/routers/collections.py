@@ -8,8 +8,9 @@ invoice and executes the due steps it hasn't seen yet:
 - late_fee: posts DR 1200 / CR 4090 and grows the invoice balance
 - pause_service: flags the customer with collections_hold
 
-Nothing runs on a timer by itself — the owner hits Run (or will wire a cron
-later). Every action is audited. Preview shows what a run would do.
+Nothing runs on a timer by itself unless the in-app scheduler is enabled
+(see backend/lib/scheduler.py and ENABLE_SCHEDULER) — otherwise the owner
+hits Run. Every action is audited. Preview shows what a run would do.
 """
 from datetime import date
 from typing import Optional
@@ -189,6 +190,23 @@ async def write_config(body: ConfigBody, user: dict = Depends(require("ops:manag
 
 
 # ---------------- Pipeline & runs ----------------
+@router.get("/scheduler/status")
+async def scheduler_status(user: dict = Depends(require("ops:manage"))):
+    """Is the in-app scheduler running, when is the next autopilot run,
+    and what did recent runs do? Owner/manager only."""
+    from lib import scheduler as sched
+    runs = await db.scheduler_runs.find(
+        {"job": "collections-autopilot"},
+        {"_id": 0}).sort("started_at", -1).limit(10).to_list(10)
+    st = sched.status()
+    return {"scheduler_env_enabled": sched.scheduler_enabled(),
+            "running": st["running"],
+            "instance_id": st["instance_id"],
+            "next_run": st["next_run"],
+            "last_outcome": st["last_outcome"],
+            "recent_runs": runs}
+
+
 @router.get("/pipeline")
 async def pipeline(user: dict = Depends(require("ledger:read"))):
     cfg = await get_config(user)
