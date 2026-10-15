@@ -46,6 +46,11 @@ export default function Banking() {
   const [recForm, setRecForm] = useState({ statement_date: today(), statement_ending_balance: "", txn_ids: [] });
   const [feed, setFeed] = useState(null);
   const [feedBusy, setFeedBusy] = useState(false);
+  const [manOpen, setManOpen] = useState(false);
+  const [manForm, setManForm] = useState({ txn_date: today(), description: "", amount: "", direction: "in" });
+  const [matchTxn, setMatchTxn] = useState(null);
+  const [candidates, setCandidates] = useState([]);
+  const [matchId, setMatchId] = useState("");
 
   const loadAccounts = () => api.get("/banking/accounts").then((a) => {
     setAccounts(a);
@@ -123,6 +128,47 @@ export default function Banking() {
   const doTransfer = async () => {
     try { await api.post("/banking/transfer", { ...xfer, amount: parseFloat(xfer.amount) || 0 }); toast.success("Transfer posted"); setXferOpen(false); setXfer({ from_account_id: "", to_account_id: "", amount: "" }); loadAccounts(); loadTxns(selected); }
     catch (e) { toast.error(errMsg(e)); }
+  };
+  const doAddManual = async () => {
+    const amt = parseFloat(manForm.amount) || 0;
+    if (!manForm.description.trim() || !amt) { toast.error("Enter a description and an amount"); return; }
+    try {
+      const signed = manForm.direction === "in" ? Math.abs(amt) : -Math.abs(amt);
+      await api.post("/banking/transactions", {
+        bank_account_id: selected, txn_date: manForm.txn_date,
+        description: manForm.description.trim(), amount: signed,
+      });
+      toast.success("Transaction added");
+      setManOpen(false);
+      setManForm({ txn_date: today(), description: "", amount: "", direction: "in" });
+      loadTxns(selected);
+    } catch (e) { toast.error(errMsg(e)); }
+  };
+  const openMatch = async (t) => {
+    setMatchTxn(t); setMatchId(""); setCandidates([]);
+    try {
+      const entries = await api.get("/ledger/journal-entries?status=posted&limit=200");
+      const target = Math.abs(t.amount_cents);
+      const tDate = new Date(t.txn_date).getTime();
+      const ranked = entries
+        .filter((e) => e.source !== "bank_txn") // already posted FROM a bank txn — never a match candidate
+        .map((e) => {
+          const amtDiff = Math.abs((e.total_cents || 0) - target);
+          const dayDiff = Math.abs((new Date(e.entry_date).getTime() - tDate) / 86400000);
+          return { ...e, _amtDiff: amtDiff, _score: amtDiff + dayDiff * 100 };
+        })
+        .sort((a, b) => a._score - b._score)
+        .slice(0, 25);
+      setCandidates(ranked);
+    } catch (e) { toast.error(errMsg(e)); }
+  };
+  const doMatch = async () => {
+    if (!matchId) { toast.error("Pick a journal entry to match"); return; }
+    try {
+      const r = await api.post(`/banking/transactions/${matchTxn.id}/match?entry_id=${matchId}`, {});
+      toast.success(`Matched to entry ${r.entry_number}`);
+      setMatchTxn(null); setMatchId(""); loadTxns(selected);
+    } catch (e) { toast.error(errMsg(e)); }
   };
   const addRule = async () => {
     try { await api.post("/banking/rules", ruleForm); toast.success("Rule added"); setRuleForm({ contains: "", category_code: "" }); api.get("/banking/rules").then(setRules); }
@@ -235,6 +281,7 @@ export default function Banking() {
             ))}
             <div className="flex-1" />
             {canManage && tab === "transactions" && <>
+              <Button data-testid="btn-add-txn" variant="outline" size="sm" onClick={() => { setManForm({ txn_date: today(), description: "", amount: "", direction: "in" }); setManOpen(true); }} className="border-[#222838]"><Plus size={14} className="mr-1" />Add Transaction</Button>
               <Button data-testid="btn-import" variant="outline" size="sm" onClick={() => setImportOpen(true)} className="border-[#222838]"><Upload size={14} className="mr-1" />Import CSV</Button>
               <Button data-testid="btn-reconcile" size="sm" onClick={() => { setRecForm({ statement_date: today(), statement_ending_balance: "", txn_ids: txns.filter((t) => t.status !== "unmatched" && !t.reconciled).map((t) => t.id) }); setRecOpen(true); }} className="bg-emerald-600 hover:bg-emerald-500 text-black"><CheckCircle2 size={14} className="mr-1" />Reconcile</Button>
             </>}
@@ -260,7 +307,12 @@ export default function Banking() {
                       <td className="px-4 py-3 text-gray-400">{t.category_code || "—"}</td>
                       <td className="px-4 py-3"><span className={`px-2 py-0.5 rounded-full text-xs border capitalize ${STATUS_CLS[t.status] || ""}`}>{t.reconciled ? "reconciled" : t.status}</span></td>
                       {canManage && <td className="px-4 py-3 text-right">
-                        {t.status === "unmatched" && <Button size="sm" className="h-7 bg-amber-600 hover:bg-amber-500 text-black" data-testid={`categorize-${t.id}`} onClick={() => { setCatTxn(t); setCatCode(t.suggested_code || ""); }}>Categorize</Button>}
+                        {t.status === "unmatched" && (
+                          <div className="flex justify-end gap-1">
+                            <Button size="sm" variant="ghost" className="h-7 text-sky-400 hover:text-sky-300" data-testid={`match-${t.id}`} onClick={() => openMatch(t)}>Match</Button>
+                            <Button size="sm" className="h-7 bg-amber-600 hover:bg-amber-500 text-black" data-testid={`categorize-${t.id}`} onClick={() => { setCatTxn(t); setCatCode(t.suggested_code || ""); }}>Categorize</Button>
+                          </div>
+                        )}
                       </td>}
                     </tr>
                   ))}
@@ -378,6 +430,50 @@ export default function Banking() {
             </Select></div>
           <div><Label className="text-xs">Amount ($)</Label><Input data-testid="xfer-amount" value={xfer.amount} onChange={(e) => setXfer({ ...xfer, amount: e.target.value })} className="bg-[#0F1218] border-[#222838] font-mono" /></div>
           <DialogFooter><Button data-testid="xfer-save" onClick={doTransfer} className="bg-amber-600 hover:bg-amber-500 text-black">Transfer</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Manual transaction dialog */}
+      <Dialog open={manOpen} onOpenChange={setManOpen}>
+        <DialogContent className="bg-[#14171E] border-[#222838]">
+          <DialogHeader><DialogTitle>Add Transaction — {acct?.name}</DialogTitle></DialogHeader>
+          <div className="grid grid-cols-2 gap-3">
+            <div><Label className="text-xs">Date</Label><Input data-testid="mantxn-date" type="date" value={manForm.txn_date} onChange={(e) => setManForm({ ...manForm, txn_date: e.target.value })} className="bg-[#0F1218] border-[#222838]" /></div>
+            <div><Label className="text-xs">Direction</Label>
+              <Select value={manForm.direction} onValueChange={(v) => setManForm({ ...manForm, direction: v })}>
+                <SelectTrigger data-testid="mantxn-direction" className="bg-[#0F1218] border-[#222838]"><SelectValue /></SelectTrigger>
+                <SelectContent className="bg-[#14171E] border-[#222838] text-gray-100"><SelectItem value="in">Money in</SelectItem><SelectItem value="out">Money out</SelectItem></SelectContent>
+              </Select></div>
+          </div>
+          <div><Label className="text-xs">Description</Label><Input data-testid="mantxn-desc" value={manForm.description} onChange={(e) => setManForm({ ...manForm, description: e.target.value })} placeholder="e.g. Supply run — Home Depot" className="bg-[#0F1218] border-[#222838]" /></div>
+          <div><Label className="text-xs">Amount ($)</Label><Input data-testid="mantxn-amount" value={manForm.amount} onChange={(e) => setManForm({ ...manForm, amount: e.target.value })} placeholder="0.00" className="bg-[#0F1218] border-[#222838] font-mono" /></div>
+          <DialogFooter><Button data-testid="mantxn-save" onClick={doAddManual} className="bg-amber-600 hover:bg-amber-500 text-black">Add Transaction</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Match-to-entry dialog */}
+      <Dialog open={!!matchTxn} onOpenChange={(o) => !o && setMatchTxn(null)}>
+        <DialogContent className="bg-[#14171E] border-[#222838] max-w-lg">
+          <DialogHeader><DialogTitle>Match Bank Transaction</DialogTitle></DialogHeader>
+          {matchTxn && <div className="text-sm text-gray-400">{matchTxn.description} · <span className="font-mono">{money(matchTxn.amount_cents)}</span> · {fmtDate(matchTxn.txn_date)}</div>}
+          <p className="text-xs text-gray-500">Link this to a journal entry already in your books (e.g. a sale recorded at the register). Ranked by amount and date closeness.</p>
+          <div className="max-h-64 overflow-y-auto space-y-1" data-testid="match-candidates">
+            {candidates.map((c, i) => (
+              <button key={c.id} onClick={() => setMatchId(c.id)} data-testid={`match-pick-${c.id}`}
+                className={`w-full text-left px-3 py-2 rounded-lg border text-sm transition-colors ${matchId === c.id ? "border-amber-500/60 bg-amber-500/10" : "border-[#222838] hover:bg-[#161b25]"}`}>
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-gray-100 font-mono">{c.number}</span>
+                  <span className="font-mono text-gray-300">{money(c.total_cents)}</span>
+                </div>
+                <div className="flex items-center justify-between gap-2 mt-0.5">
+                  <span className="text-xs text-gray-500 truncate">{c.memo || c.source}</span>
+                  <span className="text-xs text-gray-500 whitespace-nowrap">{fmtDate(c.entry_date)}{i === 0 && c._amtDiff === 0 && <span className="ml-2 text-emerald-400">best match</span>}</span>
+                </div>
+              </button>
+            ))}
+            {candidates.length === 0 && <div className="text-gray-500 text-sm py-6 text-center">No candidate entries found.</div>}
+          </div>
+          <DialogFooter><Button data-testid="match-save" disabled={!matchId} onClick={doMatch} className="bg-sky-600 hover:bg-sky-500 text-black">Match Selected</Button></DialogFooter>
         </DialogContent>
       </Dialog>
 
