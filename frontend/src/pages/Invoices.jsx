@@ -32,6 +32,8 @@ export default function Invoices() {
   const [lines, setLines] = useState([{ name: "", revenue_code: "4020", amount: "" }]);
   const [payInv, setPayInv] = useState(null);
   const [pay, setPay] = useState({ amount: "", payment_method: "bank", credit_id: "" });
+  const [juris, setJuris] = useState([]);
+  const [jurisId, setJurisId] = useState("");
 
   const load = () => api.get("/invoices").then(setInvoices).catch(() => setInvoices([]));
   const loadCredits = () => api.get("/invoices/customer-credits").then(setCredits).catch(() => {});
@@ -41,11 +43,24 @@ export default function Invoices() {
     try {
       await api.post("/invoices", {
         client_name: client, tax: parseFloat(tax) || 0,
+        tax_jurisdiction_id: jurisId || null,
         lines: lines.filter((l) => l.name && l.amount).map((l) => ({ kind: "service", name: l.name, revenue_code: l.revenue_code, amount: parseFloat(l.amount) || 0 })),
       });
       toast.success("Invoice issued");
-      setOpen(false); setClient(""); setTax(""); setLines([{ name: "", revenue_code: "4020", amount: "" }]); load();
+      setOpen(false); setClient(""); setTax(""); setJurisId(""); setLines([{ name: "", revenue_code: "4020", amount: "" }]); load();
     } catch (e) { toast.error(errMsg(e)); }
+  };
+  const openNewInvoice = () => {
+    setOpen(true); setJurisId("");
+    api.get("/sales-tax/jurisdictions").then((j) => setJuris((j || []).filter((x) => x.active))).catch(() => setJuris([]));
+  };
+  const pickJurisdiction = (id) => {
+    setJurisId(id);
+    if (!id) return;
+    const j = juris.find((x) => x.id === id);
+    if (!j) return;
+    const subtotal = lines.filter((l) => l.name && l.amount).reduce((s, l) => s + (parseFloat(l.amount) || 0), 0);
+    setTax(((subtotal * j.rate_pct) / 100).toFixed(2));
   };
   const doPay = async () => {
     try {
@@ -61,7 +76,7 @@ export default function Invoices() {
   return (
     <div className="animate-rise">
       <PageHeader title="Invoices" subtitle="Receivables — partial payments, credits & statements" testid="invoices-page">
-        {isOwner && <Button data-testid="btn-new-invoice" onClick={() => setOpen(true)} className="bg-amber-600 hover:bg-amber-500 text-black font-semibold"><Plus size={16} className="mr-1" /> New Invoice</Button>}
+        {isOwner && <Button data-testid="btn-new-invoice" onClick={openNewInvoice} className="bg-amber-600 hover:bg-amber-500 text-black font-semibold"><Plus size={16} className="mr-1" /> New Invoice</Button>}
       </PageHeader>
 
       <Tabs defaultValue="invoices">
@@ -159,7 +174,16 @@ export default function Invoices() {
             ))}
             <Button variant="ghost" size="sm" onClick={() => setLines([...lines, { name: "", revenue_code: "4020", amount: "" }])} className="text-amber-400 hover:bg-amber-500/10"><FilePlus size={14} className="mr-1" />Add line</Button>
           </div>
-          <div><Label className="text-xs">Tax ($)</Label><Input data-testid="invoice-tax" value={tax} onChange={(e) => setTax(e.target.value)} className="bg-[#0F1218] border-[#222838] w-32 font-mono" /></div>
+          <div className="grid grid-cols-2 gap-3">
+            <div><Label className="text-xs">Tax jurisdiction (optional)</Label>
+              <Select value={jurisId} onValueChange={pickJurisdiction}>
+                <SelectTrigger data-testid="invoice-jurisdiction" className="bg-[#0F1218] border-[#222838]"><SelectValue placeholder="None" /></SelectTrigger>
+                <SelectContent className="bg-[#14171E] border-[#222838] text-gray-100">
+                  {juris.map((j) => <SelectItem key={j.id} value={j.id}>{j.name} · {j.rate_pct}%</SelectItem>)}
+                </SelectContent>
+              </Select></div>
+            <div><Label className="text-xs">Tax ($)</Label><Input data-testid="invoice-tax" value={tax} onChange={(e) => setTax(e.target.value)} className="bg-[#0F1218] border-[#222838] font-mono" /></div>
+          </div>
           <DialogFooter><Button data-testid="invoice-save" onClick={create} className="bg-amber-600 hover:bg-amber-500 text-black">Issue Invoice</Button></DialogFooter>
         </DialogContent>
       </Dialog>

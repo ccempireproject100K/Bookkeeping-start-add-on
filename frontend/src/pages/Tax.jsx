@@ -11,6 +11,8 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Plus, Trash2, Send, FileCheck2, AlertTriangle } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import SalesTaxTab from "@/components/SalesTaxTab";
 
 const ENTITY_LABEL = {
   individual: "Individual", sole_prop: "Sole proprietor", llc: "LLC",
@@ -112,6 +114,12 @@ export default function Tax() {
         {canWrite && <Button data-testid="tax-new-contractor" onClick={() => setShowNew((x) => !x)} className="bg-amber-600 hover:bg-amber-500 text-black font-semibold"><Plus size={16} className="mr-1" /> Add contractor</Button>}
       </PageHeader>
 
+      <Tabs defaultValue="contractors">
+        <TabsList className="bg-[#14171E] border border-[#222838] mb-4">
+          <TabsTrigger value="contractors" data-testid="tab-contractors">Contractors & 1099s</TabsTrigger>
+          <TabsTrigger value="sales" data-testid="tab-sales-tax">Sales Tax</TabsTrigger>
+        </TabsList>
+        <TabsContent value="contractors">
       {tb && !tb.configured && (
         <div className="mb-4 flex gap-3 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-gray-300" data-testid="tax-tb-banner">
           <AlertTriangle size={16} className="mt-0.5 shrink-0 text-amber-400" />
@@ -283,6 +291,11 @@ export default function Tax() {
       <p className="text-xs text-gray-600 mt-2">
         1099-NEC is required for non-corporate contractors paid ≥ {dollars(summary.threshold)} in the year. E-filing creates a draft in TaxBandits — you review and transmit there. This app never files with the IRS directly.
       </p>
+        </TabsContent>
+        <TabsContent value="sales">
+          <SalesTaxTab canWrite={canWrite} />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

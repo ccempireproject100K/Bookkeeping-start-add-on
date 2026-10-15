@@ -14,7 +14,7 @@ from routers import (auth, ledger, products, pos, invoices, cashclose, dashboard
                      bills, aging, giftcards, commissions, customers, jobs,
                      banking, vendors, reports, estimates,
                      recurring_invoices, reminders, backup, bankfeed, copilot,
-                     time, portal, payroll, budget, tax, edition, totp, audit,
+                     time, portal, payroll, budget, tax, sales_tax, edition, totp, audit,
                      webauthn, alerts, invites)
 
 logging.basicConfig(level=logging.INFO)
@@ -41,7 +41,7 @@ for r in (auth.router, ledger.router, products.router, pos.router,
           reports.router, estimates.router,
           recurring_invoices.router, reminders.router, backup.router,
           bankfeed.router, copilot.router, time.router, portal.router,
-          payroll.router, budget.router, tax.router, edition.router,
+          payroll.router, budget.router, tax.router, sales_tax.router, edition.router,
           totp.router, audit.router, webauthn.router, alerts.router,
           invites.router):
     api_router.include_router(r)
