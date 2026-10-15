@@ -1,199 +1,235 @@
-import uuid
+"""Purchase orders: the missing procurement leg.
+
+PO lifecycle: draft -> approved -> partially_received -> received -> billed
+(cancelled any time before billed).
+
+- Receiving posts DR 1300 (Inventory) / CR 2020 (Goods Received Not Invoiced)
+  and updates product quantities with moving-average cost.
+- Converting to bill clears GRNI: DR 2020 / CR 2010 (Accounts Payable)
+  via the standard bill flow.
+"""
+from datetime import date
+from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
-from pymongo import ReturnDocument
+from pydantic import BaseModel
 
-from lib.auth import Principal, require
-from lib.dates import now_iso, today_iso
-from lib.db import db
-from lib.mailer import send_email
-from lib.money import create_txn
-from lib.repo import Scoped
-from lib.stock import load_product, post_movement
-from models.inventory import OutboxEmail, POApprovalIn, POCreate, POEmailIn, POLineIn, POStatusUpdate, PurchaseOrder, ReceiveIn
+from db import db
+from lib import ledger as L
+from lib import posting as P
+from lib.audit import audit
+from lib.auth import require
+from lib.base import Scoped, new_id, now_iso, today_str, to_cents, cents_to_dollars
 
-router = APIRouter()
+router = APIRouter(prefix="/purchase-orders", tags=["purchase-orders"])
 
-TRANSITIONS = {"draft": {"ordered", "cancelled"}, "ordered": {"received", "cancelled"}, "partial": {"received", "cancelled"}}
+GRNI_CODE = "2020"  # Goods Received Not Invoiced
+INV_CODE = "1300"  # Inventory — Retail
 
-
-def needs_approval(p: Principal, doc: dict) -> bool:
-    """Orders above the owner's limit can't be ordered/emailed until an owner approves them."""
-    limit = float(p.settings.get("po_approval_limit") or 0)
-    return doc["status"] == "draft" and limit > 0 and doc["total"] > limit and not doc.get("approved_at")
+STATUSES = ["draft", "approved", "partially_received", "received", "billed", "cancelled"]
 
 
-def to_po(p: Principal, doc: dict) -> PurchaseOrder:
-    return PurchaseOrder(**{k: v for k, v in doc.items() if k != "tenant_id"}, awaiting_approval=needs_approval(p, doc))
+def _pos(user):
+    return Scoped(db.purchase_orders, user["tenant_id"])
 
 
-def guard_approval(p: Principal, doc: dict) -> None:
-    if needs_approval(p, doc):
-        raise HTTPException(403, f"{doc['number']} is over the ${float(p.settings['po_approval_limit']):,.2f} limit and needs owner approval first")
+async def _ensure_grni(user):
+    """Create the GRNI accrual account for this tenant if missing."""
+    acc = await Scoped(db.accounts, user["tenant_id"]).find_one({"code": GRNI_CODE})
+    if not acc:
+        await Scoped(db.accounts, user["tenant_id"]).insert_one({
+            "id": new_id(), "code": GRNI_CODE,
+            "name": "Goods Received Not Invoiced", "type": "liability",
+            "normal_balance": "credit", "parent_code": None,
+            "is_system": True, "archived": False, "created_at": now_iso(),
+        })
 
 
-async def create_po(p: Principal, supplier: dict, lines: list[POLineIn], expected_date: str | None, notes: str) -> PurchaseOrder:
-    out_lines = []
-    for ln in lines:
-        prod = await Scoped("products", p).find_one({"id": ln.product_id})
+def _totals(lines):
+    return sum(l["quantity"] * l["unit_cost_cents"] for l in lines)
+
+
+def _enrich(po):
+    po = dict(po)
+    po.pop("_id", None)
+    po["total_cents"] = _totals(po.get("lines", []))
+    po["received_cents"] = sum(l.get("received_qty", 0) * l["unit_cost_cents"]
+                               for l in po.get("lines", []))
+    return po
+
+
+class POLineIn(BaseModel):
+    product_id: str
+    quantity: int
+    unit_cost: float
+
+
+class POCreate(BaseModel):
+    vendor: str
+    vendor_id: Optional[str] = None
+    expected_date: Optional[str] = None
+    notes: str = ""
+    lines: List[POLineIn]
+
+
+@router.get("")
+async def list_pos(status: str = "", user: dict = Depends(require("ledger:read"))):
+    q = {"status": status} if status in STATUSES else {}
+    rows = await _pos(user).find_list(q, sort=[("created_at", -1)], limit=500)
+    return [_enrich(r) for r in rows]
+
+
+@router.post("")
+async def create_po(body: POCreate, user: dict = Depends(require("ops:manage"))):
+    if not body.vendor.strip():
+        raise HTTPException(422, "Vendor is required")
+    if not body.lines:
+        raise HTTPException(422, "Add at least one line")
+    lines = []
+    for ln in body.lines:
+        if ln.quantity <= 0 or ln.unit_cost < 0:
+            raise HTTPException(422, "Quantities must be positive")
+        prod = await Scoped(db.products, user["tenant_id"]).find_one({"id": ln.product_id})
         if not prod:
-            raise HTTPException(400, "Product not found")
-        if prod["tracking_mode"] == "serial":
-            raise HTTPException(400, f"{prod['name']} is serial-tracked — receive it with Restock so each serial is scanned")
-        out_lines.append({"product_id": prod["id"], "sku": prod.get("sku"), "name": prod["name"], "quantity": ln.quantity, "unit_cost": ln.unit_cost, "received_qty": 0})
-    t = await db.tenants.find_one_and_update({"id": p.tenant_id}, {"$inc": {"po_seq": 1}}, return_document=ReturnDocument.AFTER)
-    doc = {"id": str(uuid.uuid4()), "number": f"PO-{t['po_seq']:05d}", "supplier_id": supplier["id"], "supplier_name": supplier["name"],
-           "status": "draft", "lines": out_lines, "total": round(sum(l["quantity"] * l["unit_cost"] for l in out_lines), 2),
-           "expected_date": expected_date, "notes": notes, "created_by": p.name, "created_at": now_iso(),
-           "ordered_at": None, "received_at": None}
-    return to_po(p, await Scoped("purchase_orders", p).insert(doc))
+            raise HTTPException(404, f"Product not found: {ln.product_id}")
+        lines.append({"product_id": ln.product_id, "product_name": prod.get("name"),
+                      "quantity": ln.quantity, "received_qty": 0,
+                      "unit_cost_cents": to_cents(ln.unit_cost)})
+    doc = {"id": new_id(), "number": f"PO-{(await _pos(user).count_documents({})) + 1:04d}",
+           "vendor": body.vendor.strip(), "vendor_id": body.vendor_id,
+           "expected_date": body.expected_date, "notes": body.notes.strip(),
+           "lines": lines, "status": "draft", "bill_id": None,
+           "created_at": now_iso()}
+    await _pos(user).insert_one(doc)
+    await audit(user, "po.create", "purchase_order", doc["id"],
+                {"vendor": doc["vendor"], "total_cents": _totals(lines)})
+    return _enrich(doc)
 
 
-@router.get("/purchase-orders", response_model=list[PurchaseOrder])
-async def list_pos(status: str = "", p: Principal = Depends(require("po:read"))):
-    return [to_po(p, d) for d in await Scoped("purchase_orders", p).find({"status": status} if status else {}, sort=[("created_at", -1)])]
-
-
-@router.post("/purchase-orders", response_model=PurchaseOrder)
-async def create_purchase_order(body: POCreate, p: Principal = Depends(require("po:write"))):
-    supplier = await Scoped("suppliers", p).find_one({"id": body.supplier_id})
-    if not supplier:
-        raise HTTPException(400, "Supplier not found")
-    return await create_po(p, supplier, body.lines, body.expected_date, body.notes)
-
-
-async def receive_lines(p: Principal, doc: dict, qty: dict[str, int], cost: dict[str, float], close: bool) -> dict:
-    """Post restock movements + one expense per category for what actually arrived; track backorders per line.
-    Optimistic lock on `rev` so two people receiving the same PO can't double-post."""
-    lines = [dict(l, received_qty=l.get("received_qty", 0)) for l in doc["lines"]]
-    for l in lines:
-        q = qty.get(l["product_id"], 0)
-        if q > l["quantity"] - l["received_qty"]:
-            raise HTTPException(400, f"{l['name']}: only {l['quantity'] - l['received_qty']} still outstanding")
-    if not any(qty.get(l["product_id"], 0) for l in lines) and not close:
-        raise HTTPException(400, "Enter at least one received quantity")
-    now = now_iso()
-    for l in lines:
-        l["received_qty"] += qty.get(l["product_id"], 0)
-    complete = all(l["received_qty"] >= l["quantity"] for l in lines)
-    status = "received" if complete or close else "partial"
-    patch = {"lines": lines, "status": status, "rev": doc.get("rev", 0) + 1, **({"received_at": now} if status == "received" else {}),
-             **({} if doc.get("first_received_at") else {"first_received_at": now})}
-    updated = await Scoped("purchase_orders", p).update({"id": doc["id"], "rev": doc.get("rev", 0) if "rev" in doc else None, "status": doc["status"]} if "rev" in doc
-                                                        else {"id": doc["id"], "rev": {"$exists": False}, "status": doc["status"]}, {"$set": patch})
-    if not updated:
-        raise HTTPException(409, "Order was modified concurrently, refresh and retry")
-    by_cat: dict[str, tuple[float, list[str]]] = {}
-    for l in lines:
-        q = qty.get(l["product_id"], 0)
-        if q <= 0:
-            continue
-        prod = await load_product(p, l["product_id"])
-        uc = cost.get(l["product_id"], l["unit_cost"])
-        mv = await post_movement(p, prod, "restock", q, unit_cost=uc, supplier_name=doc["supplier_name"],
-                                 lot_number=doc["number"] if prod["tracking_mode"] == "lot" else None,
-                                 note=f"Received on {doc['number']}" + ("" if complete else " (partial)"), update_avg_cost=True)
-        cat = p.settings["expense_category_retail" if prod["type"] == "retail" else "expense_category_supply"]
-        amt, ids = by_cat.get(cat, (0.0, []))
-        by_cat[cat] = (amt + q * uc, ids + [mv["id"]])
-    for cat, (amt, ids) in by_cat.items():
-        if amt > 0:
-            await create_txn(p, "expense", cat, amt, today_iso(p.settings.get("timezone")), f"{doc['number']} · {doc['supplier_name']}", source="inventory", movement_ids=ids, capitalized=True)
-    return updated
-
-
-@router.post("/purchase-orders/{id}/status", response_model=PurchaseOrder)
-async def update_status(id: str, body: POStatusUpdate, p: Principal = Depends(require("po:write"))):
-    pos = Scoped("purchase_orders", p)
-    doc = await pos.find_one({"id": id})
-    if not doc:
+@router.get("/{po_id}")
+async def get_po(po_id: str, user: dict = Depends(require("ledger:read"))):
+    po = await _pos(user).find_one({"id": po_id})
+    if not po:
         raise HTTPException(404, "Purchase order not found")
-    if body.status not in TRANSITIONS.get(doc["status"], set()):
-        raise HTTPException(400, f"Cannot move a {doc['status']} order to {body.status}")
-    if body.status == "received":  # receive everything still outstanding
-        rest = {l["product_id"]: l["quantity"] - l.get("received_qty", 0) for l in doc["lines"]}
-        return to_po(p, await receive_lines(p, doc, rest, {}, close=True))
-    if body.status == "ordered":
-        guard_approval(p, doc)
-    now = now_iso()
-    patch: dict = {"status": body.status, **({"ordered_at": now} if body.status == "ordered" else {})}
-    updated = await pos.update({"id": id, "status": doc["status"]}, {"$set": patch})
-    if not updated:
-        raise HTTPException(409, "Order was modified concurrently, refresh and retry")
-    return to_po(p, updated)
+    return _enrich(po)
 
 
-@router.post("/purchase-orders/{id}/approval", response_model=PurchaseOrder)
-async def approval(id: str, body: POApprovalIn, p: Principal = Depends(require("po:approve"))):
-    """Owner approves (unlocks ordering/emailing) or rejects (cancels) an over-limit draft."""
-    doc = await Scoped("purchase_orders", p).find_one({"id": id})
-    if not doc:
+@router.post("/{po_id}/approve")
+async def approve_po(po_id: str, user: dict = Depends(require("ops:manage"))):
+    po = await _pos(user).find_one({"id": po_id})
+    if not po:
         raise HTTPException(404, "Purchase order not found")
-    if doc["status"] != "draft":
-        raise HTTPException(400, "Only drafts can be approved or rejected")
-    now = now_iso()
-    patch = ({"approved_by": p.name, "approved_at": now} if body.approve
-             else {"status": "cancelled", "notes": (doc.get("notes", "") + f"\nRejected by {p.name}: {body.note}").strip()})
-    updated = await Scoped("purchase_orders", p).update({"id": id, "status": "draft"}, {"$set": patch})
-    if not updated:
-        raise HTTPException(409, "Order was modified concurrently, refresh and retry")
-    return to_po(p, updated)
+    if po["status"] != "draft":
+        raise HTTPException(409, "Only draft POs can be approved")
+    await _pos(user).update_one({"id": po_id}, {"$set": {"status": "approved"}})
+    await audit(user, "po.approve", "purchase_order", po_id, {})
+    return _enrich(await _pos(user).find_one({"id": po_id}))
 
 
-@router.post("/purchase-orders/{id}/receive", response_model=PurchaseOrder)
-async def receive(id: str, body: ReceiveIn, p: Principal = Depends(require("po:write"))):
-    """Partial receiving: post what arrived; the rest stays open as a backorder (or is closed)."""
-    doc = await Scoped("purchase_orders", p).find_one({"id": id})
-    if not doc:
+class ReceiveLine(BaseModel):
+    product_id: str
+    quantity: int
+
+
+class ReceiveBody(BaseModel):
+    lines: List[ReceiveLine]
+    receive_date: Optional[str] = None
+
+
+@router.post("/{po_id}/receive")
+async def receive_po(po_id: str, body: ReceiveBody,
+                     user: dict = Depends(require("ops:manage"))):
+    po = await _pos(user).find_one({"id": po_id})
+    if not po:
         raise HTTPException(404, "Purchase order not found")
-    if doc["status"] not in ("ordered", "partial"):
-        raise HTTPException(400, f"A {doc['status']} order can't be received")
-    known = {l["product_id"] for l in doc["lines"]}
-    if any(l.product_id not in known for l in body.lines):
-        raise HTTPException(400, "Line not on this order")
-    qty = {l.product_id: l.quantity for l in body.lines}
-    cost = {l.product_id: l.unit_cost for l in body.lines if l.unit_cost is not None}
-    return to_po(p, await receive_lines(p, doc, qty, cost, body.close_backorder))
+    if po["status"] not in ("approved", "partially_received"):
+        raise HTTPException(409, "PO must be approved before receiving")
+    if not body.lines:
+        raise HTTPException(422, "Nothing to receive")
+    await _ensure_grni(user)
+    rdate = body.receive_date or today_str()
+    tid = user["tenant_id"]
+    total_cents = 0
+    for rl in body.lines:
+        if rl.quantity <= 0:
+            raise HTTPException(422, "Receive quantities must be positive")
+        line = next((l for l in po["lines"] if l["product_id"] == rl.product_id), None)
+        if not line:
+            raise HTTPException(404, f"Line not on PO: {rl.product_id}")
+        if line["received_qty"] + rl.quantity > line["quantity"]:
+            raise HTTPException(409, f"Cannot receive more than ordered for {line['product_name']}")
+        # update product qty + moving-average cost
+        prod = await Scoped(db.products, tid).find_one({"id": rl.product_id})
+        old_qty = int(prod.get("quantity_on_hand") or 0)
+        old_cost = int(prod.get("unit_cost_cents") or 0)
+        new_qty = old_qty + rl.quantity
+        new_cost = round((old_qty * old_cost + rl.quantity * line["unit_cost_cents"]) / new_qty) if new_qty else line["unit_cost_cents"]
+        await Scoped(db.products, tid).update_one(
+            {"id": rl.product_id},
+            {"$set": {"quantity_on_hand": new_qty, "unit_cost_cents": new_cost}})
+        line["received_qty"] += rl.quantity
+        total_cents += rl.quantity * line["unit_cost_cents"]
+    # DR Inventory / CR GRNI
+    if total_cents > 0:
+        await L.post_journal_entry(db, tid, user, {
+            "entry_date": rdate, "source": "po_receive", "source_ref": po_id,
+            "memo": f"PO {po['number']} received — {po['vendor']}",
+            "lines": [P.dr(INV_CODE, total_cents, "Inventory received"),
+                      P.cr(GRNI_CODE, total_cents, "Goods received not invoiced")],
+        }, status="posted")
+    fully = all(l["received_qty"] >= l["quantity"] for l in po["lines"])
+    await _pos(user).update_one(
+        {"id": po_id},
+        {"$set": {"lines": po["lines"],
+                  "status": "received" if fully else "partially_received"}})
+    await audit(user, "po.receive", "purchase_order", po_id,
+                {"received_cents": total_cents})
+    return _enrich(await _pos(user).find_one({"id": po_id}))
 
 
-@router.post("/purchase-orders/{id}/email", response_model=OutboxEmail)
-async def email_po(id: str, body: POEmailIn, p: Principal = Depends(require("po:write"))):
-    """Email the PO to the supplier (generic SMTP; logged to the outbox if SMTP isn't configured)."""
-    doc = await Scoped("purchase_orders", p).find_one({"id": id})
-    if not doc:
+class ConvertBody(BaseModel):
+    bill_date: Optional[str] = None
+    due_date: Optional[str] = None
+
+
+@router.post("/{po_id}/convert-to-bill")
+async def convert_to_bill(po_id: str, body: ConvertBody,
+                          user: dict = Depends(require("ops:manage"))):
+    from routers.bills import BillBody, BillLine, create_bill
+    po = await _pos(user).find_one({"id": po_id})
+    if not po:
         raise HTTPException(404, "Purchase order not found")
-    if doc["status"] not in ("draft", "ordered", "partial"):
-        raise HTTPException(400, f"A {doc['status']} order can't be sent")
-    guard_approval(p, doc)
-    sup = await Scoped("suppliers", p).find_one({"id": doc["supplier_id"]})
-    if not sup or not sup.get("email"):
-        raise HTTPException(400, "Add an email address to this supplier first")
-    lines = [f"  {l['quantity']:>4} × {l['name']}" + (f" (SKU {l['sku']})" if l.get("sku") else "") + f"  @ ${l['unit_cost']:.2f}"
-             for l in doc["lines"]]
-    text = "\n".join([
-        f"Hi {sup.get('contact_name') or sup['name']},", "",
-        body.message or f"Please supply the following for {p.tenant_name}:", "",
-        f"Purchase order {doc['number']}" + (f" — needed by {doc['expected_date']}" if doc.get("expected_date") else ""),
-        *lines, "", f"Order total: ${doc['total']:.2f}", "", f"Thanks,", p.name, p.tenant_name, f"Reply to: {p.email}",
-    ])
-    subject = f"Purchase order {doc['number']} from {p.tenant_name}"
-    status, err = await send_email(sup["email"], subject, text, reply_to=p.email)
-    out = {"id": str(uuid.uuid4()), "to": sup["email"], "subject": subject, "body": text, "status": status, "error": err, "created_at": now_iso()}
-    await Scoped("email_outbox", p).insert(dict(out))
-    patch: dict = {"emailed_at": out["created_at"]}
-    if body.mark_ordered and doc["status"] == "draft" and status != "failed":
-        patch.update(status="ordered", ordered_at=out["created_at"])
-    await Scoped("purchase_orders", p).update({"id": id}, {"$set": patch})
-    return OutboxEmail(**out)
+    if po["status"] not in ("received", "partially_received"):
+        raise HTTPException(409, "Receive goods before converting to a bill")
+    if po.get("bill_id"):
+        raise HTTPException(409, "PO already converted to a bill")
+    recv_lines = [l for l in po["lines"] if l.get("received_qty", 0) > 0]
+    if not recv_lines:
+        raise HTTPException(409, "Nothing received yet")
+    # DR GRNI (clear accrual) / CR AP — via the standard bill flow
+    bill = await create_bill(BillBody(
+        vendor=po["vendor"], vendor_id=po.get("vendor_id"),
+        bill_date=body.bill_date, due_date=body.due_date,
+        lines=[BillLine(expense_code=GRNI_CODE,
+                        description=f"PO {po['number']} — {l['product_name']} x{l['received_qty']}",
+                        amount=l["received_qty"] * l["unit_cost_cents"] / 100)
+               for l in recv_lines]), user)
+    await _pos(user).update_one({"id": po_id}, {"$set": {"status": "billed",
+                                                        "bill_id": bill["id"]}})
+    await audit(user, "po.convert_to_bill", "purchase_order", po_id,
+                {"bill_id": bill["id"]})
+    return {"po": _enrich(await _pos(user).find_one({"id": po_id})), "bill": bill}
 
 
-@router.delete("/purchase-orders/{id}")
-async def delete_po(id: str, p: Principal = Depends(require("po:delete"))):
-    pos = Scoped("purchase_orders", p)
-    doc = await pos.find_one({"id": id})
-    if not doc:
+@router.post("/{po_id}/cancel")
+async def cancel_po(po_id: str, user: dict = Depends(require("ops:manage"))):
+    po = await _pos(user).find_one({"id": po_id})
+    if not po:
         raise HTTPException(404, "Purchase order not found")
-    if doc["status"] != "draft":
-        raise HTTPException(400, "Only draft orders can be deleted")
-    await pos.delete({"id": id})
-    return {"ok": True}
+    if po["status"] in ("billed", "cancelled"):
+        raise HTTPException(409, "Cannot cancel this PO")
+    if po["status"] in ("received", "partially_received"):
+        raise HTTPException(409, "Goods already received — adjust inventory instead")
+    await _pos(user).update_one({"id": po_id}, {"$set": {"status": "cancelled"}})
+    await audit(user, "po.cancel", "purchase_order", po_id, {})
+    return _enrich(await _pos(user).find_one({"id": po_id}))
