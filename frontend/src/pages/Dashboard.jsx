@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import { dollars, money, fmtDate } from "@/lib/format";
 import { PageHeader, Card, Loading } from "@/components/Page";
+import SetupChecklist from "@/components/SetupChecklist";
 import {
   Wallet, TrendingUp, TrendingDown, DollarSign, ArrowDownLeft, ArrowUpRight, Package,
 } from "lucide-react";
@@ -39,6 +40,7 @@ export default function Dashboard() {
         subtitle={`Ledger snapshot • as of ${fmtDate(data.as_of)}`}
         testid="dashboard-page"
       />
+      <SetupChecklist />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {TILES.map((tile) => {
