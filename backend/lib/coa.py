@@ -19,6 +19,7 @@ COA = [
     ("1850", "Accumulated Depreciation", "asset", "credit"),  # contra-asset
     ("2010", "Accounts Payable", "liability", "credit"),
     ("2100", "Sales Tax Payable", "liability", "credit"),
+    ("2120", "Payroll Liabilities", "liability", "credit"),
     ("2200", "Unearned Revenue — Prepaid Packages", "liability", "credit"),
     ("2210", "Customer Credits", "liability", "credit"),
     ("2300", "Tips / Commissions Payable", "liability", "credit"),
@@ -58,6 +59,7 @@ COA = [
     ("5900", "Depreciation Expense", "expense", "debit"),
     ("5950", "Interest Expense", "expense", "debit"),
     ("5990", "Other / Miscellaneous", "expense", "debit"),
+    ("6110", "Wages & Salaries", "expense", "debit"),
 ]
 
 ACCOUNT_TYPE_OF = {c[0]: c[2] for c in COA}
