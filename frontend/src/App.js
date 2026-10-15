@@ -27,6 +27,7 @@ import Customers from "@/pages/Customers";
 import Banking from "@/pages/Banking";
 import Bills from "@/pages/Bills";
 import Expenses from "@/pages/Expenses";
+import Receipts from "@/pages/Receipts";
 import Estimates from "@/pages/Estimates";
 import CashFlow from "@/pages/CashFlow";
 import BudgetVsActual from "@/pages/BudgetVsActual";
@@ -83,6 +84,7 @@ function App() {
               <Route path="invoices" element={<Invoices />} />
               <Route path="bills" element={<Bills />} />
               <Route path="expenses" element={<Expenses />} />
+              <Route path="receipts" element={<Receipts />} />
               <Route path="aging" element={<Aging />} />
               <Route path="gift-cards" element={<GiftCards />} />
               <Route path="commissions" element={<Commissions />} />
