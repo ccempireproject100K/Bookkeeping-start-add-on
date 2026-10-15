@@ -23,6 +23,13 @@ services:
       # - key: PLAID_CLIENT_ID
       # - key: PLAID_SECRET
       # - key: EMERGENT_LLM_KEY
+      # Scheduled collections autopilot (off unless ENABLE_SCHEDULER=true):
+      - key: ENABLE_SCHEDULER
+        value: false
+      - key: COLLECTIONS_RUN_TIME
+        value: "06:00"
+      - key: SCHEDULER_TZ
+        value: America/Chicago
 
   - type: web
     name: bookkeeping-web

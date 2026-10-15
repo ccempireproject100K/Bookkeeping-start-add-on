@@ -43,3 +43,25 @@ on any static host.
 - Issue an invoice, record a payment
 - Check the ledger balances and run the CPA package export
 - Invite flow, copilot propose/approve, collections run
+
+## Scheduled jobs (collections autopilot)
+
+The backend can run the collections autopilot on a daily schedule via an
+in-app scheduler (APScheduler). It is **off by default**. Environment
+variables on the API service:
+
+- `ENABLE_SCHEDULER` → `true` to start the scheduler (default off)
+- `COLLECTIONS_RUN_TIME` → daily run time `HH:MM`, 24h (default `06:00`)
+- `SCHEDULER_TZ` → IANA timezone for the schedule
+  (default `America/Chicago`)
+
+Notes:
+
+- Only one app instance runs the schedule at a time (MongoDB lock in
+  `scheduler_locks`, self-healing via TTL).
+- Each workspace gets at most one autopilot run per day (`scheduler_runs`
+  records); the autopilot itself is stage-idempotent per invoice.
+- Only workspaces with the autopilot enabled in
+  `/collections/config` are processed.
+- Check status any time: `GET /api/collections/scheduler/status`
+  (owner/manager).
