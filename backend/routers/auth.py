@@ -1,6 +1,7 @@
 """Auth: register (new workspace), login, logout, me, demo role switch."""
 import os
 from datetime import datetime, timezone, timedelta
+from typing import Optional
 from fastapi import APIRouter, Response, HTTPException, Depends, Request
 from pydantic import BaseModel, EmailStr, Field
 
