@@ -10,6 +10,7 @@ from lib.base import Scoped, new_id, now_iso, today_str, to_cents, cents_to_doll
 from lib.auth import require, get_current_user
 from lib.coa import ACCOUNT_TYPE_OF, NAME_OF, NORMAL_BALANCE_OF
 from lib import ledger as L
+from lib import posting as P
 
 router = APIRouter(prefix="/reports", tags=["reports"])
 
@@ -260,3 +261,90 @@ async def bs_csv(as_of: Optional[str] = None, user: dict = Depends(require("ledg
         for r in d[sec]:
             rows.append([r["code"], r["name"], f'{cents_to_dollars(r["amount"]):.2f}'])
     return _csv_response(["Code", "Account", "Amount"], rows, "balance_sheet.csv")
+
+
+# ---------------- Booth rent ----------------
+def _months_between(df: str, dt: str) -> int:
+    """Number of calendar months touched by [df, dt], minimum 1."""
+    y1, m1 = int(df[0:4]), int(df[5:7])
+    y2, m2 = int(dt[0:4]), int(dt[5:7])
+    return max(1, (y2 - y1) * 12 + (m2 - m1) + 1)
+
+
+@router.get("/booth-rent")
+async def booth_rent(date_from: Optional[str] = None, date_to: Optional[str] = None,
+                     user: dict = Depends(require("ledger:read"))):
+    """Per team member: monthly booth rent (from users' booth_rent field), rent
+    expected for the period (monthly rent x months in period), rent actually
+    collected in the period, and the outstanding balance."""
+    df = date_from or "2000-01-01"
+    dt = date_to or today_str()
+    months = _months_between(df, dt)
+    tenant_id = user["tenant_id"]
+    team = await db.users.find({"tenant_id": tenant_id, "role": {"$ne": "owner"}},
+                               {"_id": 0, "password_hash": 0}).to_list(1000)
+    team = [u for u in team if u.get("role") in ("barber", "staff") or (u.get("booth_rent") or 0) > 0]
+    collected = {}
+    for p in await Scoped(db.booth_rent_payments, tenant_id).find_list():
+        d = p.get("pay_date") or (p.get("created_at") or "")[:10]
+        if d and (d < df or d > dt):
+            continue
+        bid = p.get("barber_id")
+        collected[bid] = collected.get(bid, 0) + p.get("amount_cents", 0)
+    rows = []
+    for u in team:
+        rent_cents = to_cents(u.get("booth_rent") or 0)
+        expected = rent_cents * months
+        got = collected.get(u["id"], 0)
+        bal = expected - got
+        rows.append({"barber_id": u["id"], "name": u.get("name"),
+                     "monthly_rent_cents": rent_cents,
+                     "monthly_rent": cents_to_dollars(rent_cents),
+                     "months": months,
+                     "expected_cents": expected,
+                     "expected": cents_to_dollars(expected),
+                     "collected_cents": got,
+                     "collected": cents_to_dollars(got),
+                     "balance_cents": bal,
+                     "balance": cents_to_dollars(bal)})
+    rows.sort(key=lambda r: -r["balance_cents"])
+    return {"date_from": df, "date_to": dt, "months": months, "rows": rows,
+            "total_expected": cents_to_dollars(sum(r["expected_cents"] for r in rows)),
+            "total_collected": cents_to_dollars(sum(r["collected_cents"] for r in rows)),
+            "total_balance": cents_to_dollars(sum(r["balance_cents"] for r in rows))}
+
+
+class BoothRentPaymentBody(BaseModel):
+    barber_id: str
+    amount: float
+    payment_method: str = "bank"          # cash | card | bank
+    pay_date: Optional[str] = None
+
+
+@router.post("/booth-rent/payment")
+async def record_booth_rent(body: BoothRentPaymentBody,
+                            user: dict = Depends(require("ops:manage"))):
+    """Record a booth-rent collection: Dr cash / Cr 4200 Chair Rental Income."""
+    barber = await db.users.find_one({"id": body.barber_id, "tenant_id": user["tenant_id"]},
+                                     {"_id": 0, "password_hash": 0})
+    if not barber:
+        raise HTTPException(status_code=404, detail="Team member not found")
+    amount = to_cents(body.amount)
+    if amount <= 0:
+        raise HTTPException(status_code=422, detail="Amount must be positive")
+    cash = P._cash_account(body.payment_method)
+    pid = new_id()
+    pdate = body.pay_date or today_str()
+    entry = await L.post_journal_entry(db, user["tenant_id"], user, {
+        "entry_date": pdate, "source": "booth_rent", "source_ref": pid,
+        "memo": f"Booth rent collected — {barber.get('name')}",
+        "lines": [P.dr(cash, amount, "Booth rent received"),
+                  P.cr("4200", amount, "Chair rental income")],
+    }, status="posted")
+    doc = {"id": pid, "barber_id": barber["id"], "barber_name": barber.get("name"),
+           "amount_cents": amount, "payment_method": body.payment_method,
+           "pay_date": pdate, "entry_number": entry["number"],
+           "created_by": user.get("name"), "created_at": now_iso()}
+    await Scoped(db.booth_rent_payments, user["tenant_id"]).insert_one(doc)
+    doc.pop("_id", None)
+    return doc
