@@ -1,0 +1,38 @@
+id: handyman
+trade: Handyman
+product_name: "The Handyman's Ledger"
+tagline: "Bookkeeping built for handyman businesses"
+terms:
+  worker: Handyman
+  worker_plural: Handymen
+  shop: business
+  job: job
+  job_plural: jobs
+  customer: customer
+  customer_plural: customers
+colors:
+  accent: "#fb923c"
+subdomains: [handyman]
+revenue_accounts:
+  - {code: "4000", name: "Service Revenue — Repairs & Odd Jobs"}
+  - {code: "4010", name: "Service Revenue — Installations"}
+  - {code: "4020", name: "Service Revenue — Maintenance Plans"}
+trade_expense_accounts:
+  - {code: "5100", name: "Worker Commissions"}
+  - {code: "5030", name: "Job Cost — Materials & Parts"}
+services:
+  - {name: "Hourly Handyman Work", kind: service}
+  - {name: "Drywall Repair", kind: service}
+  - {name: "Fixture Installation", kind: service}
+  - {name: "Furniture Assembly", kind: service}
+checklist:
+  - {id: team, label: "Add your team", hint: "Workers show up once they have a workspace login", link: "/team", check: team}
+  - {id: services, label: "Add services & price book", hint: "Hourly work and flat-rate common jobs", link: "/inventory", check: services}
+  - {id: bank, label: "Add a bank account", hint: "Reconcile deposits against jobs in Banking", link: "/banking", check: bank}
+  - {id: tax, label: "Set up contractor tracking", hint: "W-9s and 1099-NECs for subs", link: "/tax", check: tax}
+  - {id: sale, label: "Book your first job", hint: "Invoice an hour to see the full flow", link: "/invoices", check: sale}
+copilot_notes: |
+  Handyman is a volume game: small tickets, so utilization rate is
+  everything — billable hours vs windshield time. Flat-rate common
+  jobs beat hourly for margin. Reviews drive the business; the best
+  operators turn one job into a whole-house list.

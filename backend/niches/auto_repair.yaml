@@ -1,0 +1,38 @@
+id: auto_repair
+trade: Auto Repair
+product_name: "The Shop Ledger"
+tagline: "Bookkeeping built for auto repair shops"
+terms:
+  worker: Technician
+  worker_plural: Technicians
+  shop: shop
+  job: repair order
+  job_plural: repair orders
+  customer: customer
+  customer_plural: customers
+colors:
+  accent: "#94a3b8"
+subdomains: [auto, autorepair, mechanic]
+revenue_accounts:
+  - {code: "4000", name: "Service Revenue — Labor"}
+  - {code: "4010", name: "Service Revenue — Diagnostics"}
+  - {code: "4100", name: "Product Revenue — Parts"}
+trade_expense_accounts:
+  - {code: "5100", name: "Technician Commissions"}
+  - {code: "5030", name: "Job Cost — Parts"}
+services:
+  - {name: "Diagnostic", kind: service}
+  - {name: "Brake Service", kind: service}
+  - {name: "Oil Change", kind: service}
+  - {name: "Tire Service", kind: service}
+checklist:
+  - {id: team, label: "Add your technicians", hint: "Techs show up once they have a workspace login", link: "/team", check: team}
+  - {id: services, label: "Add services & parts", hint: "Labor operations and your parts catalog", link: "/inventory", check: services}
+  - {id: bank, label: "Add a bank account", hint: "Reconcile deposits against repair orders in Banking", link: "/banking", check: bank}
+  - {id: tax, label: "Set up contractor tracking", hint: "W-9s and 1099-NECs for subs", link: "/tax", check: tax}
+  - {id: sale, label: "Write your first repair order", hint: "Invoice a diagnostic to see the full flow", link: "/invoices", check: sale}
+copilot_notes: |
+  Auto repair splits labor and parts — track them separately or
+  margin analysis lies. Parts markup is a major profit center.
+  The key metrics: average repair order, hours per RO, and
+  comeback rate. Fleet accounts are the annuity in this trade.

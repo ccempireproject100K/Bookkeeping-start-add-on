@@ -1,0 +1,39 @@
+id: restoration
+trade: Restoration
+product_name: "The Restoration Ledger"
+tagline: "Bookkeeping built for restoration companies"
+terms:
+  worker: Technician
+  worker_plural: Technicians
+  shop: company
+  job: project
+  job_plural: projects
+  customer: homeowner
+  customer_plural: homeowners
+colors:
+  accent: "#f87171"
+subdomains: [restoration, waterdamage]
+revenue_accounts:
+  - {code: "4000", name: "Service Revenue — Water Mitigation"}
+  - {code: "4010", name: "Service Revenue — Mold Remediation"}
+  - {code: "4020", name: "Service Revenue — Fire & Smoke"}
+  - {code: "4030", name: "Service Revenue — Reconstruction"}
+trade_expense_accounts:
+  - {code: "5100", name: "Technician Commissions"}
+  - {code: "5030", name: "Job Cost — Equipment & Materials"}
+services:
+  - {name: "Water Extraction", kind: service}
+  - {name: "Structural Drying", kind: service}
+  - {name: "Mold Remediation", kind: service}
+checklist:
+  - {id: team, label: "Add your technicians", hint: "Techs show up once they have a workspace login", link: "/team", check: team}
+  - {id: services, label: "Add services & price book", hint: "Mitigation, remediation, and reconstruction", link: "/inventory", check: services}
+  - {id: bank, label: "Add a bank account", hint: "Reconcile deposits against projects in Banking", link: "/banking", check: bank}
+  - {id: tax, label: "Set up contractor tracking", hint: "W-9s and 1099-NECs for subs", link: "/tax", check: tax}
+  - {id: sale, label: "Book your first project", hint: "Invoice a mitigation to see the full flow", link: "/invoices", check: sale}
+copilot_notes: |
+  Restoration is emergency + insurance: jobs are big tickets but
+  insurance pay cycles are slow — track receivables aging ruthlessly.
+  Xactimate-style line-item pricing is the industry language.
+  Drying equipment is a major asset; track utilization and
+  depreciation. Referrals from plumbers are a top lead source.
