@@ -157,19 +157,31 @@ async def revoke_all_sessions(response: Response, body: dict = None,
 
 
 class TenantSettingsBody(BaseModel):
-    inventory_enabled: bool = Field(...)
+    inventory_enabled: Optional[bool] = None
+    base_currency: Optional[str] = None
 
 
 @router.patch("/tenant/settings")
 async def update_tenant_settings(body: TenantSettingsBody,
                                  user: dict = Depends(require("settings:write"))):
-    """Owner toggle for the inventory add-on. Data is kept when the add-on is
-    turned off and comes back when it's turned back on."""
+    """Owner toggles for workspace settings. Accepts inventory_enabled and/or
+    base_currency (multi-currency Phase 4); at least one must be provided."""
+    from lib.currencies import normalize as _norm_currency
+    update = {}
+    if body.inventory_enabled is not None:
+        update["settings.inventory_enabled"] = body.inventory_enabled
+    if body.base_currency is not None:
+        try:
+            update["settings.base_currency"] = _norm_currency(body.base_currency)
+        except ValueError:
+            raise HTTPException(status_code=422,
+                                detail=f"Unsupported currency: {body.base_currency!r}")
+    if not update:
+        raise HTTPException(status_code=422, detail="Nothing to update")
     await db.tenants.update_one(
         {"id": user["tenant_id"]},
-        {"$set": {"settings.inventory_enabled": body.inventory_enabled}})
-    await _audit(user, "settings.inventory_toggled", "tenant", user["tenant_id"],
-                 {"inventory_enabled": body.inventory_enabled})
+        {"$set": update})
+    await _audit(user, "settings.updated", "tenant", user["tenant_id"], update)
     tenant = await db.tenants.find_one({"id": user["tenant_id"]}, {"_id": 0})
     return {"settings": (tenant or {}).get("settings", {})}
 

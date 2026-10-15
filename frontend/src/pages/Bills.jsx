@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { api, errMsg } from "@/lib/api";
-import { money, fmtDate, today } from "@/lib/format";
+import { money, moneyFor, fmtDate, today } from "@/lib/format";
+import CurrencyPicker from "@/components/CurrencyPicker";
 import { PageHeader, Card, Loading } from "@/components/Page";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -25,7 +26,7 @@ export default function Bills() {
   const [coa, setCoa] = useState([]);
   const [credits, setCredits] = useState([]);
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ vendor: "", expense_code: "5700", amount: "", due_date: "", recurring: false, frequency: "monthly" });
+  const [form, setForm] = useState({ vendor: "", expense_code: "5700", amount: "", due_date: "", recurring: false, frequency: "monthly", currency: "USD" });
   const [payBill, setPayBill] = useState(null);
   const [pay, setPay] = useState({ amount: "", payment_method: "bank", credit_id: "" });
 
@@ -34,7 +35,7 @@ export default function Bills() {
   const expenseAccts = coa.filter((c) => c.type === "expense" && !c.archived);
 
   const create = async () => {
-    try { await api.post("/bills", { vendor: form.vendor, expense_code: form.expense_code, amount: parseFloat(form.amount) || 0, due_date: form.due_date || null, recurring: form.recurring, frequency: form.recurring ? form.frequency : null }); toast.success("Bill created"); setOpen(false); setForm({ vendor: "", expense_code: "5700", amount: "", due_date: "", recurring: false, frequency: "monthly" }); load(); }
+    try { await api.post("/bills", { vendor: form.vendor, expense_code: form.expense_code, amount: parseFloat(form.amount) || 0, due_date: form.due_date || null, recurring: form.recurring, frequency: form.recurring ? form.frequency : null, currency: form.currency || "USD" }); toast.success("Bill created"); setOpen(false); setForm({ vendor: "", expense_code: "5700", amount: "", due_date: "", recurring: false, frequency: "monthly", currency: "USD" }); load(); }
     catch (e) { toast.error(errMsg(e)); }
   };
   const doPay = async () => {
@@ -64,8 +65,8 @@ export default function Bills() {
               <tr key={b.id} className="border-b border-[#171c26] hover:bg-[#161b25]">
                 <td className="px-4 py-3 text-gray-100">{b.vendor}{b.recurring && <span className="ml-2 text-xs text-amber-500/70">↻ {b.frequency}</span>}</td>
                 <td className="px-4 py-3 text-gray-400">{fmtDate(b.due_date)}</td>
-                <td className="px-4 py-3 text-right font-mono text-gray-300">{money(b.amount_cents)}</td>
-                <td className="px-4 py-3 text-right font-mono text-amber-400">{money(b.balance_cents)}</td>
+                <td className="px-4 py-3 text-right font-mono text-gray-300">{moneyFor(b.amount_cents, b.currency)}</td>
+                <td className="px-4 py-3 text-right font-mono text-amber-400">{moneyFor(b.balance_cents, b.currency)}</td>
                 <td className="px-4 py-3"><span className={`px-2 py-0.5 rounded-full text-xs border capitalize ${STATUS_CLS[b.status] || ""}`}>{b.status}</span></td>
                 {canManage && <td className="px-4 py-3 text-right space-x-2">
                   {b.balance_cents > 0 && <Button size="sm" className="h-7 bg-emerald-600 hover:bg-emerald-500 text-black" data-testid={`pay-bill-${b.id}`} onClick={() => { setPayBill(b); setPay({ amount: "", payment_method: "bank", credit_id: "" }); }}>Pay</Button>}
@@ -82,8 +83,9 @@ export default function Bills() {
         <DialogContent className="bg-[#14171E] border-[#222838]">
           <DialogHeader><DialogTitle>New Bill</DialogTitle></DialogHeader>
           <div><Label className="text-xs">Vendor</Label><Input data-testid="bill-vendor" value={form.vendor} onChange={(e) => setForm({ ...form, vendor: e.target.value })} className="bg-[#0F1218] border-[#222838]" /></div>
+          <CurrencyPicker value={form.currency} onChange={(v) => setForm({ ...form, currency: v })} testid="bill-currency" />
           <div className="grid grid-cols-2 gap-3">
-            <div><Label className="text-xs">Amount ($)</Label><Input data-testid="bill-amount" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} className="bg-[#0F1218] border-[#222838] font-mono" /></div>
+            <div><Label className="text-xs">Amount</Label><Input data-testid="bill-amount" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} className="bg-[#0F1218] border-[#222838] font-mono" /></div>
             <div><Label className="text-xs">Due date</Label><Input data-testid="bill-due" type="date" value={form.due_date} onChange={(e) => setForm({ ...form, due_date: e.target.value })} className="bg-[#0F1218] border-[#222838]" /></div>
           </div>
           <div><Label className="text-xs">Expense account</Label>
