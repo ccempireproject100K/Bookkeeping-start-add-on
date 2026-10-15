@@ -38,7 +38,8 @@ DISCLAIMER = (
     "a payroll provider (e.g. Gusto, Check)."
 )
 
-FICA_PCT = 7.65  # Social Security + Medicare (employee share), planning estimate
+FICA_PCT = 7.65  # Social Security + Medicare (employee share), planning estimate.
+# Per-period estimate; the 2026 SS wage base is $184,500 (cap applies to YTD wages).
 PERIODS_PER_YEAR = {"weekly": 52, "biweekly": 26, "monthly": 12}
 TEAM_ROLES = ["owner", "barber"]  # roles treated as payroll team members
 

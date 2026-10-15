@@ -30,7 +30,7 @@ def _deadlines(year: int):
 
 @router.get("")
 async def posture(year: str = Query("2026"), user: dict = Depends(require("tax:read"))):
-    from routers.taxforecast import forecast, _settings
+    from routers.taxforecast import forecast, _settings, _safe_harbor, SAFE_HARBOR_AGI_THRESHOLD_CENTS
     fc = await forecast(year, user)
     settings = await _settings(user)
     today = today_str()[:10]
@@ -60,12 +60,14 @@ async def posture(year: str = Query("2026"), user: dict = Depends(require("tax:r
         rec_basis = f"remaining {nxt['quarter']} estimate"
     prior = settings.get("prior_year_tax_cents", 0)
     if prior:
-        # 110% safe harbor for higher earners; we use 100% as the floor signal
-        harbor = prior
+        # 110% safe harbor when prior-year AGI exceeds $150k, else 100%
+        high_earner = settings.get("prior_year_agi_cents", 0) > SAFE_HARBOR_AGI_THRESHOLD_CENTS
+        harbor = _safe_harbor(prior, settings.get("prior_year_agi_cents", 0))
         catchup = max(0, harbor - fc["paid_cents"])
         if catchup and (not rec_cents or catchup < rec_cents):
             rec_cents = catchup
-            rec_basis = "safe-harbor catch-up (100% of prior-year tax)"
+            rec_basis = (f"safe-harbor catch-up ({'110%' if high_earner else '100%'} "
+                         f"of prior-year tax)")
 
     # April projection
     projected_due = fc["full_year_estimate"]["total"] - fc["paid_cents"]
