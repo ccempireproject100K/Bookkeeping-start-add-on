@@ -10,6 +10,7 @@ import TotpSettings from "@/components/TotpSettings";
 import PasskeySettings from "@/components/PasskeySettings";
 import SecurityAlerts from "@/components/SecurityAlerts";
 import TeamInvites from "@/components/TeamInvites";
+import NicheSwitcher from "@/components/NicheSwitcher";
 
 function InventoryCard() {
   const { user, refresh } = useAuth();
@@ -89,6 +90,7 @@ export default function Settings() {
         <TotpSettings />
         <PasskeySettings />
         <TeamInvites />
+        <NicheSwitcher />
         <InventoryCard />
         <SessionsCard />
       </div>

@@ -1,0 +1,39 @@
+id: pest_control
+trade: Pest Control
+product_name: "The Pest Control Ledger"
+tagline: "Bookkeeping built for pest control companies"
+terms:
+  worker: Technician
+  worker_plural: Technicians
+  shop: company
+  job: service
+  job_plural: services
+  customer: customer
+  customer_plural: customers
+colors:
+  accent: "#4ade80"
+subdomains: [pest, pestcontrol]
+revenue_accounts:
+  - {code: "4000", name: "Service Revenue — Recurring Plans"}
+  - {code: "4010", name: "Service Revenue — One-Time Treatments"}
+  - {code: "4020", name: "Service Revenue — Termite"}
+  - {code: "4030", name: "Service Revenue — Wildlife"}
+trade_expense_accounts:
+  - {code: "5100", name: "Technician Commissions"}
+  - {code: "5030", name: "Job Cost — Chemicals & Supplies"}
+services:
+  - {name: "Monthly Pest Plan", kind: service}
+  - {name: "Quarterly Pest Plan", kind: service}
+  - {name: "Termite Inspection", kind: service}
+  - {name: "One-Time Treatment", kind: service}
+checklist:
+  - {id: team, label: "Add your technicians", hint: "Techs show up once they have a workspace login", link: "/team", check: team}
+  - {id: services, label: "Add plans & treatments", hint: "Recurring plans are your annuity — get them in the system", link: "/inventory", check: services}
+  - {id: bank, label: "Add a bank account", hint: "Reconcile recurring billing deposits in Banking", link: "/banking", check: bank}
+  - {id: tax, label: "Set up contractor tracking", hint: "W-9s and 1099-NECs for subs", link: "/tax", check: tax}
+  - {id: sale, label: "Book your first service", hint: "Invoice a treatment to see the full flow", link: "/invoices", check: sale}
+copilot_notes: |
+  Pest control is an annuity business: recurring plans are the crown
+  jewel — track recurring vs one-time revenue separately and watch
+  churn like a hawk. Chemical costs are the main variable cost.
+  Route density drives margin: more stops per route, lower cost per stop.

@@ -1,0 +1,39 @@
+id: pool_service
+trade: Pool Service
+product_name: "The Pool Pro's Ledger"
+tagline: "Bookkeeping built for pool service companies"
+terms:
+  worker: Technician
+  worker_plural: Technicians
+  shop: company
+  job: service
+  job_plural: services
+  customer: customer
+  customer_plural: customers
+colors:
+  accent: "#22d3ee"
+subdomains: [pool, poolservice]
+revenue_accounts:
+  - {code: "4000", name: "Service Revenue — Weekly Plans"}
+  - {code: "4010", name: "Service Revenue — Repairs"}
+  - {code: "4020", name: "Service Revenue — Equipment Installs"}
+  - {code: "4030", name: "Service Revenue — Green Cleanups"}
+trade_expense_accounts:
+  - {code: "5100", name: "Technician Commissions"}
+  - {code: "5030", name: "Job Cost — Chemicals & Parts"}
+services:
+  - {name: "Weekly Pool Service", kind: service}
+  - {name: "Green Pool Cleanup", kind: service}
+  - {name: "Equipment Repair", kind: service}
+  - {name: "Filter Cleaning", kind: service}
+checklist:
+  - {id: team, label: "Add your technicians", hint: "Techs show up once they have a workspace login", link: "/team", check: team}
+  - {id: services, label: "Add plans & services", hint: "Weekly routes are your annuity — get them in the system", link: "/inventory", check: services}
+  - {id: bank, label: "Add a bank account", hint: "Reconcile route billing deposits in Banking", link: "/banking", check: bank}
+  - {id: tax, label: "Set up contractor tracking", hint: "W-9s and 1099-NECs for subs", link: "/tax", check: tax}
+  - {id: sale, label: "Book your first service", hint: "Invoice a cleanup to see the full flow", link: "/invoices", check: sale}
+copilot_notes: |
+  Pool service is a route business: weekly plans are the annuity, and
+  route density is everything. Chemical costs fluctuate — watch them.
+  Green cleanups and equipment installs are the high-ticket upsells
+  off the route base. Track churn on weekly plans monthly.
