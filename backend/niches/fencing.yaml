@@ -1,0 +1,37 @@
+id: fencing
+trade: Fencing & Concrete
+product_name: "The Fence & Concrete Ledger"
+tagline: "Bookkeeping built for fence and concrete contractors"
+terms:
+  worker: Crew Member
+  worker_plural: Crew
+  shop: company
+  job: project
+  job_plural: projects
+  customer: homeowner
+  customer_plural: homeowners
+colors:
+  accent: "#d4a373"
+subdomains: [fence, fencing, concrete]
+revenue_accounts:
+  - {code: "4000", name: "Service Revenue — Fence Installs"}
+  - {code: "4010", name: "Service Revenue — Concrete Work"}
+  - {code: "4020", name: "Service Revenue — Repairs"}
+trade_expense_accounts:
+  - {code: "5100", name: "Crew Commissions"}
+  - {code: "5030", name: "Job Cost — Lumber, Concrete & Materials"}
+services:
+  - {name: "Wood Fence Installation", kind: service}
+  - {name: "Concrete Driveway", kind: service}
+  - {name: "Fence Repair", kind: service}
+checklist:
+  - {id: team, label: "Add your crew", hint: "Crew members show up once they have a workspace login", link: "/team", check: team}
+  - {id: services, label: "Add services & price book", hint: "Fence installs, concrete, and repairs", link: "/inventory", check: services}
+  - {id: bank, label: "Add a bank account", hint: "Reconcile deposits against projects in Banking", link: "/banking", check: bank}
+  - {id: tax, label: "Set up contractor tracking", hint: "W-9s and 1099-NECs for subs and crews", link: "/tax", check: tax}
+  - {id: sale, label: "Book your first project", hint: "Invoice a repair to see the full flow", link: "/invoices", check: sale}
+copilot_notes: |
+  Fence and concrete are project-based: materials are a huge share
+  of job cost, so estimate accuracy is the business. Lumber and
+  concrete prices move — re-price bids regularly. Deposits upfront
+  are standard; track them as liabilities until the work is done.

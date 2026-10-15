@@ -1,0 +1,37 @@
+id: painting
+trade: Painting
+product_name: "The Painter's Ledger"
+tagline: "Bookkeeping built for painting contractors"
+terms:
+  worker: Painter
+  worker_plural: Painters
+  shop: company
+  job: job
+  job_plural: jobs
+  customer: homeowner
+  customer_plural: homeowners
+colors:
+  accent: "#f472b6"
+subdomains: [painting, painter]
+revenue_accounts:
+  - {code: "4000", name: "Service Revenue — Interior"}
+  - {code: "4010", name: "Service Revenue — Exterior"}
+  - {code: "4020", name: "Service Revenue — Commercial"}
+trade_expense_accounts:
+  - {code: "5100", name: "Painter Commissions"}
+  - {code: "5030", name: "Job Cost — Paint & Materials"}
+services:
+  - {name: "Interior Room Paint", kind: service}
+  - {name: "Exterior House Paint", kind: service}
+  - {name: "Cabinet Refinishing", kind: service}
+checklist:
+  - {id: team, label: "Add your painters", hint: "Painters show up once they have a workspace login", link: "/team", check: team}
+  - {id: services, label: "Add services & price book", hint: "Interior, exterior, and specialty finishes", link: "/inventory", check: services}
+  - {id: bank, label: "Add a bank account", hint: "Reconcile deposits against jobs in Banking", link: "/banking", check: bank}
+  - {id: tax, label: "Set up contractor tracking", hint: "W-9s and 1099-NECs for subs and crews", link: "/tax", check: tax}
+  - {id: sale, label: "Book your first job", hint: "Invoice a room to see the full flow", link: "/invoices", check: sale}
+copilot_notes: |
+  Painting is estimate-driven: the bid is the business. Track
+  estimated vs actual labor hours per job — that's where margin is
+  won or lost. Exteriors are seasonal in many markets. Photos of
+  finished work drive the next bid; they're marketing gold.

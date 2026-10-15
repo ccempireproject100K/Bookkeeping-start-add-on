@@ -1,0 +1,38 @@
+id: appliance_repair
+trade: Appliance Repair
+product_name: "The Appliance Ledger"
+tagline: "Bookkeeping built for appliance repair shops"
+terms:
+  worker: Technician
+  worker_plural: Technicians
+  shop: shop
+  job: job
+  job_plural: jobs
+  customer: customer
+  customer_plural: customers
+colors:
+  accent: "#818cf8"
+subdomains: [appliance]
+revenue_accounts:
+  - {code: "4000", name: "Service Revenue — Repairs"}
+  - {code: "4010", name: "Service Revenue — Maintenance Plans"}
+  - {code: "4100", name: "Product Revenue — Parts"}
+trade_expense_accounts:
+  - {code: "5100", name: "Technician Commissions"}
+  - {code: "5030", name: "Job Cost — Parts & Components"}
+services:
+  - {name: "Diagnostic Visit", kind: service}
+  - {name: "Refrigerator Repair", kind: service}
+  - {name: "Washer/Dryer Repair", kind: service}
+  - {name: "Oven Repair", kind: service}
+checklist:
+  - {id: team, label: "Add your technicians", hint: "Techs show up once they have a workspace login", link: "/team", check: team}
+  - {id: services, label: "Add services & price book", hint: "Diagnostics and common repairs", link: "/inventory", check: services}
+  - {id: bank, label: "Add a bank account", hint: "Reconcile deposits against jobs in Banking", link: "/banking", check: bank}
+  - {id: tax, label: "Set up contractor tracking", hint: "W-9s and 1099-NECs for subs", link: "/tax", check: tax}
+  - {id: sale, label: "Book your first job", hint: "Invoice a diagnostic to see the full flow", link: "/invoices", check: sale}
+copilot_notes: |
+  Appliance repair is high-intent: when the fridge dies, price
+  sensitivity drops. Diagnostics convert to repairs — track the
+  conversion rate. Parts markups are a quiet margin driver; track
+  parts cost per job against the flat-rate price.

@@ -1,0 +1,38 @@
+id: cleaning
+trade: Cleaning
+product_name: "The Cleaning Ledger"
+tagline: "Bookkeeping built for cleaning companies"
+terms:
+  worker: Cleaner
+  worker_plural: Cleaners
+  shop: company
+  job: clean
+  job_plural: cleans
+  customer: client
+  customer_plural: clients
+colors:
+  accent: "#5eead4"
+subdomains: [cleaning, clean]
+revenue_accounts:
+  - {code: "4000", name: "Service Revenue — Recurring Residential"}
+  - {code: "4010", name: "Service Revenue — Commercial Contracts"}
+  - {code: "4020", name: "Service Revenue — Deep Cleans & Move-Outs"}
+trade_expense_accounts:
+  - {code: "5100", name: "Cleaner Commissions"}
+  - {code: "5030", name: "Job Cost — Supplies & Equipment"}
+services:
+  - {name: "Recurring Home Clean", kind: service}
+  - {name: "Deep Clean", kind: service}
+  - {name: "Move-In/Move-Out Clean", kind: service}
+  - {name: "Office Cleaning", kind: service}
+checklist:
+  - {id: team, label: "Add your cleaners", hint: "Cleaners show up once they have a workspace login", link: "/team", check: team}
+  - {id: services, label: "Add services & packages", hint: "Recurring plans, deep cleans, and commercial contracts", link: "/inventory", check: services}
+  - {id: bank, label: "Add a bank account", hint: "Reconcile recurring billing deposits in Banking", link: "/banking", check: bank}
+  - {id: tax, label: "Set up contractor tracking", hint: "W-9s and 1099-NECs for subs", link: "/tax", check: tax}
+  - {id: sale, label: "Book your first clean", hint: "Invoice a clean to see the full flow", link: "/invoices", check: sale}
+copilot_notes: |
+  Cleaning is recurring revenue with thin margins: the math is
+  cleaners per route and minutes per home. Recurring residential
+  is the annuity; commercial contracts are bigger but bid-competed.
+  Watch labor cost as a share of revenue weekly — it drifts fast.
