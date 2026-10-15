@@ -14,7 +14,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Plus, Upload, Landmark, CreditCard, ArrowLeftRight, Wand2, CheckCircle2, Trash2 } from "lucide-react";
+import { Plus, Upload, Landmark, CreditCard, ArrowLeftRight, Wand2, CheckCircle2, Trash2, RefreshCw, Unplug } from "lucide-react";
 
 const STATUS_CLS = {
   unmatched: "bg-gray-500/10 text-gray-400 border-gray-500/20",
@@ -44,15 +44,70 @@ export default function Banking() {
   const [ruleForm, setRuleForm] = useState({ contains: "", category_code: "" });
   const [recOpen, setRecOpen] = useState(false);
   const [recForm, setRecForm] = useState({ statement_date: today(), statement_ending_balance: "", txn_ids: [] });
+  const [feed, setFeed] = useState(null);
+  const [feedBusy, setFeedBusy] = useState(false);
+  const [manOpen, setManOpen] = useState(false);
+  const [manForm, setManForm] = useState({ txn_date: today(), description: "", amount: "", direction: "in" });
+  const [matchTxn, setMatchTxn] = useState(null);
+  const [candidates, setCandidates] = useState([]);
+  const [matchId, setMatchId] = useState("");
 
   const loadAccounts = () => api.get("/banking/accounts").then((a) => {
     setAccounts(a);
     if (a.length && !selected) setSelected(a[0].id);
   }).catch(() => setAccounts([]));
   const loadTxns = (id) => api.get(`/banking/transactions?bank_account_id=${id}`).then(setTxns).catch(() => setTxns([]));
+  const loadFeed = () => api.get("/bankfeed/status").then(setFeed).catch(() => setFeed({ configured: false, connections: [] }));
+
+  const loadPlaid = () => new Promise((res, rej) => {
+    if (window.Plaid) return res();
+    const s = document.createElement("script");
+    s.src = "https://cdn.plaid.com/link/v2/stable/link-initialize.js";
+    s.onload = () => res();
+    s.onerror = () => rej(new Error("Could not load Plaid Link"));
+    document.head.appendChild(s);
+  });
+  const connectBank = async () => {
+    setFeedBusy(true);
+    try {
+      const { link_token } = await api.post("/bankfeed/link-token", {});
+      await loadPlaid();
+      const handler = window.Plaid.create({
+        token: link_token,
+        onSuccess: async (public_token) => {
+          try {
+            await api.post("/bankfeed/exchange", { public_token });
+            toast.success("Bank connected — syncing now");
+            await api.post("/bankfeed/sync", {});
+            loadFeed(); loadAccounts();
+            if (selected) loadTxns(selected);
+          } catch (e) { toast.error(errMsg(e)); }
+        },
+        onExit: () => { /* user closed Link */ },
+      });
+      handler.open();
+    } catch (e) { toast.error(errMsg(e)); }
+    setFeedBusy(false);
+  };
+  const syncFeed = async () => {
+    setFeedBusy(true);
+    try {
+      const r = await api.post("/bankfeed/sync", {});
+      toast.success(`Synced: ${r.added} new, ${r.duplicates} duplicate(s) skipped`);
+      loadFeed();
+      if (selected) loadTxns(selected);
+    } catch (e) { toast.error(errMsg(e)); }
+    setFeedBusy(false);
+  };
+  const disconnectFeed = async (id) => {
+    if (!confirm("Disconnect this bank? Already-imported transactions stay in your books.")) return;
+    try { await api.del(`/bankfeed/connection/${id}`); toast.success("Disconnected"); loadFeed(); }
+    catch (e) { toast.error(errMsg(e)); }
+  };
 
   useEffect(() => {
     loadAccounts();
+    loadFeed();
     api.get("/ledger/accounts").then(setCoa).catch(() => {});
     api.get("/banking/rules").then(setRules).catch(() => {});
   }, []);
@@ -73,6 +128,47 @@ export default function Banking() {
   const doTransfer = async () => {
     try { await api.post("/banking/transfer", { ...xfer, amount: parseFloat(xfer.amount) || 0 }); toast.success("Transfer posted"); setXferOpen(false); setXfer({ from_account_id: "", to_account_id: "", amount: "" }); loadAccounts(); loadTxns(selected); }
     catch (e) { toast.error(errMsg(e)); }
+  };
+  const doAddManual = async () => {
+    const amt = parseFloat(manForm.amount) || 0;
+    if (!manForm.description.trim() || !amt) { toast.error("Enter a description and an amount"); return; }
+    try {
+      const signed = manForm.direction === "in" ? Math.abs(amt) : -Math.abs(amt);
+      await api.post("/banking/transactions", {
+        bank_account_id: selected, txn_date: manForm.txn_date,
+        description: manForm.description.trim(), amount: signed,
+      });
+      toast.success("Transaction added");
+      setManOpen(false);
+      setManForm({ txn_date: today(), description: "", amount: "", direction: "in" });
+      loadTxns(selected);
+    } catch (e) { toast.error(errMsg(e)); }
+  };
+  const openMatch = async (t) => {
+    setMatchTxn(t); setMatchId(""); setCandidates([]);
+    try {
+      const entries = await api.get("/ledger/journal-entries?status=posted&limit=200");
+      const target = Math.abs(t.amount_cents);
+      const tDate = new Date(t.txn_date).getTime();
+      const ranked = entries
+        .filter((e) => e.source !== "bank_txn") // already posted FROM a bank txn — never a match candidate
+        .map((e) => {
+          const amtDiff = Math.abs((e.total_cents || 0) - target);
+          const dayDiff = Math.abs((new Date(e.entry_date).getTime() - tDate) / 86400000);
+          return { ...e, _amtDiff: amtDiff, _score: amtDiff + dayDiff * 100 };
+        })
+        .sort((a, b) => a._score - b._score)
+        .slice(0, 25);
+      setCandidates(ranked);
+    } catch (e) { toast.error(errMsg(e)); }
+  };
+  const doMatch = async () => {
+    if (!matchId) { toast.error("Pick a journal entry to match"); return; }
+    try {
+      const r = await api.post(`/banking/transactions/${matchTxn.id}/match?entry_id=${matchId}`, {});
+      toast.success(`Matched to entry ${r.entry_number}`);
+      setMatchTxn(null); setMatchId(""); loadTxns(selected);
+    } catch (e) { toast.error(errMsg(e)); }
   };
   const addRule = async () => {
     try { await api.post("/banking/rules", ruleForm); toast.success("Rule added"); setRuleForm({ contains: "", category_code: "" }); api.get("/banking/rules").then(setRules); }
@@ -104,6 +200,62 @@ export default function Banking() {
         </>}
       </PageHeader>
 
+      {/* Live bank feeds (Plaid) */}
+      {feed && (
+        <Card className="mb-6" data-testid="bankfeed-panel">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex-1 min-w-56">
+              <div className="text-xs uppercase tracking-wider text-gray-500">Live bank feeds</div>
+              {feed.configured ? (
+                <div className="text-sm text-gray-300 mt-1">
+                  {feed.connections.length === 0
+                    ? "No banks connected yet. Connect one and new transactions will appear in the register below for review."
+                    : `${feed.connections.length} bank connection(s) · ${feed.env}`}
+                </div>
+              ) : (
+                <div className="text-sm text-gray-400 mt-1">
+                  Connect a bank once and transactions import automatically — no more CSV uploads.
+                  To enable, set <code className="font-mono text-xs text-amber-400">PLAID_CLIENT_ID</code>,{" "}
+                  <code className="font-mono text-xs text-amber-400">PLAID_SECRET</code> and{" "}
+                  <code className="font-mono text-xs text-amber-400">TOKEN_ENCRYPTION_KEY</code> on the server
+                  (see <code className="font-mono text-xs text-amber-400">PLAID_SETUP.md</code>), then come back here.
+                </div>
+              )}
+            </div>
+            {feed.configured && canManage && (
+              <div className="flex gap-2">
+                {feed.connections.length > 0 && (
+                  <Button data-testid="bankfeed-sync" variant="outline" size="sm" disabled={feedBusy} onClick={syncFeed} className="border-[#222838]">
+                    <RefreshCw size={14} className="mr-1" /> Sync now
+                  </Button>
+                )}
+                <Button data-testid="bankfeed-connect" size="sm" disabled={feedBusy} onClick={connectBank} className="bg-amber-600 hover:bg-amber-500 text-black">
+                  <Landmark size={14} className="mr-1" /> Connect bank
+                </Button>
+              </div>
+            )}
+          </div>
+          {feed.configured && feed.connections.length > 0 && (
+            <div className="mt-3 space-y-2">
+              {feed.connections.map((c) => (
+                <div key={c.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-[#0F1218] border border-[#222838] px-4 py-2 text-sm">
+                  <div>
+                    <div className="text-gray-100 font-medium">{(c.accounts || []).map((a) => `${a.name} ••${a.mask || ""}`).join(", ") || "Bank account"}</div>
+                    <div className="text-xs text-gray-500">Last sync: {c.last_sync ? new Date(c.last_sync).toLocaleString() : "never"}</div>
+                  </div>
+                  {canManage && (
+                    <button onClick={() => disconnectFeed(c.id)} data-testid={`bankfeed-disconnect-${c.id}`}
+                      className="text-gray-600 hover:text-rose-400 text-xs flex items-center gap-1">
+                      <Unplug size={13} /> Disconnect
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </Card>
+      )}
+
       {/* Account cards */}
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6" data-testid="bank-account-cards">
         {accounts.map((a) => (
@@ -129,6 +281,7 @@ export default function Banking() {
             ))}
             <div className="flex-1" />
             {canManage && tab === "transactions" && <>
+              <Button data-testid="btn-add-txn" variant="outline" size="sm" onClick={() => { setManForm({ txn_date: today(), description: "", amount: "", direction: "in" }); setManOpen(true); }} className="border-[#222838]"><Plus size={14} className="mr-1" />Add Transaction</Button>
               <Button data-testid="btn-import" variant="outline" size="sm" onClick={() => setImportOpen(true)} className="border-[#222838]"><Upload size={14} className="mr-1" />Import CSV</Button>
               <Button data-testid="btn-reconcile" size="sm" onClick={() => { setRecForm({ statement_date: today(), statement_ending_balance: "", txn_ids: txns.filter((t) => t.status !== "unmatched" && !t.reconciled).map((t) => t.id) }); setRecOpen(true); }} className="bg-emerald-600 hover:bg-emerald-500 text-black"><CheckCircle2 size={14} className="mr-1" />Reconcile</Button>
             </>}
@@ -154,7 +307,12 @@ export default function Banking() {
                       <td className="px-4 py-3 text-gray-400">{t.category_code || "—"}</td>
                       <td className="px-4 py-3"><span className={`px-2 py-0.5 rounded-full text-xs border capitalize ${STATUS_CLS[t.status] || ""}`}>{t.reconciled ? "reconciled" : t.status}</span></td>
                       {canManage && <td className="px-4 py-3 text-right">
-                        {t.status === "unmatched" && <Button size="sm" className="h-7 bg-amber-600 hover:bg-amber-500 text-black" data-testid={`categorize-${t.id}`} onClick={() => { setCatTxn(t); setCatCode(t.suggested_code || ""); }}>Categorize</Button>}
+                        {t.status === "unmatched" && (
+                          <div className="flex justify-end gap-1">
+                            <Button size="sm" variant="ghost" className="h-7 text-sky-400 hover:text-sky-300" data-testid={`match-${t.id}`} onClick={() => openMatch(t)}>Match</Button>
+                            <Button size="sm" className="h-7 bg-amber-600 hover:bg-amber-500 text-black" data-testid={`categorize-${t.id}`} onClick={() => { setCatTxn(t); setCatCode(t.suggested_code || ""); }}>Categorize</Button>
+                          </div>
+                        )}
                       </td>}
                     </tr>
                   ))}
@@ -272,6 +430,50 @@ export default function Banking() {
             </Select></div>
           <div><Label className="text-xs">Amount ($)</Label><Input data-testid="xfer-amount" value={xfer.amount} onChange={(e) => setXfer({ ...xfer, amount: e.target.value })} className="bg-[#0F1218] border-[#222838] font-mono" /></div>
           <DialogFooter><Button data-testid="xfer-save" onClick={doTransfer} className="bg-amber-600 hover:bg-amber-500 text-black">Transfer</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Manual transaction dialog */}
+      <Dialog open={manOpen} onOpenChange={setManOpen}>
+        <DialogContent className="bg-[#14171E] border-[#222838]">
+          <DialogHeader><DialogTitle>Add Transaction — {acct?.name}</DialogTitle></DialogHeader>
+          <div className="grid grid-cols-2 gap-3">
+            <div><Label className="text-xs">Date</Label><Input data-testid="mantxn-date" type="date" value={manForm.txn_date} onChange={(e) => setManForm({ ...manForm, txn_date: e.target.value })} className="bg-[#0F1218] border-[#222838]" /></div>
+            <div><Label className="text-xs">Direction</Label>
+              <Select value={manForm.direction} onValueChange={(v) => setManForm({ ...manForm, direction: v })}>
+                <SelectTrigger data-testid="mantxn-direction" className="bg-[#0F1218] border-[#222838]"><SelectValue /></SelectTrigger>
+                <SelectContent className="bg-[#14171E] border-[#222838] text-gray-100"><SelectItem value="in">Money in</SelectItem><SelectItem value="out">Money out</SelectItem></SelectContent>
+              </Select></div>
+          </div>
+          <div><Label className="text-xs">Description</Label><Input data-testid="mantxn-desc" value={manForm.description} onChange={(e) => setManForm({ ...manForm, description: e.target.value })} placeholder="e.g. Supply run — Home Depot" className="bg-[#0F1218] border-[#222838]" /></div>
+          <div><Label className="text-xs">Amount ($)</Label><Input data-testid="mantxn-amount" value={manForm.amount} onChange={(e) => setManForm({ ...manForm, amount: e.target.value })} placeholder="0.00" className="bg-[#0F1218] border-[#222838] font-mono" /></div>
+          <DialogFooter><Button data-testid="mantxn-save" onClick={doAddManual} className="bg-amber-600 hover:bg-amber-500 text-black">Add Transaction</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Match-to-entry dialog */}
+      <Dialog open={!!matchTxn} onOpenChange={(o) => !o && setMatchTxn(null)}>
+        <DialogContent className="bg-[#14171E] border-[#222838] max-w-lg">
+          <DialogHeader><DialogTitle>Match Bank Transaction</DialogTitle></DialogHeader>
+          {matchTxn && <div className="text-sm text-gray-400">{matchTxn.description} · <span className="font-mono">{money(matchTxn.amount_cents)}</span> · {fmtDate(matchTxn.txn_date)}</div>}
+          <p className="text-xs text-gray-500">Link this to a journal entry already in your books (e.g. a sale recorded at the register). Ranked by amount and date closeness.</p>
+          <div className="max-h-64 overflow-y-auto space-y-1" data-testid="match-candidates">
+            {candidates.map((c, i) => (
+              <button key={c.id} onClick={() => setMatchId(c.id)} data-testid={`match-pick-${c.id}`}
+                className={`w-full text-left px-3 py-2 rounded-lg border text-sm transition-colors ${matchId === c.id ? "border-amber-500/60 bg-amber-500/10" : "border-[#222838] hover:bg-[#161b25]"}`}>
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-gray-100 font-mono">{c.number}</span>
+                  <span className="font-mono text-gray-300">{money(c.total_cents)}</span>
+                </div>
+                <div className="flex items-center justify-between gap-2 mt-0.5">
+                  <span className="text-xs text-gray-500 truncate">{c.memo || c.source}</span>
+                  <span className="text-xs text-gray-500 whitespace-nowrap">{fmtDate(c.entry_date)}{i === 0 && c._amtDiff === 0 && <span className="ml-2 text-emerald-400">best match</span>}</span>
+                </div>
+              </button>
+            ))}
+            {candidates.length === 0 && <div className="text-gray-500 text-sm py-6 text-center">No candidate entries found.</div>}
+          </div>
+          <DialogFooter><Button data-testid="match-save" disabled={!matchId} onClick={doMatch} className="bg-sky-600 hover:bg-sky-500 text-black">Match Selected</Button></DialogFooter>
         </DialogContent>
       </Dialog>
 
