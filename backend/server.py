@@ -10,7 +10,9 @@ from starlette.middleware.cors import CORSMiddleware
 from db import db, get_client
 from routers import (auth, ledger, products, pos, invoices, cashclose, dashboard,
                      bills, aging, giftcards, commissions, customers, jobs,
-                     banking, vendors, reports, estimates)
+                     banking, vendors, reports, estimates,
+                     recurring_invoices, reminders, backup, bankfeed, copilot,
+                     time, portal, payroll, budget, tax, edition, totp, audit)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("barbers_ledger")
@@ -33,7 +35,11 @@ for r in (auth.router, ledger.router, products.router, pos.router,
           invoices.router, cashclose.router, dashboard.router,
           bills.router, aging.router, giftcards.router, commissions.router,
           customers.router, jobs.router, banking.router, vendors.router,
-          reports.router, estimates.router):
+          reports.router, estimates.router,
+          recurring_invoices.router, reminders.router, backup.router,
+          bankfeed.router, copilot.router, time.router, portal.router,
+          payroll.router, budget.router, tax.router, edition.router,
+          totp.router, audit.router):
     api_router.include_router(r)
 
 app.include_router(api_router)
