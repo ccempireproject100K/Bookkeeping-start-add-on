@@ -25,7 +25,7 @@ from lib import ledger as L
 from lib import posting as P
 from lib import fx_posting as FXP
 from lib.currencies import normalize as normalize_currency
-from lib.currencies import get_base_currency
+from lib.currencies import get_base_currency, to_minor_units
 
 router = APIRouter(prefix="/portal", tags=["portal"])
 
@@ -255,9 +255,15 @@ async def portal_checkout(token: str, body: PortalCheckoutIn, request: Request):
     origin = (body.origin_url or request.headers.get("origin") or "").rstrip("/")
     if not origin or not origin.startswith("http"):
         raise HTTPException(status_code=422, detail="origin_url is required")
-    tenant = await db.tenants.find_one({"id": tid}, {"_id": 0, "name": 1, "settings": 1})
-    settings = (tenant or {}).get("settings", {})
-    currency = get_base_currency(settings).lower()
+    tenant = await db.tenants.find_one({"id": tid}, {"_id": 0, "name": 1})
+    # Multi-currency Phase 4: charge in the INVOICE's currency, not the
+    # workspace base currency. Invoice amounts are stored x100; convert to
+    # the currency's proper minor units (JPY has no cents).
+    inv_currency = normalize_currency(inv.get("currency") or "USD")
+    stripe_currency = inv_currency.lower()
+    stripe_amount = to_minor_units(balance / 100.0, inv_currency)
+    if stripe_amount <= 0:
+        raise HTTPException(status_code=409, detail="Invoice already fully paid")
     business = (tenant or {}).get("name", "")
     label = f"Invoice {inv.get('issue_entry') or inv['id']}"
     if business:
@@ -267,8 +273,8 @@ async def portal_checkout(token: str, body: PortalCheckoutIn, request: Request):
             mode="payment",
             line_items=[{
                 "price_data": {
-                    "currency": currency,
-                    "unit_amount": balance,
+                    "currency": stripe_currency,
+                    "unit_amount": stripe_amount,
                     "product_data": {"name": label,
                                      "description": f"Balance due: {inv.get('client_name', '')}"},
                 },
@@ -284,7 +290,7 @@ async def portal_checkout(token: str, body: PortalCheckoutIn, request: Request):
     await db.payment_transactions.insert_one({
         "session_id": session.id, "tenant_id": tid, "kind": "portal_invoice",
         "invoice_id": inv["id"], "token_hash": _digest(token),
-        "amount_cents": balance, "currency": currency,
+        "amount_cents": balance, "currency": stripe_currency,
         "status": "initiated", "payment_status": "pending", "fulfilled": False,
         "created_at": now_iso(), "updated_at": now_iso(),
     })
