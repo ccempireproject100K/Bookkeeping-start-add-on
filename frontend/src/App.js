@@ -37,6 +37,7 @@ import Pulse from "@/pages/Pulse";
 import Pricing from "@/pages/Pricing";
 import TaxForecast from "@/pages/TaxForecast";
 import Playground from "@/pages/Playground";
+import Combo from "@/pages/Combo";
 import Estimates from "@/pages/Estimates";
 import CashFlow from "@/pages/CashFlow";
 import BudgetVsActual from "@/pages/BudgetVsActual";
@@ -103,6 +104,7 @@ function App() {
               <Route path="pricing" element={<Pricing />} />
               <Route path="tax-forecast" element={<TaxForecast />} />
               <Route path="playground" element={<Playground />} />
+              <Route path="combo" element={<Combo />} />
               <Route path="aging" element={<Aging />} />
               <Route path="gift-cards" element={<GiftCards />} />
               <Route path="commissions" element={<Commissions />} />
