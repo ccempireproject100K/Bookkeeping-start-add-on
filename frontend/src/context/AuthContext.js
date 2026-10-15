@@ -20,8 +20,8 @@ export function AuthProvider({ children }) {
 
   useEffect(() => { refresh(); }, [refresh]);
 
-  const login = async (email, password) => {
-    await api.post("/auth/login", { email, password });
+  const login = async (email, password, totpCode) => {
+    await api.post("/auth/login", { email, password, totp_code: totpCode || "" });
     await refresh();
   };
   const register = async (body) => {
