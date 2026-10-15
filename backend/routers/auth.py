@@ -3,6 +3,7 @@ import os
 from datetime import datetime, timezone, timedelta
 from fastapi import APIRouter, Response, HTTPException, Depends, Request
 from pydantic import BaseModel, EmailStr, Field
+from typing import Optional
 
 from db import db
 from lib.base import Scoped, new_id, now_iso
