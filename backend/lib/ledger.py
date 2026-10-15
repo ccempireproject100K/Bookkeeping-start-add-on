@@ -7,6 +7,8 @@ from fastapi import HTTPException
 from lib.base import Scoped, new_id, now_iso, today_str, period_key_of, fiscal_year_of
 from lib.coa import ACCOUNT_TYPE_OF, NORMAL_BALANCE_OF, NAME_OF, TYPE_ORDER
 from lib.currencies import normalize as normalize_currency
+from lib.currencies import DEFAULT_CURRENCY, decimals_for
+from lib import fx as FX
 
 
 def _scoped(db, tenant_id):
@@ -237,14 +239,106 @@ async def _balances(db, tenant_id, as_of=None, date_from=None):
 
 
 def _net_balance(code, debit, credit):
-    """Signed balance in the account's natural (normal) direction."""
+    """Signed balance in the account's normal direction."""
     if NORMAL_BALANCE_OF.get(code, "debit") == "debit":
         return debit - credit
     return credit - debit
 
 
-async def trial_balance(db, tenant_id, as_of):
-    bals = await _balances(db, tenant_id, as_of=as_of)
+# ---------------- Multi-currency report translation (Phase 4) ----------------
+def _entry_match(as_of=None, date_from=None):
+    match = {"status": "posted"}
+    if as_of:
+        match.setdefault("entry_date", {})["$lte"] = as_of
+    if date_from:
+        match.setdefault("entry_date", {})["$gte"] = date_from
+    return match
+
+
+async def _needs_translation(db, tenant_id, target_currency, as_of=None, date_from=None):
+    """True when any posted line in range sits on an entry whose currency
+    differs from the target. Lets USD-only books keep the original code path."""
+    s = _scoped(db, tenant_id)
+    match = _entry_match(as_of, date_from)
+    q = {"tenant_id": tenant_id, **match}
+    async for doc in s["entries"].c.find(q, {"currency": 1}):
+        if (doc.get("currency") or DEFAULT_CURRENCY) != target_currency:
+            return True
+    return False
+
+
+async def _translated_balances(db, tenant_id, target_currency, as_of=None, date_from=None):
+    """Like _balances, but every line is converted to ``target_currency`` at
+    its own entry-date rate via the FX service.
+
+    Stored line amounts are major-units x 100 (the Phase 1 convention), so we
+    convert major -> major at the entry date, round to the target's decimals,
+    and return x100 integers — the same convention the reports already use.
+    """
+    s = _scoped(db, tenant_id)
+    match = _entry_match(as_of, date_from)
+    rows = await s["lines"].aggregate([
+        {"$match": match},
+        {"$lookup": {
+            "from": "journal_entries",
+            "let": {"eid": "$entry_id", "tid": "$tenant_id"},
+            "pipeline": [
+                {"$match": {"$expr": {"$and": [
+                    {"$eq": ["$id", "$$eid"]},
+                    {"$eq": ["$tenant_id", "$$tid"]},
+                ]}}},
+                {"$project": {"_id": 0, "currency": 1, "entry_date": 1}},
+            ],
+            "as": "_entry",
+        }},
+        {"$unwind": {"path": "$_entry", "preserveNullAndEmptyArrays": True}},
+        {"$project": {"_id": 0, "account_code": 1, "debit": 1, "credit": 1,
+                      "currency": "$_entry.currency", "entry_date": "$_entry.entry_date"}},
+    ])
+    places = decimals_for(target_currency)
+    rate_cache = {}
+
+    async def _get_rate(frm, date):
+        key = (frm, date)
+        if key not in rate_cache:
+            rate_cache[key] = await FX.get_rate(frm, target_currency, date, db=db)
+        return rate_cache[key]
+
+    # group converted amounts per account
+    out = {}
+    for r in rows:
+        frm = (r.get("currency") or DEFAULT_CURRENCY)
+        # orphaned lines (no entry found) fall back to USD / today
+        date = str(r.get("entry_date") or "")[:10] or today_str()
+        for side in ("debit", "credit"):
+            stored = int(r.get(side) or 0)
+            if not stored:
+                continue
+            if frm == target_currency:
+                conv_x100 = stored
+            else:
+                major = stored / 100.0
+                rate = await _get_rate(frm, date)
+                conv_x100 = int(round(round(major * rate, places) * 100))
+            code = r["account_code"]
+            bucket = out.setdefault(code, {"debit": 0, "credit": 0})
+            bucket[side] += conv_x100
+    return out
+
+
+async def _report_balances(db, tenant_id, target_currency, as_of=None, date_from=None):
+    """Return (balances, translated_bool). Uses the original aggregation when
+    nothing needs translating so single-currency books are untouched."""
+    if target_currency and await _needs_translation(
+            db, tenant_id, target_currency, as_of=as_of, date_from=date_from):
+        return await _translated_balances(
+            db, tenant_id, target_currency, as_of=as_of, date_from=date_from), True
+    return await _balances(db, tenant_id, as_of=as_of, date_from=date_from), False
+
+
+async def trial_balance(db, tenant_id, as_of, target_currency=None):
+    target = normalize_currency(target_currency) if target_currency else DEFAULT_CURRENCY
+    bals, translated = await _report_balances(db, tenant_id, target, as_of=as_of)
     rows = []
     total_debit = 0
     total_credit = 0
@@ -265,11 +359,14 @@ async def trial_balance(db, tenant_id, as_of):
         "as_of": as_of, "rows": rows,
         "total_debit": total_debit, "total_credit": total_credit,
         "balanced": total_debit == total_credit,
+        "currency": target, "translated": translated,
     }
 
 
-async def pnl(db, tenant_id, date_from, date_to):
-    bals = await _balances(db, tenant_id, as_of=date_to, date_from=date_from)
+async def pnl(db, tenant_id, date_from, date_to, target_currency=None):
+    target = normalize_currency(target_currency) if target_currency else DEFAULT_CURRENCY
+    bals, translated = await _report_balances(
+        db, tenant_id, target, as_of=date_to, date_from=date_from)
     revenue, expense = [], []
     rev_total = exp_total = 0
     for code, v in bals.items():
@@ -289,11 +386,13 @@ async def pnl(db, tenant_id, date_from, date_to):
         "revenue": revenue, "expense": expense,
         "revenue_total": rev_total, "expense_total": exp_total,
         "net_income": rev_total - exp_total,
+        "currency": target, "translated": translated,
     }
 
 
-async def balance_sheet(db, tenant_id, as_of):
-    bals = await _balances(db, tenant_id, as_of=as_of)
+async def balance_sheet(db, tenant_id, as_of, target_currency=None):
+    target = normalize_currency(target_currency) if target_currency else DEFAULT_CURRENCY
+    bals, translated = await _report_balances(db, tenant_id, target, as_of=as_of)
     assets, liabilities, equity = [], [], []
     a_total = l_total = e_total = 0
     rev_total = exp_total = 0
@@ -326,6 +425,7 @@ async def balance_sheet(db, tenant_id, as_of):
         "equity_total": e_total,
         "liabilities_equity_total": l_total + e_total,
         "balanced": a_total == (l_total + e_total),
+        "currency": target, "translated": translated,
     }
 
 
