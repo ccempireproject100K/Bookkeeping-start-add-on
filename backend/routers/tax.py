@@ -263,9 +263,10 @@ async def year_summary(year: int = Query(datetime.now(timezone.utc).year),
 @router.get("/1099-preview")
 async def preview_1099(year: int = Query(datetime.now(timezone.utc).year),
                        user: dict = Depends(require("tax:write"))):
-    """1099-NEC data shaped for e-filing. Carries full tax IDs, so it requires
-    tax:write. The payer's legal name/EIN/address live in TaxBandits itself;
-    the app sends only recipient + amounts (see TAXBANDITS_SETUP.md)."""
+    """1099-NEC data shaped for e-filing. Tax IDs are masked (last 4 only);
+    full values come from GET /contractors/{cid}/tax-id (pii:read). The
+    payer's legal name/EIN/address live in TaxBandits itself; the app sends
+    only recipient + amounts (see TAXBANDITS_SETUP.md)."""
     recipients = []
     for c in await contractors(user).find_list(sort=[("name", 1)]):
         total = await _year_total_cents(user, c["id"], year)
@@ -277,8 +278,7 @@ async def preview_1099(year: int = Query(datetime.now(timezone.utc).year),
             "contractor_id": c["id"], "name": c["name"],
             "business_name": c.get("business_name", ""),
             "entity_type": c.get("entity_type", "individual"),
-            # Decrypted server-side only; this preview already requires tax:write.
-            "tin": pii_decrypt(enc) if enc else "",
+            "tin_last4": c.get("tax_id_last4", ""),
             "email": c.get("email", ""),
             "address": c.get("address", {}),
             "w9_received": row["w9_received"],

@@ -20,37 +20,43 @@ export default function Backup() {
   const doExport = async () => {
     setBusy(true);
     try {
+      // Encrypted by default (Fernet, TOKEN_ENCRYPTION_KEY). The server
+      // returns a .enc blob; only it can decrypt it on restore.
       const res = await client.post("/backup/export", {}, { responseType: "blob" });
-      const url = window.URL.createObjectURL(new Blob([res.data], { type: "application/json" }));
+      const url = window.URL.createObjectURL(new Blob([res.data], { type: "application/octet-stream" }));
       const a = document.createElement("a");
       a.href = url;
-      a.download = `bookkeeping-backup-${new Date().toISOString().slice(0, 10)}.json`;
+      a.download = `bookkeeping-backup-${new Date().toISOString().slice(0, 10)}.enc`;
       document.body.appendChild(a);
       a.click();
       a.remove();
       window.URL.revokeObjectURL(url);
-      toast.success("Backup downloaded");
+      toast.success("Encrypted backup downloaded");
     } catch (e) { toast.error(errMsg(e)); } finally { setBusy(false); }
   };
 
   const doImport = async () => {
     if (!file) { toast.error("Choose a backup file first"); return; }
     if (!confirm) { toast.error("Tick the confirmation checkbox to proceed"); return; }
-    let dump;
+    const text = await file.text();
+    let dump = null;
+    let isPlaintext = false;
     try {
-      dump = JSON.parse(await file.text());
-    } catch {
-      toast.error("That file is not valid JSON");
-      return;
+      const parsed = JSON.parse(text);
+      if (parsed.format === "bookkeeping-backup" && parsed.collections) {
+        dump = parsed.collections; // legacy plaintext export
+        isPlaintext = true;
+      }
+    } catch { /* not JSON — treat as encrypted below */ }
+    if (dump === null) {
+      // Encrypted .enc file: the server decrypts it (it holds the key).
+      dump = text.trim();
     }
-    if (dump.format !== "bookkeeping-backup" || !dump.collections) {
-      toast.error("Not a bookkeeping backup file");
-      return;
-    }
-    if (!window.confirm("Restore this backup? ALL current business data will be replaced. This can't be undone.")) return;
+    if (!isPlaintext && !window.confirm("Restore this encrypted backup? ALL current business data will be replaced. This can't be undone.")) return;
+    if (isPlaintext && !window.confirm("Restore this backup? ALL current business data will be replaced. This can't be undone.")) return;
     setBusy(true);
     try {
-      const r = await api.post("/backup/import", { confirm: true, dump: dump.collections });
+      const r = await api.post("/backup/import", { confirm: true, dump });
       toast.success(`Restored ${r.restored_documents} record(s) across ${r.collections} collection(s)`);
       setFile(null); setConfirm(false);
     } catch (e) { toast.error(errMsg(e)); } finally { setBusy(false); }
