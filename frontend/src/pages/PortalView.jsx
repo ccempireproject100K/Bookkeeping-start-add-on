@@ -21,6 +21,16 @@ export default function PortalView() {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [pay, setPay] = useState({ amount: "", payment_method: "bank", reference: "" });
+  const [cardBusy, setCardBusy] = useState(false);
+  const [justPaid, setJustPaid] = useState(false);
+
+  const payWithCard = async () => {
+    setCardBusy(true);
+    try {
+      const r = await api.post(`/portal/checkout/${token}`, { origin_url: window.location.origin });
+      window.location.href = r.checkout_url;
+    } catch (e) { toast.error(errMsg(e)); setCardBusy(false); }
+  };
 
   const load = () => {
     setError("");
@@ -28,7 +38,15 @@ export default function PortalView() {
       .then((v) => { setView(v); if (v?.invoice) setPay((p) => ({ ...p, amount: (v.invoice.balance_cents / 100).toFixed(2) })); })
       .catch(() => { setView(null); setError("This link didn't work. It may have expired — ask the business for a fresh link."); });
   };
-  useEffect(() => { load(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search);
+    if (q.get("paid") === "1") {
+      setJustPaid(true);
+      // clean the URL so a refresh doesn't re-show the banner
+      window.history.replaceState({}, "", window.location.pathname);
+    }
+    load();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const doPay = async () => {
     setBusy(true);
@@ -91,9 +109,22 @@ export default function PortalView() {
               </div>
             </div>
 
+            {justPaid && (
+              <div className="mb-4 rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-emerald-300" data-testid="portal-paid-banner">
+                Card payment received — thank you! It can take a moment to post to the invoice.
+              </div>
+            )}
             {inv.balance_cents > 0 && inv.status !== "paid" && (
               <div className="mt-6 rounded-lg bg-[#0F1218] border border-[#222838] p-4" data-testid="portal-pay">
                 <div className="mb-2 text-sm font-semibold text-gray-100">Pay this invoice</div>
+                <div className="flex flex-wrap items-center gap-2 mb-3">
+                  <Button onClick={payWithCard} disabled={cardBusy} className="bg-amber-600 hover:bg-amber-500 text-black font-semibold" data-testid="portal-pay-card">
+                    {cardBusy ? "Starting secure checkout…" : `Pay ${money(inv.balance_cents)} with card`}
+                  </Button>
+                  <span className="text-[11px] text-gray-600">Secure checkout via Stripe</span>
+                </div>
+                <div className="border-t border-[#222838] pt-3">
+                  <div className="mb-2 text-xs font-semibold text-gray-400">Or record another payment method</div>
                 <div className="flex flex-wrap items-end gap-2">
                   <div><Label className="text-xs">Amount ($)</Label>
                     <Input type="number" step="0.01" min="0.01" value={pay.amount} onChange={(e) => setPay({ ...pay, amount: e.target.value })} className={`${IN} w-32 font-mono`} /></div>
@@ -111,6 +142,7 @@ export default function PortalView() {
                   <Button size="sm" disabled={busy || !parseFloat(pay.amount)} onClick={doPay} className="bg-emerald-600 hover:bg-emerald-500 text-black font-semibold">Pay now</Button>
                 </div>
                 <p className="mt-1 text-[11px] text-gray-600">Payments are recorded immediately against the invoice.</p>
+                </div>
               </div>
             )}
             {inv.status === "paid" && (
