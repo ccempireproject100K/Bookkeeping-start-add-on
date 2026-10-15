@@ -204,6 +204,9 @@ async def scheduler_status(user: dict = Depends(require("ops:manage"))):
             "instance_id": st["instance_id"],
             "next_run": st["next_run"],
             "last_outcome": st["last_outcome"],
+            "fx_enabled": sched.fx_rates_enabled(),
+            "fx_next_run": st.get("fx_next_run"),
+            "fx_last_outcome": st.get("fx_last_outcome"),
             "recent_runs": runs}
 
 
