@@ -13,6 +13,38 @@ import TeamInvites from "@/components/TeamInvites";
 import NicheSwitcher from "@/components/NicheSwitcher";
 import OpeningBalances from "@/components/OpeningBalances";
 import BrandingCard from "@/components/BrandingCard";
+import CurrencyPicker from "@/components/CurrencyPicker";
+import { Globe } from "lucide-react";
+
+function BaseCurrencyCard() {
+  const { user, refresh } = useAuth();
+  const [busy, setBusy] = useState(false);
+  if (user?.role !== "owner") return null;
+  const current = user?.tenant?.settings?.base_currency || user?.tenant?.settings?.currency || "USD";
+  const save = async (code) => {
+    setBusy(true);
+    try {
+      await api.patch("/auth/tenant/settings", { base_currency: code });
+      await refresh();
+      toast.success(`Home currency set to ${code} — reports translate into it`);
+    } catch (e) { toast.error(errMsg(e)); } finally { setBusy(false); }
+  };
+  return (
+    <Card>
+      <h3 className="font-semibold text-gray-100 mb-1 flex items-center gap-2">
+        <Globe className="w-4 h-4" /> Home currency
+      </h3>
+      <p className="text-sm text-gray-500 mb-4">
+        Reports translate foreign-currency activity into this currency at each
+        transaction's date rate. Currently <span className="font-mono text-gray-300">{current}</span>.
+      </p>
+      <div className="max-w-xs opacity-100">
+        <CurrencyPicker value={current} onChange={save} testid="settings-base-currency" label="" />
+      </div>
+      {busy && <p className="text-xs text-gray-500 mt-2">Saving…</p>}
+    </Card>
+  );
+}
 
 function InventoryCard() {
   const { user, refresh } = useAuth();
@@ -94,6 +126,7 @@ export default function Settings() {
         <TeamInvites />
         <BrandingCard />
         <NicheSwitcher />
+        <BaseCurrencyCard />
         <OpeningBalances />
         <InventoryCard />
         <SessionsCard />
