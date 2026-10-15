@@ -157,7 +157,12 @@ async def stripe_webhook(request: Request):
         return {"status": "ok"}
     if t in ("checkout.session.completed", "checkout.session.async_payment_succeeded") and obj.get("payment_status") == "paid":
         await _mark_paid(obj["id"], obj.get("payment_intent"))
-        await fulfill(obj["id"])
+        kind = (obj.get("metadata") or {}).get("kind")
+        if kind == "portal_invoice":
+            from routers.portal import fulfill_portal_invoice
+            await fulfill_portal_invoice(obj["id"])
+        else:
+            await fulfill(obj["id"])
     elif t in ("checkout.session.expired", "checkout.session.async_payment_failed"):
         await db.payment_transactions.update_one({"session_id": obj["id"]}, {"$set": {"status": t.rsplit(".", 1)[1], "payment_status": "failed"}})
     elif t == "charge.refunded":
