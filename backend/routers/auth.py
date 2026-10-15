@@ -173,6 +173,8 @@ async def migrate_encrypt_pii(user: dict = Depends(require("ledger:admin"))):
     """Owner-only, idempotent: encrypt any plaintext PII still in the DB.
 
     - contractors.tax_id -> tax_id_enc + tax_id_last4 (plaintext then unset)
+    - contractors.tax_id_enc holding PLAINTEXT (pre-encryption router wrote it
+      directly) -> encrypted in place; Fernet tokens start with "gAAAAA"
     - users.payout_account / payout_routing -> payout_*_enc + *_last4 (plaintext then unset)
     Run after any agent stored plaintext; safe to run repeatedly.
     """
@@ -190,6 +192,16 @@ async def migrate_encrypt_pii(user: dict = Depends(require("ledger:admin"))):
             {"_id": c["_id"]},
             {"$set": {"tax_id_enc": pii_encrypt(tax_id), "tax_id_last4": last4(tax_id)},
              "$unset": {"tax_id": ""}})
+        contractors_n += 1
+    # Plaintext that landed directly in tax_id_enc (pre-encryption router).
+    # Fernet tokens start with "gAAAAA"; anything else is plaintext to migrate.
+    async for c in db.contractors.find({"tax_id_enc": {"$exists": True, "$ne": ""}}):
+        enc = (c.get("tax_id_enc") or "").strip()
+        if not enc or enc.startswith("gAAAAA"):
+            continue
+        await db.contractors.update_one(
+            {"_id": c["_id"]},
+            {"$set": {"tax_id_enc": pii_encrypt(enc), "tax_id_last4": last4(enc)}})
         contractors_n += 1
     users_n = 0
     async for u in db.users.find({"$or": [{"payout_account": {"$exists": True, "$ne": ""}},

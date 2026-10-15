@@ -5,9 +5,9 @@ SCOPE LIMITS:
 - No in-house IRS e-filing. Filing goes through the TaxBandits API only.
 - Without TAXBANDITS_* env keys, e-file endpoints return 503 with setup
   instructions (see TAXBANDITS_SETUP.md at the repo root).
-- Contractor tax IDs live in the `tax_id_enc` field. For now the value is
-  stored as provided (plaintext); field-level encryption lands in the
-  security-hardening batch, which will migrate `tax_id_enc` in place.
+- Contractor tax IDs are Fernet-encrypted at rest (`tax_id_enc`); only the
+  last 4 (`tax_id_last4`) is stored in cleartext. Full values decrypt
+  server-side for `pii:read` holders and TaxBandits e-filing only.
   The field is write-only through the API: responses expose only the last 4.
 """
 
@@ -24,6 +24,7 @@ from pydantic import BaseModel, Field
 from db import db
 from lib.base import Scoped, new_id, now_iso, to_cents, cents_to_dollars
 from lib.auth import require, get_current_user
+from lib.pii import last4, pii_decrypt, pii_encrypt
 
 router = APIRouter(prefix="/tax", tags=["tax"])
 
@@ -73,13 +74,21 @@ class W9In(BaseModel):
     received: bool
 
 
+def _tax_id_fields(tax_id: str) -> dict:
+    """Encrypt the tax ID; only the last 4 is ever stored in cleartext."""
+    tax_id = (tax_id or "").strip()
+    if not tax_id:
+        return {"tax_id_enc": "", "tax_id_last4": ""}
+    return {"tax_id_enc": pii_encrypt(tax_id), "tax_id_last4": last4(tax_id)}
+
+
 def _strip(c: dict, total_cents: int = 0) -> dict:
     return {
         "id": c["id"], "name": c["name"], "email": c.get("email", ""),
         "phone": c.get("phone", ""), "business_name": c.get("business_name", ""),
         "entity_type": c.get("entity_type", "individual"),
         # tax_id_enc is write-only; only the last 4 ever leave the server.
-        "tax_id_last4": (c.get("tax_id_enc") or "")[-4:],
+        "tax_id_last4": c.get("tax_id_last4", ""),
         "address": c.get("address", {}),
         "w9_received": c.get("w9_received", False),
         "w9_received_date": c.get("w9_received_date"),
@@ -112,13 +121,12 @@ async def list_contractors(year: int = Query(datetime.now(timezone.utc).year),
 @router.post("/contractors")
 async def create_contractor(body: ContractorIn, user: dict = Depends(require("tax:write"))):
     data = body.model_dump()
+    tax_id = data.pop("tax_id", "")
     doc = {
         "id": new_id(),
         "name": data["name"], "email": data["email"], "phone": data["phone"],
         "business_name": data["business_name"], "entity_type": data["entity_type"],
-        # NOTE: stored as provided for now; the security-hardening batch
-        # migrates `tax_id_enc` to Fernet encryption in place.
-        "tax_id_enc": data["tax_id"],
+        **_tax_id_fields(tax_id),
         "address": data["address"],
         "w9_received": False, "w9_received_date": None, "efile": {},
         "created_at": now_iso(),
@@ -131,18 +139,32 @@ async def create_contractor(body: ContractorIn, user: dict = Depends(require("ta
 @router.patch("/contractors/{cid}")
 async def update_contractor(cid: str, body: ContractorIn, user: dict = Depends(require("tax:write"))):
     data = body.model_dump()
-    res = await contractors(user).update_one(
-        {"id": cid},
-        {"$set": {
-            "name": data["name"], "email": data["email"], "phone": data["phone"],
-            "business_name": data["business_name"], "entity_type": data["entity_type"],
-            # NOTE: plaintext until the security batch migrates `tax_id_enc`.
-            "tax_id_enc": data["tax_id"], "address": data["address"]}})
+    tax_id = data.pop("tax_id", "")
+    patch = {
+        "name": data["name"], "email": data["email"], "phone": data["phone"],
+        "business_name": data["business_name"], "entity_type": data["entity_type"],
+        "address": data["address"],
+    }
+    if tax_id:
+        # Only overwrite the encrypted tax ID when a new one is supplied.
+        patch.update(_tax_id_fields(tax_id))
+    res = await contractors(user).update_one({"id": cid}, {"$set": patch})
     if res.matched_count == 0:
         raise HTTPException(status_code=404, detail="Contractor not found")
     await _audit(user, "tax.contractor.update", "contractor", cid, {})
     doc = await contractors(user).find_one({"id": cid})
     return _strip(doc)
+
+
+@router.get("/contractors/{cid}/tax-id")
+async def get_contractor_tax_id(cid: str, user: dict = Depends(require("pii:read"))):
+    """Full tax ID — pii:read holders only. Audited, never logged."""
+    c = await contractors(user).find_one({"id": cid})
+    if not c:
+        raise HTTPException(status_code=404, detail="Contractor not found")
+    await _audit(user, "tax.tax_id.view", "contractor", cid, {})
+    enc = c.get("tax_id_enc") or ""
+    return {"contractor_id": cid, "tax_id": pii_decrypt(enc) if enc else ""}
 
 
 @router.delete("/contractors/{cid}")
@@ -250,11 +272,13 @@ async def preview_1099(year: int = Query(datetime.now(timezone.utc).year),
         row = _strip(c, total)
         if not row["needs_1099"]:
             continue
+        enc = c.get("tax_id_enc") or ""
         recipients.append({
             "contractor_id": c["id"], "name": c["name"],
             "business_name": c.get("business_name", ""),
             "entity_type": c.get("entity_type", "individual"),
-            "tin": c.get("tax_id_enc", ""),
+            # Decrypted server-side only; this preview already requires tax:write.
+            "tin": pii_decrypt(enc) if enc else "",
             "email": c.get("email", ""),
             "address": c.get("address", {}),
             "w9_received": row["w9_received"],
@@ -359,7 +383,8 @@ async def efile_1099(cid: str, year: int = Query(datetime.now(timezone.utc).year
         "TaxYear": year,
         "Recipient": {
             "Name": c["name"],
-            "TIN": c.get("tax_id_enc", ""),
+            # Decrypted server-side only, at send time. Never stored or logged in plaintext.
+            "TIN": pii_decrypt(c.get("tax_id_enc") or "") if c.get("tax_id_enc") else "",
             "Email": c.get("email", ""),
             "Address": {"Address1": addr.get("street", ""), "City": addr.get("city", ""),
                         "State": addr.get("state", ""), "ZipCd": addr.get("zip", "")},
