@@ -43,6 +43,7 @@ import Benchmarks from "@/pages/Benchmarks";
 import Voice from "@/pages/Voice";
 import FirmDashboard from "@/pages/FirmDashboard";
 import Entities from "@/pages/Entities";
+import Cleanup from "@/pages/Cleanup";
 import Estimates from "@/pages/Estimates";
 import CashFlow from "@/pages/CashFlow";
 import BudgetVsActual from "@/pages/BudgetVsActual";
@@ -115,6 +116,7 @@ function App() {
               <Route path="voice" element={<Voice />} />
               <Route path="firm" element={<FirmDashboard />} />
               <Route path="entities" element={<Entities />} />
+              <Route path="cleanup" element={<Cleanup />} />
               <Route path="aging" element={<Aging />} />
               <Route path="gift-cards" element={<GiftCards />} />
               <Route path="commissions" element={<Commissions />} />
