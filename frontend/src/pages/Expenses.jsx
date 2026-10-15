@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Plus, Receipt, Users, Undo2, FileText } from "lucide-react";
+import { Plus, Receipt, Users, Undo2, FileText, Trash2 } from "lucide-react";
 
 export default function Expenses() {
   const { user } = useAuth();
@@ -56,6 +56,11 @@ export default function Expenses() {
   };
   const saveCredit = async () => {
     try { await api.post("/vendors/credits", { ...cr, amount: parseFloat(cr.amount) || 0 }); toast.success("Vendor credit recorded"); setCrOpen(false); setCr({ vendor: "", amount: "", expense_code: "5700", memo: "" }); reload(); }
+    catch (e) { toast.error(errMsg(e)); }
+  };
+  const delVendor = async (v) => {
+    if (!window.confirm(`Delete vendor "${v.name}"? Expenses already recorded keep their vendor name.`)) return;
+    try { await api.del(`/vendors/${v.id}`); toast.success("Vendor deleted"); reload(); }
     catch (e) { toast.error(errMsg(e)); }
   };
   const run1099 = () => api.get(`/vendors/1099?year=${year}`).then(setReport1099).catch((e) => toast.error(errMsg(e)));
@@ -103,7 +108,8 @@ export default function Expenses() {
             <table className="w-full text-sm" data-testid="table-vendors">
               <thead><tr className="text-xs uppercase tracking-wider text-gray-500 border-b border-[#222838]">
                 <th className="px-4 py-3 text-left font-medium">Vendor</th><th className="px-4 py-3 text-left font-medium">Contact</th>
-                <th className="px-4 py-3 text-left font-medium">1099</th><th className="px-4 py-3 text-left font-medium">Tax ID</th></tr></thead>
+                <th className="px-4 py-3 text-left font-medium">1099</th><th className="px-4 py-3 text-left font-medium">Tax ID</th>
+                {canManage && <th className="px-4 py-3 text-right font-medium">Actions</th>}</tr></thead>
               <tbody>
                 {vendors.map((v) => (
                   <tr key={v.id} className="border-b border-[#171c26] hover:bg-[#161b25]">
@@ -111,9 +117,15 @@ export default function Expenses() {
                     <td className="px-4 py-3 text-gray-400 text-xs">{v.email || v.phone || "—"}</td>
                     <td className="px-4 py-3">{v.is_1099 ? <span className="px-2 py-0.5 rounded-full text-xs bg-amber-500/10 text-amber-400 border border-amber-500/20">1099</span> : <span className="text-gray-600">—</span>}</td>
                     <td className="px-4 py-3 text-gray-400 font-mono text-xs">{v.tax_id || "—"}</td>
+                    {canManage && (
+                      <td className="px-4 py-3 text-right">
+                        <button onClick={() => delVendor(v)} aria-label={`Delete ${v.name}`} data-testid={`vendor-delete-${v.id}`}
+                          className="inline-flex items-center justify-center w-8 h-8 rounded text-gray-500 hover:text-rose-400 hover:bg-rose-500/10"><Trash2 size={15} /></button>
+                      </td>
+                    )}
                   </tr>
                 ))}
-                {vendors.length === 0 && <tr><td colSpan={4} className="px-5 py-12 text-center text-gray-500">No vendors yet.</td></tr>}
+                {vendors.length === 0 && <tr><td colSpan={canManage ? 5 : 4} className="px-5 py-12 text-center text-gray-500">No vendors yet.</td></tr>}
               </tbody>
             </table>
           </Card>
