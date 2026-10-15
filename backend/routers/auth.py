@@ -124,18 +124,42 @@ async def _record_failed_login(email: str, ip: str):
 
 
 @router.post("/sessions/revoke-all")
-async def revoke_all_sessions(response: Response,
+async def revoke_all_sessions(response: Response, body: dict = None,
                               user: dict = Depends(get_current_user)):
-    """Sign out everywhere: bumps the token version so every previously issued
-    JWT stops validating. The current device is re-issued a fresh token and
-    stays signed in."""
+    """Sign out other devices: bumps the token version so every previously issued
+    JWT stops validating. The current device is re-issued a fresh token and stays
+    signed in — unless ``everywhere`` is true, in which case this device is signed
+    out too and must log back in."""
+    everywhere = bool((body or {}).get("everywhere"))
     new_v = user.get("token_version", 0) + 1
     await db.users.update_one({"id": user["id"]},
                               {"$set": {"token_version": new_v}})
     user = {**user, "token_version": new_v}
-    await _audit(user, "auth.sessions.revoke_all", "user", user["id"], {})
-    await _issue(response, user)
-    return {"ok": True}
+    await _audit(user, "auth.sessions.revoke_all", "user", user["id"],
+                 {"everywhere": everywhere})
+    if everywhere:
+        clear_session_cookie(response)
+    else:
+        await _issue(response, user)
+    return {"ok": True, "everywhere": everywhere}
+
+
+class TenantSettingsBody(BaseModel):
+    inventory_enabled: bool = Field(...)
+
+
+@router.patch("/tenant/settings")
+async def update_tenant_settings(body: TenantSettingsBody,
+                                 user: dict = Depends(require("settings:write"))):
+    """Owner toggle for the inventory add-on. Data is kept when the add-on is
+    turned off and comes back when it's turned back on."""
+    await db.tenants.update_one(
+        {"id": user["tenant_id"]},
+        {"$set": {"settings.inventory_enabled": body.inventory_enabled}})
+    await _audit(user, "settings.inventory_toggled", "tenant", user["tenant_id"],
+                 {"inventory_enabled": body.inventory_enabled})
+    tenant = await db.tenants.find_one({"id": user["tenant_id"]}, {"_id": 0})
+    return {"settings": (tenant or {}).get("settings", {})}
 
 
 @router.post("/logout")

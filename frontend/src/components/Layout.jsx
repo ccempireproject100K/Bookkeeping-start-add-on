@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { errMsg } from "@/lib/api";
+import MusicPlayer from "./MusicPlayer";
 
 const ALL = ["owner", "accountant", "bookkeeper"];
 const NAV = [
@@ -150,6 +151,7 @@ export default function Layout() {
           <Outlet />
         </main>
       </div>
+      <MusicPlayer />
     </div>
   );
 }

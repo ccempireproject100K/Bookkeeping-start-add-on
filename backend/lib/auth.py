@@ -99,6 +99,7 @@ PERMISSIONS = {
     "tax:write": {"owner"},
     "pii:read": {"owner", "accountant"},  # full PII values (tax IDs, payout accounts)
     "audit:read": {"owner", "accountant"},  # read-only audit trail viewer
+    "settings:write": {"owner"},  # workspace settings: fiscal close, equity, inventory add-on
 }
 
 
