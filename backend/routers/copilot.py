@@ -58,8 +58,76 @@ async def _audit(user, action, entity, entity_id, details=None):
 
 
 def _action_doc(d: dict) -> dict:
-    return {k: d.get(k) for k in ("id", "kind", "title", "detail", "payload", "status",
+    return {k: d.get(k) for k in ("id", "kind", "title", "detail", "brief", "payload", "status",
                                  "created_at", "decided_at", "decided_by", "result")}
+
+
+async def _cash_on_hand(tid: str) -> int:
+    bals = await L._balances(db, tid, as_of=today_str())
+
+    def bal(code):
+        v = bals.get(code, {"debit": 0, "credit": 0})
+        return L._net_balance(code, v["debit"], v["credit"])
+    return bal("1010") + bal("1020") + bal("1021") + bal("1022") + bal("1023") + bal("1050")
+
+
+async def _brief_for(user, kind: str, item: dict) -> dict:
+    """AI brief on a proposed action: what happened, what the AI noticed,
+    recommended action + reasoning, confidence. Grounded in real numbers;
+    works without any LLM key."""
+    tid = user["tenant_id"]
+    if kind == "chase_invoice":
+        client = item["client"]
+        past = await Scoped(db.invoices, tid).find_list({"client_name": client}, limit=200)
+        total_billed = sum(i.get("total_cents", 0) for i in past)
+        n = len(past)
+        # how often this client pays late (paid after due date, or still overdue)
+        late = 0
+        for i in past:
+            if i["id"] == item["id"]:
+                continue
+            due = (i.get("due_date") or "")[:10]
+            if not due:
+                continue
+            pay_dates = [p.get("date", "")[:10] for p in i.get("payments", []) if p.get("date")]
+            last_pay = max(pay_dates) if pay_dates else ""
+            if i.get("status") in ("issued", "partial") and due < today_str()[:10]:
+                late += 1
+            elif last_pay and last_pay > due:
+                late += 1
+        outstanding = sum(i["total_cents"] - i.get("paid_cents", 0)
+                          for i in past if i["status"] in ("issued", "partial"))
+        hist_note = (f"They've paid late {late} of {n} past invoices."
+                     if n > 1 else "Not enough history to judge their payment pattern.")
+        conf = "high" if n >= 5 else "medium" if n >= 2 else "low"
+        return {
+            "what_happened": f"Invoice #{item['id'][:8]} for ${item['balance']:.2f} to {client} "
+                             f"is {item['days_overdue']} days past due (due {item['due_date']}).",
+            "what_noticed": f"{hist_note} Total outstanding with {client}: "
+                             f"${cents_to_dollars(outstanding):,.2f} across {n} invoices.",
+            "recommendation": "Send the friendly reminder now.",
+            "reasoning": ("Early nudges get paid fastest, and this is still in the friendly "
+                          "window before late fees or firmer steps apply."),
+            "confidence": conf,
+            "confidence_basis": f"Based on {n} past invoices with this client.",
+        }
+    if kind == "pay_bill":
+        cash = await _cash_on_hand(tid)
+        bal = item["balance"]
+        pct = round(bal / cash * 100, 1) if cash > 0 else 0
+        return {
+            "what_happened": f"Bill from {item['vendor']} for ${bal:.2f} "
+                             f"is due {item['due_date'] or 'on receipt'}.",
+            "what_noticed": f"Cash on hand is ${cents_to_dollars(cash):,.2f}; "
+                             f"this bill is {pct}% of it.",
+            "recommendation": "Draft the payment for review.",
+            "reasoning": ("Drafting now keeps payables current; nothing moves until you "
+                          "post the payment yourself."),
+            "confidence": "high" if cash > bal * 2 else "medium",
+            "confidence_basis": "Based on current cash position.",
+        }
+    return {"what_happened": "", "what_noticed": "", "recommendation": "",
+            "reasoning": "", "confidence": "low", "confidence_basis": ""}
 
 
 # ---------------- workspace snapshot (grounding data) ----------------
@@ -213,6 +281,7 @@ async def propose_actions(user: dict = Depends(require("ops:manage"))):
             "title": f"Remind {o['client']} — ${o['balance']:.2f} overdue",
             "detail": f"Invoice {o['days_overdue']} day(s) past due (due {o['due_date']}). "
                       "Creates a reminder record — nothing is sent automatically.",
+            "brief": await _brief_for(user, "chase_invoice", o),
             "payload": {"invoice_id": o["id"]}, "status": "pending",
             "created_at": now_iso(), "decided_at": None, "decided_by": None, "result": None,
         }
@@ -227,6 +296,7 @@ async def propose_actions(user: dict = Depends(require("ops:manage"))):
             "title": f"Draft payment — {b['vendor']} (${b['balance']:.2f})",
             "detail": f"Bill due {b['due_date'] or 'n/a'}. Creates a DRAFT payment for review — "
                       "no money moves until you post it yourself.",
+            "brief": await _brief_for(user, "pay_bill", b),
             "payload": {"bill_id": b["id"], "amount": b["balance"]}, "status": "pending",
             "created_at": now_iso(), "decided_at": None, "decided_by": None, "result": None,
         }
@@ -241,7 +311,33 @@ async def propose_actions(user: dict = Depends(require("ops:manage"))):
 @router.get("/actions")
 async def list_actions(user: dict = Depends(get_current_user)):
     docs = await actions(user).find_list(sort=[("created_at", -1)], limit=50)
-    return [_action_doc(d) for d in docs]
+    out = []
+    for d in docs:
+        if not d.get("brief") and d.get("status") == "pending":
+            # backfill the brief for actions proposed before briefs existed
+            item = None
+            if d["kind"] == "chase_invoice":
+                inv = await Scoped(db.invoices, user["tenant_id"]).find_one(
+                    {"id": (d.get("payload") or {}).get("invoice_id")})
+                if inv:
+                    bal = inv["total_cents"] - inv.get("paid_cents", 0)
+                    item = {"id": inv["id"], "client": inv.get("client_name"),
+                            "balance": cents_to_dollars(bal),
+                            "due_date": (inv.get("due_date") or "")[:10],
+                            "days_overdue": max(0, (date.fromisoformat(today_str()[:10]) -
+                                date.fromisoformat((inv.get("due_date") or today_str())[:10])).days)}
+            elif d["kind"] == "pay_bill":
+                bill = await Scoped(db.bills, user["tenant_id"]).find_one(
+                    {"id": (d.get("payload") or {}).get("bill_id")})
+                if bill:
+                    item = {"vendor": bill.get("vendor"),
+                            "balance": cents_to_dollars(
+                                bill.get("amount_cents", 0) - bill.get("paid_cents", 0)),
+                            "due_date": bill.get("due_date")}
+            if item:
+                d["brief"] = await _brief_for(user, d["kind"], item)
+        out.append(_action_doc(d))
+    return out
 
 
 @router.post("/actions/{action_id}/reject")
