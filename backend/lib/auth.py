@@ -25,11 +25,12 @@ def verify_password(pw: str, hashed: str) -> bool:
         return False
 
 
-def create_access_token(user_id: str, email: str) -> str:
+def create_access_token(user_id: str, email: str, version: int = 0) -> str:
     payload = {
         "sub": user_id,
         "email": email,
         "type": "access",
+        "v": version,  # bumped by "sign out all devices"; old tokens die
         "exp": datetime.now(timezone.utc) + timedelta(days=7),
     }
     return jwt.encode(payload, _secret(), algorithm=JWT_ALG)
@@ -68,6 +69,10 @@ async def get_current_user(request: Request) -> dict:
     user = await db.users.find_one({"id": payload["sub"]}, {"_id": 0, "password_hash": 0})
     if not user:
         raise HTTPException(status_code=401, detail="User not found")
+    # Token versioning: "sign out all devices" bumps token_version, killing
+    # every previously issued JWT without any server-side session store.
+    if payload.get("v", 0) != user.get("token_version", 0):
+        raise HTTPException(status_code=401, detail="Session revoked")
     return user
 
 
@@ -93,6 +98,7 @@ PERMISSIONS = {
     "tax:read": {"owner", "accountant", "bookkeeper"},
     "tax:write": {"owner"},
     "pii:read": {"owner", "accountant"},  # full PII values (tax IDs, payout accounts)
+    "audit:read": {"owner", "accountant"},  # read-only audit trail viewer
 }
 
 

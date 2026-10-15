@@ -38,6 +38,7 @@ import Payroll from "@/pages/Payroll";
 import Budget from "@/pages/Budget";
 import Tax from "@/pages/Tax";
 import Settings from "@/pages/Settings";
+import AuditLog from "@/pages/AuditLog";
 
 function Protected({ children }) {
   const { user, loading } = useAuth();
@@ -88,6 +89,7 @@ function App() {
               <Route path="payroll" element={<Payroll />} />
               <Route path="budget" element={<Budget />} />
               <Route path="tax" element={<Tax />} />
+              <Route path="audit" element={<AuditLog />} />
               <Route path="settings" element={<Settings />} />
             </Route>
           </Routes>
