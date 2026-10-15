@@ -1,0 +1,71 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 216 16% 5%;
+  --foreground: 220 14% 96%;
+  --card: 218 22% 11%;
+  --card-foreground: 220 14% 96%;
+  --popover: 218 24% 9%;
+  --popover-foreground: 220 14% 96%;
+  --primary: 32 95% 44%;
+  --primary-foreground: 24 30% 6%;
+  --secondary: 218 18% 16%;
+  --secondary-foreground: 220 14% 96%;
+  --muted: 218 18% 16%;
+  --muted-foreground: 220 9% 62%;
+  --accent: 218 18% 20%;
+  --accent-foreground: 220 14% 96%;
+  --destructive: 350 89% 60%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 220 20% 18%;
+  --input: 220 20% 18%;
+  --ring: 32 95% 44%;
+  --radius: 0.75rem;
+}
+
+* { border-color: hsl(var(--border)); }
+
+body {
+  margin: 0;
+  font-family: 'DM Sans', sans-serif;
+  background-color: #0B0D10;
+  color: hsl(var(--foreground));
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, .font-display { font-family: 'Outfit', sans-serif; }
+.font-mono, .tabular-nums { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
+
+/* Subtle grain/vignette on the app background */
+.app-bg {
+  background:
+    radial-gradient(1200px 600px at 80% -10%, rgba(217,119,6,0.08), transparent 60%),
+    radial-gradient(900px 500px at -10% 10%, rgba(37,99,235,0.06), transparent 55%),
+    #0B0D10;
+}
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: #0B0D10; }
+::-webkit-scrollbar-thumb { background: #262C38; border-radius: 8px; }
+::-webkit-scrollbar-thumb:hover { background: #374151; }
+
+.card-surface {
+  background-color: #14171E;
+  border: 1px solid #222838;
+  border-radius: var(--radius);
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-rise { animation: rise 0.5s cubic-bezier(0.22,1,0.36,1) both; }
+
+.barber-pole {
+  background: repeating-linear-gradient(45deg, #DC2626 0 8px, #ffffff 8px 16px, #2563EB 16px 24px, #ffffff 24px 32px);
+}

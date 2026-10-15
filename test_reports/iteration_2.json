@@ -1,0 +1,43 @@
+{
+  "summary": "Phase 1 HVAC Job Costing + Customers + rebrand tested end-to-end. 16/16 pytest cases pass (seeded JOB-0001 matches spec $8000/$5500/$2500/31.25%, JOB-0003 flagged unprofitable; full create-estimate -> block-cost-409 -> convert-active -> labor-cost-by-hours*rate=300 -> material-cost -> change-order -> invoice roundtrip; each cost/invoice produces exactly ONE journal entry; trial balance & balance sheet remain balanced; all 4 profitability groupings return items; permissions enforced — accountant/bookkeeper can read, accountant and technician(barber) cannot create; customer create+persist; tenant shows 'Mind at Ease Solutions HVAC'). Playwright flow confirmed UI: rebranded login + sidebar, Jobs table with Revenue/Cost/GP/Margin columns and unprofitable row tinted rose, estimate modal, cost UI hidden on estimate, btn-advance-status converts, labor hours*rate posts (JE# shown), change order, invoice updates revenue card to $5,000, all 4 jp-tab-* tabs populate table-profitability, Customers btn-add-customer creates visible card, Trial Balance page shows Balanced badge, Technician role sidebar shows only Dashboard+Quick Sell (no Job Costing), Accountant lands on Jobs page with no New Job button (read-only).",
+  "backend_issues": {
+    "critical": [
+      {"endpoint": "POST /api/jobs", "issue": "Duplicate job_number generated. seed.py inserts JOB-0001/0002/0003 directly without initializing the 'job' counter in db.counters. When any user creates a new job via POST /jobs, next_seq starts at 1 and emits JOB-0001 again, so job_number is NOT unique within a tenant. Reproduced in UI (two rows with data-testid='job-row-JOB-0001': 'Northgate Office Park' + newly-created 'TEST_UI_Customer') and in DB (`db.counters` contains {name:'job', seq:1} while jobs already exist for 1/2/3). Fix: in seed.py, after inserting the 3 jobs, upsert `db.counters` with {tenant_id, name:'job', seq:3} — or create jobs via next_seq during seeding. Also recommend a unique DB index on (tenant_id, job_number).", "priority": "CRITICAL"}
+    ],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Branding", "issues": ["Sidebar brand reads 'Mind at Ease HVAC' while login page reads 'Mind at Ease Solutions HVAC' — align on the full name for consistency with spec."]},
+      {"screen": "Login page", "issues": ["Benign /auth/me 401 on first paint (cosmetic console error only)."]}
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_hvac_jobs.py",
+    "/app/backend/tests/backend_test.py",
+    "/app/test_reports/pytest/hvac_results.xml"
+  ],
+  "action_items": [
+    "Fix duplicate job_number: initialize the 'job' counter in seed.py (upsert {name:'job', seq:3}) and add a unique index on (tenant_id, job_number) to defend against this class of bug.",
+    "Align branding — change sidebar brand text to 'Mind at Ease Solutions HVAC' (or at minimum 'Mind at Ease HVAC Solutions') to match the login header and the request spec."
+  ],
+  "critical_code_review_comments": [
+    "routers/jobs.py#create_job: no uniqueness guard on job_number — relies entirely on counter. Combined with seed bug, this surfaced immediately. Add unique index + retry-on-duplicate.",
+    "routers/jobs.py#invoice_job: posts revenue to 4300 and relieves AR via build_invoice_issue — invoice is created in 'issued' status but no AR payment path from the Job UI. OK for Phase 1 (payment flows through existing invoices page), worth confirming expected UX.",
+    "routers/jobs.py#list_jobs returns `{**j, ...}` which includes mongo `_id` unless find_list strips it; current responses are clean (tests pass) so likely fine, but worth asserting.",
+    "routers/jobs.py#add_cost: when category=='material' and no product_id is supplied, falls through to the else branch and debits 5000 / credits 1020 or 2010 — not 1300 inventory. That is correct for direct-expensed materials, but UI doesn't surface the product_id flow; consider enabling product selection.",
+    "jobs.py JobBody.customer_id is accepted but never validated/linked when customer_name doesn't match an existing customer — easy to end up with mismatched name/id pairs."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_hvac_jobs.py"
+  ],
+  "success_rate": {"backend": "100% (16/16)", "frontend": "100% of flows tested"},
+  "test_credentials": "See /app/memory/test_credentials.md — owner/accountant/bookkeeper/technician(role='barber') demo buttons all work. Login demo testid for technician is 'demo-login-technician' (not 'demo-login-barber').",
+  "seed_data_creation": "Ran /app/backend/seed.py three times to reset state between flows.",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Reusable pytest at /app/backend/tests/test_hvac_jobs.py covers seeded spec, full create->cost->co->invoice flow, profitability groupings, permissions, customers, rebrand, and accounting-integrity (TB + BS). Run via `pytest backend/tests/test_hvac_jobs.py -v -o addopts=''` from /app. The TrialBalance/BalanceSheet endpoints return keys `total_debit`/`total_credit` and `assets_total`/`liabilities_equity_total`+`balanced:true` (not *_cents). Journal-entries list defaults limit=200; pass ?limit=10000 for counting. Demo login testid for the technician is `demo-login-technician`. Known blocker: duplicate job_number — once seed.py primes the counter, re-run pytest to confirm no regressions.",
+  "rca of the issue": "Duplicate JOB-0001: seed.py inserts jobs by writing to db.jobs directly with hard-coded job_numbers but does not advance the per-tenant 'job' counter stored in db.counters. The POST /jobs endpoint calls Scoped(db.jobs,...).next_seq(db.counters,'job'), which $inc's seq starting from 0 (returns 1) because no counter doc exists yet. Reproduction: fresh seed -> login as owner -> POST /api/jobs -> response job_number='JOB-0001' (duplicate). Mitigation: after inserting the 3 demo jobs, insert/upsert a counter document `{tenant_id: tid, name: 'job', seq: 3}`; additionally add a unique Mongo index on (tenant_id, job_number) and handle DuplicateKeyError in create_job by retrying next_seq."
+}

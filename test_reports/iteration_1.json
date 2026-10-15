@@ -1,0 +1,30 @@
+{
+  "summary": "Full-stack test of The Barber's Ledger. All 24 backend pytest cases pass (auth, dashboard, COA, journal entries + reversal, unbalanced rejection, bookkeeper draft-only, accountant 403, trial balance balanced, balance sheet balanced, P&L, general ledger, POS sell/out-of-stock/barber-can-sell, product restock+adjust, invoice issue+pay, cash close variance, period lock -> 423, tenant isolation Fade vs Sharp Lines). Frontend Playwright flow: login via demo button, dashboard with all 7 tiles rendering real numbers + recent entries, Journal Entry modal correctly enforces balanced debits==credits (Post Entry disabled until balanced, 'Balanced' status shown), Trial Balance/Balance Sheet show Balanced badge, P&L shows Net Income, COA groups all 5 types, Quick Sell completes a sale with live total+commission, role switcher correctly limits barber nav to Dashboard + Quick Sell only. Tenant isolation verified at API level.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Dashboard", "issues": ["Inconsistent tile data-testid naming: 'stat-tile-net-income' uses hyphen while key is 'net_income'; 'stat-tile-inventory-val' uses a trailing '-val' suffix inconsistent with other tiles. Consider standardising to stat-tile-{key} (e.g. stat-tile-net_income / stat-tile-inventory) to match the convention used elsewhere and the test context note."]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/backend_test.py", "/app/test_reports/pytest/pytest_results.xml"],
+  "action_items": [
+    "Optional: normalise two dashboard tile data-testids ('stat-tile-net-income' and 'stat-tile-inventory-val') to be consistent (hyphens vs underscores + no '-val' suffix).",
+    "Note: /auth/switch-role has no permission guard; any authenticated workspace user can re-auth as any role in their tenant. This is intentional for the demo per code comment, but worth confirming before production."
+  ],
+  "critical_code_review_comments": [
+    "server.py: CORSMiddleware is added AFTER include_router; it still works for simple requests but convention is to add middleware before route registration. Low impact.",
+    "lib/auth.py Secure cookie flag: ensure Secure+SameSite=Lax works across the previewed proxy; empirically /auth/me returned 200 so cookie flows end-to-end. OK.",
+    "routers/auth.py switch-role: no permission check — any role in tenant can escalate to owner via this endpoint. Fine for demo, must be gated or removed in production.",
+    "routers/ledger.py create_entry silently downgrades status from 'posted' to 'draft' for non-owner roles instead of returning 403. Could surprise clients; frontend already handles it, but a response flag would help.",
+    "Dashboard testid naming inconsistency as noted above."
+  ],
+  "updated_files": ["/app/backend/tests/backend_test.py"],
+  "success_rate": {"backend": "100% (24/24)", "frontend": "100% of critical flows"},
+  "test_credentials": "See /app/memory/test_credentials.md (used owner, accountant, bookkeeper, barber + sharp lines owner).",
+  "seed_data_creation": "Ran /app/backend/seed.py twice (once before backend tests, once before frontend tests) to restore clean demo workspaces.",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Reusable pytest suite at /app/backend/tests/backend_test.py covers every acceptance criterion in the review request. Backend tests mutate data (create accounts, POs sales, invoices, period locks); re-run seed.py between runs if needed. The locking test uses period '2000-01' and reopens it at the end to avoid blocking normal flows. Dashboard tile testids are stat-tile-cash / revenue / expenses / net-income (hyphen) / ar / ap / inventory-val (suffix) — note the two non-conformant names."
+}
