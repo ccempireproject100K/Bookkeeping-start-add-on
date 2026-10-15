@@ -5,7 +5,7 @@ import {
   TrendingUp, Lock, Scissors, Receipt, Wallet, Package, LogOut, ShieldCheck,
   Hourglass, Gift, Coins, Briefcase, PieChart, Users, Building2, FileSignature,
   Waves, Target, BarChart3, ReceiptText, Repeat, DatabaseBackup, Bot, Clock,
-  FileCheck2, Camera, Car, HandCoins, Calculator, ShieldCheck, Package, Activity, Tag, Landmark, SlidersHorizontal, Rocket, Gauge, Users, Mic,
+  FileCheck2, Camera, Car, HandCoins, Calculator, Activity, Tag, SlidersHorizontal, Rocket, Gauge, Mic,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import {
@@ -53,6 +53,7 @@ const NAV = [
   { to: "/kpis", label: "Trade KPIs", icon: Gauge, testid: "nav-kpis", roles: ALL, group: "Overview" },
   { to: "/benchmarks", label: "Benchmarks", icon: Users, testid: "nav-benchmarks", roles: ALL, group: "Overview" },
   { to: "/voice", label: "Voice books", icon: Mic, testid: "nav-voice", roles: ALL, group: "Overview" },
+  { to: "/firm", label: "Firm dashboard", icon: Building2, testid: "nav-firm", roles: ["owner", "accountant"], group: "Growth" },
   { to: "/quick-sell", label: "Quick Sell", icon: Scissors, testid: "nav-quick-sell", roles: ["owner", "barber"], group: "Operations" },
   { to: "/inventory", label: "Inventory", icon: Package, testid: "nav-inventory", roles: ALL, group: "Operations" },
   { to: "/gift-cards", label: "Gift Cards", icon: Gift, testid: "nav-gift-cards", roles: ALL, group: "Operations" },
@@ -76,7 +77,10 @@ export default function Layout() {
   const { pack, t } = useNiche();
   const navigate = useNavigate();
   const [switching, setSwitching] = useState(false);
-  const accent = pack?.colors?.accent || "#f59e0b";
+  const brand = pack?.branding || {};
+  const accent = brand.accent_color || pack?.colors?.accent || "#f59e0b";
+  const brandName = brand.firm_name || pack?.product_name || "Mind at Ease Solutions";
+  const brandTag = brand.tagline || pack?.tagline || "Bookkeeping";
   const ROLE_LABEL = { ...ROLE_LABEL_STATIC, barber: t("worker", "Technician") };
 
   const role = user?.role;
@@ -100,10 +104,12 @@ export default function Layout() {
       {/* Sidebar */}
       <aside className="w-64 shrink-0 border-r border-[#1b2230] bg-[#0D0F14] hidden lg:flex flex-col">
         <div className="h-16 flex items-center gap-3 px-5 border-b border-[#1b2230]">
-          <div className="w-9 h-9 rounded-lg barber-pole shadow-inner" />
+          {brand.logo_url
+            ? <img src={brand.logo_url} alt={brandName} className="w-9 h-9 rounded-lg object-contain bg-white/5" />
+            : <div className="w-9 h-9 rounded-lg barber-pole shadow-inner" />}
           <div>
-            <div className="font-display font-bold text-[15px] leading-tight text-gray-50">{pack?.product_name || "Mind at Ease Solutions"}</div>
-            <div className="text-[10px] uppercase tracking-widest" style={{ color: `${accent}cc` }}>{pack?.tagline || "Bookkeeping"}</div>
+            <div className="font-display font-bold text-[15px] leading-tight text-gray-50">{brandName}</div>
+            <div className="text-[10px] uppercase tracking-widest" style={{ color: `${accent}cc` }}>{brandTag}</div>
           </div>
         </div>
         <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-5">

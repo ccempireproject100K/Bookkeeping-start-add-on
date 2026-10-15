@@ -56,6 +56,7 @@ async def edition_profile(request: Request, user: dict = Depends(require("dashbo
         "terms": pack["terms"],
         "colors": pack.get("colors", {}),
         "modules": _modules(settings),
+        "branding": t.get("branding", {}),
     }
 
 
