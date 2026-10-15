@@ -6,16 +6,18 @@ import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Search } from "lucide-react";
-
+import { useTranslation } from "react-i18next";
 const INPUT_CLS = "bg-[#0F1218] border-[#222838]";
-
 export default function AuditLog() {
-  const { user } = useAuth();
+  const {
+    t
+  } = useTranslation();
+  const {
+    user
+  } = useAuth();
   const canView = user?.role === "owner" || user?.role === "accountant";
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -23,83 +25,77 @@ export default function AuditLog() {
   const [fEntity, setFEntity] = useState("");
   const [fActor, setFActor] = useState("");
   const [fDays, setFDays] = useState("30");
-
   const load = async () => {
     setLoading(true);
     try {
-      const params = new URLSearchParams({ days: fDays, limit: "200" });
+      const params = new URLSearchParams({
+        days: fDays,
+        limit: "200"
+      });
       if (fAction.trim()) params.set("action", fAction.trim());
       if (fEntity.trim()) params.set("entity", fEntity.trim());
       if (fActor.trim()) params.set("actor", fActor.trim());
       const r = await api.get(`/audit?${params.toString()}`);
       setRows(r.rows || []);
-    } catch (e) { toast.error(errMsg(e)); } finally { setLoading(false); }
+    } catch (e) {
+      toast.error(errMsg(e));
+    } finally {
+      setLoading(false);
+    }
   };
-
-  useEffect(() => { if (canView) load(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (canView) load();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!canView) return <Loading />;
-  return (
-    <div className="animate-rise">
-      <PageHeader
-        title="Audit Log"
-        subtitle="Who did what, when — every change in this workspace"
-        testid="audit-page"
-      />
+  return <div className="animate-rise">
+      <PageHeader title={t("auditlog.auditLog")} subtitle="Who did what, when — every change in this workspace" testid="audit-page" />
       <Card>
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4">
           <div>
-            <Label className="text-xs">Action contains</Label>
-            <Input value={fAction} onChange={(e) => setFAction(e.target.value)}
-              placeholder="e.g. tax, invoice, login" className={INPUT_CLS} data-testid="audit-f-action" />
+            <Label className="text-xs">{t("auditlog.actionContains")}</Label>
+            <Input value={fAction} onChange={e => setFAction(e.target.value)} placeholder={t("auditlog.eGTaxInvoiceLogin")} className={INPUT_CLS} data-testid="audit-f-action" />
           </div>
           <div>
-            <Label className="text-xs">Entity</Label>
-            <Input value={fEntity} onChange={(e) => setFEntity(e.target.value)}
-              placeholder="e.g. contractor" className={INPUT_CLS} data-testid="audit-f-entity" />
+            <Label className="text-xs">{t("auditlog.entity")}</Label>
+            <Input value={fEntity} onChange={e => setFEntity(e.target.value)} placeholder={t("auditlog.eGContractor")} className={INPUT_CLS} data-testid="audit-f-entity" />
           </div>
           <div>
-            <Label className="text-xs">Actor</Label>
-            <Input value={fActor} onChange={(e) => setFActor(e.target.value)}
-              placeholder="Name" className={INPUT_CLS} data-testid="audit-f-actor" />
+            <Label className="text-xs">{t("auditlog.actor")}</Label>
+            <Input value={fActor} onChange={e => setFActor(e.target.value)} placeholder={t("auditlog.name")} className={INPUT_CLS} data-testid="audit-f-actor" />
           </div>
           <div>
-            <Label className="text-xs">Look back</Label>
+            <Label className="text-xs">{t("auditlog.lookBack")}</Label>
             <Select value={fDays} onValueChange={setFDays}>
               <SelectTrigger className={INPUT_CLS} data-testid="audit-f-days">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="7">Last 7 days</SelectItem>
-                <SelectItem value="30">Last 30 days</SelectItem>
-                <SelectItem value="90">Last 90 days</SelectItem>
-                <SelectItem value="365">Last year</SelectItem>
+                <SelectItem value="7">{t("auditlog.last7Days")}</SelectItem>
+                <SelectItem value="30">{t("auditlog.last30Days")}</SelectItem>
+                <SelectItem value="90">{t("auditlog.last90Days")}</SelectItem>
+                <SelectItem value="365">{t("auditlog.lastYear")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className="flex items-end">
             <Button onClick={load} className="w-full" data-testid="audit-search">
-              <Search className="w-4 h-4 mr-2" /> Search
-            </Button>
+              <Search className="w-4 h-4 mr-2" /> {t("auditlog.search")}</Button>
           </div>
         </div>
-        {loading ? <Loading /> : rows.length === 0 ? (
-          <p className="text-sm text-gray-500 py-8 text-center">No audit entries match.</p>
-        ) : (
-          <div className="overflow-x-auto">
+        {loading ? <Loading /> : rows.length === 0 ? <p className="text-sm text-gray-500 py-8 text-center">{t("auditlog.noAuditEntriesMatch")}</p> : <div className="overflow-x-auto">
             <table className="w-full text-sm" data-testid="audit-table">
               <thead>
                 <tr className="text-left text-gray-500 border-b border-[#1b2230]">
-                  <th className="py-2 pr-4 font-medium">When</th>
-                  <th className="py-2 pr-4 font-medium">Actor</th>
-                  <th className="py-2 pr-4 font-medium">Action</th>
-                  <th className="py-2 pr-4 font-medium">Entity</th>
-                  <th className="py-2 font-medium">Details</th>
+                  <th className="py-2 pr-4 font-medium">{t("auditlog.when")}</th>
+                  <th className="py-2 pr-4 font-medium">{t("auditlog.actor")}</th>
+                  <th className="py-2 pr-4 font-medium">{t("auditlog.action")}</th>
+                  <th className="py-2 pr-4 font-medium">{t("auditlog.entity")}</th>
+                  <th className="py-2 font-medium">{t("auditlog.details")}</th>
                 </tr>
               </thead>
               <tbody>
-                {rows.map((r) => (
-                  <tr key={r.id} className="border-b border-[#141821] text-gray-300">
+                {rows.map(r => <tr key={r.id} className="border-b border-[#141821] text-gray-300">
                     <td className="py-2 pr-4 whitespace-nowrap text-gray-500">
                       {fmtDate(r.created_at)}
                     </td>
@@ -112,13 +108,10 @@ export default function AuditLog() {
                     <td className="py-2 font-mono text-xs text-gray-500 max-w-[280px] truncate" title={JSON.stringify(r.details || {})}>
                       {JSON.stringify(r.details || {})}
                     </td>
-                  </tr>
-                ))}
+                  </tr>)}
               </tbody>
             </table>
-          </div>
-        )}
+          </div>}
       </Card>
-    </div>
-  );
+    </div>;
 }
