@@ -33,6 +33,7 @@ class InvoiceBody(BaseModel):
     customer_id: Optional[str] = None
     lines: List[InvLine]
     tax: float = 0
+    tax_jurisdiction_id: Optional[str] = None
     due_date: Optional[str] = None
     terms: Optional[str] = "Net 30"
 
@@ -62,6 +63,12 @@ async def issue_invoice(body: InvoiceBody, user: dict = Depends(require("ops:man
         rev_lines.append({"revenue_code": ln.revenue_code, "amount_cents": amt})
     tax_cents = to_cents(body.tax)
     gross = subtotal + tax_cents
+    jid = body.tax_jurisdiction_id
+    if jid:
+        jur = await db.tax_jurisdictions.find_one(
+            {"id": jid, "tenant_id": user["tenant_id"], "active": True})
+        if not jur:
+            raise HTTPException(status_code=422, detail="Unknown or inactive tax jurisdiction")
     inv_id = new_id()
     entry = await L.post_journal_entry(db, user["tenant_id"], user, P.build_invoice_issue(
         revenue_lines=rev_lines, tax_cents=tax_cents, cogs_cents=0,
@@ -72,6 +79,7 @@ async def issue_invoice(body: InvoiceBody, user: dict = Depends(require("ops:man
         "id": inv_id, "client_name": body.client_name, "customer_id": body.customer_id,
         "lines": [l.model_dump() for l in body.lines],
         "subtotal_cents": subtotal, "tax_cents": tax_cents, "total_cents": gross,
+        "tax_jurisdiction_id": jid,
         "status": "issued", "paid_cents": 0, "payments": [], "due_date": body.due_date,
         "terms": body.terms, "issue_entry": entry["number"], "created_at": now_iso(),
     }
