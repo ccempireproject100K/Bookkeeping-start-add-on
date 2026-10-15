@@ -4,10 +4,8 @@ import { FolderOpen, Mic, MicOff, Music2, Pause, Play, Radio, SkipBack, SkipForw
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-interface Track { title: string; src: string; live?: boolean }
-
 // Free, listener-supported public streams (no keys, no accounts).
-const STATIONS: Track[] = [
+const STATIONS = [
   { title: "SomaFM · Groove Salad (chill)", src: "https://ice1.somafm.com/groovesalad-128-mp3", live: true },
   { title: "SomaFM · Lush (vocals)", src: "https://ice1.somafm.com/lush-128-mp3", live: true },
   { title: "SomaFM · Underground 80s", src: "https://ice1.somafm.com/u80s-128-mp3", live: true },
@@ -15,30 +13,26 @@ const STATIONS: Track[] = [
   { title: "KEXP 90.3 Seattle", src: "https://kexp-mp3-128.streamguys1.com/kexp128.mp3", live: true },
 ];
 
-// Minimal Web Speech API typing (not in TS's DOM lib).
-export interface SpeechRes { results: ArrayLike<ArrayLike<{ transcript: string }> & { isFinal: boolean }>; resultIndex: number }
-export interface Recognizer { continuous: boolean; interimResults: boolean; lang: string; start(): void; stop(): void; onresult: ((e: SpeechRes) => void) | null; onend: (() => void) | null; onerror: ((e: { error: string }) => void) | null }
-type RecCtor = new () => Recognizer;
-export const getRec = (): RecCtor | undefined => (window as unknown as { SpeechRecognition?: RecCtor; webkitSpeechRecognition?: RecCtor }).SpeechRecognition
-  ?? (window as unknown as { webkitSpeechRecognition?: RecCtor }).webkitSpeechRecognition;
+// Web Speech API (Chrome, Edge, Safari). Plain lookup — no TS types in this build.
+export const getRec = () => window.SpeechRecognition ?? window.webkitSpeechRecognition;
 
 /** Floating music player: your own files or free internet radio, with hands-free voice commands. */
 export default function MusicPlayer() {
-  const audio = useRef<HTMLAudioElement>(new Audio());
+  const audio = useRef(new Audio());
   const [open, setOpen] = useState(false);
-  const [source, setSource] = useState<"files" | "radio">("radio");
-  const [files, setFiles] = useState<Track[]>([]);
+  const [source, setSource] = useState("radio");
+  const [files, setFiles] = useState([]);
   const [idx, setIdx] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [vol, setVol] = useState(0.6);
   const [listening, setListening] = useState(false);
   const [heard, setHeard] = useState("");
-  const rec = useRef<Recognizer | null>(null);
+  const rec = useRef(null);
   const wantListen = useRef(false);
   const list = source === "radio" ? STATIONS : files;
   const track = list[idx];
 
-  const load = useCallback((t: Track | undefined, autoplay: boolean) => {
+  const load = useCallback((t, autoplay) => {
     const a = audio.current;
     if (!t) return;
     if (a.src !== t.src) a.src = t.src;
@@ -64,7 +58,7 @@ export default function MusicPlayer() {
   const louder = () => setVol((v) => Math.min(1, +(v + 0.15).toFixed(2)));
   const quieter = () => setVol((v) => Math.max(0, +(v - 0.15).toFixed(2)));
 
-  const command = useCallback((raw: string) => {
+  const command = useCallback((raw) => {
     const t = raw.toLowerCase();
     setHeard(raw.trim());
     if (/\b(pause|stop)\b/.test(t)) pause();
@@ -93,7 +87,7 @@ export default function MusicPlayer() {
   useEffect(() => { if (rec.current) rec.current.onresult = (e) => { for (let i = e.resultIndex; i < e.results.length; i++) if (e.results[i].isFinal) command(e.results[i][0].transcript); }; }, [command]);
   useEffect(() => () => { wantListen.current = false; rec.current?.stop(); }, []);
 
-  const pick = (fl: FileList | null) => {
+  const pick = (fl) => {
     if (!fl?.length) return;
     const ts = [...fl].filter((f) => f.type.startsWith("audio/") || /\.(mp3|m4a|aac|ogg|wav|flac)$/i.test(f.name)).map((f) => ({ title: f.name.replace(/\.[^.]+$/, ""), src: URL.createObjectURL(f) }));
     setFiles((prevFiles) => [...prevFiles, ...ts]);
@@ -114,7 +108,7 @@ export default function MusicPlayer() {
     <div className="fixed inset-x-3 bottom-3 z-30 rounded-xl border border-border bg-card/95 p-3 shadow-2xl backdrop-blur-xl sm:left-auto sm:right-4 sm:w-80 print:hidden" data-testid="music-player">
       <div className="flex items-center justify-between">
         <div className="flex gap-1 rounded-md bg-muted p-0.5">
-          {(["radio", "files"] as const).map((s) => (
+          {(["radio", "files"]).map((s) => (
             <button key={s} onClick={() => { setSource(s); setIdx(0); }} data-testid={`music-source-${s}`}
               className={cn("flex items-center gap-1 rounded px-2 py-1 text-xs font-medium transition-colors duration-150", source === s ? "bg-card shadow-sm" : "text-muted-foreground")}>
               {s === "radio" ? <><Radio className="size-3" /> Radio</> : <><FolderOpen className="size-3" /> My music</>}

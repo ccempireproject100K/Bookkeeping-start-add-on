@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import Layout from "@/components/Layout";
+import InventoryGate from "@/components/InventoryGate";
 import Login from "@/pages/Login";
 import Dashboard from "@/pages/Dashboard";
 import ChartOfAccounts from "@/pages/ChartOfAccounts";
@@ -73,7 +74,7 @@ function App() {
               <Route path="budget-vs-actual" element={<BudgetVsActual />} />
               <Route path="business-reports" element={<BusinessReports />} />
               <Route path="periods" element={<FiscalPeriods />} />
-              <Route path="inventory" element={<Inventory />} />
+              <Route path="inventory" element={<InventoryGate><Inventory /></InventoryGate>} />
               <Route path="quick-sell" element={<QuickSell />} />
               <Route path="invoices" element={<Invoices />} />
               <Route path="bills" element={<Bills />} />
