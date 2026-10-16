@@ -40,7 +40,11 @@ export default function PortalView() {
       });
       window.location.href = r.checkout_url;
     } catch (e) {
-      toast.error(errMsg(e));
+      if (e?.response?.status === 503) {
+        toast.error("Card payments aren't set up yet — please use another payment method below or contact the business.");
+      } else {
+        toast.error(errMsg(e));
+      }
       setCardBusy(false);
     }
   };
@@ -130,12 +134,14 @@ export default function PortalView() {
             {justPaid && <div className="mb-4 rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-emerald-300" data-testid="portal-paid-banner">{t("portalview.cardPaymentReceivedThankYouIt")}</div>}
             {inv.balance_cents > 0 && inv.status !== "paid" && <div className="mt-6 rounded-lg bg-[#0F1218] border border-[#222838] p-4" data-testid="portal-pay">
                 <div className="mb-2 text-sm font-semibold text-gray-100">{t("portalview.payThisInvoice")}</div>
-                <div className="flex flex-wrap items-center gap-2 mb-3">
+                {view.card_payments_enabled === false ? <div className="mb-3 rounded-lg border border-[#222838] bg-[#0F1218] p-3 text-sm text-gray-400" data-testid="portal-card-unavailable">
+                    Card payments aren't set up yet — please use another payment method below or contact the business.
+                  </div> : <div className="flex flex-wrap items-center gap-2 mb-3">
                   <Button onClick={payWithCard} disabled={cardBusy} className="bg-amber-600 hover:bg-amber-500 text-black font-semibold" data-testid="portal-pay-card">
                     {cardBusy ? "Starting secure checkout…" : `Pay ${money(inv.balance_cents)} with card`}
                   </Button>
                   <span className="text-[11px] text-gray-600">{t("portalview.secureCheckoutViaStripe")}</span>
-                </div>
+                </div>}
                 <div className="border-t border-[#222838] pt-3">
                   <div className="mb-2 text-xs font-semibold text-gray-400">{t("portalview.orRecordAnotherPaymentMethod")}</div>
                 <div className="flex flex-wrap items-end gap-2">
