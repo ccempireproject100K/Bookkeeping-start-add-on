@@ -32,7 +32,7 @@ class RevalueBody(BaseModel):
 
 
 @router.post("/revalue")
-async def revalue(body: RevalueBody, user: dict = Depends(require("owner"))):
+async def revalue(body: RevalueBody, user: dict = Depends(require("ledger:admin"))):
     as_of = (body.as_of_date or today_str())[:10]
     if len(as_of) != 10 or as_of[4] != "-" or as_of[7] != "-":
         raise HTTPException(status_code=422, detail="as_of_date must be YYYY-MM-DD")
