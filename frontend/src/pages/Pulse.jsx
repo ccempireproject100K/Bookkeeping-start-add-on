@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Activity, AlertTriangle, RefreshCw } from "lucide-react";
 import { useTranslation } from "react-i18next";
-export default function Pulse() {
+import PlanGate from "@/components/PlanGate";
+function PulseInner() {
   const {
     user
   } = useAuth();
@@ -73,4 +74,8 @@ export default function Pulse() {
         </table>
       </Card>
     </div>;
+}
+
+export default function Pulse() {
+  return <PlanGate feature="advanced_reports"><PulseInner /></PlanGate>;
 }

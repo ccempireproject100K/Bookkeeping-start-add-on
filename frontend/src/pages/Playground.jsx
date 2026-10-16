@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { SlidersHorizontal, RotateCcw } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import PlanGate from "@/components/PlanGate";
 const DEFAULTS = {
   revenue_change_pct: 0,
   new_payroll_monthly: "",
@@ -15,7 +16,7 @@ const DEFAULTS = {
   one_time: "",
   months: 12
 };
-export default function Playground() {
+function PlaygroundInner() {
   const {
     t
   } = useTranslation();
@@ -109,4 +110,8 @@ export default function Playground() {
         </div>
       </div>
     </div>;
+}
+
+export default function Playground() {
+  return <PlanGate feature="advanced_reports"><PlaygroundInner /></PlanGate>;
 }

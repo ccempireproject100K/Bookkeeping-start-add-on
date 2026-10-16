@@ -21,10 +21,11 @@ from typing import Optional
 from db import db
 from lib.audit import audit
 from lib.auth import require
+from lib.plans import require_feature
 from lib.base import Scoped, new_id, now_iso, today_str, cents_to_dollars
 from lib import ledger as L
 
-router = APIRouter(prefix="/tax-forecast", tags=["tax-forecast"])
+router = APIRouter(prefix="/tax-forecast", tags=["tax-forecast"], dependencies=[Depends(require_feature("advanced_reports"))])
 
 # 2026 federal single-filer brackets as defaults (IRS IR-2025-103).
 # Rates apply to taxable income.
