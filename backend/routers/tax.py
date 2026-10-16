@@ -24,6 +24,7 @@ from pydantic import BaseModel, Field
 from db import db
 from lib.base import Scoped, new_id, now_iso, to_cents, cents_to_dollars
 from lib.auth import require, get_current_user
+from lib.plans import require_feature
 from lib.pii import last4, pii_decrypt, pii_encrypt, scrub_secrets
 
 router = APIRouter(prefix="/tax", tags=["tax"])
@@ -260,7 +261,7 @@ async def year_summary(year: int = Query(datetime.now(timezone.utc).year),
 
 # ---------------------------------------------------------------- 1099-NEC preview
 
-@router.get("/1099-preview")
+@router.get("/1099-preview", dependencies=[Depends(require_feature("prep_1099"))])
 async def preview_1099(year: int = Query(datetime.now(timezone.utc).year),
                        user: dict = Depends(require("tax:write"))):
     """1099-NEC data shaped for e-filing. Tax IDs are masked (last 4 only);
@@ -350,7 +351,7 @@ def _tb_request_sync(method: str, url: str, token: str, payload: Optional[dict] 
     return r.json()
 
 
-@router.get("/taxbandits/status")
+@router.get("/taxbandits/status", dependencies=[Depends(require_feature("prep_1099"))])
 async def tb_status(user: dict = Depends(require("tax:read"))):
     try:
         conf = _tb_conf()
@@ -359,7 +360,7 @@ async def tb_status(user: dict = Depends(require("tax:read"))):
     return {"configured": True, "sandbox": conf["sandbox"]}
 
 
-@router.post("/efile-1099/{cid}")
+@router.post("/efile-1099/{cid}", dependencies=[Depends(require_feature("prep_1099"))])
 async def efile_1099(cid: str, year: int = Query(datetime.now(timezone.utc).year),
                      user: dict = Depends(require("tax:write"))):
     """Create a 1099-NEC in TaxBandits for this contractor (does NOT transmit —
@@ -408,7 +409,7 @@ async def efile_1099(cid: str, year: int = Query(datetime.now(timezone.utc).year
                     "to file with the IRS."}
 
 
-@router.get("/efile-1099/{cid}/status")
+@router.get("/efile-1099/{cid}/status", dependencies=[Depends(require_feature("prep_1099"))])
 async def efile_status(cid: str, user: dict = Depends(require("tax:read"))):
     c = await contractors(user).find_one({"id": cid})
     if not c:
