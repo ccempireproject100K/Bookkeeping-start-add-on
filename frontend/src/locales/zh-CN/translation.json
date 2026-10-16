@@ -1564,6 +1564,7 @@
   "payroll.people": "people)",
   "payroll.thisAppEstimatesOnly": "— this app (estimates only)",
   "payroll.ficaIsAlways": "FICA is always",
+  "payroll.employerTaxEst": "雇主工资税（估算）",
   "pricing.acReplacement3Ton": "AC replacement, 3-ton",
   "pricing.overallWinRateMedianWon": "% overall win rate · median won",
   "pricing.winRateAtThisLevel": "% win rate at this level",
