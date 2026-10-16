@@ -30,6 +30,7 @@ import Expenses from "@/pages/Expenses";
 import Receipts from "@/pages/Receipts";
 import Mileage from "@/pages/Mileage";
 import Collections from "@/pages/Collections";
+import PortalLinks from "@/pages/PortalLinks";
 import Simulator from "@/pages/Simulator";
 import SubCompliance from "@/pages/SubCompliance";
 import CpaPackage from "@/pages/CpaPackage";
@@ -109,6 +110,7 @@ function App() {
               <Route path="receipts" element={<Receipts />} />
               <Route path="mileage" element={<Mileage />} />
               <Route path="collections" element={<Collections />} />
+              <Route path="portal-links" element={<PortalLinks />} />
               <Route path="simulator" element={<Simulator />} />
               <Route path="sub-compliance" element={<SubCompliance />} />
               <Route path="cpa-package" element={<CpaPackage />} />
