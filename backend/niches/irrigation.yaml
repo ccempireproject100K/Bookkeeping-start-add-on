@@ -1,0 +1,83 @@
+id: irrigation
+trade: Irrigation
+product_name: The Irrigation Ledger
+tagline: Bookkeeping built for irrigation companies
+terms:
+  worker: Technician
+  worker_plural: Technicians
+  shop: company
+  job: job
+  job_plural: jobs
+  customer: customer
+  customer_plural: customers
+colors:
+  accent: '#0891b2'
+subdomains:
+- irrigation
+- sprinklers
+revenue_accounts:
+- code: '4000'
+  name: Service Revenue — System Installations
+- code: '4010'
+  name: Service Revenue — Repairs & Service
+- code: '4020'
+  name: Service Revenue — Startups & Winterization
+- code: '4100'
+  name: Product Revenue — Parts & Controllers
+trade_expense_accounts:
+- code: '5100'
+  name: Technician Commissions
+- code: '5030'
+  name: Job Cost — Pipe, Heads & Controllers
+services:
+- name: Sprinkler System Installation
+  kind: service
+- name: Spring Startup
+  kind: service
+- name: Winterization
+  kind: service
+- name: Irrigation Repair
+  kind: service
+checklist:
+- id: team
+  label: Add your technicians
+  hint: They show up once they have a workspace login; commissions split automatically
+  link: /team
+  check: team
+- id: services
+  label: Add services & price book
+  hint: Sprinkler System Installation, Spring Startup, Winterization
+  link: /inventory
+  check: services
+- id: bank
+  label: Add a bank account
+  hint: Reconcile deposits against jobs in Banking
+  link: /banking
+  check: bank
+- id: tax
+  label: Set up contractor tracking
+  hint: W-9s and 1099-NECs for subs and helpers
+  link: /tax
+  check: tax
+- id: sale
+  label: Book your first job
+  hint: Invoice a job to see the full flow
+  link: /invoices
+  check: sale
+copilot_notes: 'Irrigation is two seasons of rush — spring startups and fall winterization — plus install
+  projects in between. Route density decides service margin; track seasonal service as recurring revenue.
+
+  '
+kpis:
+- id: jobs_per_day
+  label: Jobs per day
+  hint: Route density
+- id: avg_ticket
+  label: Average ticket
+  hint: Per-invoice average
+- id: recurring_share
+  label: Recurring revenue
+  hint: Seasonal-plan share
+- id: revenue_trend
+  label: Revenue trend
+  hint: Last 30 days vs prior 30

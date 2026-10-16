@@ -1,0 +1,84 @@
+id: home_inspection
+trade: Home Inspection
+product_name: The Inspector's Ledger
+tagline: Bookkeeping built for home inspectors
+terms:
+  worker: Inspector
+  worker_plural: Inspectors
+  shop: firm
+  job: inspection
+  job_plural: inspections
+  customer: client
+  customer_plural: clients
+colors:
+  accent: '#0f766e'
+subdomains:
+- homeinspection
+- inspection
+revenue_accounts:
+- code: '4000'
+  name: Service Revenue — Home Inspections
+- code: '4010'
+  name: Service Revenue — Pre-Listing Inspections
+- code: '4020'
+  name: Service Revenue — Radon, Mold & Specialty Testing
+- code: '4030'
+  name: Service Revenue — Re-Inspections
+trade_expense_accounts:
+- code: '5100'
+  name: Inspector Commissions
+- code: '5030'
+  name: Job Cost — Testing & Lab Fees
+services:
+- name: Full Home Inspection
+  kind: service
+- name: Pre-Listing Inspection
+  kind: service
+- name: Radon Testing
+  kind: service
+- name: Re-Inspection
+  kind: service
+checklist:
+- id: team
+  label: Add your inspectors
+  hint: They show up once they have a workspace login; commissions split automatically
+  link: /team
+  check: team
+- id: services
+  label: Add services & price book
+  hint: Full Home Inspection, Pre-Listing Inspection, Radon Testing
+  link: /inventory
+  check: services
+- id: bank
+  label: Add a bank account
+  hint: Reconcile deposits against jobs in Banking
+  link: /banking
+  check: bank
+- id: tax
+  label: Set up contractor tracking
+  hint: W-9s and 1099-NECs for subs and helpers
+  link: /tax
+  check: tax
+- id: sale
+  label: Book your first inspection
+  hint: Invoice a inspection to see the full flow
+  link: /invoices
+  check: sale
+copilot_notes: 'Inspection revenue follows the housing market and agent referrals. Fees are the product
+  — labor and lab costs are the margin. Track inspections per week and referral source; ancillary testing
+  raises the average ticket.
+
+  '
+kpis:
+- id: jobs_per_day
+  label: Inspections per day
+  hint: Inspector throughput
+- id: avg_ticket
+  label: Average inspection
+  hint: Per-invoice average
+- id: repeat_rate
+  label: Repeat clients
+  hint: Clients with 2+ invoices
+- id: revenue_trend
+  label: Revenue trend
+  hint: Last 30 days vs prior 30

@@ -1,0 +1,84 @@
+id: septic_well
+trade: Septic & Well
+product_name: The Septic & Well Ledger
+tagline: Bookkeeping built for septic and well companies
+terms:
+  worker: Technician
+  worker_plural: Technicians
+  shop: company
+  job: job
+  job_plural: jobs
+  customer: customer
+  customer_plural: customers
+colors:
+  accent: '#78716c'
+subdomains:
+- septic
+- septicwell
+revenue_accounts:
+- code: '4000'
+  name: Service Revenue — Septic Pumping
+- code: '4010'
+  name: Service Revenue — Installations & Repairs
+- code: '4020'
+  name: Service Revenue — Well & Water Treatment
+- code: '4030'
+  name: Service Revenue — Inspections & Certifications
+trade_expense_accounts:
+- code: '5100'
+  name: Technician Commissions
+- code: '5030'
+  name: Job Cost — Disposal, Treatment & Parts
+services:
+- name: Septic Tank Pumping
+  kind: service
+- name: Septic System Inspection
+  kind: service
+- name: Well Pump Service
+  kind: service
+- name: Water Treatment Installation
+  kind: service
+checklist:
+- id: team
+  label: Add your technicians
+  hint: They show up once they have a workspace login; commissions split automatically
+  link: /team
+  check: team
+- id: services
+  label: Add services & price book
+  hint: Septic Tank Pumping, Septic System Inspection, Well Pump Service
+  link: /inventory
+  check: services
+- id: bank
+  label: Add a bank account
+  hint: Reconcile deposits against jobs in Banking
+  link: /banking
+  check: bank
+- id: tax
+  label: Set up contractor tracking
+  hint: W-9s and 1099-NECs for subs and helpers
+  link: /tax
+  check: tax
+- id: sale
+  label: Book your first job
+  hint: Invoice a job to see the full flow
+  link: /invoices
+  check: sale
+copilot_notes: 'Septic and well work mixes recurring pumping routes with big-ticket installs. Disposal
+  fees and permit costs vary by county — track them per job. Pumping reminders are the annuity; keep the
+  route book full.
+
+  '
+kpis:
+- id: jobs_per_day
+  label: Jobs per day
+  hint: Route density
+- id: avg_ticket
+  label: Average ticket
+  hint: Per-invoice average
+- id: recurring_share
+  label: Recurring revenue
+  hint: Pumping-plan share
+- id: revenue_trend
+  label: Revenue trend
+  hint: Last 30 days vs prior 30

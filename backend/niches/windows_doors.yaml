@@ -1,0 +1,84 @@
+id: windows_doors
+trade: Windows & Doors
+product_name: The Windows & Doors Ledger
+tagline: Bookkeeping built for window and door companies
+terms:
+  worker: Installer
+  worker_plural: Installers
+  shop: company
+  job: installation
+  job_plural: installations
+  customer: customer
+  customer_plural: customers
+colors:
+  accent: '#a16207'
+subdomains:
+- windows
+- windowsdoors
+revenue_accounts:
+- code: '4000'
+  name: Service Revenue — Window Installations
+- code: '4010'
+  name: Service Revenue — Door Installations
+- code: '4020'
+  name: Service Revenue — Repairs & Glass
+- code: '4100'
+  name: Product Revenue — Windows & Doors
+trade_expense_accounts:
+- code: '5100'
+  name: Installer Commissions
+- code: '5030'
+  name: Job Cost — Windows, Doors & Glass
+services:
+- name: Window Replacement
+  kind: service
+- name: Entry Door Installation
+  kind: service
+- name: Glass Repair
+  kind: service
+- name: Patio Door Installation
+  kind: service
+checklist:
+- id: team
+  label: Add your installers
+  hint: They show up once they have a workspace login; commissions split automatically
+  link: /team
+  check: team
+- id: services
+  label: Add services & price book
+  hint: Window Replacement, Entry Door Installation, Glass Repair
+  link: /inventory
+  check: services
+- id: bank
+  label: Add a bank account
+  hint: Reconcile deposits against jobs in Banking
+  link: /banking
+  check: bank
+- id: tax
+  label: Set up contractor tracking
+  hint: W-9s and 1099-NECs for subs and helpers
+  link: /tax
+  check: tax
+- id: sale
+  label: Book your first installation
+  hint: Invoice a installation to see the full flow
+  link: /invoices
+  check: sale
+copilot_notes: 'Windows and doors are measure-twice businesses: deposits up front, product cost is most
+  of the ticket, and a mis-measure eats the job. Track product cost per install and warranty callbacks
+  separately.
+
+  '
+kpis:
+- id: avg_ticket
+  label: Average ticket
+  hint: Per-invoice average
+- id: close_rate
+  label: Close rate
+  hint: Estimates won vs decided
+- id: callback_rate
+  label: Callback rate
+  hint: Return visits within 30 days
+- id: revenue_trend
+  label: Revenue trend
+  hint: Last 30 days vs prior 30
