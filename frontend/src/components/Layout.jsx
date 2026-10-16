@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
-import { LayoutDashboard, BookOpen, FileText, Scale, ScrollText, Landmark, TrendingUp, Lock, Scissors, Receipt, Wallet, Package, LogOut, ShieldCheck, Hourglass, Gift, Coins, Briefcase, PieChart, Users, Building2, FileSignature, Waves, Target, BarChart3, ReceiptText, Repeat, DatabaseBackup, Bot, Clock, FileCheck2, Camera, Car, HandCoins, Calculator, Activity, Tag, SlidersHorizontal, Rocket, Gauge, Mic, Layers, Sparkles, ClipboardList } from "lucide-react";
+import { LayoutDashboard, BookOpen, FileText, Scale, ScrollText, Landmark, TrendingUp, Lock, Scissors, Receipt, Wallet, Package, LogOut, ShieldCheck, Hourglass, Gift, Coins, Briefcase, PieChart, Users, Building2, FileSignature, Waves, Target, BarChart3, ReceiptText, Repeat, DatabaseBackup, Bot, Clock, FileCheck2, Camera, Car, HandCoins, Calculator, Activity, Tag, SlidersHorizontal, Rocket, Gauge, Mic, Layers, Sparkles, ClipboardList, Link2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
@@ -170,6 +170,13 @@ const NAV = [{
   labelKey: "nav.collections",
   icon: HandCoins,
   testid: "nav-collections",
+  roles: ALL,
+  groupKey: "navGroup.operations"
+}, {
+  to: "/portal-links",
+  labelKey: "nav.portalLinks",
+  icon: Link2,
+  testid: "nav-portal-links",
   roles: ALL,
   groupKey: "navGroup.operations"
 }, {
