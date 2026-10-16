@@ -16,6 +16,7 @@ UI shows setup instructions instead of a Connect button.
 
 import asyncio
 import hashlib
+import json
 import logging
 import os
 from typing import Optional
@@ -28,6 +29,7 @@ from pydantic import BaseModel, Field
 from db import db
 from lib.base import Scoped, new_id, now_iso, to_cents
 from lib.auth import require
+from lib.plaid_webhook import verify_plaid_webhook
 from lib.coa import NAME_OF, ACCOUNT_TYPE_OF
 from routers.banking import (
     accounts as _accounts, txns as _txns, _apply_rules,
@@ -262,11 +264,31 @@ async def sync(body: SyncIn, user: dict = Depends(require("ops:manage"))):
 @router.post("/webhook")
 async def webhook(request: Request):
     """Plaid transaction webhooks (TRANSACTIONS SYNC_UPDATES etc.). Logged here;
-    the next /sync (manual or cron) pulls the actual changes. No auth: Plaid
-    calls this server-to-server and cannot hold a session cookie."""
+    the next /sync (manual or cron) pulls the actual changes. No session auth:
+    Plaid calls this server-to-server, so authenticity is established via the
+    `Plaid-Verification` JWT signature instead (see lib/plaid_webhook.py).
+
+    The signature is computed over the RAW request body, so the body is read
+    as bytes first and only parsed to JSON after verification. Verification is
+    skipped gracefully when Plaid is not configured (nothing is configured to
+    send webhooks then); any verification failure is a hard 403 — Plaid
+    redelivers, so a key-fetch outage only delays, never loses, delivery."""
+    raw = await request.body()
+    cid, sec, _env, base = _plaid_cfg()
+    if cid and sec:
+        ok, reason = await asyncio.to_thread(
+            verify_plaid_webhook, raw, request.headers, cid, sec, base)
+        if not ok:
+            logger.warning("bankfeed webhook: rejected (%s)", reason)
+            raise HTTPException(403, "Webhook signature verification failed")
+    else:
+        logger.warning(
+            "bankfeed webhook: Plaid not configured; skipping signature verification")
     try:
-        body = await request.json()
+        body = json.loads(raw) if raw else {}
     except Exception:
+        body = {}
+    if not isinstance(body, dict):
         body = {}
     await db.bank_webhooks.insert_one({
         "webhook_type": body.get("webhook_type"), "webhook_code": body.get("webhook_code"),

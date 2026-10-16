@@ -9,7 +9,7 @@ from starlette.middleware.cors import CORSMiddleware
 
 from db import db, get_client
 from lib.ratelimit import RateLimitMiddleware
-from lib.security_headers import SecurityHeadersMiddleware
+from lib.security_headers import ContentSecurityPolicyMiddleware, SecurityHeadersMiddleware
 from routers import (auth, ledger, products, pos, invoices, cashclose, dashboard,
                      bills, aging, giftcards, commissions, customers, jobs,
                      banking, vendors, reports, estimates,
@@ -73,6 +73,10 @@ app.add_middleware(
 )
 app.add_middleware(RateLimitMiddleware)
 app.add_middleware(SecurityHeadersMiddleware)
+# --- security-hardening (2026-10-16): CSP middleware, strictly additive block.
+# Keep this block intact; other agents may add their own middleware above/below.
+app.add_middleware(ContentSecurityPolicyMiddleware)
+# --- end security-hardening
 
 
 @app.on_event("startup")
