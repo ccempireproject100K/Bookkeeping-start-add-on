@@ -1,0 +1,8 @@
+code: AU
+name: Australia
+flag: 🇦🇺
+colors:
+  accent: '#00843d'
+languages:
+- en
+extended_network: false

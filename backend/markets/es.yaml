@@ -1,0 +1,8 @@
+code: ES
+name: Spain
+flag: 🇪🇸
+colors:
+  accent: '#f1bf00'
+languages:
+- es
+extended_network: false

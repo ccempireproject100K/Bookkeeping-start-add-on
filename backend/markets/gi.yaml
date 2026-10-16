@@ -1,0 +1,8 @@
+code: GI
+name: Gibraltar
+flag: 🇬🇮
+colors:
+  accent: '#f7d618'
+languages:
+- en
+extended_network: false

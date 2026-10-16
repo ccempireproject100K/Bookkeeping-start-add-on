@@ -1,0 +1,10 @@
+code: ZA
+name: South Africa
+flag: 🇿🇦
+colors:
+  accent: '#007749'
+languages:
+- en
+- af
+- zu
+extended_network: true

@@ -1,0 +1,8 @@
+code: JP
+name: Japan
+flag: 🇯🇵
+colors:
+  accent: '#bc002d'
+languages:
+- ja
+extended_network: false

@@ -1,0 +1,8 @@
+code: GH
+name: Ghana
+flag: 🇬🇭
+colors:
+  accent: '#006b3f'
+languages:
+- en
+extended_network: true

@@ -1,0 +1,8 @@
+code: SK
+name: Slovakia
+flag: 🇸🇰
+colors:
+  accent: '#0b4ea2'
+languages:
+- sk
+extended_network: false

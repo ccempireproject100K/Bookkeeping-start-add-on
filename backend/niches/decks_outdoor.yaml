@@ -1,0 +1,83 @@
+id: decks_outdoor
+trade: Decks & Outdoor Living
+product_name: The Outdoor Living Ledger
+tagline: Bookkeeping built for deck and outdoor living builders
+terms:
+  worker: Builder
+  worker_plural: Builders
+  shop: firm
+  job: project
+  job_plural: projects
+  customer: client
+  customer_plural: clients
+colors:
+  accent: '#ea580c'
+subdomains:
+- decks
+- outdoorliving
+revenue_accounts:
+- code: '4000'
+  name: Project Revenue — Deck Builds
+- code: '4010'
+  name: Project Revenue — Patios & Outdoor Kitchens
+- code: '4020'
+  name: Service Revenue — Repairs & Staining
+- code: '4100'
+  name: Product Revenue — Materials
+trade_expense_accounts:
+- code: '5100'
+  name: Builder Commissions
+- code: '5030'
+  name: Job Cost — Lumber, Composite & Materials
+services:
+- name: Deck Build
+  kind: service
+- name: Pergola & Patio Build
+  kind: service
+- name: Deck Repair & Staining
+  kind: service
+- name: Outdoor Kitchen Build
+  kind: service
+checklist:
+- id: team
+  label: Add your builders
+  hint: They show up once they have a workspace login; commissions split automatically
+  link: /team
+  check: team
+- id: services
+  label: Add services & price book
+  hint: Deck Build, Pergola & Patio Build, Deck Repair & Staining
+  link: /inventory
+  check: services
+- id: bank
+  label: Add a bank account
+  hint: Reconcile deposits against jobs in Banking
+  link: /banking
+  check: bank
+- id: tax
+  label: Set up contractor tracking
+  hint: W-9s and 1099-NECs for subs and helpers
+  link: /tax
+  check: tax
+- id: sale
+  label: Book your first project
+  hint: Invoice a project to see the full flow
+  link: /invoices
+  check: sale
+copilot_notes: 'Outdoor living is seasonal, deposit-driven project work. Lumber and composite prices swing
+  — lock material costs at signing and track change orders per project, they are pure margin when billed.
+
+  '
+kpis:
+- id: avg_ticket
+  label: Average project
+  hint: Per-invoice average
+- id: close_rate
+  label: Close rate
+  hint: Estimates won vs decided
+- id: ar_days
+  label: Avg days to paid
+  hint: Draw collection speed
+- id: revenue_trend
+  label: Revenue trend
+  hint: Last 30 days vs prior 30

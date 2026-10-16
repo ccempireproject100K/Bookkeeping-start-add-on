@@ -1,0 +1,8 @@
+code: FI
+name: Finland
+flag: 🇫🇮
+colors:
+  accent: '#002f6c'
+languages:
+- fi
+extended_network: false

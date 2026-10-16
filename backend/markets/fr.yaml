@@ -1,0 +1,8 @@
+code: FR
+name: France
+flag: 🇫🇷
+colors:
+  accent: '#0055a4'
+languages:
+- fr
+extended_network: false

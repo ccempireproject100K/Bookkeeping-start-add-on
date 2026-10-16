@@ -1,0 +1,84 @@
+id: siding_gutters
+trade: Siding & Gutters
+product_name: The Siding & Gutters Ledger
+tagline: Bookkeeping built for siding and gutter companies
+terms:
+  worker: Installer
+  worker_plural: Installers
+  shop: company
+  job: project
+  job_plural: projects
+  customer: homeowner
+  customer_plural: homeowners
+colors:
+  accent: '#7c3aed'
+subdomains:
+- siding
+- gutters
+- sidinggutters
+revenue_accounts:
+- code: '4000'
+  name: Project Revenue — Siding Installations
+- code: '4010'
+  name: Project Revenue — Gutter Installations
+- code: '4020'
+  name: Service Revenue — Repairs
+- code: '4030'
+  name: Service Revenue — Gutter Cleaning
+trade_expense_accounts:
+- code: '5100'
+  name: Installer Commissions
+- code: '5030'
+  name: Job Cost — Siding, Coil & Materials
+services:
+- name: Siding Installation
+  kind: service
+- name: Seamless Gutter Installation
+  kind: service
+- name: Gutter Cleaning
+  kind: service
+- name: Siding Repair
+  kind: service
+checklist:
+- id: team
+  label: Add your installers
+  hint: They show up once they have a workspace login; commissions split automatically
+  link: /team
+  check: team
+- id: services
+  label: Add services & price book
+  hint: Siding Installation, Seamless Gutter Installation, Gutter Cleaning
+  link: /inventory
+  check: services
+- id: bank
+  label: Add a bank account
+  hint: Reconcile deposits against jobs in Banking
+  link: /banking
+  check: bank
+- id: tax
+  label: Set up contractor tracking
+  hint: W-9s and 1099-NECs for subs and helpers
+  link: /tax
+  check: tax
+- id: sale
+  label: Book your first project
+  hint: Invoice a project to see the full flow
+  link: /invoices
+  check: sale
+copilot_notes: 'Siding and gutters are material-heavy exterior projects, often storm-driven. Track coil
+  and panel cost per project and separate insurance-restoration work — its billing cycle is slower.
+
+  '
+kpis:
+- id: avg_ticket
+  label: Average project
+  hint: Per-invoice average
+- id: close_rate
+  label: Close rate
+  hint: Estimates won vs decided
+- id: callback_rate
+  label: Callback rate
+  hint: Return visits within 30 days
+- id: revenue_trend
+  label: Revenue trend
+  hint: Last 30 days vs prior 30

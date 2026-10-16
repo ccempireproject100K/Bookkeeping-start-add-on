@@ -1,0 +1,8 @@
+code: HU
+name: Hungary
+flag: 🇭🇺
+colors:
+  accent: '#477050'
+languages:
+- hu
+extended_network: false

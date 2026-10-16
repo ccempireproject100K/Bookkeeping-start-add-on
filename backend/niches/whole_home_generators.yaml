@@ -1,0 +1,83 @@
+id: whole_home_generators
+trade: Whole-Home Generators
+product_name: The Generator Ledger
+tagline: Bookkeeping built for generator dealers
+terms:
+  worker: Technician
+  worker_plural: Technicians
+  shop: company
+  job: job
+  job_plural: jobs
+  customer: customer
+  customer_plural: customers
+colors:
+  accent: '#eab308'
+subdomains:
+- generators
+- generator
+revenue_accounts:
+- code: '4000'
+  name: Service Revenue — Generator Installations
+- code: '4010'
+  name: Service Revenue — Maintenance Agreements
+- code: '4020'
+  name: Service Revenue — Service & Repairs
+- code: '4100'
+  name: Product Revenue — Generators & Parts
+trade_expense_accounts:
+- code: '5100'
+  name: Technician Commissions
+- code: '5030'
+  name: Job Cost — Generators, Transfer Switches & Parts
+services:
+- name: Generator Installation
+  kind: service
+- name: Maintenance Plan Visit
+  kind: service
+- name: Generator Repair
+  kind: service
+- name: Load Assessment
+  kind: service
+checklist:
+- id: team
+  label: Add your technicians
+  hint: They show up once they have a workspace login; commissions split automatically
+  link: /team
+  check: team
+- id: services
+  label: Add services & price book
+  hint: Generator Installation, Maintenance Plan Visit, Generator Repair
+  link: /inventory
+  check: services
+- id: bank
+  label: Add a bank account
+  hint: Reconcile deposits against jobs in Banking
+  link: /banking
+  check: bank
+- id: tax
+  label: Set up contractor tracking
+  hint: W-9s and 1099-NECs for subs and helpers
+  link: /tax
+  check: tax
+- id: sale
+  label: Book your first job
+  hint: Invoice a job to see the full flow
+  link: /invoices
+  check: sale
+copilot_notes: 'Generators pair a big install ticket with a maintenance annuity. Storm seasons spike demand
+  — track install vs maintenance revenue separately and watch unit and transfer-switch costs per job.
+
+  '
+kpis:
+- id: avg_ticket
+  label: Average ticket
+  hint: Per-invoice average
+- id: recurring_share
+  label: Recurring revenue
+  hint: Maintenance-plan share
+- id: callback_rate
+  label: Callback rate
+  hint: Return visits within 30 days
+- id: revenue_trend
+  label: Revenue trend
+  hint: Last 30 days vs prior 30

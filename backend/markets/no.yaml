@@ -1,0 +1,8 @@
+code: 'NO'
+name: Norway
+flag: 🇳🇴
+colors:
+  accent: '#ba0c2f'
+languages:
+- 'no'
+extended_network: false

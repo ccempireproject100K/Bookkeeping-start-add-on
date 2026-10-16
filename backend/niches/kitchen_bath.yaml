@@ -1,0 +1,85 @@
+id: kitchen_bath
+trade: Kitchen & Bath Remodeling
+product_name: The Remodeler's Ledger
+tagline: Bookkeeping built for kitchen and bath remodelers
+terms:
+  worker: Remodeler
+  worker_plural: Remodelers
+  shop: firm
+  job: project
+  job_plural: projects
+  customer: client
+  customer_plural: clients
+colors:
+  accent: '#fb7185'
+subdomains:
+- kitchenbath
+- remodel
+- remodeling
+revenue_accounts:
+- code: '4000'
+  name: Project Revenue — Kitchen Remodels
+- code: '4010'
+  name: Project Revenue — Bathroom Remodels
+- code: '4020'
+  name: Service Revenue — Design Services
+- code: '4100'
+  name: Product Revenue — Fixtures & Materials
+trade_expense_accounts:
+- code: '5100'
+  name: Crew & Installer Commissions
+- code: '5030'
+  name: Job Cost — Cabinets, Fixtures & Materials
+services:
+- name: Kitchen Remodel
+  kind: service
+- name: Bathroom Remodel
+  kind: service
+- name: Design Consultation
+  kind: service
+- name: Tile & Countertop Installation
+  kind: service
+checklist:
+- id: team
+  label: Add your remodelers
+  hint: They show up once they have a workspace login; commissions split automatically
+  link: /team
+  check: team
+- id: services
+  label: Add services & price book
+  hint: Kitchen Remodel, Bathroom Remodel, Design Consultation
+  link: /inventory
+  check: services
+- id: bank
+  label: Add a bank account
+  hint: Reconcile deposits against jobs in Banking
+  link: /banking
+  check: bank
+- id: tax
+  label: Set up contractor tracking
+  hint: W-9s and 1099-NECs for subs and helpers
+  link: /tax
+  check: tax
+- id: sale
+  label: Book your first project
+  hint: Invoice a project to see the full flow
+  link: /invoices
+  check: sale
+copilot_notes: 'Remodeling is deposit-and-draw bookkeeping: progress billings, change orders, and material
+  markups decide the margin. Track job cost per project weekly — cabinets and fixtures are where estimates
+  drift.
+
+  '
+kpis:
+- id: avg_ticket
+  label: Average project
+  hint: Per-invoice average
+- id: close_rate
+  label: Close rate
+  hint: Estimates won vs decided
+- id: ar_days
+  label: Avg days to paid
+  hint: Draw collection speed
+- id: revenue_trend
+  label: Revenue trend
+  hint: Last 30 days vs prior 30

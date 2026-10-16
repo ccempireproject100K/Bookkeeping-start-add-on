@@ -1,0 +1,9 @@
+code: IE
+name: Ireland
+flag: 🇮🇪
+colors:
+  accent: '#169b62'
+languages:
+- en
+- ga
+extended_network: false

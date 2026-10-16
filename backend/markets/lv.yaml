@@ -1,0 +1,8 @@
+code: LV
+name: Latvia
+flag: 🇱🇻
+colors:
+  accent: '#9d2235'
+languages:
+- lv
+extended_network: false

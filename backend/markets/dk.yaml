@@ -1,0 +1,8 @@
+code: DK
+name: Denmark
+flag: 🇩🇰
+colors:
+  accent: '#c8102e'
+languages:
+- da
+extended_network: false

@@ -1,0 +1,8 @@
+code: PL
+name: Poland
+flag: 🇵🇱
+colors:
+  accent: '#dc143c'
+languages:
+- pl
+extended_network: false

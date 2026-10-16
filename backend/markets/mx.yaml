@@ -1,0 +1,8 @@
+code: MX
+name: Mexico
+flag: 🇲🇽
+colors:
+  accent: '#006847'
+languages:
+- es
+extended_network: false

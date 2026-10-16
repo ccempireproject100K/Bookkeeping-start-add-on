@@ -1,0 +1,83 @@
+id: foundation_repair
+trade: Foundation Repair
+product_name: The Foundation Ledger
+tagline: Bookkeeping built for foundation repair companies
+terms:
+  worker: Foreman
+  worker_plural: Foremen
+  shop: company
+  job: project
+  job_plural: projects
+  customer: homeowner
+  customer_plural: homeowners
+colors:
+  accent: '#57534e'
+subdomains:
+- foundation
+- foundationrepair
+revenue_accounts:
+- code: '4000'
+  name: Project Revenue — Foundation Repair
+- code: '4010'
+  name: Project Revenue — Waterproofing
+- code: '4020'
+  name: Project Revenue — Crawl Space & Encapsulation
+- code: '4030'
+  name: Service Revenue — Inspections & Engineering
+trade_expense_accounts:
+- code: '5100'
+  name: Crew Commissions
+- code: '5030'
+  name: Job Cost — Piers, Steel & Materials
+services:
+- name: Foundation Piering
+  kind: service
+- name: Basement Waterproofing
+  kind: service
+- name: Crawl Space Encapsulation
+  kind: service
+- name: Foundation Inspection
+  kind: service
+checklist:
+- id: team
+  label: Add your foremen
+  hint: They show up once they have a workspace login; commissions split automatically
+  link: /team
+  check: team
+- id: services
+  label: Add services & price book
+  hint: Foundation Piering, Basement Waterproofing, Crawl Space Encapsulation
+  link: /inventory
+  check: services
+- id: bank
+  label: Add a bank account
+  hint: Reconcile deposits against jobs in Banking
+  link: /banking
+  check: bank
+- id: tax
+  label: Set up contractor tracking
+  hint: W-9s and 1099-NECs for subs and helpers
+  link: /tax
+  check: tax
+- id: sale
+  label: Book your first project
+  hint: Invoice a project to see the full flow
+  link: /invoices
+  check: sale
+copilot_notes: 'Foundation jobs are high-ticket, permit-heavy, and often financed or warranty-backed.
+  Track pier and material costs per project, and keep warranty reserves visible — callbacks here are expensive.
+
+  '
+kpis:
+- id: avg_ticket
+  label: Average project
+  hint: Per-invoice average
+- id: close_rate
+  label: Close rate
+  hint: Estimates won vs decided
+- id: ar_days
+  label: Avg days to paid
+  hint: Collection speed
+- id: revenue_trend
+  label: Revenue trend
+  hint: Last 30 days vs prior 30

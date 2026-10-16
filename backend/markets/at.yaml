@@ -1,0 +1,8 @@
+code: AT
+name: Austria
+flag: 🇦🇹
+colors:
+  accent: '#ed2939'
+languages:
+- de
+extended_network: false

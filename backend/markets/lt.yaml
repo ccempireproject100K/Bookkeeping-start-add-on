@@ -1,0 +1,8 @@
+code: LT
+name: Lithuania
+flag: 🇱🇹
+colors:
+  accent: '#fdb913'
+languages:
+- lt
+extended_network: false

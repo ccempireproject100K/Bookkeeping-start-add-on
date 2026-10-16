@@ -1,0 +1,8 @@
+code: IT
+name: Italy
+flag: 🇮🇹
+colors:
+  accent: '#008c45'
+languages:
+- it
+extended_network: false

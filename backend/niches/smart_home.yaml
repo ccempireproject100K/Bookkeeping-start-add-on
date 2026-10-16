@@ -1,0 +1,84 @@
+id: smart_home
+trade: Smart Home & Security
+product_name: The Smart Home Ledger
+tagline: Bookkeeping built for smart home and security companies
+terms:
+  worker: Technician
+  worker_plural: Technicians
+  shop: company
+  job: installation
+  job_plural: installations
+  customer: customer
+  customer_plural: customers
+colors:
+  accent: '#6366f1'
+subdomains:
+- smarthome
+- security
+revenue_accounts:
+- code: '4000'
+  name: Service Revenue — Security Installations
+- code: '4010'
+  name: Service Revenue — Smart Home Installations
+- code: '4020'
+  name: Service Revenue — Monitoring Plans
+- code: '4100'
+  name: Product Revenue — Devices & Cameras
+trade_expense_accounts:
+- code: '5100'
+  name: Technician Commissions
+- code: '5030'
+  name: Job Cost — Devices, Cameras & Cabling
+services:
+- name: Security System Installation
+  kind: service
+- name: Smart Lock & Camera Setup
+  kind: service
+- name: Monitoring Plan
+  kind: service
+- name: Home Automation Consultation
+  kind: service
+checklist:
+- id: team
+  label: Add your technicians
+  hint: They show up once they have a workspace login; commissions split automatically
+  link: /team
+  check: team
+- id: services
+  label: Add services & price book
+  hint: Security System Installation, Smart Lock & Camera Setup, Monitoring Plan
+  link: /inventory
+  check: services
+- id: bank
+  label: Add a bank account
+  hint: Reconcile deposits against jobs in Banking
+  link: /banking
+  check: bank
+- id: tax
+  label: Set up contractor tracking
+  hint: W-9s and 1099-NECs for subs and helpers
+  link: /tax
+  check: tax
+- id: sale
+  label: Book your first installation
+  hint: Invoice a installation to see the full flow
+  link: /invoices
+  check: sale
+copilot_notes: 'Smart home and security blend install revenue with recurring monitoring — the RMR is the
+  business''s value. Track device cost per install and monitoring churn; truck rolls for callbacks erase
+  thin install margins.
+
+  '
+kpis:
+- id: avg_ticket
+  label: Average ticket
+  hint: Per-invoice average
+- id: recurring_share
+  label: Recurring revenue
+  hint: Monitoring-plan share
+- id: callback_rate
+  label: Callback rate
+  hint: Return visits within 30 days
+- id: revenue_trend
+  label: Revenue trend
+  hint: Last 30 days vs prior 30

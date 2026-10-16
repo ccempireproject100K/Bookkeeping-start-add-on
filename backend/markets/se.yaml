@@ -1,0 +1,8 @@
+code: SE
+name: Sweden
+flag: 🇸🇪
+colors:
+  accent: '#006aa7'
+languages:
+- sv
+extended_network: false

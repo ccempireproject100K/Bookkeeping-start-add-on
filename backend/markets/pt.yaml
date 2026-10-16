@@ -1,0 +1,8 @@
+code: PT
+name: Portugal
+flag: 🇵🇹
+colors:
+  accent: '#046a38'
+languages:
+- pt
+extended_network: false

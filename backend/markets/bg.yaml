@@ -1,0 +1,8 @@
+code: BG
+name: Bulgaria
+flag: 🇧🇬
+colors:
+  accent: '#00966e'
+languages:
+- bg
+extended_network: false

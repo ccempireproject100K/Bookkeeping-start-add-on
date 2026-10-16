@@ -1,0 +1,10 @@
+code: BE
+name: Belgium
+flag: 🇧🇪
+colors:
+  accent: '#fdda24'
+languages:
+- nl
+- fr
+- de
+extended_network: false

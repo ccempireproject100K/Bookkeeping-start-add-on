@@ -1,0 +1,83 @@
+id: junk_removal
+trade: Junk Removal
+product_name: The Junk Removal Ledger
+tagline: Bookkeeping built for junk removal companies
+terms:
+  worker: Crew Member
+  worker_plural: Crew Members
+  shop: company
+  job: haul
+  job_plural: hauls
+  customer: customer
+  customer_plural: customers
+colors:
+  accent: '#65a30d'
+subdomains:
+- junkremoval
+- junk
+revenue_accounts:
+- code: '4000'
+  name: Service Revenue — Residential Removal
+- code: '4010'
+  name: Service Revenue — Commercial Cleanouts
+- code: '4020'
+  name: Service Revenue — Hauling & Dumpster
+- code: '4030'
+  name: Service Revenue — Donation & Recycling Pickups
+trade_expense_accounts:
+- code: '5100'
+  name: Crew Commissions
+- code: '5030'
+  name: Job Cost — Dump & Disposal Fees
+services:
+- name: Single-Item Pickup
+  kind: service
+- name: Full Truck Load
+  kind: service
+- name: Estate Cleanout
+  kind: service
+- name: Construction Debris Removal
+  kind: service
+checklist:
+- id: team
+  label: Add your crew members
+  hint: They show up once they have a workspace login; commissions split automatically
+  link: /team
+  check: team
+- id: services
+  label: Add services & price book
+  hint: Single-Item Pickup, Full Truck Load, Estate Cleanout
+  link: /inventory
+  check: services
+- id: bank
+  label: Add a bank account
+  hint: Reconcile deposits against jobs in Banking
+  link: /banking
+  check: bank
+- id: tax
+  label: Set up contractor tracking
+  hint: W-9s and 1099-NECs for subs and helpers
+  link: /tax
+  check: tax
+- id: sale
+  label: Book your first haul
+  hint: Invoice a haul to see the full flow
+  link: /invoices
+  check: sale
+copilot_notes: 'Junk removal is priced by volume and won on route density. Dump fees and fuel are the
+  margin — track disposal cost per haul and jobs per truck per day.
+
+  '
+kpis:
+- id: jobs_per_day
+  label: Hauls per day
+  hint: Truck throughput
+- id: avg_ticket
+  label: Average haul
+  hint: Per-invoice average
+- id: repeat_rate
+  label: Repeat customers
+  hint: Customers with 2+ invoices
+- id: revenue_trend
+  label: Revenue trend
+  hint: Last 30 days vs prior 30

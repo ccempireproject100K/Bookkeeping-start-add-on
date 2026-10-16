@@ -1,0 +1,8 @@
+code: RO
+name: Romania
+flag: 🇷🇴
+colors:
+  accent: '#002b7f'
+languages:
+- ro
+extended_network: false

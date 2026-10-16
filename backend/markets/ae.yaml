@@ -1,0 +1,9 @@
+code: AE
+name: United Arab Emirates
+flag: 🇦🇪
+colors:
+  accent: '#00732f'
+languages:
+- ar
+- en
+extended_network: false

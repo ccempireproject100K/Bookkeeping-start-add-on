@@ -1,0 +1,9 @@
+code: MT
+name: Malta
+flag: 🇲🇹
+colors:
+  accent: '#cf142b'
+languages:
+- mt
+- en
+extended_network: false

@@ -1,0 +1,8 @@
+code: EE
+name: Estonia
+flag: 🇪🇪
+colors:
+  accent: '#0072ce'
+languages:
+- et
+extended_network: false

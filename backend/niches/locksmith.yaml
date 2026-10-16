@@ -1,0 +1,84 @@
+id: locksmith
+trade: Locksmith
+product_name: The Locksmith's Ledger
+tagline: Bookkeeping built for locksmiths
+terms:
+  worker: Locksmith
+  worker_plural: Locksmiths
+  shop: shop
+  job: job
+  job_plural: jobs
+  customer: customer
+  customer_plural: customers
+colors:
+  accent: '#b45309'
+subdomains:
+- locksmith
+- locks
+revenue_accounts:
+- code: '4000'
+  name: Service Revenue — Service Calls
+- code: '4010'
+  name: Service Revenue — Lockouts & Emergency
+- code: '4020'
+  name: Service Revenue — Installations
+- code: '4100'
+  name: Product Revenue — Locks & Hardware
+trade_expense_accounts:
+- code: '5100'
+  name: Locksmith Commissions
+- code: '5030'
+  name: Job Cost — Locks, Cylinders & Key Blanks
+services:
+- name: Emergency Lockout
+  kind: service
+- name: Lock Rekey
+  kind: service
+- name: Lock Installation
+  kind: service
+- name: Safe Opening
+  kind: service
+checklist:
+- id: team
+  label: Add your locksmiths
+  hint: They show up once they have a workspace login; commissions split automatically
+  link: /team
+  check: team
+- id: services
+  label: Add services & price book
+  hint: Emergency Lockout, Lock Rekey, Lock Installation
+  link: /inventory
+  check: services
+- id: bank
+  label: Add a bank account
+  hint: Reconcile deposits against jobs in Banking
+  link: /banking
+  check: bank
+- id: tax
+  label: Set up contractor tracking
+  hint: W-9s and 1099-NECs for subs and helpers
+  link: /tax
+  check: tax
+- id: sale
+  label: Book your first job
+  hint: Invoice a job to see the full flow
+  link: /invoices
+  check: sale
+copilot_notes: 'Locksmiths live on emergency calls and ticket mix: lockouts are fast cash, installs and
+  access work carry the margin. Track after-hours premiums separately and watch key-blank and cylinder
+  costs — small parts, steady bleed.
+
+  '
+kpis:
+- id: avg_ticket
+  label: Average ticket
+  hint: Per-invoice average
+- id: jobs_per_day
+  label: Jobs per day
+  hint: Call volume
+- id: repeat_rate
+  label: Repeat customers
+  hint: Customers with 2+ invoices
+- id: revenue_trend
+  label: Revenue trend
+  hint: Last 30 days vs prior 30
