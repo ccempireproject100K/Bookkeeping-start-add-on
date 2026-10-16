@@ -8,10 +8,15 @@ DISCLAIMER (also shown in the UI):
 
 Journal posting for an approved run (all amounts in cents):
     Dr 6110 Wages & Salaries          (gross)
-        Cr 2120 Payroll Liabilities   (federal withholding est. + FICA est.)
+    Dr 6120 Payroll Tax Expense       (employer FICA match 7.65% — estimate)
+        Cr 2120 Payroll Liabilities   (est. federal withholding + employee FICA
+                                      + employer FICA match + other deductions)
         Cr 4200 Chair Rental Income   (booth rent collected by the shop)
         Cr 2320 Wages Payable         (net pay owed to staff — disbursement
                                       happens OUTSIDE this app via a provider)
+
+FUTA/SUTA (federal/state unemployment taxes) are NOT computed here: state
+rules vary and the app does not file or deposit any taxes.
 """
 from decimal import Decimal, ROUND_HALF_UP
 
@@ -36,10 +41,12 @@ router = APIRouter(prefix="/payroll", tags=["payroll"])
 DISCLAIMER = (
     "Payroll-lite computes pay estimates only. It does not withhold or file taxes, "
     "and it does not run direct deposit. For compliant tax filing and payments, use "
-    "a payroll provider (e.g. Gusto, Check)."
+    "a payroll provider (e.g. Gusto, Check). Federal/state unemployment taxes "
+    "(FUTA/SUTA) are not estimated or filed here."
 )
 
 FICA_PCT = 7.65  # Social Security + Medicare (employee share), planning estimate.
+FICA_EMPLOYER_PCT = 7.65  # Employer FICA match, planning estimate (posted to 6120/2120).
 # Per-period estimate; the 2026 SS wage base is $184,500 (cap applies to YTD wages).
 PERIODS_PER_YEAR = {"weekly": 52, "biweekly": 26, "monthly": 12}
 TEAM_ROLES = ["owner", "barber"]  # roles treated as payroll team members
@@ -300,6 +307,10 @@ def _build_item(member, frequency, inp: RunItemIn, default_fed_pct,
         raise HTTPException(status_code=422, detail=f"Deductions exceed gross pay for {name}")
     net = gross - total_ded
 
+    # Employer share: FICA match (7.65%) is an employer cost on top of gross pay —
+    # estimate only, not filed or deposited by this app.
+    employer_fica_cents = _pct_cents(gross, FICA_EMPLOYER_PCT)
+
     earnings = []
     if pay_type == "hourly":
         src_note = " (from approved time)" if hours_source == "time_entries" else ""
@@ -317,6 +328,7 @@ def _build_item(member, frequency, inp: RunItemIn, default_fed_pct,
         "rate_cents": rate_cents, "commission_cents": commission_cents,
         "earnings": earnings, "gross_cents": gross, "deductions": deductions,
         "total_deductions_cents": total_ded, "net_cents": net,
+        "employer_fica_cents": employer_fica_cents,
     }
 
 
@@ -329,8 +341,10 @@ def _totals(items):
                 if d["label"] not in ("Federal withholding (est.)",
                                       "FICA — Social Security & Medicare (est.)", "Booth rent"))
     net = sum(i["net_cents"] for i in items)
+    employer_tax = sum(i.get("employer_fica_cents", 0) for i in items)
     return {"gross_cents": gross, "tax_deductions_cents": tax, "booth_rent_cents": booth,
-            "other_deductions_cents": other, "net_cents": net}
+            "other_deductions_cents": other, "net_cents": net,
+            "employer_tax_cents": employer_tax}
 
 
 @router.get("/runs")
@@ -408,10 +422,11 @@ async def approve_run(rid: str, user: dict = Depends(require("payroll:write"))):
 
 
 async def _ensure_payroll_accounts(user):
-    """6110/2120 are new COA accounts — upsert them for existing tenants."""
+    """6110/6120/2120 are new COA accounts — upsert them for existing tenants."""
     s = Scoped(db.accounts, user["tenant_id"])
     for code, name, atype, normal in (
             ("6110", "Wages & Salaries", "expense", "debit"),
+            ("6120", "Payroll Tax Expense", "expense", "debit"),
             ("2120", "Payroll Liabilities", "liability", "credit")):
         if not await s.find_one({"code": code}):
             await s.insert_one({
@@ -437,8 +452,12 @@ async def post_run(rid: str, user: dict = Depends(require("payroll:write"))):
 
     await _ensure_payroll_accounts(user)
     jl = [P.dr("6110", t["gross_cents"], "Gross wages")]
+    if t["employer_tax_cents"]:
+        jl.append(P.dr("6120", t["employer_tax_cents"], "Employer FICA match (est.)"))
     if t["tax_deductions_cents"]:
         jl.append(P.cr("2120", t["tax_deductions_cents"], "Payroll liabilities (est. withholding + FICA)"))
+    if t["employer_tax_cents"]:
+        jl.append(P.cr("2120", t["employer_tax_cents"], "Employer FICA match liability (est.)"))
     if t["booth_rent_cents"]:
         jl.append(P.cr("4200", t["booth_rent_cents"], "Booth rent collected"))
     if t["other_deductions_cents"]:

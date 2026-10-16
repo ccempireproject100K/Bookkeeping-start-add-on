@@ -56,6 +56,10 @@ export default function Payroll() {
     user
   } = useAuth();
   const canWrite = user?.role === "owner";
+  // Backend role keys stay structural ("owner"/"barber"); user-facing labels are
+  // neutral and i18n'd (roles.barber -> "Staff").
+  const ROLE_LABEL_KEY = { owner: "roles.owner", barber: "roles.barber" };
+  const roleLabel = r => (ROLE_LABEL_KEY[r] ? t(ROLE_LABEL_KEY[r]) : r);
   const [schedules, setSchedules] = useState(null);
   const [team, setTeam] = useState(null);
   const [settings, setSettings] = useState(null);
@@ -293,7 +297,7 @@ export default function Payroll() {
                     <td className="py-2"><input type="checkbox" checked={!!r.include} onChange={e => setRow(m.id, {
                   include: e.target.checked
                 })} /></td>
-                    <td className="py-2 text-gray-100">{m.name} <span className="text-xs text-gray-500 capitalize">· {m.role}</span></td>
+                    <td className="py-2 text-gray-100">{m.name} <span className="text-xs text-gray-500">· {roleLabel(m.role)}</span></td>
                     <td className="py-2 text-gray-400 text-xs">{isSalary ? "Salary" : "Hourly"}</td>
                     <td className="py-2 text-right">{!isSalary && <Input type="number" step="0.25" min={0} value={r.hours || ""} onChange={e => setRow(m.id, {
                   hours: e.target.value
@@ -349,7 +353,13 @@ export default function Payroll() {
                       <td className="py-2 text-right"><Button size="sm" variant="ghost" className="h-7 text-gray-400" onClick={() => doPrint(detail.id, it.id)}><Printer size={14} className="mr-1" />{t("payroll.stub")}</Button></td>
                     </tr>)}
                 </tbody>
-                <tfoot><tr className="font-semibold text-gray-100">
+                <tfoot>
+                  {(detail.totals.employer_tax_cents || 0) > 0 && <tr className="text-xs text-gray-500">
+                    <td className="py-1">{t("payroll.employerTaxEst")}</td>
+                    <td className="py-1 text-right font-mono">{money(detail.totals.employer_tax_cents)}</td>
+                    <td className="py-1" /><td className="py-1" /><td />
+                  </tr>}
+                  <tr className="font-semibold text-gray-100">
                   <td className="py-2">{t("payroll.totals")}</td>
                   <td className="py-2 text-right font-mono">{money(detail.totals.gross_cents)}</td>
                   <td className="py-2 text-right font-mono">{money(detail.totals.tax_deductions_cents + detail.totals.booth_rent_cents + detail.totals.other_deductions_cents)}</td>
@@ -459,7 +469,7 @@ export default function Payroll() {
                 {team.map(m => {
                 const f = edit[m.id] || {};
                 return <tr key={m.id} className="border-b border-[#171c26]">
-                      <td className="py-2 text-gray-100">{m.name} <span className="text-xs text-gray-500 capitalize">· {m.role}</span></td>
+                      <td className="py-2 text-gray-100">{m.name} <span className="text-xs text-gray-500">· {roleLabel(m.role)}</span></td>
                       {canWrite ? <>
                           <td className="py-2 text-right"><Input type="number" step="0.01" min={0} value={f.hourly_rate ?? ""} onChange={e => setEditRow(m.id, {
                         hourly_rate: e.target.value
