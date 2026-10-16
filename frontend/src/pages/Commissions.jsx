@@ -49,7 +49,7 @@ export default function Commissions() {
   };
   if (!summary) return <Loading />;
   return <div className="animate-rise">
-      <PageHeader title={t("commissions.commissionPayouts")} subtitle="Accrued barber commission (2300 payable) → pay out" testid="commissions-page" />
+      <PageHeader title={t("commissions.commissionPayouts")} subtitle="Accrued staff commission (2300 payable) → pay out" testid="commissions-page" />
 
       <div className="grid sm:grid-cols-2 gap-4 mb-6">
         {summary.map(b => <Card key={b.barber_id} data-testid={`commission-card-${b.barber_id}`} className="hover:border-[#34404f] transition-colors">
