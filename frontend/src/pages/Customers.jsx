@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Plus, MapPin, Phone, Mail, FileText } from "lucide-react";
+import { Plus, MapPin, Phone, Mail, FileText, Pencil, Trash2 } from "lucide-react";
 import { money, dollars, fmtDate } from "@/lib/format";
 import { useTranslation } from "react-i18next";
 export default function Customers() {
@@ -20,12 +20,14 @@ export default function Customers() {
   const isOwner = user?.role === "owner";
   const [rows, setRows] = useState(null);
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({
+  const [editing, setEditing] = useState(null);
+  const blankForm = {
     name: "",
     email: "",
     phone: "",
     address: ""
-  });
+  };
+  const [form, setForm] = useState(blankForm);
   const [stmt, setStmt] = useState(null);
   const load = () => api.get("/customers").then(setRows).catch(() => setRows([]));
   useEffect(() => {
@@ -38,25 +40,54 @@ export default function Customers() {
       toast.error(errMsg(e));
     }
   };
-  const create = async () => {
+  const openCreate = () => {
+    setEditing(null);
+    setForm(blankForm);
+    setOpen(true);
+  };
+  const openEdit = c => {
+    setEditing(c);
+    setForm({
+      name: c.name || "",
+      email: c.email || "",
+      phone: c.phone || "",
+      address: c.locations?.[0]?.address || ""
+    });
+    setOpen(true);
+  };
+  const save = async () => {
+    const payload = {
+      name: form.name,
+      email: form.email || null,
+      phone: form.phone || null,
+      locations: form.address ? [{
+        label: "Primary",
+        address: form.address
+      }] : []
+    };
     try {
-      await api.post("/customers", {
-        name: form.name,
-        email: form.email || null,
-        phone: form.phone || null,
-        locations: form.address ? [{
-          label: "Primary",
-          address: form.address
-        }] : []
-      });
-      toast.success(t("customers.customerAdded"));
+      if (editing) {
+        await api.patch(`/customers/${editing.id}`, payload);
+        toast.success(t("customers.customerUpdated"));
+      } else {
+        await api.post("/customers", payload);
+        toast.success(t("customers.customerAdded"));
+      }
       setOpen(false);
-      setForm({
-        name: "",
-        email: "",
-        phone: "",
-        address: ""
-      });
+      setEditing(null);
+      setForm(blankForm);
+      load();
+    } catch (e) {
+      toast.error(errMsg(e));
+    }
+  };
+  const remove = async c => {
+    if (!window.confirm(t("customers.deleteConfirm", {
+      name: c.name
+    }))) return;
+    try {
+      await api.del(`/customers/${c.id}`);
+      toast.success(t("customers.customerDeleted"));
       load();
     } catch (e) {
       toast.error(errMsg(e));
@@ -65,7 +96,7 @@ export default function Customers() {
   if (!rows) return <Loading />;
   return <div className="animate-rise">
       <PageHeader title={t("customers.customers")} subtitle={`${rows.length} customers & service locations`} testid="customers-page">
-        {isOwner && <Button data-testid="btn-add-customer" onClick={() => setOpen(true)} className="bg-amber-600 hover:bg-amber-500 text-black font-semibold"><Plus size={16} className="mr-1" />{t("customers.addCustomer")}</Button>}
+        {isOwner && <Button data-testid="btn-add-customer" onClick={openCreate} className="bg-amber-600 hover:bg-amber-500 text-black font-semibold"><Plus size={16} className="mr-1" />{t("customers.addCustomer")}</Button>}
       </PageHeader>
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -76,14 +107,18 @@ export default function Customers() {
               {c.phone && <div className="flex items-center gap-2"><Phone size={14} className="text-gray-500" />{c.phone}</div>}
               {c.email && <div className="flex items-center gap-2"><Mail size={14} className="text-gray-500" />{c.email}</div>}
             </div>
-            <Button size="sm" variant="outline" data-testid={`statement-${c.id}`} onClick={() => openStatement(c.id)} className="mt-4 border-[#222838] h-8"><FileText size={13} className="mr-1" />{t("customers.statement")}</Button>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <Button size="sm" variant="outline" data-testid={`statement-${c.id}`} onClick={() => openStatement(c.id)} className="border-[#222838] h-8"><FileText size={13} className="mr-1" />{t("customers.statement")}</Button>
+              {isOwner && <Button size="sm" variant="outline" data-testid={`edit-customer-${c.id}`} onClick={() => openEdit(c)} className="border-[#222838] h-8"><Pencil size={13} className="mr-1" />{t("customers.edit")}</Button>}
+              {isOwner && <Button size="sm" variant="outline" data-testid={`delete-customer-${c.id}`} onClick={() => remove(c)} className="border-[#222838] h-8 text-rose-400 hover:text-rose-300"><Trash2 size={13} className="mr-1" />{t("customers.delete")}</Button>}
+            </div>
           </Card>)}
         {rows.length === 0 && <Card><div className="text-gray-500 text-sm text-center py-6">{t("customers.noCustomersYet")}</div></Card>}
       </div>
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="bg-[#14171E] border-[#222838]">
-          <DialogHeader><DialogTitle>{t("customers.addCustomer")}</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{editing ? t("customers.editCustomer") : t("customers.addCustomer")}</DialogTitle></DialogHeader>
           <div className="space-y-3">
             <div><Label className="text-xs">{t("customers.name")}</Label><Input data-testid="customer-name" value={form.name} onChange={e => setForm({
               ...form,
@@ -104,7 +139,7 @@ export default function Customers() {
               })} className="bg-[#0F1218] border-[#222838]" /></div>
             </div>
           </div>
-          <DialogFooter><Button data-testid="customer-save" onClick={create} className="bg-amber-600 hover:bg-amber-500 text-black">{t("customers.add")}</Button></DialogFooter>
+          <DialogFooter><Button data-testid="customer-save" onClick={save} className="bg-amber-600 hover:bg-amber-500 text-black">{editing ? t("customers.save") : t("customers.add")}</Button></DialogFooter>
         </DialogContent>
       </Dialog>
 
