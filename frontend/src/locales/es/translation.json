@@ -1549,7 +1549,7 @@
   "collections.preview2": "Preview —",
   "collections.actionsWouldRun": "actions would run",
   "collections.pauseFromDay": "Pause from day",
-  "combo.templateAddEMERGENTLLMKEYFor": "(template — add EMERGENT_LLM_KEY for AI drafts)",
+  "combo.templateAddAIKeyFor": "(template — add AI_API_KEY for AI drafts)",
   "combo.acNotCooling": "AC not cooling",
   "cpapackage.readmeForYourPreparer": "README for your preparer",
   "giftcards.activeCards": "active cards",
