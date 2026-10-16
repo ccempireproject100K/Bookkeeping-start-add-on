@@ -419,7 +419,7 @@ export default function Layout() {
       {/* Sidebar */}
       <aside className="w-64 shrink-0 border-r border-[#1b2230] bg-[#0D0F14] hidden lg:flex flex-col">
         <div className="h-16 flex items-center gap-3 px-5 border-b border-[#1b2230]">
-          {brand.logo_url ? <img src={brand.logo_url} alt={brandName} className="w-9 h-9 rounded-lg object-contain bg-white/5" /> : <div className="w-9 h-9 rounded-lg barber-pole shadow-inner" />}
+          {brand.logo_url ? <img src={brand.logo_url} alt={brandName} className="w-9 h-9 rounded-lg object-contain bg-white/5" /> : <div className="w-9 h-9 rounded-lg brand-mark shadow-inner" />}
           <div>
             <div className="font-display font-bold text-[15px] leading-tight text-gray-50">{brandName}</div>
             <div className="text-[10px] uppercase tracking-widest" style={{

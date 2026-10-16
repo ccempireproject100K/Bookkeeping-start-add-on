@@ -12,7 +12,7 @@ API = f"{BASE_URL}/api"
 OWNER = {"email": "onelovellc@outlook.com", "password": "Owner123!"}
 ACCT = {"email": "accountant@fadeco.com", "password": "Books123!"}
 BOOK = {"email": "bookkeeper@fadeco.com", "password": "Books123!"}
-BARBER = {"email": "marcus@fadeco.com", "password": "Barber123!"}
+BARBER = {"email": "marcus@fadeco.com", "password": "Staff123!"}
 
 
 def mk_sess(creds):

@@ -94,8 +94,8 @@ async def seed_fade():
     owner = await make_user(tid, "onelovellc@outlook.com", "Darnell Price", "owner", "Owner123!")
     await make_user(tid, "accountant@fadeco.com", "Priya Shah", "accountant", "Books123!")
     await make_user(tid, "bookkeeper@fadeco.com", "Sam Reed", "bookkeeper", "Books123!")
-    b1 = await make_user(tid, "marcus@fadeco.com", "Marcus Vance", "barber", "Barber123!", 0.10)
-    b2 = await make_user(tid, "tasha@fadeco.com", "Tasha Lane", "barber", "Barber123!", 0.12)
+    b1 = await make_user(tid, "marcus@fadeco.com", "Marcus Vance", "barber", "Staff123!", 0.10)
+    b2 = await make_user(tid, "tasha@fadeco.com", "Tasha Lane", "barber", "Staff123!", 0.12)
     barbers = [b1, b2]
 
     products = [
