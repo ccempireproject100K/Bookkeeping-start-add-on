@@ -29,6 +29,7 @@ from pydantic import BaseModel, Field
 from db import db
 from lib.base import Scoped, new_id, now_iso, to_cents
 from lib.auth import require
+from lib.plans import require_feature
 from lib.plaid_webhook import verify_plaid_webhook
 from lib.coa import NAME_OF, ACCOUNT_TYPE_OF
 from routers.banking import (
@@ -36,7 +37,7 @@ from routers.banking import (
     BANK_CODES, CARD_CODES,
 )
 
-router = APIRouter(prefix="/bankfeed", tags=["bankfeed"])
+router = APIRouter(prefix="/bankfeed", tags=["bankfeed"], dependencies=[Depends(require_feature("bank_feeds"))])
 logger = logging.getLogger(__name__)
 
 PLAID_BASES = {

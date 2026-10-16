@@ -12,6 +12,7 @@ from lib.auth import (
     set_session_cookie, clear_session_cookie, get_current_user, require,
 )
 from lib.coa import seed_coa
+from lib.plans import validate_plan, new_trial_fields
 from lib.pii import last4, pii_decrypt, pii_encrypt
 from lib.pwned import is_pwned
 from lib.devices import check_device
@@ -25,6 +26,7 @@ class RegisterBody(BaseModel):
     name: str
     shop_name: str = "My Shop"
     niche_id: Optional[str] = None
+    plan: Optional[str] = None  # light | medium | heavy; default light + 30-day trial
 
 
 class LoginBody(BaseModel):
@@ -57,21 +59,25 @@ async def _audit(user, action, entity, entity_id, details=None):
     })
 
 
-async def create_workspace(email, password, name, shop_name, role="owner", tenant_id=None, commission_rate=0, niche_id=None):
+async def create_workspace(email, password, name, shop_name, role="owner", tenant_id=None, commission_rate=0, niche_id=None, plan=None):
     from lib.niches import get_pack, DEFAULT_NICHE
     email = email.lower().strip()
     if await db.users.find_one({"email": email}):
         raise HTTPException(status_code=409, detail="An account with this email already exists")
     pack = get_pack(niche_id)
     niche_id = pack.get("id") or DEFAULT_NICHE
+    stored_plan = validate_plan(plan) if plan else "light"
     if tenant_id is None:
         tenant_id = new_id()
-        await db.tenants.insert_one({
+        tenant = {
             "id": tenant_id, "name": shop_name, "niche_id": niche_id,
             "settings": {"inventory_enabled": True, "sales_tax_rate": 0.0725,
                          "double_entry_mode": "primary", "base_currency": "USD"},
             "created_at": now_iso(),
-        })
+        }
+        tenant.update(new_trial_fields())       # Light + 30-day Medium trial
+        tenant["plan"] = stored_plan            # explicit signup choice wins on expiry
+        await db.tenants.insert_one(tenant)
         await seed_coa(Scoped(db.accounts, tenant_id), niche_id)
     user = {
         "id": new_id(), "tenant_id": tenant_id, "email": email,
@@ -89,7 +95,7 @@ async def register(body: RegisterBody, response: Response):
             400, "This password has appeared in a data breach. "
                  "Please choose a different one.")
     user = await create_workspace(body.email, body.password, body.name, body.shop_name,
-                                  niche_id=body.niche_id)
+                                  niche_id=body.niche_id, plan=body.plan)
     await _issue(response, user)
     return _public(user)
 

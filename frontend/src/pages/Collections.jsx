@@ -12,6 +12,7 @@ import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { Play, Eye, Settings2, PauseCircle } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import PlanGate from "@/components/PlanGate";
 const ACTIONS = ["nudge", "firm", "final", "pause_service"];
 const ACTION_LABEL = {
   nudge: "Friendly nudge",
@@ -92,12 +93,12 @@ export default function Collections() {
     (buckets[r.bucket] = buckets[r.bucket] || []).push(r);
   });
   return <div className="space-y-6">
-      <PageHeader title={t("collections.collectionsAutopilot")} subtitle="Escalating reminders, late fees, and service holds — you approve the ladder, it works the list." actions={canManage && <>
+      <PageHeader title={t("collections.collectionsAutopilot")} subtitle="Escalating reminders, late fees, and service holds — you approve the ladder, it works the list." actions={canManage && <PlanGate feature="collections_automation" inline>
           <Button variant="outline" onClick={() => setCfgOpen(true)}><Settings2 size={14} className="mr-1" />{t("collections.ladderConfig")}</Button>
           <Button variant="outline" onClick={doPreview}><Eye size={14} className="mr-1" />{t("collections.preview")}</Button>
           <Button onClick={doRun} disabled={running || !cfg?.enabled} data-testid="collections-run">
             <Play size={14} className="mr-1" />{running ? "Running…" : "Run autopilot"}</Button>
-        </>} />
+        </PlanGate>} />
       {!cfg?.enabled && <Card className="p-4 text-sm text-amber-400 bg-amber-500/5">{t("collections.autopilotIsOffOpenLadderConfig")}</Card>}
       <div className="grid grid-cols-2 gap-4">
         <Card className="p-4"><div className="text-xs text-gray-500">{t("collections.overdueInvoices")}</div><div className="text-2xl font-semibold">{pipe?.count ?? 0}</div></Card>

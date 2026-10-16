@@ -7,7 +7,8 @@ import { Building2 } from "lucide-react";
 
 /** Multi-entity: every business you own, plus one consolidated view. */
 import { useTranslation } from "react-i18next";
-export default function Entities() {
+import PlanGate from "@/components/PlanGate";
+function EntitiesInner() {
   const {
     t
   } = useTranslation();
@@ -52,4 +53,8 @@ export default function Entities() {
         </Card>}
       <p className="text-[11px] text-gray-600">{t("entities.consolidationIsReadOnlyEachEntity")}</p>
     </div>;
+}
+
+export default function Entities() {
+  return <PlanGate feature="multi_entity"><EntitiesInner /></PlanGate>;
 }

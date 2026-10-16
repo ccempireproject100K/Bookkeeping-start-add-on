@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { Plus, Upload, Landmark, CreditCard, ArrowLeftRight, Wand2, CheckCircle2, Trash2, RefreshCw, Unplug } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import PlanGate from "@/components/PlanGate";
 const STATUS_CLS = {
   unmatched: "bg-gray-500/10 text-gray-400 border-gray-500/20",
   cleared: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
@@ -327,8 +328,9 @@ export default function Banking() {
         </>}
       </PageHeader>
 
-      {/* Live bank feeds (Plaid) */}
-      {feed && <Card className="mb-6" data-testid="bankfeed-panel">
+      {/* Live bank feeds (Plaid) — Medium plan and up */}
+      {feed && <PlanGate feature="bank_feeds">
+        <Card className="mb-6" data-testid="bankfeed-panel">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex-1 min-w-56">
               <div className="text-xs uppercase tracking-wider text-gray-500">{t("banking.liveBankFeeds")}</div>
@@ -355,7 +357,8 @@ export default function Banking() {
                       <Unplug size={13} /> {t("banking.disconnect")}</button>}
                 </div>)}
             </div>}
-        </Card>}
+        </Card>
+      </PlanGate>}
 
       {/* Account cards */}
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6" data-testid="bank-account-cards">

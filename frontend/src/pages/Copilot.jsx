@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { Sparkles, Send, Wand2, Check, X, Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import PlanGate from "@/components/PlanGate";
 const STATUS_CLS = {
   pending: "bg-amber-500/10 text-amber-400 border-amber-500/20",
   approved: "bg-sky-500/10 text-sky-400 border-sky-500/20",
@@ -123,7 +124,8 @@ export default function Copilot() {
           <div className="px-4 pb-2 text-[10px] text-gray-600">{t("copilot.aiCanMakeMistakesDoubleCheck")}</div>
         </Card>
 
-        {/* Actions */}
+        {/* Actions — Medium plan and up */}
+        <PlanGate feature="copilot_actions">
         <Card className="p-0 overflow-hidden" data-testid="copilot-actions">
           <div className="px-4 py-3 border-b border-[#222838] flex items-center justify-between gap-2">
             <div className="text-xs uppercase tracking-wider text-gray-500">{t("copilot.proposedActions")}</div>
@@ -159,6 +161,7 @@ export default function Copilot() {
               </div>)}
           </div>
         </Card>
+        </PlanGate>
       </div>
     </div>;
 }

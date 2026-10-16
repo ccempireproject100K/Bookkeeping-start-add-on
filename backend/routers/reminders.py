@@ -11,6 +11,7 @@ from pydantic import BaseModel
 from db import db
 from lib.base import Scoped, new_id, now_iso, today_str
 from lib.auth import require, get_current_user
+from lib.plans import require_feature
 
 router = APIRouter(prefix="/reminders", tags=["reminders"])
 
@@ -84,7 +85,7 @@ async def overdue(user: dict = Depends(require("ledger:read"))):
     return out
 
 
-@router.post("/draft")
+@router.post("/draft", dependencies=[Depends(require_feature("collections_automation"))])
 async def draft(body: DraftIn, user: dict = Depends(require("ops:manage"))):
     """Generate (or echo back) reminder text for an invoice — nothing is saved."""
     inv = await inv_coll(user).find_one({"id": body.invoice_id})
@@ -95,7 +96,7 @@ async def draft(body: DraftIn, user: dict = Depends(require("ops:manage"))):
     return {"invoice_id": inv["id"], "client_name": inv["client_name"], "message": message}
 
 
-@router.post("/send")
+@router.post("/send", dependencies=[Depends(require_feature("collections_automation"))])
 async def send(body: SendIn, user: dict = Depends(require("ops:manage"))):
     """Mark a reminder as sent: stores the record and appends it to the invoice's
     reminder history. (No email is sent — copy the text into your own mail app.)"""

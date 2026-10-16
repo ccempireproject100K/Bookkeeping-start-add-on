@@ -10,7 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { Landmark, Plus } from "lucide-react";
 import { useTranslation } from "react-i18next";
-export default function TaxForecast() {
+import PlanGate from "@/components/PlanGate";
+function TaxForecastInner() {
   const {
     t
   } = useTranslation();
@@ -170,4 +171,8 @@ export default function TaxForecast() {
         </DialogContent>
       </Dialog>
     </div>;
+}
+
+export default function TaxForecast() {
+  return <PlanGate feature="advanced_reports"><TaxForecastInner /></PlanGate>;
 }

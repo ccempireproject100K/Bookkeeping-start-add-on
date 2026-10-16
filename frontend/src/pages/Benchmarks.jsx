@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Users, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import PlanGate from "@/components/PlanGate";
 const POS_CLS = {
   above: "text-emerald-400",
   typical: "text-amber-400",
@@ -21,7 +22,7 @@ const POS_TXT = {
   typical: "In the typical range",
   below: "Below most shops"
 };
-export default function Benchmarks() {
+function BenchmarksInner() {
   const {
     t
   } = useTranslation();
@@ -110,4 +111,8 @@ export default function Benchmarks() {
       </div>
       <p className="text-[11px] text-gray-600">{t("benchmarks.benchmarksAreAggregatesMedianQuartilesFrom")}</p>
     </div>;
+}
+
+export default function Benchmarks() {
+  return <PlanGate feature="advanced_reports"><BenchmarksInner /></PlanGate>;
 }

@@ -14,10 +14,11 @@ from fastapi import APIRouter, Depends, Query
 from db import db
 from lib import ledger as L
 from lib.auth import get_current_user
+from lib.plans import require_feature
 from lib.base import Scoped, cents_to_dollars, today_str
 from lib.memberships import memberships
 
-router = APIRouter(prefix="/entities", tags=["entities"])
+router = APIRouter(prefix="/entities", tags=["entities"], dependencies=[Depends(require_feature("multi_entity"))])
 
 
 def _owned(user) -> list:

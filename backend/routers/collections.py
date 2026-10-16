@@ -25,6 +25,7 @@ from pydantic import BaseModel
 from db import db
 from lib.audit import audit
 from lib.auth import require
+from lib.plans import require_feature
 from lib.base import Scoped, new_id, now_iso, today_str
 from lib.mailer import send_email
 from lib import ledger as L
@@ -346,7 +347,7 @@ async def pipeline(user: dict = Depends(require("ledger:read"))):
             "count": len(rows), "rows": rows}
 
 
-@router.post("/autopilot/preview")
+@router.post("/autopilot/preview", dependencies=[Depends(require_feature("collections_automation"))])
 async def autopilot_preview(user: dict = Depends(require("ops:manage"))):
     cfg = await get_config(user)
     if not cfg["enabled"]:
@@ -366,7 +367,7 @@ async def autopilot_preview(user: dict = Depends(require("ops:manage"))):
     return {"actions": plan, "count": len(plan)}
 
 
-@router.post("/autopilot/run")
+@router.post("/autopilot/run", dependencies=[Depends(require_feature("collections_automation"))])
 async def autopilot_run(user: dict = Depends(require("ops:manage"))):
     cfg = await get_config(user)
     if not cfg["enabled"]:
