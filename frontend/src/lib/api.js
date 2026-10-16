@@ -9,6 +9,7 @@ export function errMsg(e) {
   if (d == null) return e?.message || "Something went wrong";
   if (typeof d === "string") return d;
   if (Array.isArray(d)) return d.map((x) => x.msg || JSON.stringify(x)).join(" ");
+  if (typeof d === "object") return d.message || d.detail || JSON.stringify(d);
   return String(d);
 }
 

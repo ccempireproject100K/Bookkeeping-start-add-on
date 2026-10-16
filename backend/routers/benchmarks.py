@@ -14,10 +14,11 @@ from pydantic import BaseModel
 from db import db
 from lib.audit import audit
 from lib.auth import require
+from lib.plans import require_feature
 from lib.base import Scoped, new_id, now_iso
 from lib.niches import get_pack
 
-router = APIRouter(prefix="/benchmarks", tags=["benchmarks"])
+router = APIRouter(prefix="/benchmarks", tags=["benchmarks"], dependencies=[Depends(require_feature("advanced_reports"))])
 
 MIN_POOL = 5  # k-anonymity floor
 
