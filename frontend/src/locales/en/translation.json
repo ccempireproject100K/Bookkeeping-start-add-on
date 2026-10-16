@@ -1132,6 +1132,7 @@
   "payroll.defaultFederalWithholdingEstimate": "Default federal withholding % (estimate)",
   "payroll.saveDefault": "Save default",
   "payroll.ficaIsAlways": "FICA is always",
+  "payroll.employerTaxEst": "Employer payroll tax (est.)",
   "payroll.estimate": "% (estimate).",
   "payroll.member": "Member",
   "payroll.hourlyHr": "Hourly $/hr",
