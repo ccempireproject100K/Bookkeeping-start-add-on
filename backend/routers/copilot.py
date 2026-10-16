@@ -30,9 +30,9 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
 from db import db
+from lib.pii import scrub_secrets
 from lib.base import Scoped, new_id, now_iso, today_str, cents_to_dollars, to_cents
 from lib.auth import require, get_current_user
-from lib.pii import scrub_secrets
 
 router = APIRouter(prefix="/copilot", tags=["copilot"])
 logger = logging.getLogger(__name__)
