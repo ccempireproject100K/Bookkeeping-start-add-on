@@ -38,6 +38,7 @@ def _can_approve(user) -> bool:
 class ClockInBody(BaseModel):
     notes: str = Field(default="", max_length=300)
     client_name: str = Field(default="", max_length=160)
+    job_id: Optional[str] = Field(default=None, max_length=64)  # optional job link
 
 
 class ManualEntryBody(BaseModel):
@@ -46,12 +47,14 @@ class ManualEntryBody(BaseModel):
     notes: str = Field(default="", max_length=300)
     client_name: str = Field(default="", max_length=160)
     billable: bool = True
+    job_id: Optional[str] = Field(default=None, max_length=64)  # optional job link
 
 
 def _out(d: dict) -> dict:
     return {k: d.get(k) for k in ("id", "user_id", "user_name", "date", "clock_in",
                                  "clock_out", "hours", "notes", "client_name", "billable",
-                                 "status", "approved_by", "approved_at", "closed_at", "created_at")}
+                                 "job_id", "status", "approved_by", "approved_at",
+                                 "closed_at", "created_at")}
 
 
 @router.post("/clock-in")
@@ -62,6 +65,7 @@ async def clock_in(body: ClockInBody, user: dict = Depends(require("time:manage"
         "id": new_id(), "user_id": user["id"], "user_name": user.get("name"),
         "date": today_str(), "clock_in": now_iso(), "clock_out": None, "hours": 0.0,
         "notes": body.notes, "client_name": body.client_name, "billable": True,
+        "job_id": body.job_id or None,
         "status": "open", "approved_by": None, "approved_at": None,
         "closed_at": None, "created_at": now_iso(),
     }
@@ -107,6 +111,7 @@ async def log_entry(body: ManualEntryBody, user: dict = Depends(require("time:ma
         "id": new_id(), "user_id": user["id"], "user_name": user.get("name"),
         "date": body.date, "clock_in": None, "clock_out": None, "hours": round(body.hours, 2),
         "notes": body.notes, "client_name": body.client_name, "billable": body.billable,
+        "job_id": body.job_id or None,
         "status": "logged", "approved_by": None, "approved_at": None,
         "closed_at": None, "created_at": now_iso(),
     }

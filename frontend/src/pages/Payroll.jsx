@@ -108,7 +108,7 @@ export default function Payroll() {
         user_id: id,
         name: m.name,
         pay_type: m.salary_monthly_cents > 0 ? "salary" : "hourly",
-        hours: parseFloat(r.hours) || 0,
+        hours: r.hours === "" ? null : (parseFloat(r.hours) || 0),
         rate: r.rate ? parseFloat(r.rate) : undefined,
         commission: parseFloat(r.commission) || 0
       };
@@ -297,7 +297,7 @@ export default function Payroll() {
                     <td className="py-2 text-gray-400 text-xs">{isSalary ? "Salary" : "Hourly"}</td>
                     <td className="py-2 text-right">{!isSalary && <Input type="number" step="0.25" min={0} value={r.hours || ""} onChange={e => setRow(m.id, {
                   hours: e.target.value
-                })} className="bg-[#0F1218] border-[#222838] w-24 font-mono text-right ml-auto" placeholder="0" />}</td>
+                })} className="bg-[#0F1218] border-[#222838] w-24 font-mono text-right ml-auto" placeholder="auto" title="Leave blank to pull approved time entries; type a number to override" />}</td>
                     <td className="py-2 text-right">{!isSalary && <Input type="number" step="0.01" min={0} value={r.rate || ""} onChange={e => setRow(m.id, {
                   rate: e.target.value
                 })} className="bg-[#0F1218] border-[#222838] w-24 font-mono text-right ml-auto" placeholder={centsToDollars(m.hourly_rate_cents)} />}</td>
