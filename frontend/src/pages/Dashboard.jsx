@@ -57,19 +57,35 @@ const TONE = {
   gray: "text-gray-200"
 };
 export default function Dashboard() {
+  const { t } = useTranslation();
   const [data, setData] = useState(null);
+  const [loadError, setLoadError] = useState(false);
+  const [retryKey, setRetryKey] = useState(0);
   useEffect(() => {
-    api.get("/dashboard").then(setData).catch(() => setData(false));
-  }, []);
+    setLoadError(false);
+    api.get("/dashboard").then(setData).catch(() => setLoadError(true));
+  }, [retryKey]);
+  if (loadError) return <div className="animate-rise" data-testid="dashboard-error">
+      <PageHeader title={t("dashboard.dashboard")} testid="dashboard-page" />
+      <Card className="p-8 text-center">
+        <p className="text-gray-300">{t("dashboard.loadError")}</p>
+        <button onClick={() => setRetryKey(k => k + 1)} data-testid="dashboard-retry"
+          className="mt-4 px-4 py-2 rounded-lg bg-amber-500/20 border border-amber-500/40 text-amber-300 hover:bg-amber-500/30">
+          {t("dashboard.retry")}
+        </button>
+      </Card>
+    </div>;
   if (!data) return <Loading />;
-  const t = data.tiles;
+  // tiles may be missing if the API returns an error/partial shape — default to {}
+  // so the page renders zeros instead of throwing.
+  const tiles = data.tiles || {};
   return <div className="animate-rise">
       <PageHeader title={t("dashboard.dashboard")} subtitle={`Ledger snapshot • as of ${fmtDate(data.as_of)}`} testid="dashboard-page" />
       <SetupChecklist />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {TILES.map(tile => {
-        const val = t[tile.key];
+        const val = tiles[tile.key];
         const tone = tile.tone === "auto" ? val >= 0 ? "emerald" : "rose" : tile.tone;
         return <Card key={tile.key} data-testid={tile.testid} className="hover:border-[#34404f] transition-colors">
               <div className="flex items-start justify-between">
