@@ -24,6 +24,7 @@ from lib.base import Scoped, new_id, now_iso, today_str, to_cents, cents_to_doll
 from lib.auth import require, get_current_user
 from lib import ledger as L
 from lib import posting as P
+from lib import timeutil as T
 
 router = APIRouter(prefix="/payroll", tags=["payroll"])
 
@@ -195,7 +196,9 @@ class RunItemIn(BaseModel):
     user_id: Optional[str] = None
     name: Optional[str] = None
     pay_type: Optional[str] = Field(default=None, pattern=r"^(hourly|salary)$")
-    hours: float = Field(default=0, ge=0)
+    # None => pre-fill from approved time entries for the pay period (hourly only).
+    # Any explicit number (including 0) is a manual override and wins.
+    hours: Optional[float] = Field(default=None, ge=0)
     rate: Optional[float] = Field(default=None, ge=0)          # $/hr override
     amount: Optional[float] = Field(default=None, ge=0)        # salary $ per period override
     commission: float = Field(default=0, ge=0)                 # extra commission $ this period
@@ -225,13 +228,43 @@ async def _default_fed_pct(user):
     return (doc or {}).get("default_fed_withholding_pct", 0) or 0
 
 
-def _build_item(member, frequency, inp: RunItemIn, default_fed_pct):
+async def _fetch_period_entries(user, user_id: str, start: str, end: str):
+    """Approved time entries for one staffer inside the pay period.
+
+    Tenant-scoped via Scoped; only approved/closed entries (see lib.timeutil).
+    """
+    return await Scoped(db.time_entries, user["tenant_id"]).find_list(
+        {"user_id": user_id, "status": {"$in": list(T.APPROVED_STATUSES)},
+         "date": {"$gte": start, "$lte": end}},
+        sort=[("date", 1)], limit=5000)
+
+
+async def _resolve_hours(user, inp: RunItemIn, member, period_start: str, period_end: str):
+    """Resolve an item's hours: explicit hours win; otherwise (hourly staff only)
+    pre-fill from approved time entries in the pay period.
+
+    Returns (hours, hours_source, time_entry_ids).
+    """
+    if inp.hours is not None:
+        return inp.hours, "manual", []
+    member = member or {}
+    pay_type = inp.pay_type or ("salary" if (member.get("salary_monthly_cents") or 0) > 0 else "hourly")
+    if pay_type != "hourly" or not inp.user_id:
+        return 0.0, "manual", []
+    entries = await _fetch_period_entries(user, inp.user_id, period_start, period_end)
+    hours, ids = T.period_hours(entries, inp.user_id, period_start, period_end)
+    return hours, "time_entries", ids
+
+
+def _build_item(member, frequency, inp: RunItemIn, default_fed_pct,
+                hours_source="manual", time_entry_ids=None):
     member = member or {}
     name = inp.name or member.get("name") or "Unnamed"
     pay_type = inp.pay_type or ("salary" if (member.get("salary_monthly_cents") or 0) > 0 else "hourly")
+    hours = inp.hours if inp.hours is not None else 0.0
     rate_cents = to_cents(inp.rate) if inp.rate is not None else (member.get("hourly_rate_cents") or 0)
     if pay_type == "hourly":
-        wage_cents = int((Decimal(rate_cents) * Decimal(str(inp.hours)))
+        wage_cents = int((Decimal(rate_cents) * Decimal(str(hours)))
                          .quantize(Decimal("1"), rounding=ROUND_HALF_UP))
     else:
         if inp.amount is not None:
@@ -269,7 +302,8 @@ def _build_item(member, frequency, inp: RunItemIn, default_fed_pct):
 
     earnings = []
     if pay_type == "hourly":
-        earnings.append({"label": f"Hourly — {inp.hours}h × ${cents_to_dollars(rate_cents):.2f}/hr",
+        src_note = " (from approved time)" if hours_source == "time_entries" else ""
+        earnings.append({"label": f"Hourly — {hours}h × ${cents_to_dollars(rate_cents):.2f}/hr{src_note}",
                          "amount_cents": wage_cents})
     else:
         earnings.append({"label": f"Salary ({frequency})", "amount_cents": wage_cents})
@@ -278,7 +312,9 @@ def _build_item(member, frequency, inp: RunItemIn, default_fed_pct):
 
     return {
         "id": new_id(), "user_id": inp.user_id, "name": name, "pay_type": pay_type,
-        "hours": inp.hours, "rate_cents": rate_cents, "commission_cents": commission_cents,
+        "hours": hours, "hours_source": hours_source,
+        "time_entry_ids": time_entry_ids or [],
+        "rate_cents": rate_cents, "commission_cents": commission_cents,
         "earnings": earnings, "gross_cents": gross, "deductions": deductions,
         "total_deductions_cents": total_ded, "net_cents": net,
     }
@@ -328,7 +364,12 @@ async def create_run(body: RunIn, user: dict = Depends(require("payroll:write"))
     for inp in raw_items:
         if inp.user_id and inp.user_id not in members and not inp.name:
             raise HTTPException(status_code=404, detail=f"Team member {inp.user_id} not found")
-        items.append(_build_item(members.get(inp.user_id), frequency, inp, default_fed))
+        member = members.get(inp.user_id)
+        hours, hours_source, entry_ids = await _resolve_hours(
+            user, inp, member, body.period_start, body.period_end)
+        resolved = inp.model_copy(update={"hours": hours})
+        items.append(_build_item(member, frequency, resolved, default_fed,
+                                 hours_source=hours_source, time_entry_ids=entry_ids))
 
     run_id = new_id()
     doc = {

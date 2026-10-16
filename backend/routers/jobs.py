@@ -10,6 +10,7 @@ from lib.base import Scoped, new_id, now_iso, today_str, to_cents, cents_to_doll
 from lib.auth import require, get_current_user
 from lib import ledger as L
 from lib import posting as P
+from lib import timeutil as T
 
 router = APIRouter(prefix="/jobs", tags=["jobs"])
 
@@ -29,7 +30,35 @@ def jobcosts(user):
 
 
 # ---------------- Profitability ----------------
-async def _profit(user, job):
+async def _team_rates(user):
+    """{user_id: hourly_rate_cents} for valuing time entries as labor."""
+    rows = await db.users.find(
+        {"tenant_id": user["tenant_id"]}, {"_id": 0, "id": 1, "pay_settings": 1}
+    ).to_list(500)
+    return {r["id"]: ((r.get("pay_settings") or {}).get("hourly_rate_cents") or 0)
+            for r in rows}
+
+
+async def _job_time_block(user, job, team_rates):
+    """Analytical labor from approved billable time entries linked to this job.
+
+    NOT posted to the ledger — shown alongside posted costs so shops can see
+    true labor without double-counting wages already posted via payroll or
+    manual labor cost entries.
+    """
+    entries = await Scoped(db.time_entries, user["tenant_id"]).find_list(
+        {"job_id": job["id"]}, sort=[("date", 1)], limit=5000)
+    tl = T.job_time_labor(entries, job["id"], team_rates or {})
+    return {
+        "time_labor_hours": tl["hours"],
+        "time_labor_cents": tl["cost_cents"],
+        "time_labor": cents_to_dollars(tl["cost_cents"]),
+        "time_entry_count": tl["entry_count"],
+        "time_labor_note": "Approved billable time entries linked to this job (analytical — not posted)",
+    }
+
+
+async def _profit(user, job, team_rates=None):
     tenant_id = user["tenant_id"]
     costs = await jobcosts(user).find_list({"job_id": job["id"]})
     actual_by_cat = {c: 0 for c in CATEGORIES}
@@ -52,10 +81,12 @@ async def _profit(user, job):
     margin = round(gp / actual_revenue * 100, 2) if actual_revenue else 0.0
     est_gp = est_rev - est_cost
     est_margin = round(est_gp / est_rev * 100, 2) if est_rev else 0.0
+    time_block = await _job_time_block(user, job, team_rates)
     return {
         "actual_revenue_cents": actual_revenue, "actual_cost_cents": actual_cost,
         "actual_by_category": {k: cents_to_dollars(v) for k, v in actual_by_cat.items()},
         "actual_by_category_cents": actual_by_cat,
+        **time_block,
         "gross_profit_cents": gp, "gross_margin_pct": margin,
         "estimated_revenue_cents": est_rev, "estimated_cost_cents": est_cost,
         "estimated_gp_cents": est_gp, "estimated_margin_pct": est_margin,
@@ -82,9 +113,10 @@ class JobBody(BaseModel):
 @router.get("")
 async def list_jobs(user: dict = Depends(get_current_user)):
     rows = await jobs(user).find_list(sort=[("created_at", -1)], limit=500)
+    rates = await _team_rates(user)
     out = []
     for j in rows:
-        p = await _profit(user, j)
+        p = await _profit(user, j, rates)
         out.append({**j, "profit": p})
     return out
 
@@ -92,7 +124,8 @@ async def list_jobs(user: dict = Depends(get_current_user)):
 @router.get("/reports/dashboard")
 async def job_dashboard(user: dict = Depends(require("ledger:read"))):
     rows = await jobs(user).find_list(sort=[("created_at", -1)], limit=1000)
-    enriched = [{**j, "profit": await _profit(user, j)} for j in rows]
+    rates = await _team_rates(user)
+    enriched = [{**j, "profit": await _profit(user, j, rates)} for j in rows]
 
     def card(j):
         p = j["profit"]
@@ -136,7 +169,8 @@ async def job_dashboard(user: dict = Depends(require("ledger:read"))):
 @router.get("/reports/profitability")
 async def profitability_report(group_by: str = "job", user: dict = Depends(require("ledger:read"))):
     rows = await jobs(user).find_list(sort=[("created_at", -1)], limit=1000)
-    enriched = [{**j, "profit": await _profit(user, j)} for j in rows]
+    rates = await _team_rates(user)
+    enriched = [{**j, "profit": await _profit(user, j, rates)} for j in rows]
 
     if group_by == "job":
         items = [{
@@ -185,7 +219,7 @@ async def get_job(job_id: str, user: dict = Depends(get_current_user)):
     if not j:
         raise HTTPException(status_code=404, detail="Job not found")
     j = {k: v for k, v in j.items() if k != "_id"}
-    j["profit"] = await _profit(user, j)
+    j["profit"] = await _profit(user, j, await _team_rates(user))
     j["costs"] = await jobcosts(user).find_list({"job_id": job_id}, sort=[("created_at", -1)])
     j["invoices"] = await Scoped(db.invoices, user["tenant_id"]).find_list({"job_id": job_id}, sort=[("created_at", -1)])
     return j
