@@ -3,13 +3,18 @@
 The owner generates a link per invoice (from the API: POST /portal/links with
 invoice_id or customer_id). The customer opens it with NO login and can:
   - view that invoice (details + amounts only),
-  - pay it (posts a real journal entry and clears AR, same as an in-shop payment).
+  - pay it (posts a real journal entry and clears AR, same as an in-shop payment),
+  - pay by card via Stripe Checkout (POST /portal/checkout/{token}); the
+    signature-verified webhook (POST /portal/stripe/webhook) fulfills the
+    payment exactly once. Stripe is KEY-GATED: without STRIPE_SECRET_KEY the
+    checkout endpoint returns a graceful 503 (see STRIPE_SETUP.md).
 
 Links are random tokens (secrets.token_urlsafe); only the SHA-256 hash is stored
 in the `portal_links` collection along with the expiry. Invalid/expired/revoked
 tokens -> 404. The public endpoints are intentionally unauthenticated.
 """
 import hashlib
+import logging
 import secrets
 from datetime import datetime, timedelta, timezone
 
@@ -29,6 +34,7 @@ from lib.currencies import get_base_currency, to_minor_units
 from lib.mailer import send_email
 
 router = APIRouter(prefix="/portal", tags=["portal"])
+logger = logging.getLogger(__name__)
 
 DEFAULT_TTL_HOURS = 24 * 7  # 7 days
 
@@ -323,7 +329,11 @@ async def portal_view(token: str):
     if not inv:
         raise HTTPException(status_code=404, detail="Invoice not found")
     tenant = await db.tenants.find_one({"id": link["tenant_id"]}, {"_id": 0, "name": 1})
-    return {"business": (tenant or {}).get("name", ""), "invoice": _strip_invoice(inv)}
+    # Card payments are key-gated (see the Stripe section below). The
+    # publishable key is safe to expose — it is public by design.
+    return {"business": (tenant or {}).get("name", ""), "invoice": _strip_invoice(inv),
+            "card_payments_enabled": _stripe_configured(),
+            "stripe_publishable_key": _stripe_cfg()[1] or None}
 
 
 class PortalPayIn(BaseModel):
@@ -389,32 +399,62 @@ async def portal_pay(token: str, body: PortalPayIn):
 
 
 # ---------------------------------------------------------------- Stripe card checkout (live payments)
+#
+# Setup (env vars; see repo-root STRIPE_SETUP.md):
+#   STRIPE_SECRET_KEY       - from the Stripe dashboard (sk_test_… / sk_live_…)
+#   STRIPE_PUBLISHABLE_KEY  - public key (pk_…); exposed to the portal page
+#   STRIPE_WEBHOOK_SECRET   - whsec_… for the /portal/stripe/webhook endpoint
+#
+# Key-gated like Plaid (routers/bankfeed.py): until STRIPE_SECRET_KEY is set,
+# checkout returns a graceful 503 and the portal page shows "card payments
+# not configured" instead of a dead button. Keys are NEVER hardcoded and
+# NEVER logged — log lines carry amounts and ids only.
 
 
 class PortalCheckoutIn(BaseModel):
     origin_url: str = ""  # e.g. https://books.example.com — used for success/cancel URLs
 
 
+def _stripe_cfg():
+    secret = (os.environ.get("STRIPE_SECRET_KEY") or "").strip()
+    publishable = (os.environ.get("STRIPE_PUBLISHABLE_KEY") or "").strip()
+    webhook_secret = (os.environ.get("STRIPE_WEBHOOK_SECRET") or "").strip()
+    return secret, publishable, webhook_secret
+
+
 def _stripe_configured() -> bool:
-    key = os.environ.get("STRIPE_SECRET_KEY") or ""
-    return bool(key) and key != "sk_test_emergent"
+    return bool(_stripe_cfg()[0])
+
+
+def _require_stripe() -> str:
+    secret = _stripe_cfg()[0]
+    if not secret:
+        raise HTTPException(
+            status_code=503,
+            detail="Card payments are not configured. Set STRIPE_SECRET_KEY to enable them (see STRIPE_SETUP.md).")
+    return secret
+
+
+def _stripe():
+    """Lazily import + configure the Stripe SDK. Call ONLY after the
+    key-gate has passed — importing before the config check (the old bug)
+    turned every unconfigured checkout call into a 500."""
+    import stripe
+    stripe.api_key = _stripe_cfg()[0]
+    return stripe
 
 
 @router.post("/checkout/{token}")
 async def portal_checkout(token: str, body: PortalCheckoutIn, request: Request):
     """Public: create a Stripe Checkout session for the invoice's balance.
 
-    The customer pays on Stripe; the `checkout.session.completed` webhook
-    fulfills it (ledger entry + invoice totals). Idempotent-ish: creating
-    another session for the same invoice just makes another link — the
-    fulfill step clamps to the remaining balance exactly once per session.
+    The customer pays on Stripe; the signature-verified webhook fulfills it
+    (ledger entry + invoice totals) exactly once per session. Creating
+    another session for the same invoice just makes another payment link —
+    fulfillment clamps to the remaining balance.
     """
-    import stripe
-    if not _stripe_configured():
-        raise HTTPException(
-            status_code=501,
-            detail="Card payments aren't connected yet — ask the business for another way to pay.")
-    stripe.api_key = os.environ.get("STRIPE_SECRET_KEY")
+    _require_stripe()  # 503 BEFORE any SDK import when keys are absent
+    stripe = _stripe()
     link = await _lookup_link(token)
     tid = link["tenant_id"]
     inv = await db.invoices.find_one({"tenant_id": tid, "id": link["invoice_id"]})
@@ -457,7 +497,11 @@ async def portal_checkout(token: str, body: PortalCheckoutIn, request: Request):
                       "invoice_id": inv["id"], "token_hash": _digest(token)},
         )
     except Exception as e:
-        raise HTTPException(status_code=502, detail=f"Card payment unavailable: {e}")
+        # Log the SDK error server-side; never echo provider internals
+        # (or anything key-adjacent) to an unauthenticated caller.
+        logger.warning("stripe checkout create failed invoice=%s amount=%s %s: %s",
+                       inv["id"], stripe_amount, stripe_currency, type(e).__name__)
+        raise HTTPException(status_code=502, detail="Card payment unavailable — please try again or use another payment method.")
     await db.payment_transactions.insert_one({
         "session_id": session.id, "tenant_id": tid, "kind": "portal_invoice",
         "invoice_id": inv["id"], "token_hash": _digest(token),
@@ -465,6 +509,8 @@ async def portal_checkout(token: str, body: PortalCheckoutIn, request: Request):
         "status": "initiated", "payment_status": "pending", "fulfilled": False,
         "created_at": now_iso(), "updated_at": now_iso(),
     })
+    logger.info("stripe checkout created session=%s invoice=%s amount=%s %s",
+                session.id, inv["id"], stripe_amount, stripe_currency)
     return {"checkout_url": session.url, "session_id": session.id}
 
 
@@ -521,3 +567,60 @@ async def fulfill_portal_invoice(session_id: str) -> None:
         {"session_id": session_id},
         {"$set": {"fulfilled": not err, "fulfilling": False, "error": err,
                   "updated_at": now_iso()}})
+
+
+async def _mark_session_paid(session) -> None:
+    """Record a verified paid Checkout session and fulfill it exactly once.
+
+    Shared by `checkout.session.completed` (immediate payment methods) and
+    `checkout.session.async_payment_succeeded` (delayed methods, where the
+    completed event fires while payment_status is still 'unpaid')."""
+    session_id = session["id"]
+    metadata = session.get("metadata") or {}
+    if metadata.get("kind") != "portal_invoice":
+        return  # not ours — some other integration on the same Stripe account
+    if session.get("payment_status") != "paid":
+        logger.info("stripe session=%s not yet paid (status=%s); awaiting async success",
+                    session_id, session.get("payment_status"))
+        return
+    await db.payment_transactions.update_one(
+        {"session_id": session_id},
+        {"$set": {"payment_status": "paid", "status": "paid",
+                  "amount_total": session.get("amount_total"),
+                  "updated_at": now_iso()}})
+    logger.info("stripe session=%s paid amount_total=%s currency=%s",
+                session_id, session.get("amount_total"), session.get("currency"))
+    await fulfill_portal_invoice(session_id)
+
+
+@router.post("/stripe/webhook")
+async def stripe_webhook(request: Request):
+    """Public (Stripe server-to-server): the ONLY unauthenticated write
+    surface in this integration, so signature verification is mandatory —
+    the raw body + Stripe-Signature header are checked against
+    STRIPE_WEBHOOK_SECRET before anything is trusted. Without the secret
+    the endpoint refuses (503): an unverifiable webhook must never move
+    money. Stripe retries non-2xx, and fulfillment is exactly-once, so
+    duplicate deliveries are safe."""
+    _, _, webhook_secret = _stripe_cfg()
+    if not webhook_secret:
+        raise HTTPException(
+            status_code=503,
+            detail="Stripe webhook is not configured. Set STRIPE_WEBHOOK_SECRET (see STRIPE_SETUP.md).")
+    stripe = _stripe()
+    payload = await request.body()
+    sig_header = request.headers.get("stripe-signature", "")
+    try:
+        event = stripe.Webhook.construct_event(payload, sig_header, webhook_secret)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid webhook payload")
+    except stripe.error.SignatureVerificationError:
+        logger.warning("stripe webhook signature verification failed")
+        raise HTTPException(status_code=400, detail="Invalid webhook signature")
+    if event["type"] in ("checkout.session.completed",
+                         "checkout.session.async_payment_succeeded"):
+        await _mark_session_paid(event["data"]["object"])
+    else:
+        logger.info("stripe webhook ignored event type=%s id=%s",
+                    event["type"], event.get("id"))
+    return {"received": True}
