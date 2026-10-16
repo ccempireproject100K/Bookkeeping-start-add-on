@@ -62,7 +62,7 @@ export default function InviteAccept() {
   return <div className="min-h-screen flex items-center justify-center p-6 app-bg">
       <div className="w-full max-w-sm animate-rise">
         <div className="flex items-center gap-3 mb-8">
-          <div className="w-9 h-9 rounded-lg barber-pole" />
+          <div className="w-9 h-9 rounded-lg brand-mark" />
           <span className="font-display font-bold text-lg text-gray-50">{t("inviteaccept.workspaceInvite")}</span>
         </div>
 

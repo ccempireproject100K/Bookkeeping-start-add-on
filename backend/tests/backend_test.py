@@ -4,13 +4,13 @@ import pytest
 import requests
 from datetime import datetime, timezone
 
-BASE_URL = os.environ.get("REACT_APP_BACKEND_URL", "https://barber-books-6.preview.emergentagent.com").rstrip("/")
+BASE_URL = os.environ.get("REACT_APP_BACKEND_URL", "").rstrip("/")
 API = f"{BASE_URL}/api"
 
 OWNER = {"email": "onelovellc@outlook.com", "password": "Owner123!"}
 ACCT = {"email": "accountant@fadeco.com", "password": "Books123!"}
 BOOK = {"email": "bookkeeper@fadeco.com", "password": "Books123!"}
-BARBER = {"email": "marcus@fadeco.com", "password": "Barber123!"}
+BARBER = {"email": "marcus@fadeco.com", "password": "Staff123!"}
 SHARP = {"email": "owner@sharplines.com", "password": "Owner123!"}
 
 

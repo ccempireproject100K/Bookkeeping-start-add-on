@@ -66,6 +66,6 @@ h1, h2, h3, h4, .font-display { font-family: 'Outfit', sans-serif; }
 }
 .animate-rise { animation: rise 0.5s cubic-bezier(0.22,1,0.36,1) both; }
 
-.barber-pole {
-  background: repeating-linear-gradient(45deg, #DC2626 0 8px, #ffffff 8px 16px, #2563EB 16px 24px, #ffffff 24px 32px);
+.brand-mark {
+  background: linear-gradient(135deg, #f59e0b 0%, #b45309 60%, #78350f 100%);
 }

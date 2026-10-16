@@ -24,7 +24,7 @@ const DEMOS = [{
 }, {
   role: "Technician",
   email: "marcus@fadeco.com",
-  password: "Barber123!"
+  password: "Staff123!"
 }];
 export default function Login() {
   const {
@@ -88,7 +88,7 @@ export default function Login() {
         <img src="https://images.unsplash.com/photo-1698479603408-1a66a6d9e80f?crop=entropy&cs=srgb&fm=jpg&q=85&w=1400" alt={t("login.hvacEquipment")} className="absolute inset-0 w-full h-full object-cover opacity-30" />
         <div className="absolute inset-0 bg-gradient-to-br from-[#0B0D10] via-[#0B0D10]/85 to-[#0B0D10]/40" />
         <div className="relative flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg barber-pole" />
+          <div className="w-10 h-10 rounded-lg brand-mark" />
           <span className="font-display font-bold text-xl">{t("login.mindAtEaseSolutionsHVAC")}</span>
         </div>
         <div className="relative max-w-md">
@@ -103,7 +103,7 @@ export default function Login() {
       <div className="flex items-center justify-center p-6 sm:p-10">
         <div className="w-full max-w-sm animate-rise">
           <div className="lg:hidden flex items-center gap-3 mb-8">
-            <div className="w-9 h-9 rounded-lg barber-pole" />
+            <div className="w-9 h-9 rounded-lg brand-mark" />
             <span className="font-display font-bold text-lg">{t("login.mindAtEaseHVAC")}</span>
           </div>
           <h2 className="font-display text-2xl font-bold mb-1">{t("login.signIn")}</h2>
