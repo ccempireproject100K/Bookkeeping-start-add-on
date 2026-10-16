@@ -782,6 +782,8 @@
   "customers.statement": "Estado de cuenta",
   "customers.serviceAddress": "Dirección de servicio",
   "dashboard.source": "Origen",
+  "dashboard.loadError": "No se pudo cargar el panel. Inténtalo de nuevo.",
+  "dashboard.retry": "Reintentar",
   "estimates.recurringTemplateCreated": "Plantilla recurrente creada",
   "estimates.recurringInvoices": "Facturas recurrentes",
   "expenses.remaining": "Restante",
