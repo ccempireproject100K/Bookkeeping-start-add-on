@@ -12,6 +12,7 @@ import { Plus, Trash2, Send, FileCheck2, AlertTriangle } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import SalesTaxTab from "@/components/SalesTaxTab";
 import { useTranslation } from "react-i18next";
+import PlanGate from "@/components/PlanGate";
 const ENTITY_LABEL = {
   individual: "Individual",
   sole_prop: "Sole proprietor",
@@ -374,8 +375,8 @@ export default function Tax() {
                         description: ""
                       });
                     }} data-testid={`tax-pay-${c.id}`}>{t("tax.recordPayment")}</Button>
-                      {c.needs_1099 && !c.efile?.submission_id && <Button size="sm" className="h-7 bg-amber-600 hover:bg-amber-500 text-black" onClick={() => efile(c)} disabled={!tb?.configured} title={tb?.configured ? "Create 1099-NEC draft in TaxBandits" : "Connect TaxBandits first"} data-testid={`tax-efile-${c.id}`}>
-                          <Send size={12} className="mr-1" /> {t("tax.eFile")}</Button>}
+                      {c.needs_1099 && !c.efile?.submission_id && <PlanGate feature="prep_1099" inline><Button size="sm" className="h-7 bg-amber-600 hover:bg-amber-500 text-black" onClick={() => efile(c)} disabled={!tb?.configured} title={tb?.configured ? "Create 1099-NEC draft in TaxBandits" : "Connect TaxBandits first"} data-testid={`tax-efile-${c.id}`}>
+                          <Send size={12} className="mr-1" /> {t("tax.eFile")}</Button></PlanGate>}
                       <button onClick={() => removeContractor(c)} className="text-gray-600 hover:text-rose-400 px-1" data-testid={`tax-del-${c.id}`}><Trash2 size={14} /></button>
                     </div>
                   </td>}
