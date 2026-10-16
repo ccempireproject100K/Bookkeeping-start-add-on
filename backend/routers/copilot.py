@@ -32,6 +32,7 @@ from pydantic import BaseModel, Field
 from db import db
 from lib.base import Scoped, new_id, now_iso, today_str, cents_to_dollars, to_cents
 from lib.auth import require, get_current_user
+from lib.pii import scrub_secrets
 
 router = APIRouter(prefix="/copilot", tags=["copilot"])
 logger = logging.getLogger(__name__)
@@ -220,7 +221,7 @@ async def _llm_chat(system: str, user_text: str) -> str:
         logger.error("copilot LLM request failed: %s", exc)
         raise HTTPException(502, "The AI service could not be reached — try again in a minute")
     if r.status_code != 200:
-        logger.error("copilot LLM error %s: %s", r.status_code, r.text[:300])
+        logger.error("copilot LLM error %s: %s", r.status_code, scrub_secrets(r.text[:300]))
         raise HTTPException(502, "The AI service returned an error — try again in a minute")
     try:
         return r.json()["choices"][0]["message"]["content"].strip()

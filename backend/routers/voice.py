@@ -20,6 +20,7 @@ from fastapi.responses import FileResponse
 from db import db
 from lib.audit import audit
 from lib.auth import get_current_user
+from lib.pii import scrub_secrets
 from lib.base import new_id, now_iso
 from routers.copilot import _snapshot, _llm_chat, _llm_key, CHAT_SYSTEM
 
@@ -39,7 +40,7 @@ def _transcribe(path: Path, key: str) -> str:
                           files={"file": (path.name, f, "audio/webm")},
                           data={"model": "whisper-1"}, timeout=90)
     if r.status_code != 200:
-        logger.error("whisper error %s: %s", r.status_code, r.text[:300])
+        logger.error("whisper error %s: %s", r.status_code, scrub_secrets(r.text[:300]))
         raise HTTPException(502, "Speech transcription failed — try again")
     return r.json().get("text", "").strip()
 
@@ -52,7 +53,7 @@ def _speak(text: str, key: str, out: Path):
                             "input": text[:4000]},
                       timeout=90)
     if r.status_code != 200:
-        logger.error("tts error %s: %s", r.status_code, r.text[:300])
+        logger.error("tts error %s: %s", r.status_code, scrub_secrets(r.text[:300]))
         raise RuntimeError("tts failed")
     out.write_bytes(r.content)
 

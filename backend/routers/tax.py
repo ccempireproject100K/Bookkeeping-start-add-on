@@ -24,7 +24,7 @@ from pydantic import BaseModel, Field
 from db import db
 from lib.base import Scoped, new_id, now_iso, to_cents, cents_to_dollars
 from lib.auth import require, get_current_user
-from lib.pii import last4, pii_decrypt, pii_encrypt
+from lib.pii import last4, pii_decrypt, pii_encrypt, scrub_secrets
 
 router = APIRouter(prefix="/tax", tags=["tax"])
 
@@ -329,14 +329,14 @@ def _tb_token_sync(conf: dict) -> str:
         "user_token": conf["TAXBANDITS_USER_TOKEN"]})
     if r.status_code != 200:
         raise HTTPException(status_code=502,
-                            detail=f"TaxBandits auth failed ({r.status_code}): {r.text[:300]}")
+                            detail=f"TaxBandits auth failed ({r.status_code}): {scrub_secrets(r.text[:300])}")
     try:
         token = r.json().get("AccessToken") or r.json().get("access_token")
     except Exception:
         token = None
     if not token:
         raise HTTPException(status_code=502,
-                            detail=f"TaxBandits auth returned no token: {r.text[:300]}")
+                            detail=f"TaxBandits auth returned no token: {scrub_secrets(r.text[:300])}")
     return token
 
 

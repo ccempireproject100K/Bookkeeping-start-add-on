@@ -21,6 +21,7 @@ from pydantic import BaseModel
 from db import db
 from lib.audit import audit
 from lib.auth import require, get_current_user
+from lib.pii import scrub_secrets
 from lib.base import Scoped, new_id, now_iso, today_str, to_cents
 from lib import ledger as L
 from lib import posting as P
@@ -191,7 +192,7 @@ async def scan_receipt(rid: str, user: dict = Depends(require("ops:manage"))):
         logger.error("receipt vision request failed: %s", exc)
         raise HTTPException(502, "The AI service could not be reached — enter it manually.")
     if r.status_code != 200:
-        logger.error("receipt vision error %s: %s", r.status_code, r.text[:300])
+        logger.error("receipt vision error %s: %s", r.status_code, scrub_secrets(r.text[:300]))
         raise HTTPException(502, f"Vision API error ({r.status_code})")
     try:
         text = r.json()["choices"][0]["message"]["content"]
