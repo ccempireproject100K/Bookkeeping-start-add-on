@@ -676,6 +676,8 @@
   "dashboard.number": "Number",
   "dashboard.date": "Date",
   "dashboard.source": "Source",
+  "dashboard.loadError": "Couldn't load the dashboard. Please try again.",
+  "dashboard.retry": "Retry",
   "dashboard.memo": "Memo",
   "dashboard.amount": "Amount",
   "dashboard.noEntriesYet": "No entries yet",
