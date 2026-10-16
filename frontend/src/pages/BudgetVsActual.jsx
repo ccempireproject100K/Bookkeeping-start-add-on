@@ -66,7 +66,8 @@ export default function BudgetVsActual() {
           <thead><tr className="text-xs uppercase tracking-wider text-gray-500 border-b border-[#222838]">
             <th className="px-4 py-3 text-left font-medium">{t("budgetvsactual.account")}</th><th className="px-4 py-3 text-left font-medium">{t("budgetvsactual.type")}</th>
             <th className="px-4 py-3 text-right font-medium">{t("budgetvsactual.budget")}</th><th className="px-4 py-3 text-right font-medium">{t("budgetvsactual.actual")}</th>
-            <th className="px-4 py-3 text-right font-medium">{t("budgetvsactual.variance")}</th></tr></thead>
+            <th className="px-4 py-3 text-right font-medium">{t("budgetvsactual.variance")}</th>
+            <th className="px-4 py-3 text-right font-medium">Var %</th></tr></thead>
           <tbody>
             {data.rows.map(r => <tr key={r.code} className="border-b border-[#171c26] hover:bg-[#161b25]">
                 <td className="px-4 py-3 text-gray-100">{r.code} · {r.name}</td>
@@ -74,8 +75,9 @@ export default function BudgetVsActual() {
                 <td className="px-4 py-3 text-right font-mono text-gray-400">{dollars(r.budget)}</td>
                 <td className="px-4 py-3 text-right font-mono text-gray-200">{dollars(r.actual)}</td>
                 <td className={`px-4 py-3 text-right font-mono ${r.variance_cents < 0 ? "text-rose-400" : "text-emerald-400"}`}>{dollars(r.variance)}</td>
+                <td className={`px-4 py-3 text-right font-mono ${r.variance_pct == null ? "text-gray-600" : r.variance_cents < 0 ? "text-rose-400" : "text-emerald-400"}`}>{r.variance_pct == null ? "—" : `${r.variance_pct}%`}</td>
               </tr>)}
-            {data.rows.length === 0 && <tr><td colSpan={5} className="px-5 py-12 text-center text-gray-500">{t("budgetvsactual.noRevenueExpenseActivityOrBudgets")} {year}.</td></tr>}
+            {data.rows.length === 0 && <tr><td colSpan={6} className="px-5 py-12 text-center text-gray-500">{t("budgetvsactual.noRevenueExpenseActivityOrBudgets")} {year}.</td></tr>}
           </tbody>
         </table>
       </Card>

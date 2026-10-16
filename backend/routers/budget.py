@@ -42,9 +42,13 @@ def expenses(user):
 
 
 def _period(p: str) -> str:
+    """Validate a budget period: monthly YYYY-MM or quarterly YYYY-QN (Q1-Q4)."""
     if len(p) == 7 and p[4] == "-" and p[:4].isdigit() and p[5:].isdigit() and 1 <= int(p[5:]) <= 12:
         return p
-    raise HTTPException(status_code=400, detail="period must be YYYY-MM")
+    if (len(p) == 7 and p[:4].isdigit() and p[4] == "-" and p[5] == "Q"
+            and p[6] in "1234"):
+        return p
+    raise HTTPException(status_code=400, detail="period must be YYYY-MM or YYYY-QN")
 
 
 def _add_months(d: date, n: int) -> date:
@@ -56,17 +60,33 @@ def _add_months(d: date, n: int) -> date:
     return date(y, m, min(d.day, last))
 
 
+def _period_range(p: str) -> tuple[str, str]:
+    """(inclusive start, exclusive end) YYYY-MM-DD dates covered by a period."""
+    p = _period(p)
+    if p[5] == "Q":  # YYYY-QN
+        year, q = int(p[:4]), int(p[6])
+        start = date(year, (q - 1) * 3 + 1, 1)
+        end = _add_months(start, 3)
+    else:  # YYYY-MM
+        start = date(int(p[:4]), int(p[5:]), 1)
+        end = _add_months(start, 1)
+    return start.isoformat(), end.isoformat()
+
+
 # ---------------------------------------------------------------- budgets
 
 @router.get("")
 async def get_budget(period: str = Query(...), user: dict = Depends(require("budget:read"))):
-    """Budget vs actuals for a month. Includes unbudgeted categories that had spend."""
+    """Budget vs actuals for a month (or quarter). Includes unbudgeted categories
+    that had spend. variance_cents = budgeted - actual (positive = under / favorable
+    for spend); variance_pct is null when nothing was budgeted (no div-by-zero)."""
     period = _period(period)
+    start, end = _period_range(period)
     rows = await budgets(user).find_list({"period": period}, limit=500)
     budgeted = {r["category"]: r for r in rows}
 
     actual: dict[str, int] = {}
-    cur = expenses(user).find({"expense_date": {"$gte": period + "-01", "$lt": period + "-32"}},
+    cur = expenses(user).find({"expense_date": {"$gte": start, "$lt": end}},
                               {"_id": 0, "category_name": 1, "category_code": 1, "amount_cents": 1})
     async for e in cur:
         cat = e.get("category_name") or e.get("category_code") or "Uncategorized"
@@ -77,16 +97,23 @@ async def get_budget(period: str = Query(...), user: dict = Depends(require("bud
         b = budgeted.get(cat, {})
         b_cents = b.get("amount_cents", 0)
         a_cents = actual.get(cat, 0)
+        var_cents = b_cents - a_cents
         out.append({
             "id": b.get("id"), "category": cat,
             "budgeted_cents": b_cents, "actual_cents": a_cents,
-            "remaining_cents": b_cents - a_cents,
+            "remaining_cents": var_cents,
+            "variance_cents": var_cents,
+            "variance_pct": round(var_cents / b_cents * 100, 1) if b_cents else None,
             "pct_used": round(a_cents / b_cents * 100, 1) if b_cents else (100.0 if a_cents else 0.0),
         })
     bt = sum(r["budgeted_cents"] for r in out)
     at = sum(r["actual_cents"] for r in out)
-    return {"period": period, "rows": out,
-            "totals": {"budgeted_cents": bt, "actual_cents": at, "remaining_cents": bt - at}}
+    vt = bt - at
+    return {"period": period, "granularity": "quarter" if period[5] == "Q" else "month",
+            "rows": out,
+            "totals": {"budgeted_cents": bt, "actual_cents": at, "remaining_cents": vt,
+                       "variance_cents": vt,
+                       "variance_pct": round(vt / bt * 100, 1) if bt else None}}
 
 
 @router.get("/categories")

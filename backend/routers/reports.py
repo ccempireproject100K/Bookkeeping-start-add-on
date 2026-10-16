@@ -125,10 +125,14 @@ async def budget_vs_actual(year: str, user: dict = Depends(require("ledger:read"
         actual = L._net_balance(c, v["debit"], v["credit"])
         budget = bmap.get(c, 0)
         variance = (actual - budget) if t == "revenue" else (budget - actual)
+        # variance_pct is null when nothing was budgeted -- never div-by-zero.
+        # Positive variance is favorable (revenue beat / expense under budget).
+        variance_pct = round(variance / budget * 100, 1) if budget else None
         rows.append({"code": c, "name": NAME_OF.get(c, c), "type": t,
                      "budget": cents_to_dollars(budget), "actual": cents_to_dollars(actual),
                      "budget_cents": budget, "actual_cents": actual,
-                     "variance": cents_to_dollars(variance), "variance_cents": variance})
+                     "variance": cents_to_dollars(variance), "variance_cents": variance,
+                     "variance_pct": variance_pct})
     return {"year": year, "rows": rows}
 
 
@@ -215,9 +219,11 @@ async def cash_flow_csv(date_from: Optional[str] = None, date_to: Optional[str] 
 @router.get("/budget-vs-actual.csv")
 async def bva_csv(year: str, user: dict = Depends(require("ledger:read"))):
     d = await budget_vs_actual(year, user)
-    rows = [[r["code"], r["name"], r["type"], f'{r["budget"]:.2f}', f'{r["actual"]:.2f}', f'{r["variance"]:.2f}']
+    rows = [[r["code"], r["name"], r["type"], f'{r["budget"]:.2f}', f'{r["actual"]:.2f}',
+             f'{r["variance"]:.2f}', "" if r["variance_pct"] is None else f'{r["variance_pct"]:.1f}']
             for r in d["rows"]]
-    return _csv_response(["Code", "Account", "Type", "Budget", "Actual", "Variance"], rows, f"budget_{year}.csv")
+    return _csv_response(["Code", "Account", "Type", "Budget", "Actual", "Variance", "VariancePct"],
+                         rows, f"budget_{year}.csv")
 
 
 @router.get("/income-by-customer.csv")
