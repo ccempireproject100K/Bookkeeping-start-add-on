@@ -56,6 +56,27 @@ export default function Budget() {
   } = useAuth();
   const canWrite = user?.role === "owner";
   const [period, setPeriod] = useState(new Date().toISOString().slice(0, 7));
+  const isQuarter = period.includes("Q");
+  const cy = new Date().getFullYear();
+  const quarterOpts = [];
+  for (let y = cy - 1; y <= cy + 1; y++) for (let q = 1; q <= 4; q++) quarterOpts.push(`${y}-Q${q}`);
+  const monthToQuarter = m => {
+    const [y, mo] = m.split("-").map(Number);
+    return `${y}-Q${Math.ceil(mo / 3)}`;
+  };
+  const quarterToMonth = p => {
+    const [y, q] = p.split("-Q").map(Number);
+    return `${y}-${String((q - 1) * 3 + 1).padStart(2, "0")}`;
+  };
+  const prevQuarter = p => {
+    let [y, q] = p.split("-Q").map(Number);
+    q -= 1;
+    if (q < 1) {
+      q = 4;
+      y -= 1;
+    }
+    return `${y}-Q${q}`;
+  };
   const [days, setDays] = useState(90);
   const [data, setData] = useState(null);
   const [cats, setCats] = useState([]);
@@ -112,9 +133,14 @@ export default function Budget() {
     }
   };
   const copy = async () => {
-    const [y, m] = period.split("-").map(Number);
-    const prev = new Date(y, m - 2, 1);
-    const from = `${prev.getFullYear()}-${String(prev.getMonth() + 1).padStart(2, "0")}`;
+    let from;
+    if (isQuarter) {
+      from = prevQuarter(period);
+    } else {
+      const [y, m] = period.split("-").map(Number);
+      const prev = new Date(y, m - 2, 1);
+      from = `${prev.getFullYear()}-${String(prev.getMonth() + 1).padStart(2, "0")}`;
+    }
     try {
       const r = await api.post("/budget/copy", {
         from_period: from,
@@ -130,8 +156,14 @@ export default function Budget() {
   const rows = data.rows || [];
   const t = data.totals || {};
   return <div className="animate-rise">
-      <PageHeader title={t("budget.budgetForecast")} subtitle="Monthly spending budgets with variance, plus a 30/60/90-day cash projection" testid="budget-page">
-        <Input type="month" value={period} onChange={e => setPeriod(e.target.value)} className="bg-[#0F1218] border-[#222838] w-40" data-testid="budget-period" />
+      <PageHeader title={t("budget.budgetForecast")} subtitle="Monthly or quarterly spending budgets with variance, plus a 30/60/90-day cash projection" testid="budget-page">
+        <div className="flex gap-1">
+          <Button size="sm" variant={!isQuarter ? "default" : "outline"} className={`h-9 ${!isQuarter ? "bg-amber-600 hover:bg-amber-500 text-black" : "border-[#222838]"}`} onClick={() => setPeriod(p => quarterToMonth(p))}>Monthly</Button>
+          <Button size="sm" variant={isQuarter ? "default" : "outline"} className={`h-9 ${isQuarter ? "bg-amber-600 hover:bg-amber-500 text-black" : "border-[#222838]"}`} onClick={() => setPeriod(p => monthToQuarter(p))}>Quarterly</Button>
+        </div>
+        {isQuarter ? <select value={period} onChange={e => setPeriod(e.target.value)} className="bg-[#0F1218] border border-[#222838] rounded-md h-9 px-3 text-sm text-gray-200" data-testid="budget-period-quarter">
+            {quarterOpts.map(q => <option key={q} value={q}>{q.replace("-", " ")}</option>)}
+          </select> : <Input type="month" value={period} onChange={e => setPeriod(e.target.value)} className="bg-[#0F1218] border-[#222838] w-40" data-testid="budget-period" />}
       </PageHeader>
 
       <Card className="p-0 overflow-hidden mb-6" data-testid="budget-table">
@@ -145,6 +177,7 @@ export default function Budget() {
             <th className="px-5 py-3 text-right font-medium">{t("budget.budgeted")}</th>
             <th className="px-5 py-3 text-right font-medium">{t("budget.actual")}</th>
             <th className="px-5 py-3 text-right font-medium">{t("budget.remaining")}</th>
+            <th className="px-5 py-3 text-right font-medium">Variance</th>
             <th className="px-5 py-3 text-left font-medium">{t("budget.used")}</th><th /></tr></thead>
           <tbody>
             {rows.map(r => <tr key={r.category} className="border-b border-[#171c26]" data-testid={`budget-row-${r.category}`}>
@@ -152,16 +185,22 @@ export default function Budget() {
                 <td className="px-5 py-3 text-right font-mono text-gray-300">{money(r.budgeted_cents)}</td>
                 <td className={`px-5 py-3 text-right font-mono ${r.pct_used > 100 ? "text-red-400 font-medium" : "text-gray-200"}`}>{money(r.actual_cents)}</td>
                 <td className={`px-5 py-3 text-right font-mono ${r.remaining_cents < 0 ? "text-red-400" : "text-gray-300"}`}>{money(r.remaining_cents)}</td>
+                <td className={`px-5 py-3 text-right font-mono ${r.variance_cents == null || r.variance_cents >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                  {money(r.variance_cents)}
+                  {r.variance_pct != null && <span className="text-xs text-gray-500"> ({r.variance_pct}%)</span>}
+                  {r.variance_pct == null && <span className="text-xs text-gray-500"> —</span>}
+                </td>
                 <td className="px-5 py-3"><div className="flex items-center gap-2"><VarianceBar pct={r.pct_used} /><span className="text-xs text-gray-500 font-mono">{r.pct_used}%</span></div></td>
                 <td className="px-5 py-3 text-right">{canWrite && r.id && <button onClick={() => del(r.id)} className="text-gray-600 hover:text-rose-400"><Trash2 size={14} /></button>}</td>
               </tr>)}
-            {rows.length === 0 && <tr><td colSpan={6} className="px-5 py-12 text-center text-gray-500">{t("budget.noBudgetsOrSpendingForThis")}</td></tr>}
+            {rows.length === 0 && <tr><td colSpan={7} className="px-5 py-12 text-center text-gray-500">{t("budget.noBudgetsOrSpendingForThis")}</td></tr>}
           </tbody>
           {rows.length > 0 && <tfoot><tr className="font-semibold text-gray-100">
               <td className="px-5 py-3">{t("budget.total")}</td>
               <td className="px-5 py-3 text-right font-mono">{money(t.budgeted_cents)}</td>
               <td className="px-5 py-3 text-right font-mono">{money(t.actual_cents)}</td>
               <td className="px-5 py-3 text-right font-mono">{money(t.remaining_cents)}</td>
+              <td className="px-5 py-3 text-right font-mono">{t.variance_pct != null ? <span className={t.variance_cents < 0 ? "text-red-400" : "text-emerald-400"}>{t.variance_pct}%</span> : "—"}</td>
               <td colSpan={2} />
             </tr></tfoot>}
         </table>
