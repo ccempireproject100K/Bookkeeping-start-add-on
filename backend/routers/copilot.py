@@ -21,7 +21,7 @@ No action invents amounts: every amount comes from an existing record
 (bank transaction, draft entry, invoice, bill).
 
 LLM config (env; same style as the dead new-style ai.py):
-  EMERGENT_LLM_KEY - API key for an OpenAI-compatible chat endpoint
+  AI_API_KEY       - API key for an OpenAI-compatible chat endpoint
   AI_MODEL         - model name (default: gpt-5-mini)
 
 If the key is missing, chat returns 503 with a setup hint. Everything else
@@ -275,11 +275,15 @@ async def _snapshot(user) -> dict:
 
 # ---------------- LLM (OpenAI-compatible, key-gated) ----------------
 def _llm_key() -> str:
-    key = os.environ.get("EMERGENT_LLM_KEY", "").strip()
+    # Canonical env name: AI_API_KEY. EMERGENT_LLM_KEY is the legacy name,
+    # still honored as a fallback so existing deployments keep working
+    # until the server env is renamed.
+    key = (os.environ.get("AI_API_KEY", "").strip()
+           or os.environ.get("EMERGENT_LLM_KEY", "").strip())
     if not key:
         raise HTTPException(
             503,
-            "AI is not configured. Set EMERGENT_LLM_KEY on the server to an "
+            "AI is not configured. Set AI_API_KEY on the server to an "
             "OpenAI-compatible API key to enable the copilot chat.")
     return key
 

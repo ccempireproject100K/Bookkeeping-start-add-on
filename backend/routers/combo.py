@@ -145,7 +145,10 @@ async def draft_followup(lead_id: str, user: dict = Depends(require("ops:manage"
         raise HTTPException(404, "Lead not found")
     recent = await _interactions(user).find_list({"lead_id": lead_id},
                                                  sort=[("created_at", -1)], limit=5)
-    key = os.environ.get("EMERGENT_LLM_KEY", "").strip()
+    # Canonical env name: AI_API_KEY (legacy EMERGENT_LLM_KEY still works
+    # as a fallback — same resolution as copilot._llm_key).
+    key = (os.environ.get("AI_API_KEY", "").strip()
+           or os.environ.get("EMERGENT_LLM_KEY", "").strip())
     if not key:
         return {"draft": _template_followup(lead), "ai": False}
     hist = "\n".join(f"- [{i['kind']}/{i['direction']}] {i['summary']}" for i in recent)

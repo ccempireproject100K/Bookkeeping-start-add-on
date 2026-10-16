@@ -1,7 +1,7 @@
 """Voice-first books: talk to your books, get a voice-note answer.
 
 POST /voice/ask — multipart: audio file (webm/mp3/wav/m4a, <= 10MB) and/or text.
-  1. Transcribe audio via Whisper (needs EMERGENT_LLM_KEY).
+  1. Transcribe audio via Whisper (needs AI_API_KEY).
   2. Answer with the copilot's grounded chat (workspace snapshot + LLM).
   3. Speak the answer back via TTS; audio served at /voice/audio/{file}.
 Without an LLM key, transcription and Q&A are unavailable (503 with hint),
@@ -64,7 +64,7 @@ async def ask(audio: Optional[UploadFile] = File(None),
               user: dict = Depends(get_current_user)):
     key = _llm_key()
     if not key:
-        raise HTTPException(503, "Voice books need EMERGENT_LLM_KEY (same key as the copilot chat)")
+        raise HTTPException(503, "Voice books need AI_API_KEY (same key as the copilot chat)")
     transcript = (text or "").strip()
     if audio is not None:
         if audio.content_type not in ALLOWED:
