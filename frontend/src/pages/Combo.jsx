@@ -236,7 +236,7 @@ export default function Combo() {
                     <Sparkles size={13} className="mr-1" /> {t("combo.draftFollowUp")}</Button>
                   {draft?.loading && <p className="text-xs text-gray-500">{t("combo.writing")}</p>}
                   {draft?.draft && <p className="text-xs bg-[#0F1218] border border-[#222838] rounded p-2.5 text-gray-300">{draft.draft}
-                    {!draft.ai && <span className="text-gray-600"> {t("combo.templateAddEMERGENTLLMKEYFor")}</span>}</p>}
+                    {!draft.ai && <span className="text-gray-600"> {t("combo.templateAddAIKeyFor")}</span>}</p>}
                 </div>}
               {canManage && detail.stage !== "quoted" && detail.stage !== "won" && <div className="border-t border-[#222838] pt-3">
                   <div className="text-sm font-medium mb-2">{t("combo.convertToEstimate")}</div>
