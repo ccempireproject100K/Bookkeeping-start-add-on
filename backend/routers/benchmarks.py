@@ -46,7 +46,7 @@ class OptInBody(BaseModel):
 
 
 @router.post("/opt-in")
-async def opt_in(body: OptInBody, user: dict = Depends(require("owner"))):
+async def opt_in(body: OptInBody, user: dict = Depends(require("settings:write"))):
     await db.tenants.update_one({"id": user["tenant_id"]},
                                 {"$set": {"benchmark_opt_in": body.opt_in}})
     await audit(user, "benchmarks.opt_in", "tenant", user["tenant_id"],

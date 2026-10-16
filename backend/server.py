@@ -24,7 +24,7 @@ from routers import (auth, ledger, products, pos, invoices, cashclose, dashboard
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("barbers_ledger")
 
-app = FastAPI(title="The Barber's Ledger")
+app = FastAPI(title="Mind at Ease Solutions — Books API")
 api_router = APIRouter(prefix="/api")
 
 

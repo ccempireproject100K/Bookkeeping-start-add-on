@@ -92,6 +92,7 @@ async def issue_invoice(body: InvoiceBody, user: dict = Depends(require("ops:man
         "tax_jurisdiction_id": jid,
         "status": "issued", "paid_cents": 0, "payments": [], "due_date": body.due_date,
         "terms": body.terms, "issue_entry": entry["number"], "created_at": now_iso(),
+        "issue_date": today_str(),  # accounting date; KPIs filter on this
     }
     await coll(user).insert_one(doc)
     doc.pop("_id", None)

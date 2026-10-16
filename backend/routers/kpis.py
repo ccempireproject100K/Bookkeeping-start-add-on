@@ -26,8 +26,12 @@ async def _compute(user, days: int = 90) -> dict:
     today = today_str()[:10]
     start = (date.fromisoformat(today) - timedelta(days=days)).isoformat()
 
+    # Invoices are stamped with issue_date at creation (see routers/invoices.py);
+    # the $or keeps legacy docs (issue_date missing) visible via created_at.
     invs = await Scoped(db.invoices, tid).find_list(
-        {"issue_date": {"$gte": start}}, limit=5000)
+        {"$or": [{"issue_date": {"$gte": start}},
+                 {"issue_date": None, "created_at": {"$gte": start}}]},
+        limit=5000)
     ests = await Scoped(db.estimates, tid).find_list(limit=2000)
     jobs = await Scoped(db.jobs, tid).find_list(limit=5000)
     recs = await Scoped(db.recurring_invoices, tid).find_list(limit=1000)
@@ -80,8 +84,8 @@ async def _compute(user, days: int = 90) -> dict:
                 pass
     k["callback_rate"] = {"value": _pct(callbacks, len(cust_jobs)), "unit": "%",
                           "samples": len(cust_jobs)}
-    # recurring revenue share
-    rec_total = sum(r.get("amount_cents", 0) for r in recs if r.get("status") == "active")
+    # recurring revenue share (templates carry active: bool, not status)
+    rec_total = sum(r.get("amount_cents", 0) for r in recs if r.get("active"))
     inv_total = sum(totals)
     k["recurring_share"] = {"value": _pct(rec_total, inv_total), "unit": "%",
                             "samples": len(recs)}
@@ -97,10 +101,13 @@ async def _compute(user, days: int = 90) -> dict:
                     pass
     k["ar_days"] = {"value": round(sum(agings) / len(agings), 1) if agings else 0,
                     "unit": "days", "samples": len(agings)}
-    # revenue trend: last 30d vs prior 30d
+    # revenue trend: last 30d vs prior 30d (fall back to created_at for pre-issue_date docs)
     mid = (date.fromisoformat(today) - timedelta(days=30)).isoformat()
-    r1 = sum(i.get("total_cents", 0) for i in invs if (i.get("issue_date") or "") >= mid)
-    r0 = sum(i.get("total_cents", 0) for i in invs if (i.get("issue_date") or "") < mid)
+
+    def _inv_date(i):
+        return i.get("issue_date") or (i.get("created_at") or "")[:10] or ""
+    r1 = sum(i.get("total_cents", 0) for i in invs if _inv_date(i) >= mid)
+    r0 = sum(i.get("total_cents", 0) for i in invs if _inv_date(i) < mid and _inv_date(i))
     k["revenue_trend"] = {"value": _pct(r1 - r0, r0) if r0 else (100.0 if r1 else 0.0),
                           "unit": "%", "samples": len(invs)}
     return k
