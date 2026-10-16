@@ -1,0 +1,8 @@
+code: BR
+name: Brazil
+flag: 🇧🇷
+colors:
+  accent: '#009739'
+languages:
+- pt
+extended_network: false

@@ -1,0 +1,8 @@
+code: DE
+name: Germany
+flag: 🇩🇪
+colors:
+  accent: '#ffcc00'
+languages:
+- de
+extended_network: false

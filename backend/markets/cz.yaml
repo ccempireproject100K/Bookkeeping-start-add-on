@@ -1,0 +1,8 @@
+code: CZ
+name: Czech Republic
+flag: 🇨🇿
+colors:
+  accent: '#11457e'
+languages:
+- cs
+extended_network: false

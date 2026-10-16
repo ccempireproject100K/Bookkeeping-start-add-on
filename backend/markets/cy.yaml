@@ -1,0 +1,9 @@
+code: CY
+name: Cyprus
+flag: 🇨🇾
+colors:
+  accent: '#d57800'
+languages:
+- el
+- en
+extended_network: false

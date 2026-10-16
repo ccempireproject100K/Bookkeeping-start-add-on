@@ -1,0 +1,8 @@
+code: GB
+name: United Kingdom
+flag: 🇬🇧
+colors:
+  accent: '#012169'
+languages:
+- en
+extended_network: false

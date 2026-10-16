@@ -1,0 +1,9 @@
+code: HK
+name: Hong Kong
+flag: 🇭🇰
+colors:
+  accent: '#de2910'
+languages:
+- zh
+- en
+extended_network: false

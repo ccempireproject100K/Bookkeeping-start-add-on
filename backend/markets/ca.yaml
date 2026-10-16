@@ -1,0 +1,9 @@
+code: CA
+name: Canada
+flag: 🇨🇦
+colors:
+  accent: '#ff0000'
+languages:
+- en
+- fr
+extended_network: false

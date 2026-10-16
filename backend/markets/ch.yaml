@@ -1,0 +1,10 @@
+code: CH
+name: Switzerland
+flag: 🇨🇭
+colors:
+  accent: '#da291c'
+languages:
+- de
+- fr
+- it
+extended_network: false
