@@ -586,7 +586,7 @@
   "combo.log": "Log",
   "combo.draftFollowUp": "Draft follow-up",
   "combo.writing": "Writing…",
-  "combo.templateAddEMERGENTLLMKEYFor": "(template — add EMERGENT_LLM_KEY for AI drafts)",
+  "combo.templateAddAIKeyFor": "(template — add AI_API_KEY for AI drafts)",
   "combo.convertToEstimate": "Convert to estimate",
   "combo.amount": "Amount $",
   "combo.description": "Description",
