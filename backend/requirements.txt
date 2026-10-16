@@ -28,3 +28,4 @@ typer>=0.9.0
 webauthn>=3.0.0
 pyyaml>=6.0.1
 apscheduler>=3.10.0
+stripe==11.3.0
