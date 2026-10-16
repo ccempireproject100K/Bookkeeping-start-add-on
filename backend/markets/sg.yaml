@@ -1,0 +1,11 @@
+code: SG
+name: Singapore
+flag: 🇸🇬
+colors:
+  accent: '#ef3340'
+languages:
+- en
+- zh
+- ms
+- ta
+extended_network: false

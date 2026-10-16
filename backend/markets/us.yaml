@@ -1,0 +1,9 @@
+code: US
+name: United States
+flag: 🇺🇸
+colors:
+  accent: '#3c3b6e'
+languages:
+- en
+- es
+extended_network: false

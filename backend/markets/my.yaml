@@ -1,0 +1,9 @@
+code: MY
+name: Malaysia
+flag: 🇲🇾
+colors:
+  accent: '#cc0001'
+languages:
+- ms
+- en
+extended_network: false

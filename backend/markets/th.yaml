@@ -1,0 +1,8 @@
+code: TH
+name: Thailand
+flag: 🇹🇭
+colors:
+  accent: '#2d2a4a'
+languages:
+- th
+extended_network: false

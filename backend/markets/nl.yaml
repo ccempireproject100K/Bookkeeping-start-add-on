@@ -1,0 +1,8 @@
+code: NL
+name: Netherlands
+flag: 🇳🇱
+colors:
+  accent: '#ff6600'
+languages:
+- nl
+extended_network: false

@@ -1,0 +1,8 @@
+code: NG
+name: Nigeria
+flag: 🇳🇬
+colors:
+  accent: '#008751'
+languages:
+- en
+extended_network: true

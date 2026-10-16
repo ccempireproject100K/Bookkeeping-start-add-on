@@ -1,0 +1,10 @@
+code: LU
+name: Luxembourg
+flag: 🇱🇺
+colors:
+  accent: '#00a1de'
+languages:
+- lb
+- fr
+- de
+extended_network: false

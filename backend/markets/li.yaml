@@ -1,0 +1,8 @@
+code: LI
+name: Liechtenstein
+flag: 🇱🇮
+colors:
+  accent: '#002780'
+languages:
+- de
+extended_network: false

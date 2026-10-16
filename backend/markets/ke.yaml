@@ -1,0 +1,9 @@
+code: KE
+name: Kenya
+flag: 🇰🇪
+colors:
+  accent: '#006600'
+languages:
+- en
+- sw
+extended_network: true

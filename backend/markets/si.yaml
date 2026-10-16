@@ -1,0 +1,8 @@
+code: SI
+name: Slovenia
+flag: 🇸🇮
+colors:
+  accent: '#005da4'
+languages:
+- sl
+extended_network: false
