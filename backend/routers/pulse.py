@@ -13,11 +13,12 @@ from fastapi import APIRouter, Depends
 
 from db import db
 from lib.auth import require
+from lib.plans import require_feature
 from lib.base import Scoped, today_str, cents_to_dollars
 from lib import ledger as L
 from routers.jobs import _profit
 
-router = APIRouter(prefix="/pulse", tags=["pulse"])
+router = APIRouter(prefix="/pulse", tags=["pulse"], dependencies=[Depends(require_feature("advanced_reports"))])
 
 
 def _money(cents) -> str:

@@ -13,9 +13,10 @@ from pydantic import BaseModel
 from db import db
 from lib.audit import audit
 from lib.auth import require
+from lib.plans import require_feature
 from lib.base import Scoped, cents_to_dollars, today_str
 
-router = APIRouter(prefix="/whitelabel", tags=["whitelabel"])
+router = APIRouter(prefix="/whitelabel", tags=["whitelabel"], dependencies=[Depends(require_feature("white_label"))])
 
 
 class BrandingBody(BaseModel):

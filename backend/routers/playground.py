@@ -9,11 +9,12 @@ from pydantic import BaseModel
 
 from db import db
 from lib.auth import require
+from lib.plans import require_feature
 from lib.base import today_str
 from lib import ledger as L
 from routers.simulator import _baseline, _month_range
 
-router = APIRouter(prefix="/playground", tags=["playground"])
+router = APIRouter(prefix="/playground", tags=["playground"], dependencies=[Depends(require_feature("advanced_reports"))])
 
 
 async def _rev_exp_avg(user) -> dict:
