@@ -68,7 +68,15 @@ def make_db(entries=(), lines=()):
 
 
 def run(coro):
-    return asyncio.get_event_loop().run_until_complete(coro)
+    # Dedicated loop, NOT asyncio.get_event_loop(): other test modules call
+    # asyncio.run(), which unsets/closes the thread's current loop on exit,
+    # so the legacy get_event_loop() pattern broke (RuntimeError: no current
+    # event loop) whenever suite order shifted. Same fix PR #123 applied.
+    loop = asyncio.new_event_loop()
+    try:
+        return loop.run_until_complete(coro)
+    finally:
+        loop.close()
 
 
 # ---------------- _needs_translation ----------------
