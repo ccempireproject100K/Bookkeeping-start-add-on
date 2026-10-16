@@ -782,6 +782,8 @@
   "customers.statement": "对账单",
   "customers.serviceAddress": "服务地址",
   "dashboard.source": "来源",
+  "dashboard.loadError": "无法加载仪表板，请重试。",
+  "dashboard.retry": "重试",
   "estimates.recurringTemplateCreated": "周期性模板已创建",
   "estimates.recurringInvoices": "周期性发票",
   "expenses.remaining": "剩余",
