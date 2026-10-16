@@ -62,6 +62,18 @@ def _find_duplicate(customers, name, email, phone):
     return None
 
 
+def _is_deleted(c):
+    """Soft-delete marker: DELETE stamps deleted_at (+ active=False) instead of
+    removing the row, so historical invoices and statements keep resolving."""
+    return bool(c.get("deleted_at"))
+
+
+def _active_only(customers):
+    """Customers still in service — soft-deleted rows are hidden from lists and
+    must not block name/contact reuse in duplicate checks."""
+    return [c for c in customers if not _is_deleted(c)]
+
+
 class Location(BaseModel):
     label: str = "Primary"
     address: str
@@ -76,13 +88,14 @@ class CustomerBody(BaseModel):
 
 @router.get("")
 async def list_customers(user: dict = Depends(get_current_user)):
-    return await coll(user).find_list(sort=[("name", 1)], limit=500)
+    rows = await coll(user).find_list(sort=[("name", 1)], limit=500)
+    return _active_only(rows)
 
 
 @router.post("")
 async def create_customer(body: CustomerBody, user: dict = Depends(require("ops:manage"))):
     existing = await coll(user).find_list()
-    dup = _find_duplicate(existing, body.name, body.email, body.phone)
+    dup = _find_duplicate(_active_only(existing), body.name, body.email, body.phone)
     if dup:
         raise HTTPException(status_code=409, detail={
             "message": "Customer already exists",
@@ -92,14 +105,58 @@ async def create_customer(body: CustomerBody, user: dict = Depends(require("ops:
     doc = {
         "id": new_id(), "name": body.name, "email": body.email, "phone": body.phone,
         "locations": [l.model_dump() for l in body.locations], "created_at": now_iso(),
+        "active": True, "deleted_at": None,
     }
     await coll(user).insert_one(doc)
     doc.pop("_id", None)
     return doc
 
 
+@router.patch("/{customer_id}")
+async def update_customer(customer_id: str, body: CustomerBody,
+                          user: dict = Depends(require("ops:manage"))):
+    c = await coll(user).find_one({"id": customer_id})
+    if not c or _is_deleted(c):
+        raise HTTPException(status_code=404, detail="Customer not found")
+    # Same duplicate rule as create, excluding the customer being edited:
+    # renaming onto another active customer's name + email/phone is a 409.
+    others = [o for o in _active_only(await coll(user).find_list())
+              if o.get("id") != customer_id]
+    dup = _find_duplicate(others, body.name, body.email, body.phone)
+    if dup:
+        raise HTTPException(status_code=409, detail={
+            "message": "Customer already exists",
+            "existing_id": dup.get("id"),
+            "existing_name": dup.get("name"),
+        })
+    await coll(user).update_one({"id": customer_id}, {"$set": {
+        "name": body.name, "email": body.email, "phone": body.phone,
+        "locations": [l.model_dump() for l in body.locations],
+        "updated_at": now_iso(),
+    }})
+    updated = await coll(user).find_one({"id": customer_id})
+    return {k: v for k, v in updated.items() if k != "_id"}
+
+
+@router.delete("/{customer_id}")
+async def delete_customer(customer_id: str, user: dict = Depends(require("ops:manage"))):
+    """Soft delete: stamp deleted_at and active=False, keep the row. Invoices
+    reference customers by id (and legacy rows by name), so removing the row
+    would orphan history; statements for a deleted customer must still resolve."""
+    c = await coll(user).find_one({"id": customer_id})
+    if not c or _is_deleted(c):
+        raise HTTPException(status_code=404, detail="Customer not found")
+    ts = now_iso()
+    await coll(user).update_one({"id": customer_id},
+                                {"$set": {"deleted_at": ts, "active": False,
+                                          "updated_at": ts}})
+    return {"id": customer_id, "deleted": True, "deleted_at": ts}
+
+
 @router.get("/{customer_id}")
 async def get_customer(customer_id: str, user: dict = Depends(get_current_user)):
+    # Soft-deleted customers still resolve here (and in statements) so invoice
+    # history stays readable; they are only hidden from the list endpoint.
     c = await coll(user).find_one({"id": customer_id})
     if not c:
         raise HTTPException(status_code=404, detail="Customer not found")
@@ -116,8 +173,9 @@ async def statement(customer_id: str, user: dict = Depends(require("ledger:read"
     invoices = await Scoped(db.invoices, user["tenant_id"]).find_list()
     # The legacy client_name fallback is only safe when no other customer in
     # this tenant shares the name; otherwise same-name customers would see
-    # each other's invoices.
-    tenant_customers = await coll(user).find_list()
+    # each other's invoices. Soft-deleted customers don't create ambiguity —
+    # only active customers count.
+    tenant_customers = _active_only(await coll(user).find_list())
     same_name = sum(1 for o in tenant_customers if _norm_name(o.get("name")) == _norm_name(name))
     name_unique = same_name <= 1
     events = []
