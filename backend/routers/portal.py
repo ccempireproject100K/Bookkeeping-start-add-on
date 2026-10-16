@@ -26,6 +26,7 @@ from lib import posting as P
 from lib import fx_posting as FXP
 from lib.currencies import normalize as normalize_currency
 from lib.currencies import get_base_currency, to_minor_units
+from lib.mailer import send_email
 
 router = APIRouter(prefix="/portal", tags=["portal"])
 
@@ -45,6 +46,113 @@ class LinkIn(BaseModel):
     invoice_id: Optional[str] = None
     customer_id: Optional[str] = None
     expires_in_hours: int = Field(default=DEFAULT_TTL_HOURS, ge=1, le=24 * 90)
+    send_email: bool = False
+    origin_url: str = ""  # e.g. https://books.example.com — used to build the link in the email
+
+
+class LinkSendIn(BaseModel):
+    origin_url: str = ""
+    to_email: str = ""  # optional override; defaults to the customer's email on file
+
+
+async def _shop_name_async(user) -> str:
+    try:
+        tenant = await db.tenants.find_one({"id": user["tenant_id"]}, {"_id": 0, "name": 1})
+    except Exception:
+        tenant = None
+    return ((tenant or {}).get("name") or "").strip() or "Mind at Ease Solutions"
+
+
+async def _portal_recipient(user, inv: dict) -> Optional[str]:
+    """Customer email for an invoice, or None when there is none on file.
+    Same approach as collections._reminder_recipient."""
+    cid = inv.get("customer_id")
+    if cid:
+        try:
+            c = await Scoped(db.customers, user["tenant_id"]).find_one({"id": cid})
+        except Exception:
+            c = None
+        if c and (c.get("email") or "").strip():
+            return c["email"].strip()
+    return None
+
+
+def _portal_origin(body_origin: str, request: Request) -> str:
+    origin = (body_origin or request.headers.get("origin")
+              or os.environ.get("APP_URL", "") or "").rstrip("/")
+    return origin
+
+
+def _build_portal_email(shop_name: str, portal_url: str, invoice_ref: str,
+                        client_name: str, balance_cents: int,
+                        expires_at: str) -> tuple[str, str, str]:
+    """(subject, text_body, html_body) for a portal-link invitation email.
+    Branded with the shop name; no third-party residue."""
+    balance = f"${balance_cents / 100:,.2f}"
+    subject = f"{shop_name} — view & pay invoice {invoice_ref} online"
+    text = (
+        f"Hi {client_name or 'there'},\n\n"
+        f"{shop_name} has shared a secure link where you can view and pay "
+        f"invoice {invoice_ref} ({balance} due):\n\n"
+        f"{portal_url}\n\n"
+        f"This link expires on {expires_at[:10]}. No account or login needed.\n\n"
+        f"— {shop_name}\n"
+        f"Sent via Mind at Ease Solutions"
+    )
+    html = (
+        f"<div style=\"font-family:sans-serif;max-width:560px;color:#1a1a1a\">"
+        f"<h2 style=\"color:#b8860b\">{shop_name}</h2>"
+        f"<p>Hi {client_name or 'there'},</p>"
+        f"<p>{shop_name} has shared a secure link where you can view and pay "
+        f"invoice <strong>{invoice_ref}</strong> (<strong>{balance}</strong> due):</p>"
+        f"<p><a href=\"{portal_url}\" "
+        f"style=\"display:inline-block;padding:12px 24px;background:#b8860b;color:#fff;"
+        f"text-decoration:none;border-radius:6px\">View &amp; pay invoice</a></p>"
+        f"<p style=\"color:#666;font-size:13px\">Or open this link:<br/>"
+        f"<a href=\"{portal_url}\">{portal_url}</a></p>"
+        f"<p style=\"color:#666;font-size:13px\">This link expires on {expires_at[:10]}. "
+        f"No account or login needed.</p>"
+        f"<hr style=\"border:none;border-top:1px solid #ddd\"/>"
+        f"<p style=\"color:#999;font-size:12px\">Sent via Mind at Ease Solutions</p>"
+        f"</div>"
+    )
+    return subject, text, html
+
+
+async def _deliver_link_email(user, link_doc: dict, inv: dict, token: str,
+                              origin_url: str, to_override: str = "") -> dict:
+    """Best-effort email delivery for a portal link. Key-gated in lib.mailer:
+    without SMTP_HOST this returns ("skipped", ...) and the link is marked
+    'queued' so the owner can retry from the UI once SMTP is configured.
+    Returns the email fields to persist on the link doc."""
+    shop = await _shop_name_async(user)
+    origin = (origin_url or os.environ.get("APP_URL", "") or "").rstrip("/")
+    to = (to_override or "").strip() or await _portal_recipient(user, inv)
+    if not to:
+        return {"email_to": None, "email_status": "no_recipient",
+                "email_error": "Customer has no email on file", "email_sent_at": None}
+    if not origin:
+        return {"email_to": to, "email_status": "queued",
+                "email_error": "Could not determine the site URL — retry with an origin",
+                "email_sent_at": None}
+    portal_url = f"{origin}/p/{token}"
+    ref = inv.get("issue_entry") or inv["id"]
+    balance = inv["total_cents"] - inv.get("paid_cents", 0)
+    subject, text, html = _build_portal_email(
+        shop, portal_url, ref, inv.get("client_name", ""), balance,
+        link_doc["expires_at"])
+    try:
+        status, err = await send_email(to, subject, text, html)
+    except Exception as exc:  # belt-and-braces; mailer already catches
+        status, err = "skipped", str(exc)
+    if status == "sent":
+        return {"email_to": to, "email_status": "sent", "email_error": None,
+                "email_sent_at": now_iso(), "portal_url": portal_url}
+    if err == "SMTP not configured":
+        return {"email_to": to, "email_status": "queued", "email_error": err,
+                "email_sent_at": None, "portal_url": portal_url}
+    return {"email_to": to, "email_status": "failed", "email_error": err,
+            "email_sent_at": None, "portal_url": portal_url}
 
 
 def _digest(token: str) -> str:
@@ -62,9 +170,14 @@ async def _lookup_link(token: str) -> dict:
 
 
 @router.post("/links")
-async def create_link(body: LinkIn, user: dict = Depends(require("ops:manage"))):
+async def create_link(body: LinkIn, user: dict = Depends(require("ops:manage")),
+                      request: Request = None):
     """Generate a magic link. Pass invoice_id, or customer_id to link that
-    customer's most recent unpaid invoice."""
+    customer's most recent unpaid invoice.
+
+    With send_email=true the link is also emailed to the customer's address
+    on file (key-gated: without SMTP configured it stays queued for a later
+    retry via POST /portal/links/{id}/send)."""
     inv_coll = Scoped(db.invoices, user["tenant_id"])
     if body.invoice_id:
         inv = await inv_coll.find_one({"id": body.invoice_id})
@@ -82,16 +195,31 @@ async def create_link(body: LinkIn, user: dict = Depends(require("ops:manage")))
 
     token = secrets.token_urlsafe(32)
     expires_at = (datetime.now(timezone.utc) + timedelta(hours=body.expires_in_hours)).isoformat()
-    await db.portal_links.insert_one({
-        "id": new_id(), "token_hash": _digest(token), "tenant_id": user["tenant_id"],
+    link_id = new_id()
+    link_doc = {
+        "id": link_id, "token_hash": _digest(token), "tenant_id": user["tenant_id"],
         "invoice_id": inv["id"], "customer_id": inv.get("customer_id"),
         "created_by": user.get("name"), "created_at": now_iso(),
         "expires_at": expires_at, "revoked": False, "used": False,
-    })
+        "email_to": None, "email_status": "not_sent", "email_error": None,
+        "email_sent_at": None,
+    }
+    await db.portal_links.insert_one(link_doc)
+    email_fields = {}
+    if body.send_email:
+        origin = _portal_origin(body.origin_url, request) if request else body.origin_url.rstrip("/")
+        email_fields = await _deliver_link_email(user, link_doc, inv, token, origin)
+        await Scoped(db.portal_links, user["tenant_id"]).update_one(
+            {"id": link_id}, {"$set": email_fields})
     await _audit(user, "portal.link.create", "invoice", inv["id"],
-                 {"customer_id": inv.get("customer_id"), "expires_at": expires_at})
-    return {"token": token, "expires_at": expires_at, "invoice_id": inv["id"],
-            "client_name": inv.get("client_name")}
+                 {"customer_id": inv.get("customer_id"), "expires_at": expires_at,
+                  "email_status": email_fields.get("email_status", "not_sent")})
+    out = {"token": token, "expires_at": expires_at, "invoice_id": inv["id"],
+           "client_name": inv.get("client_name"), "link_id": link_id,
+           "email_status": email_fields.get("email_status", "not_sent")}
+    if email_fields.get("portal_url"):
+        out["portal_url"] = email_fields["portal_url"]
+    return out
 
 
 @router.get("/links")
@@ -122,6 +250,49 @@ async def revoke_link(link_id: str, user: dict = Depends(require("ops:manage")))
         raise HTTPException(status_code=404, detail="Link not found")
     await _audit(user, "portal.link.revoke", "portal_link", link_id, {})
     return {"ok": True}
+
+
+@router.post("/links/{link_id}/send")
+async def send_link(link_id: str, body: LinkSendIn,
+                    user: dict = Depends(require("ops:manage")),
+                    request: Request = None):
+    """(Re)send a portal link by email. Generates a FRESH token (the previous
+    URL stops working — only the hash is stored, so resends must rotate),
+    keeping the original expiry. Key-gated like collections: without SMTP the
+    link is marked 'queued' for a later retry."""
+    coll = Scoped(db.portal_links, user["tenant_id"])
+    link = await coll.find_one({"id": link_id})
+    if not link:
+        raise HTTPException(status_code=404, detail="Link not found")
+    if link.get("revoked"):
+        raise HTTPException(status_code=409, detail="Link is revoked")
+    if link.get("used"):
+        raise HTTPException(status_code=409, detail="Link was already used")
+    inv = await Scoped(db.invoices, user["tenant_id"]).find_one({"id": link["invoice_id"]})
+    if not inv:
+        raise HTTPException(status_code=404, detail="Invoice not found")
+
+    token = secrets.token_urlsafe(32)
+    link["token_hash"] = _digest(token)
+    origin = _portal_origin(body.origin_url, request) if request else body.origin_url.rstrip("/")
+    email_fields = await _deliver_link_email(user, link, inv, token, origin,
+                                             to_override=body.to_email)
+    sent_count = (link.get("email_sent_count") or 0) + (1 if email_fields["email_status"] == "sent" else 0)
+    await coll.update_one({"id": link_id}, {"$set": {
+        "token_hash": _digest(token),
+        **email_fields,
+        "email_sent_count": sent_count,
+    }})
+    await _audit(user, "portal.link.send", "portal_link", link_id,
+                 {"email_status": email_fields["email_status"],
+                  "email_to": email_fields.get("email_to")})
+    out = {"ok": True, "token": token, "email_status": email_fields["email_status"],
+           "email_to": email_fields.get("email_to"),
+           "email_error": email_fields.get("email_error"),
+           "email_sent_count": sent_count}
+    if email_fields.get("portal_url"):
+        out["portal_url"] = email_fields["portal_url"]
+    return out
 
 
 def _strip_invoice(inv: dict) -> dict:

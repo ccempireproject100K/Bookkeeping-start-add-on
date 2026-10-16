@@ -30,8 +30,12 @@ def _config():
     }
 
 
-async def send_email(to: str, subject: str, body: str) -> tuple[str, str | None]:
-    """Returns (status, error). status is 'sent' or 'skipped'."""
+async def send_email(to: str, subject: str, body: str,
+                   html_body: str | None = None) -> tuple[str, str | None]:
+    """Returns (status, error). status is 'sent' or 'skipped'.
+
+    html_body is optional; when provided the message is sent as
+    multipart/alternative with the plain-text body as fallback."""
     cfg = _config()
     if not cfg or not to:
         return ("skipped", "SMTP not configured")
@@ -41,6 +45,8 @@ async def send_email(to: str, subject: str, body: str) -> tuple[str, str | None]
         msg["To"] = to
         msg["Subject"] = subject
         msg.set_content(body)
+        if html_body:
+            msg.add_alternative(html_body, subtype="html")
         with smtplib.SMTP(cfg["host"], cfg["port"], timeout=15) as s:
             if cfg["tls"]:
                 s.starttls()
