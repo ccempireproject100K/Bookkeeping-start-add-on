@@ -39,6 +39,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
 from db import db
+from lib.plans import require_feature
 from lib.base import Scoped, new_id, now_iso, today_str, cents_to_dollars, to_cents
 from lib.auth import require, get_current_user, PERMISSIONS
 from lib.coa import NAME_OF, ACCOUNT_TYPE_OF
@@ -401,7 +402,7 @@ async def _match_candidate(user, txn: dict):
     return None
 
 
-@router.post("/actions/propose")
+@router.post("/actions/propose", dependencies=[Depends(require_feature("copilot_actions"))])
 async def propose_actions(user: dict = Depends(get_current_user)):
     """Build proposed actions from the workspace data WITHOUT executing anything.
 
@@ -594,7 +595,7 @@ async def propose_actions(user: dict = Depends(get_current_user)):
     return out
 
 
-@router.get("/actions")
+@router.get("/actions", dependencies=[Depends(require_feature("copilot_actions"))])
 async def list_actions(user: dict = Depends(get_current_user)):
     docs = await actions(user).find_list(sort=[("created_at", -1)], limit=50)
     out = []
@@ -626,7 +627,7 @@ async def list_actions(user: dict = Depends(get_current_user)):
     return out
 
 
-@router.post("/actions/{action_id}/reject")
+@router.post("/actions/{action_id}/reject", dependencies=[Depends(require_feature("copilot_actions"))])
 async def reject_action(action_id: str, user: dict = Depends(require("ops:manage"))):
     doc = await actions(user).find_one({"id": action_id})
     if not doc:
@@ -642,7 +643,7 @@ async def reject_action(action_id: str, user: dict = Depends(require("ops:manage
     return _action_doc(doc)
 
 
-@router.post("/actions/{action_id}/approve")
+@router.post("/actions/{action_id}/approve", dependencies=[Depends(require_feature("copilot_actions"))])
 async def approve_action(action_id: str, user: dict = Depends(get_current_user)):
     """Approve AND execute a proposed action.
 

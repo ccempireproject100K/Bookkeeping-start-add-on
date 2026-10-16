@@ -10,6 +10,7 @@ from starlette.middleware.cors import CORSMiddleware
 from db import db, get_client
 from lib.ratelimit import RateLimitMiddleware
 from lib.security_headers import SecurityHeadersMiddleware
+from routers import plans
 from routers import (auth, ledger, products, pos, invoices, cashclose, dashboard,
                      bills, aging, giftcards, commissions, customers, jobs,
                      banking, vendors, reports, estimates,
@@ -61,6 +62,7 @@ for r in (auth.router, ledger.router, products.router, pos.router,
           purchase_orders.router, fx.router, fx.currencies_router,
           market_packs.router):
     api_router.include_router(r)
+api_router.include_router(plans.router)
 
 app.include_router(api_router)
 
