@@ -13,20 +13,20 @@ import { loginWithPasskey, passkeysSupported } from "@/lib/webauthn";
 import { useTranslation } from "react-i18next";
 const DEMOS = [{
   role: "Owner",
-  email: "onelovellc@outlook.com",
-  password: "Owner123!"
+  email: "owner@mindatease.example",
+  password: "Owner#Demo2026"
 }, {
   role: "Accountant",
   email: "accountant@mindatease.example",
-  password: "Books123!"
+  password: "Books#Demo2026"
 }, {
   role: "Bookkeeper",
   email: "bookkeeper@mindatease.example",
-  password: "Books123!"
+  password: "Books#Demo2026"
 }, {
   role: "Technician",
   email: "marcus@mindatease.example",
-  password: "Staff123!"
+  password: "Staff#Demo2026"
 }];
 export default function Login() {
   const {
