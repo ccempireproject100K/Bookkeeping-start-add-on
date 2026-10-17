@@ -109,7 +109,7 @@ def _fetch_url(url):
     """Blocking HTTP GET; callers run it in a thread."""
     import urllib.request
 
-    req = urllib.request.Request(url, headers={"User-Agent": "barbers-ledger/fx"})
+    req = urllib.request.Request(url, headers={"User-Agent": "mindatease-books/fx"})
     with urllib.request.urlopen(req, timeout=FETCH_TIMEOUT) as resp:
         return resp.read().decode("utf-8", errors="replace")
 

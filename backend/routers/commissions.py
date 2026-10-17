@@ -1,4 +1,4 @@
-"""Barber commission payouts: statement of accrued commission, paid from 2300 Tips/Commissions Payable."""
+"""Staff commission payouts: statement of accrued commission, paid from 2300 Tips/Commissions Payable."""
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
@@ -67,7 +67,7 @@ async def pay_out(body: PayoutBody, user: dict = Depends(require("ledger:admin")
     tenant_id = user["tenant_id"]
     barber = await db.users.find_one({"id": body.barber_id, "tenant_id": tenant_id}, {"_id": 0, "password_hash": 0})
     if not barber:
-        raise HTTPException(status_code=404, detail="Barber not found")
+        raise HTTPException(status_code=404, detail="Team member not found")
     sales = await _unpaid_sales(tenant_id, body.barber_id)
     total = sum(s["commission_cents"] for s in sales)
     if total <= 0:

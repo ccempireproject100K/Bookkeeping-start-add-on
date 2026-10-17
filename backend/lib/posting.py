@@ -35,8 +35,8 @@ def build_sale(*, lines_in, payment_method, subtotal_cents, discount_cents,
         jl.append(dr("5010", cogs_cents, "Cost of goods sold"))
         jl.append(cr("1300", cogs_cents, "Inventory relieved"))
     if commission_cents:
-        # accrue barber commission as expense + payable (does not affect cash leg)
-        jl.append(dr("5100", commission_cents, "Barber commission"))
+        # accrue staff commission as expense + payable (does not affect cash leg)
+        jl.append(dr("5100", commission_cents, "Staff commission"))
         jl.append(cr("2300", commission_cents, "Commission payable"))
     return {"entry_date": entry_date, "currency": currency, "source": "sale", "source_ref": source_ref, "memo": memo, "lines": jl}
 

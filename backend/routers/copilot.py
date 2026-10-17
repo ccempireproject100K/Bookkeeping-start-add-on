@@ -275,11 +275,8 @@ async def _snapshot(user) -> dict:
 
 # ---------------- LLM (OpenAI-compatible, key-gated) ----------------
 def _llm_key() -> str:
-    # Canonical env name: AI_API_KEY. EMERGENT_LLM_KEY is the legacy name,
-    # still honored as a fallback so existing deployments keep working
-    # until the server env is renamed.
-    key = (os.environ.get("AI_API_KEY", "").strip()
-           or os.environ.get("EMERGENT_LLM_KEY", "").strip())
+    # Canonical env name: AI_API_KEY.
+    key = os.environ.get("AI_API_KEY", "").strip()
     if not key:
         raise HTTPException(
             503,
