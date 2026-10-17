@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, ArrowRight, CheckCircle2 } from "lucide-react";
 import { api } from "@/lib/api";
+import { findPack } from "@/lib/packs";
 import FaceIcon from "@/components/FaceIcon";
 
 /** Public landing page for one trade edition, rendered entirely from its
@@ -18,7 +19,7 @@ export default function TradeLanding() {
     api.get("/niches")
       .then((packs) => {
         if (!live) return;
-        const found = (packs || []).find((p) => p.id === nicheId);
+        const found = findPack(packs, nicheId);
         if (found) {
           setPack(found);
           document.title = `${found.product_name} — Bookkeeping for ${found.trade} | Mind at Ease Solutions`;

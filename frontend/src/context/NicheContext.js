@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { api } from "@/lib/api";
+import { asFace } from "@/lib/packs";
 import { useAuth } from "./AuthContext";
 
 const NicheCtx = createContext(null);
@@ -13,7 +14,7 @@ export function NicheProvider({ children }) {
 
   const refresh = () => {
     if (!user) { setPack(null); return Promise.resolve(); }
-    return api.get("/edition").then(setPack).catch(() => setPack(null));
+    return api.get("/edition").then((d) => setPack(asFace(d))).catch(() => setPack(null));
   };
 
   useEffect(() => { refresh(); }, [user?.tenant_id]);

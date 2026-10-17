@@ -10,7 +10,11 @@ export function AuthProvider({ children }) {
   const refresh = useCallback(async () => {
     try {
       const me = await api.get("/auth/me");
-      setUser(me);
+      // Only an object can be a user. Anything else (e.g. an HTML page
+      // accepted as data when the API base is misconfigured) means
+      // "not signed in" — storing it would crash every consumer that
+      // reads user fields and blank the app.
+      setUser(me && typeof me === "object" && !Array.isArray(me) ? me : false);
     } catch {
       setUser(false);
     } finally {

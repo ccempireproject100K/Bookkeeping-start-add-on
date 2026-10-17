@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { api } from "@/lib/api";
+import { asPackList } from "@/lib/packs";
 import FaceIcon from "@/components/FaceIcon";
 
 /** Public index of all trade editions. Data-driven from the niche packs
@@ -12,7 +13,16 @@ export default function Industries() {
 
   useEffect(() => {
     document.title = "Industries — Mind at Ease Solutions";
-    api.get("/niches").then(setPacks).catch(() => setErr("Could not load the industry list."));
+    api.get("/niches")
+      .then((data) => {
+        // Only a real array of packs may reach the grid — anything else
+        // (e.g. an HTML page from a misconfigured API base) is an error,
+        // not renderable data.
+        const list = asPackList(data);
+        if (list) setPacks(list);
+        else setErr("Could not load the industry list.");
+      })
+      .catch(() => setErr("Could not load the industry list."));
   }, []);
 
   return (
