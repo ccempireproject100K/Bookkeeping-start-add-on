@@ -7,3 +7,4 @@ languages:
 - en
 - mi
 extended_network: false
+currency: NZD

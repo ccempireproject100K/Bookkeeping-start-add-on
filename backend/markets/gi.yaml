@@ -6,3 +6,4 @@ colors:
 languages:
 - en
 extended_network: false
+currency: GIP

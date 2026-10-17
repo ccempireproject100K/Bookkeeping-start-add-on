@@ -6,3 +6,4 @@ colors:
 languages:
 - lv
 extended_network: false
+currency: EUR

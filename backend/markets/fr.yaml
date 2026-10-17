@@ -6,3 +6,4 @@ colors:
 languages:
 - fr
 extended_network: false
+currency: EUR

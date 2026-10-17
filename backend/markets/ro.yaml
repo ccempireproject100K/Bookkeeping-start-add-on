@@ -6,3 +6,4 @@ colors:
 languages:
 - ro
 extended_network: false
+currency: RON

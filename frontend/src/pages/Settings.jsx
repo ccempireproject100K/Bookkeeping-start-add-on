@@ -11,6 +11,7 @@ import PasskeySettings from "@/components/PasskeySettings";
 import SecurityAlerts from "@/components/SecurityAlerts";
 import TeamInvites from "@/components/TeamInvites";
 import NicheSwitcher from "@/components/NicheSwitcher";
+import MarketSwitcher from "@/components/MarketSwitcher";
 import OpeningBalances from "@/components/OpeningBalances";
 import BrandingCard from "@/components/BrandingCard";
 import CurrencyPicker from "@/components/CurrencyPicker";
@@ -197,6 +198,7 @@ export default function Settings() {
         <TeamInvites />
         <BrandingCard />
         <NicheSwitcher />
+        <MarketSwitcher />
         <BaseCurrencyCard />
         <LanguageCard />
         <OpeningBalances />

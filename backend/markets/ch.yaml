@@ -8,3 +8,4 @@ languages:
 - fr
 - it
 extended_network: false
+currency: CHF

@@ -6,3 +6,4 @@ colors:
 languages:
 - 'no'
 extended_network: false
+currency: NOK

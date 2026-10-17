@@ -6,6 +6,7 @@ import { NicheProvider } from "@/context/NicheContext";
 import Layout from "@/components/Layout";
 import InventoryGate from "@/components/InventoryGate";
 import Login from "@/pages/Login";
+import Register from "@/pages/Register";
 import Industries from "@/pages/Industries";
 import TradeLanding from "@/pages/TradeLanding";
 import Dashboard from "@/pages/Dashboard";
@@ -85,6 +86,7 @@ function App() {
         <BrowserRouter>
           <Routes>
             <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
             <Route path="/industries" element={<Industries />} />
             <Route path="/industries/:nicheId" element={<TradeLanding />} />
             <Route path="/invite" element={<InviteAccept />} />

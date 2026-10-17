@@ -3,16 +3,25 @@ import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, ArrowRight, CheckCircle2 } from "lucide-react";
 import { api } from "@/lib/api";
 import { findPack } from "@/lib/packs";
+import { asSkin, readMarketChoice, writeMarketChoice } from "@/lib/markets";
 import FaceIcon from "@/components/FaceIcon";
+import MarketSelect from "@/components/MarketSelect";
 
 /** Public landing page for one trade edition, rendered entirely from its
  *  niche pack (GET /niches): product name, tagline, terminology, services,
  *  checklist and visual identity. All 33 trades get this page from the one
- *  component — there are no hand-written per-trade pages. */
+ *  component — there are no hand-written per-trade pages.
+ *  Choosing a market re-skins the page with the composed trade x market
+ *  face from GET /market-packs/resolve (market accent wins, flag +
+ *  languages + currency from the market) — the same composition the
+ *  backend resolver serves. The choice persists (localStorage), shared
+ *  with /industries and login. */
 export default function TradeLanding() {
   const { nicheId } = useParams();
   const [pack, setPack] = useState(null);
   const [missing, setMissing] = useState(false);
+  const [marketCode, setMarketCode] = useState(() => readMarketChoice());
+  const [skin, setSkin] = useState(null);
 
   useEffect(() => {
     let live = true;
@@ -31,6 +40,20 @@ export default function TradeLanding() {
       .catch(() => live && setMissing(true));
     return () => { live = false; };
   }, [nicheId]);
+
+  useEffect(() => {
+    if (!marketCode) { setSkin(null); return; }
+    let live = true;
+    api.get("/market-packs/resolve", { params: { trade: nicheId, market: marketCode } })
+      .then((data) => { if (live) setSkin(asSkin(data)); })
+      .catch(() => { if (live) setSkin(null); });
+    return () => { live = false; };
+  }, [nicheId, marketCode]);
+
+  const pickMarket = (code) => {
+    writeMarketChoice(code);
+    setMarketCode(code);
+  };
 
   if (missing) {
     return (
@@ -54,7 +77,8 @@ export default function TradeLanding() {
     );
   }
 
-  const accent = pack.colors?.accent || "#f59e0b";
+  const accent = skin?.accent || pack.colors?.accent || "#f59e0b";
+  const market = skin?.market || null;
   const terms = pack.terms || {};
   const worker = (terms.worker_plural || "Staff").toLowerCase();
   const job = terms.job || "job";
@@ -87,12 +111,15 @@ export default function TradeLanding() {
             <div className="w-10 h-10 rounded-lg brand-mark" />
             <span className="font-display font-bold text-xl">Mind at Ease Solutions</span>
           </div>
-          <Link to="/login" className="text-sm text-amber-500 hover:text-amber-400">
-            Sign in <ArrowRight size={14} className="inline ml-1" />
-          </Link>
+          <div className="flex items-center gap-4">
+            <MarketSelect value={marketCode} onChange={pickMarket} testId="trade-market-select" />
+            <Link to="/login" className="text-sm text-amber-500 hover:text-amber-400">
+              Sign in <ArrowRight size={14} className="inline ml-1" />
+            </Link>
+          </div>
         </div>
 
-        {/* Hero — the pack's own face */}
+        {/* Hero — the pack's own face, composed with the market's when chosen */}
         <div className="max-w-3xl mb-16">
           <div
             className="w-14 h-14 rounded-xl flex items-center justify-center mb-6"
@@ -102,11 +129,18 @@ export default function TradeLanding() {
           </div>
           <div className="text-xs uppercase tracking-widest text-gray-500 mb-3">{pack.trade}</div>
           <h1 className="font-display text-5xl font-bold leading-tight mb-4">{pack.product_name}</h1>
-          <p className="text-xl text-gray-300 leading-relaxed mb-8">{pack.tagline}</p>
+          <p className="text-xl text-gray-300 leading-relaxed mb-4">{pack.tagline}</p>
+          {market && (
+            <p data-testid="trade-market-face" className="text-sm text-gray-400 mb-8">
+              <span className="text-base mr-1">{market.flag}</span>
+              {market.name} edition — {(skin.languages || []).join(" / ").toUpperCase()} · {skin.currency}
+            </p>
+          )}
           <div className="flex gap-3">
             <Link
               to="/login"
               className="px-5 py-3 rounded-lg bg-amber-600 hover:bg-amber-500 text-black font-semibold text-sm"
+              style={market ? { backgroundColor: accent } : undefined}
             >
               Start with {pack.product_name} <ArrowRight size={15} className="inline ml-1" />
             </Link>

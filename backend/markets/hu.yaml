@@ -6,3 +6,4 @@ colors:
 languages:
 - hu
 extended_network: false
+currency: HUF

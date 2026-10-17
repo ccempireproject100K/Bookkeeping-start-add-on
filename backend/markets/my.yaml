@@ -7,3 +7,4 @@ languages:
 - ms
 - en
 extended_network: false
+currency: MYR
