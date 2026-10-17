@@ -1,6 +1,13 @@
 import axios from "axios";
+import { resolveApiBase, backendUrlProblem } from "./apiBase";
 
-const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
+const API = resolveApiBase();
+if (process.env.NODE_ENV === "production" && backendUrlProblem()) {
+  // The build-time guard (scripts/check-build-env.js) is meant to make
+  // this unreachable; if it ever fires, fail loudly in the console
+  // rather than silently calling a bogus base URL.
+  console.error(`[api] Backend misconfigured: ${backendUrlProblem()}. API calls will fail.`);
+}
 
 const client = axios.create({ baseURL: API, withCredentials: true });
 

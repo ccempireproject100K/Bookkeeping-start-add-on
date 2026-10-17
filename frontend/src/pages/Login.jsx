@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { api, errMsg } from "@/lib/api";
+import { asFace } from "@/lib/packs";
 import FaceIcon from "@/components/FaceIcon";
 import { KeyRound, ArrowRight, Fingerprint } from "lucide-react";
 import { loginWithPasskey, passkeysSupported } from "@/lib/webauthn";
@@ -54,7 +55,7 @@ export default function Login() {
       params: {
         host: window.location.hostname
       }
-    }).then(setFace).catch(() => {});
+    }).then((d) => setFace(asFace(d))).catch(() => {});
   }, []);
   const tradeFace = face && face.niche_id !== "generic" ? face : null;
   const brandName = face?.product_name || "Mind at Ease Solutions";

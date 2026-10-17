@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Card } from "@/components/Page";
 import { api, errMsg } from "@/lib/api";
+import { asPackList } from "@/lib/packs";
 import { toast } from "sonner";
 import { useNiche } from "@/context/NicheContext";
 import { useAuth } from "@/context/AuthContext";
@@ -24,7 +25,7 @@ export default function NicheSwitcher() {
   const [niches, setNiches] = useState([]);
   const [busy, setBusy] = useState(false);
   useEffect(() => {
-    if (user?.role === "owner") api.get("/niches").then(setNiches).catch(() => setNiches([]));
+    if (user?.role === "owner") api.get("/niches").then((d) => setNiches(asPackList(d) || [])).catch(() => setNiches([]));
   }, [user?.role]);
   if (user?.role !== "owner") return null;
   const switchNiche = async nid => {
