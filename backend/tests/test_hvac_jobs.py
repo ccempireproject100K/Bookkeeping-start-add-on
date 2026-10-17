@@ -9,10 +9,10 @@ BASE_URL = os.environ.get("REACT_APP_BACKEND_URL", "").rstrip("/")
 assert BASE_URL, "REACT_APP_BACKEND_URL not set"
 API = f"{BASE_URL}/api"
 
-OWNER = {"email": "onelovellc@outlook.com", "password": "Owner123!"}
-ACCT = {"email": "accountant@mindatease.example", "password": "Books123!"}
-BOOK = {"email": "bookkeeper@mindatease.example", "password": "Books123!"}
-BARBER = {"email": "marcus@mindatease.example", "password": "Staff123!"}
+OWNER = {"email": "owner@mindatease.example", "password": "Owner#Demo2026"}
+ACCT = {"email": "accountant@mindatease.example", "password": "Books#Demo2026"}
+BOOK = {"email": "bookkeeper@mindatease.example", "password": "Books#Demo2026"}
+BARBER = {"email": "marcus@mindatease.example", "password": "Staff#Demo2026"}
 
 
 def mk_sess(creds):

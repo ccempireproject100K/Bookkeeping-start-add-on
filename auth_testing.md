@@ -7,7 +7,7 @@ Frontend and backend are the SAME origin (served via ingress), so Lax cookies ar
 ```
 API=https://bookkeeping-api-ymh6.onrender.com/api
 curl -s -c c.txt -X POST $API/auth/login -H "Content-Type: application/json" \
-  -d '{"email":"onelovellc@outlook.com","password":"Owner123!"}'
+  -d '{"email":"owner@mindatease.example","password":"Owner#Demo2026"}'
 curl -s -b c.txt $API/auth/me        # -> 200 with user + tenant
 ```
 

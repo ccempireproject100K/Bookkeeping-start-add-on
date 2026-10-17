@@ -7,11 +7,11 @@ from datetime import datetime, timezone
 BASE_URL = os.environ.get("REACT_APP_BACKEND_URL", "").rstrip("/")
 API = f"{BASE_URL}/api"
 
-OWNER = {"email": "onelovellc@outlook.com", "password": "Owner123!"}
-ACCT = {"email": "accountant@fadeco.com", "password": "Books123!"}
-BOOK = {"email": "bookkeeper@fadeco.com", "password": "Books123!"}
-BARBER = {"email": "marcus@fadeco.com", "password": "Staff123!"}
-SHARP = {"email": "owner@sharplines.com", "password": "Owner123!"}
+OWNER = {"email": "owner@mindatease.example", "password": "Owner#Demo2026"}
+ACCT = {"email": "accountant@mindatease.example", "password": "Books#Demo2026"}
+BOOK = {"email": "bookkeeper@mindatease.example", "password": "Books#Demo2026"}
+BARBER = {"email": "marcus@mindatease.example", "password": "Staff#Demo2026"}
+SHARP = {"email": "owner@sharplines.com", "password": "Owner#Demo2026"}
 
 
 def mk_session(creds):

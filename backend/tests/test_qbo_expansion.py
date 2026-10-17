@@ -9,7 +9,7 @@ BASE_URL = (os.environ.get("REACT_APP_BACKEND_URL") or
             open("/app/frontend/.env").read().split("REACT_APP_BACKEND_URL=")[1].split()[0]).rstrip("/")
 API = f"{BASE_URL}/api"
 
-OWNER = {"email": "onelovellc@outlook.com", "password": "Owner123!"}
+OWNER = {"email": "owner@mindatease.example", "password": "Owner#Demo2026"}
 
 
 def mk_session(creds):

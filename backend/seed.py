@@ -92,11 +92,11 @@ async def seed_demo():
                      "industry": "hvac", "base_currency": "USD"},
         "created_at": now_iso()})
     await seed_coa(Scoped(db.accounts, tid))
-    owner = await make_user(tid, "onelovellc@outlook.com", "Darnell Price", "owner", "Owner123!")
-    await make_user(tid, "accountant@mindatease.example", "Priya Shah", "accountant", "Books123!")
-    await make_user(tid, "bookkeeper@mindatease.example", "Sam Reed", "bookkeeper", "Books123!")
-    b1 = await make_user(tid, "marcus@mindatease.example", "Marcus Vance", "barber", "Staff123!", 0.10)
-    b2 = await make_user(tid, "tasha@mindatease.example", "Tasha Lane", "barber", "Staff123!", 0.12)
+    owner = await make_user(tid, "owner@mindatease.example", "Darnell Price", "owner", "Owner#Demo2026")
+    await make_user(tid, "accountant@mindatease.example", "Priya Shah", "accountant", "Books#Demo2026")
+    await make_user(tid, "bookkeeper@mindatease.example", "Sam Reed", "bookkeeper", "Books#Demo2026")
+    b1 = await make_user(tid, "marcus@mindatease.example", "Marcus Vance", "barber", "Staff#Demo2026", 0.10)
+    b2 = await make_user(tid, "tasha@mindatease.example", "Tasha Lane", "barber", "Staff#Demo2026", 0.12)
     staff = [b1, b2]
 
     products = [
@@ -305,7 +305,7 @@ async def seed_sharp():
                      "base_currency": "USD"},
         "created_at": now_iso()})
     await seed_coa(Scoped(db.accounts, tid))
-    await make_user(tid, "owner@sharplines.com", "Jordan Cole", "owner", "Owner123!")
+    await make_user(tid, "owner@sharplines.com", "Jordan Cole", "owner", "Owner#Demo2026")
     print("  Sharp Lines Studio: isolation workspace (owner only)")
 
 
