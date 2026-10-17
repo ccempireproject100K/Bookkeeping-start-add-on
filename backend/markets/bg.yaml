@@ -6,3 +6,4 @@ colors:
 languages:
 - bg
 extended_network: false
+currency: BGN

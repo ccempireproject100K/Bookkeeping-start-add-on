@@ -9,3 +9,4 @@ languages:
 - ms
 - ta
 extended_network: false
+currency: SGD

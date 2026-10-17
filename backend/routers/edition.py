@@ -1,17 +1,26 @@
 """Vertical editions, driven by niche packs (backend/niches/*.yaml).
 
 GET /edition returns the workspace's pack: brand face, terminology,
-colors, and module list. The checklist is the pack's own items with
-`done` computed from live workspace data via each item's `check` key.
+colors, and module list. When the workspace has a market (one of the
+46 market packs, backend/markets/*.yaml), the face is composed
+trade x market via lib.market_packs: market accent wins, and the
+payload gains a `market` object (flag, name, languages, currency).
+Workspaces without a market get the trade-only payload, unchanged.
+The checklist is the pack's own items with `done` computed from live
+workspace data via each item's `check` key.
 
 Public: GET /niches (pack picker for signup) and GET /niches/resolve
 (subdomain -> niche id, for the Cloudflare wildcard setup).
 """
+from typing import Optional
+
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
 
 from db import db
 from lib.auth import require
+from lib.market_packs import resolve_market_pack
+from lib.markets import get_market, public_market
 from lib.niches import get_pack, all_packs, public_pack, niche_from_host
 
 router = APIRouter(prefix="/edition", tags=["edition"])
@@ -45,7 +54,7 @@ async def edition_profile(request: Request, user: dict = Depends(require("dashbo
     t = await _tenant(user)
     pack = _pack_for_tenant(t, request.headers.get("host"))
     settings = t.get("settings", {})
-    return {
+    payload = {
         "edition": pack["id"],
         "vertical": pack["id"],
         "niche_id": pack["id"],
@@ -58,6 +67,22 @@ async def edition_profile(request: Request, user: dict = Depends(require("dashbo
         "modules": _modules(settings),
         "branding": t.get("branding", {}),
     }
+    # Market face: only when the workspace has a market_code. The
+    # composed colors replace the trade colors (market accent wins);
+    # every other top-level field stays the trade's. No market_code ->
+    # the payload above is returned exactly as before.
+    market_code = t.get("market_code")
+    if market_code:
+        skin = resolve_market_pack(pack["id"], market_code)
+        if skin is not None:
+            payload["colors"] = skin["colors"]
+            payload["market"] = {
+                **skin["market"],
+                "accent": skin["accent"],
+                "languages": skin["languages"],
+                "currency": skin.get("currency"),
+            }
+    return payload
 
 
 @router.get("/checklist")
@@ -108,6 +133,29 @@ async def switch_niche(body: NicheBody, user: dict = Depends(require("ledger:adm
         {"id": user["tenant_id"]}, {"$set": {"niche_id": pack["id"]}})
     return {"ok": True, "niche_id": pack["id"],
             "product_name": pack["product_name"]}
+
+
+class MarketBody(BaseModel):
+    market_code: Optional[str] = None
+
+
+@router.patch("/market")
+async def switch_market(body: MarketBody, user: dict = Depends(require("ledger:admin"))):
+    """Set or clear the workspace's market face (accent, flag, languages,
+    currency). Display/skin only, like the niche switch — the books and
+    the base currency seeded at creation are left untouched. A null or
+    empty market_code clears the market (back to the trade-only face)."""
+    if not body.market_code:
+        await db.tenants.update_one(
+            {"id": user["tenant_id"]}, {"$set": {"market_code": None}})
+        return {"ok": True, "market_code": None, "market": None}
+    market = get_market(body.market_code)
+    if market is None:
+        raise HTTPException(400, "Unknown market")
+    await db.tenants.update_one(
+        {"id": user["tenant_id"]}, {"$set": {"market_code": market["code"]}})
+    return {"ok": True, "market_code": market["code"],
+            "market": public_market(market)}
 
 
 # ---------- Public ----------

@@ -6,3 +6,4 @@ colors:
 languages:
 - da
 extended_network: false
+currency: DKK

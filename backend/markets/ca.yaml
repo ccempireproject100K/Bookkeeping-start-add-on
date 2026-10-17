@@ -7,3 +7,4 @@ languages:
 - en
 - fr
 extended_network: false
+currency: CAD

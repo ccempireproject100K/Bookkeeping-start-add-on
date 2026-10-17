@@ -6,3 +6,4 @@ colors:
 languages:
 - pl
 extended_network: false
+currency: PLN

@@ -2,9 +2,10 @@
 
 Each file in backend/markets/ describes a market (46 total, the locked
 list in proposed-45-markets.md): a theme accent, the AI receptionist
-languages for that market, and the country flag. Markets carry NO trade
-content — chart of accounts, services and templates come from the trade
-(niche) pack. See lib/market_packs.py for the trade x market resolver.
+languages for that market, the country flag, and the market's ISO 4217
+currency. Markets carry NO trade content — chart of accounts, services
+and templates come from the trade (niche) pack. See lib/market_packs.py
+for the trade x market resolver.
 
 Adding market #47 = adding one YAML file. No code changes.
 """
@@ -14,7 +15,7 @@ import yaml
 
 PACKS_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "markets")
 
-_REQUIRED = ["code", "name", "flag", "colors", "languages"]
+_REQUIRED = ["code", "name", "flag", "colors", "languages", "currency"]
 
 _cache: dict = {}
 
@@ -31,6 +32,10 @@ def _validate(market: dict, path: str) -> dict:
         raise ValueError(f"market pack {path}: colors.accent is required")
     if not all(isinstance(x, str) and x for x in market["languages"]):
         raise ValueError(f"market pack {path}: languages must be non-empty strings")
+    currency = str(market["currency"]).upper()
+    if len(currency) != 3 or not currency.isalpha():
+        raise ValueError(f"market pack {path}: currency must be a 3-letter ISO 4217 code")
+    market["currency"] = currency
     market.setdefault("extended_network", False)
     return market
 
@@ -75,6 +80,7 @@ def public_market(market: dict) -> dict:
         "code": market["code"], "name": market["name"],
         "flag": market["flag"], "colors": market.get("colors", {}),
         "languages": market.get("languages", []),
+        "currency": market.get("currency"),
         "extended_network": bool(market.get("extended_network", False)),
     }
 

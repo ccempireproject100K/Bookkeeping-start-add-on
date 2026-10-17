@@ -6,3 +6,4 @@ colors:
 languages:
 - ja
 extended_network: false
+currency: JPY

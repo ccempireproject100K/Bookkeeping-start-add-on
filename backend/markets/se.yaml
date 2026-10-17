@@ -6,3 +6,4 @@ colors:
 languages:
 - sv
 extended_network: false
+currency: SEK

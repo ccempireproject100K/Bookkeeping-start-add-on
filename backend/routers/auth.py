@@ -26,6 +26,7 @@ class RegisterBody(BaseModel):
     name: str
     shop_name: str = "My Shop"
     niche_id: Optional[str] = None
+    market_code: Optional[str] = None  # one of the 46 market packs; validated in create_workspace
     plan: Optional[str] = None  # light | medium | heavy; default light + 30-day trial
 
     @field_validator("password")
@@ -76,20 +77,37 @@ async def _audit(user, action, entity, entity_id, details=None):
     })
 
 
-async def create_workspace(email, password, name, shop_name, role="owner", tenant_id=None, commission_rate=0, niche_id=None, plan=None):
+async def create_workspace(email, password, name, shop_name, role="owner", tenant_id=None, commission_rate=0, niche_id=None, plan=None, market_code=None):
     from lib.niches import get_pack, DEFAULT_NICHE
+    from lib.markets import get_market
+    from lib.currencies import is_supported
     email = email.lower().strip()
     if await db.users.find_one({"email": email}):
         raise HTTPException(status_code=409, detail="An account with this email already exists")
     pack = get_pack(niche_id)
     niche_id = pack.get("id") or DEFAULT_NICHE
+    # A market is optional, but a supplied one must be a real market pack —
+    # no silent fallback to an invented default (mirrors the resolver).
+    market = None
+    if market_code:
+        market = get_market(market_code)
+        if market is None:
+            raise HTTPException(status_code=400, detail="Unknown market")
     stored_plan = validate_plan(plan) if plan else "light"
     if tenant_id is None:
         tenant_id = new_id()
+        # Seed the books' base currency from the market's currency at
+        # creation only, and only when the multi-currency system supports
+        # that currency — otherwise the USD default stands (the market's
+        # own currency still rides on the tenant's market face).
+        base_currency = "USD"
+        if market and is_supported(market.get("currency")):
+            base_currency = market["currency"]
         tenant = {
             "id": tenant_id, "name": shop_name, "niche_id": niche_id,
+            "market_code": market["code"] if market else None,
             "settings": {"inventory_enabled": True, "sales_tax_rate": 0.0725,
-                         "double_entry_mode": "primary", "base_currency": "USD"},
+                         "double_entry_mode": "primary", "base_currency": base_currency},
             "created_at": now_iso(),
         }
         tenant.update(new_trial_fields())       # Light + 30-day Medium trial
@@ -112,7 +130,8 @@ async def register(body: RegisterBody, response: Response):
             400, "This password has appeared in a data breach. "
                  "Please choose a different one.")
     user = await create_workspace(body.email, body.password, body.name, body.shop_name,
-                                  niche_id=body.niche_id, plan=body.plan)
+                                  niche_id=body.niche_id, plan=body.plan,
+                                  market_code=body.market_code)
     await _issue(response, user)
     return _public(user)
 

@@ -7,3 +7,4 @@ languages:
 - zh
 - en
 extended_network: false
+currency: HKD

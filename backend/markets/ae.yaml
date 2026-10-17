@@ -7,3 +7,4 @@ languages:
 - ar
 - en
 extended_network: false
+currency: AED

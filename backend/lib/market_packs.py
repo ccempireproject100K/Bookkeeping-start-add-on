@@ -33,6 +33,8 @@ def compose_skin(pack: dict, market: dict) -> dict:
         "flag": market["flag"],
         # languages come from the market
         "languages": list(market.get("languages") or []),
+        # currency comes from the market
+        "currency": market.get("currency"),
         # content comes from the trade
         "terms": pack.get("terms", {}),
         "revenue_accounts": pack.get("revenue_accounts", []),

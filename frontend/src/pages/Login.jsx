@@ -7,26 +7,27 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { api, errMsg } from "@/lib/api";
 import { asFace } from "@/lib/packs";
+import { asMarketList, findMarket, readMarketChoice } from "@/lib/markets";
 import FaceIcon from "@/components/FaceIcon";
 import { KeyRound, ArrowRight, Fingerprint } from "lucide-react";
 import { loginWithPasskey, passkeysSupported } from "@/lib/webauthn";
 import { useTranslation } from "react-i18next";
 const DEMOS = [{
   role: "Owner",
-  email: "owner@mindatease.example",
-  password: "Owner#Demo2026"
+  email: "onelovellc@outlook.com",
+  password: "Owner123!"
 }, {
   role: "Accountant",
   email: "accountant@mindatease.example",
-  password: "Books#Demo2026"
+  password: "Books123!"
 }, {
   role: "Bookkeeper",
   email: "bookkeeper@mindatease.example",
-  password: "Books#Demo2026"
+  password: "Books123!"
 }, {
   role: "Technician",
   email: "marcus@mindatease.example",
-  password: "Staff#Demo2026"
+  password: "Staff123!"
 }];
 export default function Login() {
   const {
@@ -59,6 +60,15 @@ export default function Login() {
   }, []);
   const tradeFace = face && face.niche_id !== "generic" ? face : null;
   const brandName = face?.product_name || "Mind at Ease Solutions";
+  // Market chosen on the public pages (industries / register) rides
+  // along in localStorage — show its flag + name so the choice is
+  // visibly honored here too.
+  const [marketFace, setMarketFace] = useState(null);
+  useEffect(() => {
+    const code = readMarketChoice();
+    if (!code) return;
+    api.get("/market-packs").then((d) => setMarketFace(findMarket(d, code))).catch(() => {});
+  }, []);
   const passkeyLogin = async () => {
     if (!email.trim()) {
       toast.error(t("login.enterYourEmailFirstThenUse"));
@@ -104,6 +114,7 @@ export default function Login() {
         <div className="relative flex items-center gap-3">
           <div className="w-10 h-10 rounded-lg brand-mark" />
           <span className="font-display font-bold text-xl">{brandName}</span>
+          {marketFace && <span data-testid="login-market-face" className="text-sm text-gray-400">{marketFace.flag} {marketFace.name}</span>}
         </div>
         <div className="relative max-w-md">
           {tradeFace && <div className="flex items-center gap-2 mb-5">
@@ -164,8 +175,13 @@ export default function Login() {
             </div>
           </div>
 
-          <div className="mt-8 text-center">
-            <Link to="/industries" className="text-xs text-gray-500 hover:text-amber-400">Bookkeeping for your industry — all 33 trades</Link>
+          <div className="mt-8 text-center space-y-2">
+            <div>
+              <Link to="/register" data-testid="login-register-link" className="text-sm text-amber-500 hover:text-amber-400">Create your workspace</Link>
+            </div>
+            <div>
+              <Link to="/industries" className="text-xs text-gray-500 hover:text-amber-400">Bookkeeping for your industry — all 33 trades</Link>
+            </div>
           </div>
         </div>
       </div>

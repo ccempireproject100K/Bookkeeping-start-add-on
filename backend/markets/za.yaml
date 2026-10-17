@@ -8,3 +8,4 @@ languages:
 - af
 - zu
 extended_network: true
+currency: ZAR

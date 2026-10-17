@@ -8,3 +8,4 @@ languages:
 - fr
 - de
 extended_network: false
+currency: EUR

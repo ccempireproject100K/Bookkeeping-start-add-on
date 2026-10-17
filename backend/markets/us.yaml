@@ -7,3 +7,4 @@ languages:
 - en
 - es
 extended_network: false
+currency: USD
