@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { errMsg } from "@/lib/api";
+import { api, errMsg } from "@/lib/api";
+import FaceIcon from "@/components/FaceIcon";
 import { KeyRound, ArrowRight, Fingerprint } from "lucide-react";
 import { loginWithPasskey, passkeysSupported } from "@/lib/webauthn";
 import { useTranslation } from "react-i18next";
@@ -44,6 +45,19 @@ export default function Login() {
   useEffect(() => {
     if (user) navigate("/");
   }, [user, navigate]);
+  // Public face for this hostname: a niche subdomain shows that trade's
+  // pack (name, tagline, icon); anything else resolves to the generic
+  // trade-neutral product face — never a default trade's branding.
+  const [face, setFace] = useState(null);
+  useEffect(() => {
+    api.get("/niches/resolve", {
+      params: {
+        host: window.location.hostname
+      }
+    }).then(setFace).catch(() => {});
+  }, []);
+  const tradeFace = face && face.niche_id !== "generic" ? face : null;
+  const brandName = face?.product_name || "Mind at Ease Solutions";
   const passkeyLogin = async () => {
     if (!email.trim()) {
       toast.error(t("login.enterYourEmailFirstThenUse"));
@@ -85,16 +99,24 @@ export default function Login() {
   return <div className="min-h-screen grid lg:grid-cols-2">
       {/* Brand side */}
       <div className="hidden lg:flex relative flex-col justify-between p-12 overflow-hidden">
-        <img src="https://images.unsplash.com/photo-1698479603408-1a66a6d9e80f?crop=entropy&cs=srgb&fm=jpg&q=85&w=1400" alt={t("login.hvacEquipment")} className="absolute inset-0 w-full h-full object-cover opacity-30" />
         <div className="absolute inset-0 bg-gradient-to-br from-[#0B0D10] via-[#0B0D10]/85 to-[#0B0D10]/40" />
         <div className="relative flex items-center gap-3">
           <div className="w-10 h-10 rounded-lg brand-mark" />
-          <span className="font-display font-bold text-xl">{t("login.mindAtEaseSolutionsHVAC")}</span>
+          <span className="font-display font-bold text-xl">{brandName}</span>
         </div>
         <div className="relative max-w-md">
+          {tradeFace && <div className="flex items-center gap-2 mb-5">
+              <span className="w-9 h-9 rounded-lg flex items-center justify-center" style={{
+              backgroundColor: `${tradeFace.colors?.accent || "#f59e0b"}22`,
+              color: tradeFace.colors?.accent || "#f59e0b"
+            }}>
+                <FaceIcon name={tradeFace.icon} size={18} />
+              </span>
+              <span className="text-xs uppercase tracking-widest text-gray-400">{tradeFace.trade}</span>
+            </div>}
           <h1 className="font-display text-4xl font-bold leading-tight mb-4">{t("login.knowYourProfitOn")} <span className="text-amber-500">{t("login.everyJob")}</span>.
           </h1>
-          <p className="text-gray-400 leading-relaxed">{t("login.contractorJobCostingWiredStraightInto")}</p>
+          <p className="text-gray-400 leading-relaxed">{tradeFace ? tradeFace.tagline : t("login.contractorJobCostingWiredStraightInto")}</p>
         </div>
         <div className="relative text-xs text-gray-500 font-mono">{t("login.revenueJobCostsGrossProfit")}</div>
       </div>
@@ -104,7 +126,7 @@ export default function Login() {
         <div className="w-full max-w-sm animate-rise">
           <div className="lg:hidden flex items-center gap-3 mb-8">
             <div className="w-9 h-9 rounded-lg brand-mark" />
-            <span className="font-display font-bold text-lg">{t("login.mindAtEaseHVAC")}</span>
+            <span className="font-display font-bold text-lg">{brandName}</span>
           </div>
           <h2 className="font-display text-2xl font-bold mb-1">{t("login.signIn")}</h2>
           <p className="text-sm text-gray-500 mb-6">{t("login.accessYourWorkspace")}</p>
@@ -139,6 +161,10 @@ export default function Login() {
                   <div className="text-[10px] text-gray-500 truncate">{d.email}</div>
                 </button>)}
             </div>
+          </div>
+
+          <div className="mt-8 text-center">
+            <Link to="/industries" className="text-xs text-gray-500 hover:text-amber-400">Bookkeeping for your industry — all 33 trades</Link>
           </div>
         </div>
       </div>

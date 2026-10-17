@@ -120,7 +120,13 @@ async def list_niches():
 
 @public_router.get("/resolve")
 async def resolve_niche(host: str):
-    """Which niche a hostname maps to (Cloudflare wildcard subdomains)."""
+    """Which niche a hostname maps to (Cloudflare wildcard subdomains).
+
+    Returns the full public face (name, tagline, icon, terms, colors).
+    A hostname with no niche subdomain resolves to the generic
+    trade-neutral face — the product itself, never one trade's face."""
     nid = niche_from_host(host)
     pack = get_pack(nid)
-    return {"niche_id": pack["id"], "product_name": pack["product_name"]}
+    out = public_pack(pack)
+    out["niche_id"] = pack["id"]
+    return out
