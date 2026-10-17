@@ -1,4 +1,5 @@
 id: auto_repair
+icon: Car
 trade: Auto Repair
 product_name: "The Shop Ledger"
 tagline: "Bookkeeping built for auto repair shops"

@@ -62,7 +62,7 @@ BASE_COA = [
 ]
 
 # Backwards-compatible alias for anything still importing COA directly.
-def full_coa(niche_id: str = "barbershop"):
+def full_coa(niche_id: str | None = None):
     """Base chart + the niche pack's revenue and trade-expense lines."""
     from lib.niches import get_pack
     pack = get_pack(niche_id)
@@ -120,7 +120,7 @@ del _code, _name, _type, _normal
 TYPE_ORDER = {"asset": 0, "liability": 1, "equity": 2, "revenue": 3, "expense": 4}
 
 
-async def seed_coa(accounts: Scoped, niche_id: str = "barbershop"):
+async def seed_coa(accounts: Scoped, niche_id: str | None = None):
     """Idempotent: creates any missing system accounts for this tenant.
 
     The chart is the shared base plus the niche pack's revenue and
