@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { errMsg } from "@/lib/api";
-import { Scissors, ArrowRight, Fingerprint } from "lucide-react";
+import { KeyRound, ArrowRight, Fingerprint } from "lucide-react";
 import { loginWithPasskey, passkeysSupported } from "@/lib/webauthn";
 import { useTranslation } from "react-i18next";
 const DEMOS = [{
@@ -15,15 +15,15 @@ const DEMOS = [{
   password: "Owner123!"
 }, {
   role: "Accountant",
-  email: "accountant@fadeco.com",
+  email: "accountant@mindatease.example",
   password: "Books123!"
 }, {
   role: "Bookkeeper",
-  email: "bookkeeper@fadeco.com",
+  email: "bookkeeper@mindatease.example",
   password: "Books123!"
 }, {
   role: "Technician",
-  email: "marcus@fadeco.com",
+  email: "marcus@mindatease.example",
   password: "Staff123!"
 }];
 export default function Login() {
@@ -132,7 +132,7 @@ export default function Login() {
 
           <div className="mt-8">
             <div className="text-[10px] uppercase tracking-widest text-gray-500 mb-3 flex items-center gap-2">
-              <Scissors size={12} /> {t("login.demoLogins")}</div>
+              <KeyRound size={12} /> {t("login.demoLogins")}</div>
             <div className="grid grid-cols-2 gap-2">
               {DEMOS.map(d => <button key={d.role} data-testid={`demo-login-${d.role.toLowerCase()}`} onClick={e => submit(e, d)} disabled={busy} className="text-left px-3 py-2 rounded-lg bg-[#14171E] border border-[#222838] hover:border-amber-500/40 transition-colors">
                   <div className="text-sm font-medium text-gray-100">{d.role}</div>

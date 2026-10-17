@@ -1,5 +1,6 @@
-"""Seed demo workspaces for The Barber's Ledger. Run: cd /app/backend && python seed.py
-Wipes demo collections and recreates Fade & Co. (rich data) + Sharp Lines (isolation)."""
+"""Seed demo workspaces for Mind at Ease Solutions. Run: cd /app/backend && python seed.py
+Wipes demo collections and recreates the Mind at Ease Solutions HVAC demo workspace
+(rich data) + Sharp Lines (isolation)."""
 import asyncio
 import os
 import random
@@ -47,7 +48,7 @@ async def make_product(tenant_id, name, ptype, price_c, cost_c, qty, code, img=N
     return doc
 
 
-async def do_sale(tenant_id, owner, d, barbers, products, tax_rate):
+async def do_sale(tenant_id, owner, d, staff, products, tax_rate):
     svc = random.choice(SERVICES)
     rev_by_code = {svc[3]: svc[2]}
     service_subtotal = svc[2]
@@ -66,8 +67,8 @@ async def do_sale(tenant_id, owner, d, barbers, products, tax_rate):
     pm = random.choice(["cash", "cash", "card"])
     taxable = product_subtotal
     tax = round(taxable * tax_rate)
-    barber = random.choice(barbers)
-    commission = round(service_subtotal * barber["commission_rate"])
+    member = random.choice(staff)
+    commission = round(service_subtotal * member["commission_rate"])
     lines_in = [{"revenue_code": c, "amount_cents": a} for c, a in rev_by_code.items()]
     sale_id = new_id()
     entry = await L.post_journal_entry(db, tenant_id, owner, P.build_sale(
@@ -80,11 +81,11 @@ async def do_sale(tenant_id, owner, d, barbers, products, tax_rate):
         "id": sale_id, "tenant_id": tenant_id, "cart": [{"name": svc[1], "qty": 1, "amount_cents": svc[2]}],
         "payment_method": pm, "subtotal_cents": subtotal, "discount_cents": 0, "tax_cents": tax,
         "total_cents": total, "cogs_cents": cogs, "commission_cents": commission,
-        "barber_id": barber["id"], "entry_id": entry["id"], "entry_number": entry["number"],
+        "barber_id": member["id"], "entry_id": entry["id"], "entry_number": entry["number"],
         "created_at": d.isoformat()})
 
 
-async def seed_fade():
+async def seed_demo():
     tid = new_id()
     await db.tenants.insert_one({"id": tid, "name": "Mind at Ease Solutions HVAC",
         "settings": {"inventory_enabled": True, "sales_tax_rate": 0.0725, "double_entry_mode": "primary",
@@ -92,11 +93,11 @@ async def seed_fade():
         "created_at": now_iso()})
     await seed_coa(Scoped(db.accounts, tid))
     owner = await make_user(tid, "onelovellc@outlook.com", "Darnell Price", "owner", "Owner123!")
-    await make_user(tid, "accountant@fadeco.com", "Priya Shah", "accountant", "Books123!")
-    await make_user(tid, "bookkeeper@fadeco.com", "Sam Reed", "bookkeeper", "Books123!")
-    b1 = await make_user(tid, "marcus@fadeco.com", "Marcus Vance", "barber", "Staff123!", 0.10)
-    b2 = await make_user(tid, "tasha@fadeco.com", "Tasha Lane", "barber", "Staff123!", 0.12)
-    barbers = [b1, b2]
+    await make_user(tid, "accountant@mindatease.example", "Priya Shah", "accountant", "Books123!")
+    await make_user(tid, "bookkeeper@mindatease.example", "Sam Reed", "bookkeeper", "Books123!")
+    b1 = await make_user(tid, "marcus@mindatease.example", "Marcus Vance", "barber", "Staff123!", 0.10)
+    b2 = await make_user(tid, "tasha@mindatease.example", "Tasha Lane", "barber", "Staff123!", 0.12)
+    staff = [b1, b2]
 
     products = [
         await make_product(tid, "Air Filter 20x25x1 (MERV 11)", "retail", 2400, 900, 160, "4100"),
@@ -124,7 +125,7 @@ async def seed_fade():
         if d.weekday() == 6:  # closed Sundays
             continue
         for _ in range(random.randint(2, 5)):
-            await do_sale(tid, owner, d, barbers, retail, 0.0725)
+            await do_sale(tid, owner, d, staff, retail, 0.0725)
 
     # expenses: shop rent + utilities (manual posted entries, monthly)
     for m in range(3, 0, -1):
@@ -141,9 +142,9 @@ async def seed_fade():
     e = await L.post_journal_entry(db, tid, owner, P.build_invoice_issue(
         revenue_lines=[{"revenue_code": "4200", "amount_cents": 60000}], tax_cents=0, cogs_cents=0,
         gross_cents=60000, entry_date=(today - timedelta(days=20)).isoformat(),
-        source_ref=inv1, memo="Chair rent — booth 3"), status="posted")
-    await db.invoices.insert_one({"id": inv1, "tenant_id": tid, "client_name": "Leo Sterling (Booth Rent)",
-        "lines": [{"kind": "service", "name": "Monthly booth rent", "revenue_code": "4200", "amount": 600.0}],
+        source_ref=inv1, memo="Quarterly maintenance contract"), status="posted")
+    await db.invoices.insert_one({"id": inv1, "tenant_id": tid, "client_name": "Leo Sterling (Property Mgmt)",
+        "lines": [{"kind": "service", "name": "Quarterly maintenance contract", "revenue_code": "4200", "amount": 600.0}],
         "subtotal_cents": 60000, "tax_cents": 0, "total_cents": 60000, "status": "issued",
         "due_date": today.isoformat(), "issue_entry": e["number"], "paid_entry": None, "created_at": now_iso()})
 
@@ -151,16 +152,16 @@ async def seed_fade():
     e2 = await L.post_journal_entry(db, tid, owner, P.build_invoice_issue(
         revenue_lines=[{"revenue_code": "4020", "amount_cents": 25000}], tax_cents=0, cogs_cents=0,
         gross_cents=25000, entry_date=(today - timedelta(days=15)).isoformat(),
-        source_ref=inv2, memo="Event grooming package"), status="posted")
+        source_ref=inv2, memo="Emergency repair call"), status="posted")
     e2b = await L.post_journal_entry(db, tid, owner, P.build_invoice_paid(
         amount_cents=25000, payment_method="bank", entry_date=(today - timedelta(days=10)).isoformat(),
-        source_ref=inv2, memo="Event grooming package"), status="posted")
+        source_ref=inv2, memo="Emergency repair call"), status="posted")
     await db.invoices.insert_one({"id": inv2, "tenant_id": tid, "client_name": "Northside Films LLC",
-        "lines": [{"kind": "service", "name": "On-set grooming", "revenue_code": "4020", "amount": 250.0}],
+        "lines": [{"kind": "service", "name": "After-hours compressor repair", "revenue_code": "4020", "amount": 250.0}],
         "subtotal_cents": 25000, "tax_cents": 0, "total_cents": 25000, "status": "paid",
         "due_date": None, "issue_entry": e["number"], "paid_entry": e2b["number"], "created_at": now_iso()})
 
-    print(f"  Fade & Co.: owner+4 staff, {len(products)} products, ~90 days of sales, 2 invoices")
+    print(f"  Mind at Ease Solutions HVAC: owner+4 staff, {len(products)} products, ~90 days of sales, 2 invoices")
 
     # gift cards (deferred revenue)
     for amt, who in [(10000, "Jordan M."), (5000, "Alex R.")]:
@@ -174,7 +175,7 @@ async def seed_fade():
             "issue_entry": e["number"], "created_at": now_iso()})
 
     # vendor bills (accounts payable), one overdue
-    for vendor, amt, days, code in [("Clipper Supply Co.", 32000, -20, "5700"), ("Fresh Towel Service", 8500, 10, "5700")]:
+    for vendor, amt, days, code in [("Summit Refrigeration Supply", 32000, -20, "5700"), ("City Linen Service", 8500, 10, "5700")]:
         b_id = new_id()
         bdate = (today - timedelta(days=max(days + 30, 5))).isoformat()
         due = (today + timedelta(days=days)).isoformat()
@@ -294,7 +295,7 @@ async def seed_fade():
     for code, amt in [("4300", 5000000), ("5000", 1200000), ("5005", 900000), ("5400", 300000)]:
         await db.budgets.insert_one({"id": new_id(), "tenant_id": tid, "year": str(today.year),
             "account_code": code, "account_name": None, "amount_cents": amt, "created_at": now_iso()})
-    print("  Fade & Co.: + banking (2 accts), 3 vendors, 2 expenses, 4 budgets")
+    print("  Mind at Ease Solutions HVAC: + banking (2 accts), 3 vendors, 2 expenses, 4 budgets")
 
 
 async def seed_sharp():
@@ -314,7 +315,7 @@ async def main():
     for c in COLLECTIONS:
         await db[c].delete_many({})
     print("Cleared demo collections. Seeding...")
-    await seed_fade()
+    await seed_demo()
     await seed_sharp()
     print("seeded")
 

@@ -39,7 +39,7 @@ from lib.base import now_iso, today_str
 from lib.fx import refresh_rates
 from routers.collections import autopilot_run, get_config
 
-logger = logging.getLogger("barbers_ledger.scheduler")
+logger = logging.getLogger("mindatease.scheduler")
 
 LOCK_ID = "collections-scheduler"
 LOCK_TTL_SECONDS = 900  # 15 min; the heartbeat renews every 5

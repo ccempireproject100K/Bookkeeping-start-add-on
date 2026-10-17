@@ -1,4 +1,4 @@
-"""Backend API tests for The Barber's Ledger."""
+"""Backend API tests for Mind at Ease Solutions."""
 import os
 import pytest
 import requests
@@ -292,7 +292,7 @@ class TestPeriods:
 # ---------------- Tenant isolation ----------------
 class TestIsolation:
     def test_sharp_lines_sees_no_fadeco_data(self, sharp_owner, owner):
-        # Fade & Co accounts count
+        # Demo workspace accounts count
         fade_accts = owner.get(f"{API}/ledger/accounts").json()
         fade_entries = owner.get(f"{API}/ledger/journal-entries").json()
         sharp_entries = sharp_owner.get(f"{API}/ledger/journal-entries").json()

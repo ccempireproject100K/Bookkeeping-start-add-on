@@ -10,9 +10,9 @@ assert BASE_URL, "REACT_APP_BACKEND_URL not set"
 API = f"{BASE_URL}/api"
 
 OWNER = {"email": "onelovellc@outlook.com", "password": "Owner123!"}
-ACCT = {"email": "accountant@fadeco.com", "password": "Books123!"}
-BOOK = {"email": "bookkeeper@fadeco.com", "password": "Books123!"}
-BARBER = {"email": "marcus@fadeco.com", "password": "Staff123!"}
+ACCT = {"email": "accountant@mindatease.example", "password": "Books123!"}
+BOOK = {"email": "bookkeeper@mindatease.example", "password": "Books123!"}
+BARBER = {"email": "marcus@mindatease.example", "password": "Staff123!"}
 
 
 def mk_sess(creds):

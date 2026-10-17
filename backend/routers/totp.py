@@ -33,7 +33,7 @@ from lib.pii import pii_decrypt, pii_encrypt
 
 router = APIRouter(prefix="/totp", tags=["totp"])
 
-ISSUER = "Barber's Ledger"
+ISSUER = "Mind at Ease Solutions"
 
 
 async def _audit(user, action, entity, entity_id, details=None):

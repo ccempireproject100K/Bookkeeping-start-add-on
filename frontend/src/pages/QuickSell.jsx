@@ -194,7 +194,7 @@ export default function QuickSell() {
               <Row label="Subtotal" value={dollars(totals.subtotal)} />
               {totals.disc > 0 && <Row label="Discount" value={`-${dollars(totals.disc)}`} tone="text-rose-400" />}
               <Row label="Sales tax" value={dollars(totals.tax)} />
-              {barberId && <Row label="Barber commission" value={dollars(totals.commission)} tone="text-sky-400" testid="pos-commission-split-display" />}
+              {barberId && <Row label="Staff commission" value={dollars(totals.commission)} tone="text-sky-400" testid="pos-commission-split-display" />}
               <div className="flex justify-between pt-2 text-base font-semibold">
                 <span>{t("quicksell.total")}</span>
                 <span className="text-amber-400" data-testid="pos-cart-total">{dollars(totals.total)}</span>

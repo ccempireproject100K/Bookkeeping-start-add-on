@@ -1,4 +1,4 @@
-# Auth Testing — The Barber's Ledger
+# Auth Testing — Mind at Ease Solutions
 
 Custom email/password auth with httpOnly JWT cookie (`access_token`), `SameSite=Lax`, `Secure`.
 Frontend and backend are the SAME origin (served via ingress), so Lax cookies are sent on same-origin XHR.

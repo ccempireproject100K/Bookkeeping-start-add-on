@@ -23,7 +23,7 @@ from routers import (auth, ledger, products, pos, invoices, cashclose, dashboard
                      fx, market_packs, cfdi)
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("barbers_ledger")
+logger = logging.getLogger("mindatease")
 
 app = FastAPI(title="Mind at Ease Solutions — Books API")
 api_router = APIRouter(prefix="/api")
@@ -112,7 +112,7 @@ async def startup():
         await _sched.start()
     except Exception as e:
         logger.warning(f"Scheduler not started: {e}")
-    logger.info("Barber's Ledger started; indexes ensured.")
+    logger.info("Mind at Ease Solutions — Books API started; indexes ensured.")
 
 
 @app.on_event("shutdown")
