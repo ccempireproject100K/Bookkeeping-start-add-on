@@ -79,11 +79,35 @@ class Location(BaseModel):
     address: str
 
 
+class CustomerFiscal(BaseModel):
+    """Mexican receptor fiscal block (playbook §3.2). Optional everywhere;
+    required only when a CFDI is stamped to this customer. Validated with
+    the SAT catalogues whenever present, in any market."""
+    rfc: str
+    razon_social: str
+    cp_fiscal: str
+    regimen_fiscal: str
+    uso_cfdi: str = "G03"
+
+
 class CustomerBody(BaseModel):
     name: str
     email: Optional[str] = None
     phone: Optional[str] = None
     locations: List[Location] = []
+    fiscal: Optional[CustomerFiscal] = None
+
+
+def _fiscal_or_422(body: CustomerBody):
+    """Serialise the optional fiscal block, enforcing CFDI validity."""
+    if body.fiscal is None:
+        return None
+    from lib.cfdi import validate_receptor
+    data = body.fiscal.model_dump()
+    errs = validate_receptor(data)
+    if errs:
+        raise HTTPException(status_code=422, detail="; ".join(errs))
+    return data
 
 
 @router.get("")
@@ -105,7 +129,7 @@ async def create_customer(body: CustomerBody, user: dict = Depends(require("ops:
     doc = {
         "id": new_id(), "name": body.name, "email": body.email, "phone": body.phone,
         "locations": [l.model_dump() for l in body.locations], "created_at": now_iso(),
-        "active": True, "deleted_at": None,
+        "active": True, "deleted_at": None, "fiscal": _fiscal_or_422(body),
     }
     await coll(user).insert_one(doc)
     doc.pop("_id", None)
@@ -132,6 +156,7 @@ async def update_customer(customer_id: str, body: CustomerBody,
     await coll(user).update_one({"id": customer_id}, {"$set": {
         "name": body.name, "email": body.email, "phone": body.phone,
         "locations": [l.model_dump() for l in body.locations],
+        "fiscal": _fiscal_or_422(body),
         "updated_at": now_iso(),
     }})
     updated = await coll(user).find_one({"id": customer_id})
