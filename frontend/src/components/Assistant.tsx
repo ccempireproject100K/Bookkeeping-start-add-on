@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
-const SUGGESTIONS = ["What sold best this month?", "What should I reorder this week?", "How much commission does each barber get?", "Which lots expire soon?"];
+const SUGGESTIONS = ["What sold best this month?", "What should I reorder this week?", "How much commission does each team member get?", "Which lots expire soon?"];
 
 /** "Ask the shop": streaming ChatGPT answers grounded in this workspace's own numbers. */
 export default function Assistant() {

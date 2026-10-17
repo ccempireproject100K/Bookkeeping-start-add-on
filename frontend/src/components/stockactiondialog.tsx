@@ -175,7 +175,7 @@ export default function StockActionDialog({
     m.mutate();
   };
   if (!p) return null;
-  const barberSelect = <Field label="Barber">
+  const barberSelect = <Field label="Staff">
       <NativeSelect value={barber} onChange={e => setBarber(e.target.value)} data-testid="stock-barber-select">
         <option value="">{t("stockactiondialog.none")}</option>
         {team.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
