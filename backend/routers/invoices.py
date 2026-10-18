@@ -1,12 +1,14 @@
 """Invoices (accounts receivable): issue, partial payments, overpayments → customer
 credits, credit application, and refunds. Each transition posts a balanced entry."""
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
 from typing import Optional, List
 
 from db import db
 from lib.base import Scoped, new_id, now_iso, today_str, to_cents, cents_to_dollars
 from lib.auth import require, get_current_user
+from lib import idempotency as idem
+from lib.integration_auth import actor_label, get_sync_actor
 from lib import ledger as L
 from lib import posting as P
 from lib import fx as FX
@@ -59,44 +61,76 @@ async def list_invoices(user: dict = Depends(get_current_user)):
 
 
 @router.post("")
-async def issue_invoice(body: InvoiceBody, user: dict = Depends(require("ops:manage"))):
+async def issue_invoice(body: InvoiceBody,
+                        user: dict = Depends(get_sync_actor),
+                        request: Request = None):
+    # Sync surface: user session (ops:manage) OR integration credential.
+    # Idempotency-Key (sent by Momo) is enforced server-side — a retried
+    # push replays the recorded response instead of issuing a duplicate
+    # invoice + journal entry. See lib/idempotency.py.
+    idem_key = request.headers.get("Idempotency-Key") if request else None
+    sess = await idem.begin(
+        tenant_id=user["tenant_id"], key=idem_key,
+        endpoint="POST /invoices",
+        req_hash=idem.request_hash(
+            "POST", request.url.path if request else "/api/invoices",
+            body.model_dump()),
+        actor=actor_label(user))
+    if sess.is_replay:
+        return sess.replay_response()
     try:
-        currency = normalize_currency(body.currency)
-    except ValueError:
-        raise HTTPException(status_code=422, detail=f"Unsupported currency: {body.currency!r}")
-    rev_lines = []
-    subtotal = 0
-    for ln in body.lines:
-        amt = to_cents(ln.amount)
-        subtotal += amt
-        rev_lines.append({"revenue_code": ln.revenue_code, "amount_cents": amt})
-    tax_cents = to_cents(body.tax)
-    gross = subtotal + tax_cents
-    jid = body.tax_jurisdiction_id
-    if jid:
-        jur = await db.tax_jurisdictions.find_one(
-            {"id": jid, "tenant_id": user["tenant_id"], "active": True})
-        if not jur:
-            raise HTTPException(status_code=422, detail="Unknown or inactive tax jurisdiction")
-    inv_id = new_id()
-    entry = await L.post_journal_entry(db, user["tenant_id"], user, P.build_invoice_issue(
-        revenue_lines=rev_lines, tax_cents=tax_cents, cogs_cents=0,
-        gross_cents=gross, entry_date=today_str(), source_ref=inv_id,
-        memo=f"Invoice — {body.client_name}", currency=currency,
-    ), status="posted")
-    doc = {
-        "id": inv_id, "client_name": body.client_name, "customer_id": body.customer_id,
-        "lines": [l.model_dump() for l in body.lines],
-        "subtotal_cents": subtotal, "tax_cents": tax_cents, "total_cents": gross,
-        "currency": currency,
-        "tax_jurisdiction_id": jid,
-        "status": "issued", "paid_cents": 0, "payments": [], "due_date": body.due_date,
-        "terms": body.terms, "issue_entry": entry["number"], "created_at": now_iso(),
-        "issue_date": today_str(),  # accounting date; KPIs filter on this
-    }
-    await coll(user).insert_one(doc)
-    doc.pop("_id", None)
-    return _enrich(doc)
+        if idem_key:
+            # Crash-window guard: a previous attempt with this key
+            # issued the invoice but its response was never recorded.
+            stamped = await coll(user).find_one({"sync_key": idem_key})
+            if stamped:
+                out = {k: v for k, v in stamped.items() if k != "sync_key"}
+                return await sess.complete(_enrich(out),
+                                           resource_id=stamped["id"])
+        try:
+            currency = normalize_currency(body.currency)
+        except ValueError:
+            raise HTTPException(status_code=422, detail=f"Unsupported currency: {body.currency!r}")
+        rev_lines = []
+        subtotal = 0
+        for ln in body.lines:
+            amt = to_cents(ln.amount)
+            subtotal += amt
+            rev_lines.append({"revenue_code": ln.revenue_code, "amount_cents": amt})
+        tax_cents = to_cents(body.tax)
+        gross = subtotal + tax_cents
+        jid = body.tax_jurisdiction_id
+        if jid:
+            jur = await db.tax_jurisdictions.find_one(
+                {"id": jid, "tenant_id": user["tenant_id"], "active": True})
+            if not jur:
+                raise HTTPException(status_code=422, detail="Unknown or inactive tax jurisdiction")
+        inv_id = new_id()
+        entry = await L.post_journal_entry(db, user["tenant_id"], user, P.build_invoice_issue(
+            revenue_lines=rev_lines, tax_cents=tax_cents, cogs_cents=0,
+            gross_cents=gross, entry_date=today_str(), source_ref=inv_id,
+            memo=f"Invoice — {body.client_name}", currency=currency,
+        ), status="posted",
+            idempotency_key=f"httpidem:{idem_key}" if idem_key else None)
+        doc = {
+            "id": inv_id, "client_name": body.client_name, "customer_id": body.customer_id,
+            "lines": [l.model_dump() for l in body.lines],
+            "subtotal_cents": subtotal, "tax_cents": tax_cents, "total_cents": gross,
+            "currency": currency,
+            "tax_jurisdiction_id": jid,
+            "status": "issued", "paid_cents": 0, "payments": [], "due_date": body.due_date,
+            "terms": body.terms, "issue_entry": entry["number"], "created_at": now_iso(),
+            "issue_date": today_str(),  # accounting date; KPIs filter on this
+        }
+        if idem_key:
+            doc["sync_key"] = idem_key
+        await coll(user).insert_one(doc)
+        doc.pop("_id", None)
+        doc.pop("sync_key", None)
+        return await sess.complete(_enrich(doc), resource_id=inv_id)
+    except HTTPException as e:
+        await sess.fail(e.status_code, str(e.detail))
+        raise
 
 
 class PayBody(BaseModel):
@@ -108,10 +142,43 @@ class PayBody(BaseModel):
 
 
 @router.post("/{invoice_id}/pay")
-async def pay_invoice(invoice_id: str, body: PayBody, user: dict = Depends(require("ops:manage"))):
+async def pay_invoice(invoice_id: str, body: PayBody,
+                      user: dict = Depends(get_sync_actor),
+                      request: Request = None):
+    # Sync surface: user session (ops:manage) OR integration credential.
+    # A retried payment push with the same Idempotency-Key replays the
+    # recorded result instead of posting the payment twice.
+    idem_key = request.headers.get("Idempotency-Key") if request else None
+    sess = await idem.begin(
+        tenant_id=user["tenant_id"], key=idem_key,
+        endpoint="POST /invoices/pay",
+        req_hash=idem.request_hash(
+            "POST",
+            request.url.path if request else f"/api/invoices/{invoice_id}/pay",
+            body.model_dump()),
+        actor=actor_label(user))
+    if sess.is_replay:
+        return sess.replay_response()
+    try:
+        return await _pay_invoice_inner(invoice_id, body, user,
+                                        idem_key, sess)
+    except HTTPException as e:
+        await sess.fail(e.status_code, str(e.detail))
+        raise
+
+
+async def _pay_invoice_inner(invoice_id: str, body: PayBody, user: dict,
+                             idem_key, sess):
     inv = await coll(user).find_one({"id": invoice_id})
     if not inv:
         raise HTTPException(status_code=404, detail="Invoice not found")
+    if idem_key:
+        # Crash-window guard: this payment already landed (its stamp is
+        # on the invoice) but the response was never recorded.
+        for pmt in inv.get("payments", []):
+            if pmt.get("sync_key") == idem_key and pmt.get("sync_result"):
+                return await sess.complete(pmt["sync_result"],
+                                           resource_id=invoice_id)
     paid = inv.get("paid_cents", 0)
     balance = inv["total_cents"] - paid
     if balance <= 0:
@@ -172,7 +239,8 @@ async def pay_invoice(invoice_id: str, body: PayBody, user: dict = Depends(requi
         "entry_date": pay_date, "source": "invoice_paid", "source_ref": invoice_id,
         "memo": f"Payment — {inv['client_name']}", "lines": jl,
         "currency": inv_currency,
-    }, status="posted")
+    }, status="posted",
+        idempotency_key=f"httpidem:{idem_key}" if idem_key else None)
 
     # Realized FX on the cash portion that settled AR (best-effort; never
     # breaks the payment). Overpayments parked in 2210 carry no FX yet.
@@ -202,11 +270,19 @@ async def pay_invoice(invoice_id: str, body: PayBody, user: dict = Depends(requi
            "cash_cents": cash_received - overpay, "credit_cents": credit_applied,
            "method": body.payment_method, "pay_currency": pay_currency,
            "entry": entry["number"]}
+    result = {"status": status, "paid_cents": new_paid,
+              "balance_cents": inv["total_cents"] - new_paid,
+              "entry_number": entry["number"],
+              "credit_applied_cents": credit_applied,
+              "overpayment_cents": overpay}
+    if idem_key:
+        # Stamp the payment with its sync key + full result so an
+        # interrupted-then-retried push can be answered from the stamp.
+        pmt["sync_key"] = idem_key
+        pmt["sync_result"] = result
     await coll(user).update_one({"id": invoice_id}, {"$set": {"status": status, "paid_cents": new_paid},
                                                      "$push": {"payments": pmt}})
-    return {"status": status, "paid_cents": new_paid, "balance_cents": inv["total_cents"] - new_paid,
-            "entry_number": entry["number"], "credit_applied_cents": credit_applied,
-            "overpayment_cents": overpay}
+    return await sess.complete(result, resource_id=invoice_id)
 
 
 # ---------------- Customer credits / credit notes ----------------
