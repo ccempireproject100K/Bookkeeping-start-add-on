@@ -285,6 +285,103 @@ async def _pay_invoice_inner(invoice_id: str, body: PayBody, user: dict,
     return await sess.complete(result, resource_id=invoice_id)
 
 
+# ---------------- Payment refunds (sync surface) ----------------
+# Added by the financial-sync fix track (audit 2026-10-17): Momo
+# processes Stripe refunds on its side, but until now nothing could
+# reflect one here — the customer-credits refund below settles a
+# *credit balance* (2210) for an owner in the UI; it is not an
+# invoice-payment refund and is not reachable by an integration
+# credential. This endpoint is the minimal sync-surface addition:
+# same auth (get_sync_actor), same Idempotency-Key enforcement and
+# crash-window stamping as /pay. See INTEGRATION_CONTRACT_ADDENDUM.md.
+
+class InvoiceRefundBody(BaseModel):
+    amount: float                    # dollars, in the invoice currency
+    payment_method: str = "card"
+    refund_date: Optional[str] = None
+
+
+@router.post("/{invoice_id}/refund")
+async def refund_invoice_payment(invoice_id: str, body: InvoiceRefundBody,
+                                 user: dict = Depends(get_sync_actor),
+                                 request: Request = None):
+    # Sync surface: user session (ops:manage) OR integration credential.
+    # A retried refund push with the same Idempotency-Key replays the
+    # recorded result instead of refunding twice.
+    idem_key = request.headers.get("Idempotency-Key") if request else None
+    sess = await idem.begin(
+        tenant_id=user["tenant_id"], key=idem_key,
+        endpoint="POST /invoices/refund",
+        req_hash=idem.request_hash(
+            "POST",
+            request.url.path if request else f"/api/invoices/{invoice_id}/refund",
+            body.model_dump()),
+        actor=actor_label(user))
+    if sess.is_replay:
+        return sess.replay_response()
+    try:
+        return await _refund_invoice_inner(invoice_id, body, user,
+                                           idem_key, sess)
+    except HTTPException as e:
+        await sess.fail(e.status_code, str(e.detail))
+        raise
+
+
+async def _refund_invoice_inner(invoice_id: str, body: InvoiceRefundBody,
+                                user: dict, idem_key, sess):
+    inv = await coll(user).find_one({"id": invoice_id})
+    if not inv:
+        raise HTTPException(status_code=404, detail="Invoice not found")
+    if idem_key:
+        # Crash-window guard: this refund already landed (its stamp is
+        # on the invoice) but the response was never recorded.
+        for pmt in inv.get("payments", []):
+            if pmt.get("sync_key") == idem_key and pmt.get("kind") == "refund" \
+                    and pmt.get("sync_result"):
+                return await sess.complete(pmt["sync_result"],
+                                           resource_id=invoice_id)
+    paid = inv.get("paid_cents", 0)
+    refund_cents = to_cents(body.amount)
+    if refund_cents <= 0:
+        raise HTTPException(status_code=422, detail="Invalid refund amount")
+    if refund_cents > paid:
+        raise HTTPException(status_code=422, detail="Refund exceeds amount paid on this invoice")
+    inv_currency = normalize_currency(inv.get("currency") or "USD")
+    refund_date = body.refund_date or today_str()
+    cash = P._cash_account(body.payment_method)
+    # Reverse the payment's AR settlement: cash leaves, the customer
+    # owes the refunded amount again (balance reopens by exactly the
+    # refund), revenue is untouched — the sale happened; the payment
+    # was returned. Balanced by construction.
+    jl = [P.dr("1200", refund_cents, "AR reopened — payment refunded"),
+          P.cr(cash, refund_cents, "Refund paid out")]
+    entry = await L.post_journal_entry(db, user["tenant_id"], user, {
+        "entry_date": refund_date, "source": "invoice_refund",
+        "source_ref": invoice_id,
+        "memo": f"Refund — {inv['client_name']}", "lines": jl,
+        "currency": inv_currency,
+    }, status="posted",
+        idempotency_key=f"httpidem:{idem_key}" if idem_key else None)
+    new_paid = paid - refund_cents
+    status = "paid" if new_paid >= inv["total_cents"] else \
+        ("partial" if new_paid > 0 else "issued")
+    rec = {"date": refund_date, "amount_cents": -refund_cents,
+           "cash_cents": -refund_cents, "credit_cents": 0,
+           "method": body.payment_method, "pay_currency": inv_currency,
+           "kind": "refund", "entry": entry["number"]}
+    result = {"status": status, "paid_cents": new_paid,
+              "balance_cents": inv["total_cents"] - new_paid,
+              "entry_number": entry["number"],
+              "refund_cents": refund_cents}
+    if idem_key:
+        rec["sync_key"] = idem_key
+        rec["sync_result"] = result
+    await coll(user).update_one({"id": invoice_id},
+                                {"$set": {"status": status, "paid_cents": new_paid},
+                                 "$push": {"payments": rec}})
+    return await sess.complete(result, resource_id=invoice_id)
+
+
 # ---------------- Customer credits / credit notes ----------------
 class CreditNoteBody(BaseModel):
     client_name: str
