@@ -20,7 +20,7 @@ from routers import (auth, ledger, products, pos, invoices, cashclose, dashboard
                      simulator, subcompliance, cpa, pulse, pricing, taxforecast,
                      playground, combo, kpis, benchmarks, voice, taxposture,
                      whitelabel, entities, cleanup, purchase_orders,
-                     fx, market_packs, cfdi)
+                     fx, market_packs, cfdi, integrations)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("mindatease")
@@ -60,7 +60,7 @@ for r in (auth.router, ledger.router, products.router, pos.router,
           kpis.router, benchmarks.router, voice.router, taxposture.router,
           whitelabel.router, entities.router, cleanup.router,
           purchase_orders.router, fx.router, fx.currencies_router,
-          market_packs.router, cfdi.router):
+          market_packs.router, cfdi.router, integrations.router):
     api_router.include_router(r)
 api_router.include_router(plans.router)
 
@@ -93,6 +93,16 @@ async def startup():
         (db.bank_transactions, [("tenant_id", 1), ("dedupe_hash", 1)], {"unique": True}),
         (db.bank_accounts, [("tenant_id", 1), ("gl_code", 1)], {}),
         (db.rates, [("base", 1), ("quote", 1), ("date", 1)], {"unique": True}),
+        # Momo sync: idempotency records are unique per (tenant, key) —
+        # this index is what makes concurrent duplicate pushes safe.
+        (db.idempotency_records, [("tenant_id", 1), ("key", 1)], {"unique": True}),
+        (db.idempotency_records, [("tenant_id", 1), ("updated_at", -1)], {}),
+        # Integration credentials: client_id is the global lookup key.
+        (db.integration_credentials, "client_id", {"unique": True}),
+        (db.integration_credentials, [("tenant_id", 1), ("created_at", -1)], {}),
+        # sync_key stamps let an interrupted sync retry find its resource.
+        (db.customers, [("tenant_id", 1), ("sync_key", 1)], {}),
+        (db.invoices, [("tenant_id", 1), ("sync_key", 1)], {}),
     ]
     for coll, keys, opts in indexes:
         try:
