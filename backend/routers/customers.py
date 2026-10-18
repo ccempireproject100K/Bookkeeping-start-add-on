@@ -1,11 +1,13 @@
 """Customers & service locations."""
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
 from typing import Optional, List
 
 from db import db
 from lib.base import Scoped, new_id, now_iso
 from lib.auth import require, get_current_user
+from lib import idempotency as idem
+from lib.integration_auth import actor_label, get_sync_actor
 
 router = APIRouter(prefix="/customers", tags=["customers"])
 
@@ -117,23 +119,55 @@ async def list_customers(user: dict = Depends(get_current_user)):
 
 
 @router.post("")
-async def create_customer(body: CustomerBody, user: dict = Depends(require("ops:manage"))):
-    existing = await coll(user).find_list()
-    dup = _find_duplicate(_active_only(existing), body.name, body.email, body.phone)
-    if dup:
-        raise HTTPException(status_code=409, detail={
-            "message": "Customer already exists",
-            "existing_id": dup.get("id"),
-            "existing_name": dup.get("name"),
-        })
-    doc = {
-        "id": new_id(), "name": body.name, "email": body.email, "phone": body.phone,
-        "locations": [l.model_dump() for l in body.locations], "created_at": now_iso(),
-        "active": True, "deleted_at": None, "fiscal": _fiscal_or_422(body),
-    }
-    await coll(user).insert_one(doc)
-    doc.pop("_id", None)
-    return doc
+async def create_customer(body: CustomerBody,
+                          user: dict = Depends(get_sync_actor),
+                          request: Request = None):
+    # Sync surface: a user session (ops:manage) OR a dedicated
+    # integration credential may create customers here. When the caller
+    # sends an Idempotency-Key (Momo does), the push is deduped
+    # server-side — see lib/idempotency.py and INTEGRATION_CONTRACT.md.
+    # `request` trails `user` so pre-existing direct callers using
+    # (body, user) keep working; FastAPI injects it by type.
+    idem_key = request.headers.get("Idempotency-Key") if request else None
+    sess = await idem.begin(
+        tenant_id=user["tenant_id"], key=idem_key,
+        endpoint="POST /customers",
+        req_hash=idem.request_hash(
+            "POST", request.url.path if request else "/api/customers",
+            body.model_dump()),
+        actor=actor_label(user))
+    if sess.is_replay:
+        return sess.replay_response()
+    try:
+        if idem_key:
+            # Crash-window guard: a previous attempt with this key
+            # created the customer but its response was never recorded.
+            stamped = await coll(user).find_one({"sync_key": idem_key})
+            if stamped and not _is_deleted(stamped):
+                out = {k: v for k, v in stamped.items() if k != "sync_key"}
+                return await sess.complete(out, resource_id=stamped["id"])
+        existing = await coll(user).find_list()
+        dup = _find_duplicate(_active_only(existing), body.name, body.email, body.phone)
+        if dup:
+            raise HTTPException(status_code=409, detail={
+                "message": "Customer already exists",
+                "existing_id": dup.get("id"),
+                "existing_name": dup.get("name"),
+            })
+        doc = {
+            "id": new_id(), "name": body.name, "email": body.email, "phone": body.phone,
+            "locations": [l.model_dump() for l in body.locations], "created_at": now_iso(),
+            "active": True, "deleted_at": None, "fiscal": _fiscal_or_422(body),
+        }
+        if idem_key:
+            doc["sync_key"] = idem_key
+        await coll(user).insert_one(doc)
+        doc.pop("_id", None)
+        doc.pop("sync_key", None)
+        return await sess.complete(doc, resource_id=doc["id"])
+    except HTTPException as e:
+        await sess.fail(e.status_code, str(e.detail))
+        raise
 
 
 @router.patch("/{customer_id}")
