@@ -110,6 +110,7 @@ class FakeCollection:
 COLLECTIONS = ["monthly_budgets", "expenses", "invoices", "bills", "recurring",
                "recurring_invoices", "pay_schedules", "payroll_runs",
                "tax_forecast_config", "tax_payments", "tax_jurisdictions",
+               "sales_tax_registrations",
                "journal_entries", "journal_lines", "forecast_events",
                "forecast_scenarios", "security_alerts"]
 
@@ -303,6 +304,46 @@ def test_payroll_layer_from_last_posted_run(monkeypatch):
     _run(run())
 
 
+def _posted_run_149(**kw):
+    """A run posted under PR #149's totals shape: employer_tax_cents is
+    employer FICA ONLY; FUTA/SUTA/ETT are their own keys and
+    employer_cost_cents = gross + ALL employer taxes."""
+    d = {"id": "run149", "tenant_id": TID, "schedule_id": "sch1",
+         "status": "posted", "period_start": "2026-09-25",
+         "period_end": "2026-10-08",
+         "totals": {"gross_cents": 500000, "booth_rent_cents": 50000,
+                    "employer_tax_cents": 38250,   # FICA only, post-#149
+                    "employer_futa_cents": 3500,
+                    "employer_suta_cents": 13500,
+                    "employer_ett_cents": 500,
+                    "employer_cost_cents": 500000 + 38250 + 3500 + 13500 + 500,
+                    "net_cents": 400000, "tax_deductions_cents": 70000}}
+    d.update(kw)
+    return d
+
+
+def test_payroll_layer_uses_full_employer_cost_for_149_runs(monkeypatch):
+    """REGRESSION (merge plan 2026-10-20 §1.2c): #149 narrowed
+    totals.employer_tax_cents to employer FICA only. The forecast must
+    project gross − booth rent + ALL employer taxes (via
+    employer_cost_cents); the pre-adapter formula silently under-projects
+    by FUTA+SUTA+ETT on every post-#149 run."""
+    async def run():
+        _fake_db(monkeypatch,
+                 pay_schedules=[_schedule()],
+                 payroll_runs=[_posted_run_149()])
+        fc = await B.forecast(90, user=OWNER)
+        pay = [i for i in fc["items"] if i["kind"] == "payroll"]
+        full = 555750 - 50000             # employer_cost_cents − booth rent
+        legacy = 500000 - 50000 + 38250   # the old formula's under-projection
+        assert full - legacy == 3500 + 13500 + 500  # exactly FUTA+SUTA+ETT
+        assert len(pay) == 7  # same biweekly cadence as the legacy-shape test
+        assert all(i["amount_cents"] == full for i in pay)
+        assert all(i["amount_cents"] != legacy for i in pay)
+        assert fc["layers"]["payroll"]["projected_cents"] == full * len(pay)
+    _run(run())
+
+
 def test_payroll_gap_note_when_no_schedules(monkeypatch):
     async def run():
         _fake_db(monkeypatch)
@@ -368,6 +409,34 @@ def test_sales_tax_layer_uses_configured_filing_schedule(monkeypatch):
         assert [i["date"] for i in st] == ["2026-10-20", "2026-11-20", "2026-12-20"]
         assert all(i["amount_cents"] == 8000 for i in st)
         assert fc["scheduled"]["sales_tax_cents"] == 24000
+    _run(run())
+
+
+def test_sales_tax_no_registration_on_file_is_a_note(monkeypatch):
+    """Post-#150 adaptation: jurisdiction filing fields are always stored,
+    so the layer projects from the jurisdiction's schedule — but with NO
+    row in db.sales_tax_registrations (the record #150's worksheets key
+    on) the forecast flags that the dates are schedule-based, not
+    registration-confirmed. With a registration present, no such note."""
+    async def run():
+        jur = {"id": "j1", "tenant_id": TID, "name": "Travis County, TX",
+               "state": "TX", "rate_pct": 8.25, "active": True,
+               "filing_frequency": "monthly", "filing_due_day": 20,
+               "registration_id": None}
+        invs = [_inv(id="s1", tax_jurisdiction_id="j1", tax_cents=5000,
+                     created_at="2026-10-05T00:00:00")]
+        _fake_db(monkeypatch, tax_jurisdictions=[jur], invoices=invs)
+        fc = await B.forecast(90, user=OWNER)
+        assert any(i["kind"] == "sales_tax" for i in fc["items"])
+        assert any("no state registration is on file" in n for n in fc["notes"])
+
+        _fake_db(monkeypatch, tax_jurisdictions=[jur], invoices=invs,
+                 sales_tax_registrations=[{"id": "r1", "tenant_id": TID,
+                                           "state": "TX", "active": True}])
+        fc2 = await B.forecast(90, user=OWNER)
+        assert any(i["kind"] == "sales_tax" for i in fc2["items"])
+        assert not any("no state registration is on file" in n
+                       for n in fc2["notes"])
     _run(run())
 
 
