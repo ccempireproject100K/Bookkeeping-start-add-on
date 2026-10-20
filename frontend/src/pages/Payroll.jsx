@@ -14,8 +14,12 @@ import { useTranslation } from "react-i18next";
 const STATUS_CLS = {
   draft: "bg-gray-500/10 text-gray-400 border-gray-500/20",
   approved: "bg-sky-500/10 text-sky-400 border-sky-500/20",
-  posted: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+  posted: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+  reversed: "bg-rose-500/10 text-rose-400 border-rose-500/20",
+  accrued: "bg-amber-500/10 text-amber-400 border-amber-500/20",
+  remitted: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
 };
+const FILING_STATUSES = ["single", "married_filing_jointly", "married_filing_separately", "head_of_household"];
 const centsToDollars = c => ((c || 0) / 100).toFixed(2);
 function printPayslip(p) {
   const fmt = c => ((c || 0) / 100).toLocaleString("en-US", {
@@ -43,6 +47,8 @@ function printPayslip(p) {
     <tr><td><strong>Gross pay</strong></td><td class="mono" style="text-align:right"><strong>${fmt(p.gross_cents)}</strong></td></tr>
     ${dedRows}
     <tr class="total"><td>Net pay</td><td class="mono" style="text-align:right">${fmt(p.net_cents)}</td></tr></table>
+    ${p.ytd ? `<p style="font-size:12px;color:#444">Year to date — gross ${fmt(p.ytd.gross_cents)} · federal withheld ${fmt(p.ytd.federal_withholding_cents)} · net ${fmt(p.ytd.net_cents)}</p>` : ""}
+    ${(p.warnings || []).map(w => `<p style="font-size:11px;color:#92600a">${w}</p>`).join("")}
     ${p.entry_number ? `<p style="font-size:11px;color:#666">Journal entry ${p.entry_number}</p>` : ""}
     <p class="disc">${p.disclaimer}</p>
     <script>window.onload=()=>window.print()</script></body></html>`);
@@ -65,12 +71,14 @@ export default function Payroll() {
   const [settings, setSettings] = useState(null);
   const [runs, setRuns] = useState(null);
   const [detail, setDetail] = useState(null);
+  const [liabs, setLiabs] = useState(null);
   const [showNew, setShowNew] = useState(false);
   const load = () => {
     api.get("/payroll/schedules").then(setSchedules).catch(() => setSchedules([]));
     api.get("/payroll/team").then(setTeam).catch(() => setTeam([]));
     api.get("/payroll/settings").then(setSettings).catch(() => {});
     api.get("/payroll/runs").then(setRuns).catch(() => setRuns([]));
+    api.get("/payroll/liabilities").then(setLiabs).catch(() => setLiabs({ liabilities: [], accrued_summary: [], accrued_total_cents: 0 }));
   };
   useEffect(() => {
     load();
@@ -82,6 +90,7 @@ export default function Payroll() {
     start: today(),
     end: today()
   });
+  const [payDate, setPayDate] = useState("");
   const [rows, setRows] = useState({});
   useEffect(() => {
     if (!team) return;
@@ -92,7 +101,8 @@ export default function Payroll() {
         include: hasSettings,
         hours: "",
         rate: centsToDollars(m.hourly_rate_cents),
-        commission: ""
+        commission: "",
+        tips: ""
       };
     });
     setRows(init);
@@ -111,10 +121,11 @@ export default function Payroll() {
       return {
         user_id: id,
         name: m.name,
-        pay_type: m.salary_monthly_cents > 0 ? "salary" : "hourly",
+        pay_type: m.pay_type || (m.salary_monthly_cents > 0 ? "salary" : "hourly"),
         hours: r.hours === "" ? null : (parseFloat(r.hours) || 0),
         rate: r.rate ? parseFloat(r.rate) : undefined,
-        commission: parseFloat(r.commission) || 0
+        commission: parseFloat(r.commission) || 0,
+        tips: parseFloat(r.tips) || 0
       };
     });
     if (!items.length) {
@@ -126,6 +137,7 @@ export default function Payroll() {
         schedule_id: schedId || null,
         period_start: period.start,
         period_end: period.end,
+        pay_date: payDate || period.end,
         items
       });
       toast.success(`Pay run created — net ${money(run.totals.net_cents)}`);
@@ -152,6 +164,39 @@ export default function Payroll() {
       toast.success(`Posted to journal${r.entry_number ? ` as ${r.entry_number}` : ""}`);
       setDetail(r);
       load();
+    } catch (e) {
+      toast.error(errMsg(e));
+    }
+  };
+  const doReverse = async id => {
+    try {
+      const r = await api.post(`/payroll/runs/${id}/reverse`, {});
+      toast.success(t("payroll.runReversed"));
+      setDetail(r);
+      load();
+    } catch (e) {
+      toast.error(errMsg(e));
+    }
+  };
+  const doRemit = async lid => {
+    const reference = window.prompt("Reference (EFTPS confirmation / check #) — optional", "") || undefined;
+    try {
+      await api.patch(`/payroll/liabilities/${lid}`, { status: "remitted", reference });
+      toast.success(t("payroll.markRemitted"));
+      load();
+    } catch (e) {
+      toast.error(errMsg(e));
+    }
+  };
+  const downloadWorkpaper = async (path, filename) => {
+    try {
+      const data = await api.get(path);
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(a.href);
     } catch (e) {
       toast.error(errMsg(e));
     }
@@ -216,7 +261,19 @@ export default function Payroll() {
         hourly_rate: centsToDollars(m.hourly_rate_cents),
         salary_monthly: centsToDollars(m.salary_monthly_cents),
         fed_withholding_pct: String(m.fed_withholding_pct ?? ""),
-        booth_rent: centsToDollars(m.booth_rent_cents)
+        booth_rent: centsToDollars(m.booth_rent_cents),
+        department: m.department || "",
+        work_state: m.work_state || "",
+        filing_status: m.filing_status || "single",
+        w4_dependents: centsToDollars(m.w4?.dependents_cents),
+        w4_other_income: centsToDollars(m.w4?.other_income_cents),
+        w4_deductions: centsToDollars(m.w4?.deductions_cents),
+        w4_extra_withholding: centsToDollars(m.w4?.extra_withholding_cents),
+        w4_multiple_jobs: !!m.w4?.multiple_jobs,
+        w4_on_file: !!m.w4_on_file,
+        state_allowances: String(m.state_allowances ?? 0),
+        state_deduction_allowances: String(m.state_deduction_allowances ?? 0),
+        extra_withholding_state: centsToDollars(m.extra_withholding_state_cents)
       };
     });
     setEdit(init);
@@ -235,8 +292,34 @@ export default function Payroll() {
         hourly_rate: parseFloat(f.hourly_rate) || 0,
         salary_monthly: parseFloat(f.salary_monthly) || 0,
         fed_withholding_pct: parseFloat(f.fed_withholding_pct) || 0,
-        booth_rent: parseFloat(f.booth_rent) || 0
+        booth_rent: parseFloat(f.booth_rent) || 0,
+        department: f.department || "",
+        work_state: (f.work_state || "").toUpperCase() || null,
+        filing_status: f.filing_status || "single",
+        w4_dependents: parseFloat(f.w4_dependents) || 0,
+        w4_other_income: parseFloat(f.w4_other_income) || 0,
+        w4_deductions: parseFloat(f.w4_deductions) || 0,
+        w4_extra_withholding: parseFloat(f.w4_extra_withholding) || 0,
+        w4_multiple_jobs: !!f.w4_multiple_jobs,
+        w4_on_file: !!f.w4_on_file,
+        state_allowances: parseInt(f.state_allowances) || 0,
+        state_deduction_allowances: parseInt(f.state_deduction_allowances) || 0,
+        extra_withholding_state: parseFloat(f.extra_withholding_state) || 0
       });
+      toast.success(t("payroll.paySettingsSaved"));
+      load();
+    } catch (e) {
+      toast.error(errMsg(e));
+    }
+  };
+  const saveSutaRates = async () => {
+    try {
+      const rates = {};
+      Object.entries(settings.suta_rates || {}).forEach(([k, v]) => {
+        const n = parseFloat(v);
+        if (!Number.isNaN(n)) rates[k] = n;
+      });
+      await api.patch("/payroll/settings", { suta_rates: rates });
       toast.success(t("payroll.paySettingsSaved"));
       load();
     } catch (e) {
@@ -262,7 +345,7 @@ export default function Payroll() {
 
       <div className="flex gap-3 rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-sm mb-6" data-testid="payroll-disclaimer">
         <AlertTriangle size={16} className="mt-0.5 shrink-0 text-amber-500" />
-        <p className="text-gray-300"><strong>{t("payroll.payrollLiteScope")}</strong> {t("payroll.estimatesOnlyItDoes")} <strong>{t("payroll.not")}</strong> {t("payroll.withholdOrFileTaxesAndDoes")} <strong>{t("payroll.not")}</strong> {t("payroll.runDirectDepositForCompliantPayroll")}</p>
+        <p className="text-gray-300"><strong>{t("payroll.trackingScope")}</strong> {t("payroll.trackingScopeBody")}</p>
       </div>
 
       {showNew && canWrite && <Card className="mb-6" data-testid="payroll-new-form">
@@ -283,12 +366,13 @@ export default function Payroll() {
             ...period,
             end: e.target.value
           })} className="bg-[#0F1218] border-[#222838] w-40" /></div>
+            <div><Label className="text-xs">{t("payroll.payDate")}</Label><Input type="date" value={payDate} onChange={e => setPayDate(e.target.value)} className="bg-[#0F1218] border-[#222838] w-40" /></div>
           </div>
           <table className="w-full text-sm mb-4">
             <thead><tr className="text-xs uppercase tracking-wider text-gray-500 border-b border-[#222838]">
               <th className="py-2 text-left font-medium">{t("payroll.include")}</th><th className="py-2 text-left font-medium">{t("payroll.name")}</th>
               <th className="py-2 text-left font-medium">{t("payroll.type")}</th><th className="py-2 text-right font-medium">{t("payroll.hours")}</th>
-              <th className="py-2 text-right font-medium">{t("payroll.rateHr")}</th><th className="py-2 text-right font-medium">{t("payroll.commission")}</th></tr></thead>
+              <th className="py-2 text-right font-medium">{t("payroll.rateHr")}</th><th className="py-2 text-right font-medium">{t("payroll.commission")}</th><th className="py-2 text-right font-medium">Tips $</th></tr></thead>
             <tbody>
               {team.map(m => {
             const r = rows[m.id] || {};
@@ -308,6 +392,9 @@ export default function Payroll() {
                     <td className="py-2 text-right"><Input type="number" step="0.01" min={0} value={r.commission || ""} onChange={e => setRow(m.id, {
                   commission: e.target.value
                 })} className="bg-[#0F1218] border-[#222838] w-24 font-mono text-right ml-auto" placeholder="0" /></td>
+                    <td className="py-2 text-right"><Input type="number" step="0.01" min={0} value={r.tips || ""} onChange={e => setRow(m.id, {
+                  tips: e.target.value
+                })} className="bg-[#0F1218] border-[#222838] w-24 font-mono text-right ml-auto" placeholder="0" /></td>
                   </tr>;
           })}
             </tbody>
@@ -322,9 +409,40 @@ export default function Payroll() {
       <Tabs defaultValue="runs">
         <TabsList className="bg-[#14171E] border border-[#222838]">
           <TabsTrigger value="runs" data-testid="tab-pay-runs">{t("payroll.payRuns")}</TabsTrigger>
+          <TabsTrigger value="liabilities" data-testid="tab-pay-liabilities">{t("payroll.liabilities")}{liabs && liabs.accrued_total_cents > 0 ? ` · ${money(liabs.accrued_total_cents)}` : ""}</TabsTrigger>
           <TabsTrigger value="schedules" data-testid="tab-pay-schedules">{t("payroll.schedules")}</TabsTrigger>
           <TabsTrigger value="team" data-testid="tab-pay-team">{t("payroll.teamPaySettings")}</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="liabilities" className="mt-4">
+          <Card className="p-0 overflow-hidden" data-testid="payroll-liabilities">
+            <div className="px-5 py-3 border-b border-[#222838] flex flex-wrap items-center justify-between gap-2">
+              <span className="text-sm text-gray-300">{t("payroll.totalOwed")}: <strong className="font-mono text-amber-400">{money(liabs?.accrued_total_cents || 0)}</strong></span>
+              <span className="text-xs text-gray-500">{t("payroll.liabilitiesNote")}</span>
+            </div>
+            <table className="w-full text-sm">
+              <thead><tr className="text-xs uppercase tracking-wider text-gray-500 border-b border-[#222838]">
+                <th className="px-5 py-3 text-left font-medium">{t("payroll.agency")}</th>
+                <th className="px-5 py-3 text-left font-medium">{t("payroll.type")}</th>
+                <th className="px-5 py-3 text-right font-medium">Amount</th>
+                <th className="px-5 py-3 text-left font-medium">{t("payroll.payDate")}</th>
+                <th className="px-5 py-3 text-left font-medium">{t("payroll.dueDate")}</th>
+                <th className="px-5 py-3 text-left font-medium">{t("payroll.status")}</th><th /></tr></thead>
+              <tbody>
+                {(liabs?.liabilities || []).map(l => <tr key={l.id} className="border-b border-[#171c26]">
+                    <td className="px-5 py-3 text-gray-100">{l.agency}</td>
+                    <td className="px-5 py-3 text-gray-400">{l.kind.replaceAll("_", " ")}</td>
+                    <td className="px-5 py-3 text-right font-mono text-gray-200">{money(l.amount_cents)}</td>
+                    <td className="px-5 py-3 text-gray-400 font-mono text-xs">{l.pay_date}</td>
+                    <td className="px-5 py-3 text-gray-200 font-mono text-xs">{l.due_date}</td>
+                    <td className="px-5 py-3"><span className={`px-2 py-0.5 rounded-full text-xs border capitalize ${STATUS_CLS[l.status] || ""}`}>{l.status}{l.reference ? ` · ${l.reference}` : ""}</span></td>
+                    <td className="px-5 py-3 text-right">{canWrite && l.status === "accrued" && <Button size="sm" variant="outline" className="h-7 border-[#222838]" onClick={() => doRemit(l.id)}>{t("payroll.markRemitted")}</Button>}</td>
+                  </tr>)}
+                {(liabs?.liabilities || []).length === 0 && <tr><td colSpan={7} className="px-5 py-12 text-center text-gray-500">—</td></tr>}
+              </tbody>
+            </table>
+          </Card>
+        </TabsContent>
 
         <TabsContent value="runs" className="mt-4">
           {detail && <Card className="mb-4" data-testid="payroll-detail">
@@ -345,8 +463,9 @@ export default function Payroll() {
                 <tbody>
                   {detail.items.map(it => <tr key={it.id} className="border-b border-[#171c26]">
                       <td className="py-2 text-gray-100">{it.name}{" "}
-                        <span className="text-xs text-gray-500">{it.pay_type === "hourly" ? `${it.hours}h × ${money(it.rate_cents)}/hr` : "salary"}</span>
-                        <div className="text-xs text-gray-600">{it.deductions.map(d => d.label).join(" · ")}</div></td>
+                        <span className="text-xs text-gray-500">{it.pay_type === "hourly" ? `${it.hours}h × ${money(it.rate_cents)}/hr` : "salary"}{it.work_state ? ` · ${it.work_state}` : ""}</span>
+                        <div className="text-xs text-gray-600">{it.deductions.map(d => `${d.label} ${money(d.amount_cents)}`).join(" · ")}</div>
+                        {(it.warnings || []).map((w, wi) => <div key={wi} className="text-xs text-amber-500">{w}</div>)}</td>
                       <td className="py-2 text-right font-mono text-gray-200">{money(it.gross_cents)}</td>
                       <td className="py-2 text-right font-mono text-gray-400">{money(it.total_deductions_cents)}</td>
                       <td className="py-2 text-right font-mono text-emerald-400 font-medium">{money(it.net_cents)}</td>
@@ -354,9 +473,14 @@ export default function Payroll() {
                     </tr>)}
                 </tbody>
                 <tfoot>
-                  {(detail.totals.employer_tax_cents || 0) > 0 && <tr className="text-xs text-gray-500">
-                    <td className="py-1">{t("payroll.employerTaxEst")}</td>
-                    <td className="py-1 text-right font-mono">{money(detail.totals.employer_tax_cents)}</td>
+                  {((detail.totals.employer_tax_cents || 0) + (detail.totals.employer_futa_cents || 0) + (detail.totals.employer_suta_cents || 0) + (detail.totals.employer_ett_cents || 0)) > 0 && <tr className="text-xs text-gray-500">
+                    <td className="py-1">{t("payroll.employerTaxEst")} <span className="text-gray-600">(FICA {money(detail.totals.employer_tax_cents)} · FUTA {money(detail.totals.employer_futa_cents || 0)} · SUTA {money(detail.totals.employer_suta_cents || 0)}{(detail.totals.employer_ett_cents || 0) > 0 ? ` · ETT ${money(detail.totals.employer_ett_cents)}` : ""})</span></td>
+                    <td className="py-1 text-right font-mono">{money((detail.totals.employer_tax_cents || 0) + (detail.totals.employer_futa_cents || 0) + (detail.totals.employer_suta_cents || 0) + (detail.totals.employer_ett_cents || 0))}</td>
+                    <td className="py-1" /><td className="py-1" /><td />
+                  </tr>}
+                  {(detail.totals.employer_cost_cents || 0) > 0 && <tr className="text-xs text-gray-500">
+                    <td className="py-1">{t("payroll.employerCost")}</td>
+                    <td className="py-1 text-right font-mono">{money(detail.totals.employer_cost_cents)}</td>
                     <td className="py-1" /><td className="py-1" /><td />
                   </tr>}
                   <tr className="font-semibold text-gray-100">
@@ -368,10 +492,22 @@ export default function Payroll() {
               </table>
               {detail.notes && <p className="text-xs text-gray-500 mb-2">{detail.notes}</p>}
               {detail.entry_number && <p className="text-xs text-gray-500 mb-2">{t("payroll.journalEntry")} <span className="font-mono">{detail.entry_number}</span></p>}
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 {canWrite && detail.status === "draft" && <Button size="sm" onClick={() => doApprove(detail.id)} className="bg-sky-600 hover:bg-sky-500 text-black">{t("payroll.approveRun")}</Button>}
                 {canWrite && detail.status === "approved" && <Button size="sm" onClick={() => doPost(detail.id)} className="bg-emerald-600 hover:bg-emerald-500 text-black">{t("payroll.postToJournal")}</Button>}
                 {canWrite && detail.status === "draft" && <Button size="sm" variant="ghost" className="text-rose-400" onClick={() => doDeleteRun(detail.id)}>{t("payroll.deleteDraft")}</Button>}
+                {canWrite && detail.status === "posted" && <Button size="sm" variant="ghost" className="text-rose-400" onClick={() => doReverse(detail.id)}>{t("payroll.reverseRun")}</Button>}
+                {detail.status === "posted" && (() => {
+                  const pd = new Date((detail.pay_date || detail.period_end) + "T12:00:00");
+                  const yr = pd.getFullYear();
+                  const q = Math.floor(pd.getMonth() / 3) + 1;
+                  return <span className="flex gap-2 items-center">
+                    <span className="text-xs text-gray-500">{t("payroll.workpapers")}:</span>
+                    <Button size="sm" variant="outline" className="h-7 border-[#222838]" onClick={() => downloadWorkpaper(`/payroll/reports/form-941?year=${yr}&quarter=${q}`, `form-941-workpaper-${yr}-q${q}.json`)}>941</Button>
+                    <Button size="sm" variant="outline" className="h-7 border-[#222838]" onClick={() => downloadWorkpaper(`/payroll/reports/form-940?year=${yr}`, `form-940-workpaper-${yr}.json`)}>940</Button>
+                    <Button size="sm" variant="outline" className="h-7 border-[#222838]" onClick={() => downloadWorkpaper(`/payroll/reports/w2-workpaper?year=${yr}`, `w2-workpaper-${yr}.json`)}>W-2</Button>
+                  </span>;
+                })()}
               </div>
               <p className="text-xs text-gray-600 mt-3">{detail.disclaimer}</p>
             </Card>}
@@ -455,7 +591,13 @@ export default function Payroll() {
                 default_fed_withholding_pct: e.target.value
               })} className="bg-[#0F1218] border-[#222838] w-32 font-mono" /></div>
                 <Button size="sm" variant="outline" className="border-[#222838]" onClick={saveDefaultFed}>{t("payroll.saveDefault")}</Button>
-                <span className="text-xs text-gray-500">{t("payroll.ficaIsAlways")} {settings.fica_pct}{t("payroll.estimate")}</span>
+                <span className="text-xs text-gray-500">FICA: Social Security 6.2% up to the 2026 wage base ($184,500) + Medicare 1.45% — applied per employee from finalized pay. Tables: {settings.config_version || "2026"}.</span>
+                {["CA", "NY"].map(st => <div key={st}><Label className="text-xs">SUTA {st} % override</Label>
+                  <Input type="number" step="0.001" min={0} value={settings.suta_rates?.[st] ?? ""} placeholder={st === "CA" ? "3.4" : "4.1"} onChange={e => setSettings({
+                  ...settings,
+                  suta_rates: { ...(settings.suta_rates || {}), [st]: e.target.value }
+                })} className="bg-[#0F1218] border-[#222838] w-24 font-mono" /></div>)}
+                <Button size="sm" variant="outline" className="border-[#222838]" onClick={saveSutaRates}>{t("payroll.save")}</Button>
               </div>}
             <table className="w-full text-sm">
               <thead><tr className="text-xs uppercase tracking-wider text-gray-500 border-b border-[#222838]">
@@ -497,7 +639,43 @@ export default function Payroll() {
                 {team.length === 0 && <tr><td colSpan={7} className="py-12 text-center text-gray-500">{t("payroll.noTeamMembers")}</td></tr>}
               </tbody>
             </table>
-            <p className="text-xs text-gray-600 mt-3">Pay settings are stored per team member. Hourly members enter hours per run; salary members are paid their monthly salary ÷ periods per year (52/26/12). Withholding and FICA are planning estimates — not filed taxes.</p>
+
+            {canWrite && <div className="mt-6 pt-4 border-t border-[#222838]" data-testid="payroll-tax-profiles">
+              <h4 className="text-sm font-semibold text-gray-200 mb-1">{t("payroll.taxProfile")}</h4>
+              <p className="text-xs text-gray-500 mb-3">W-4 elections drive the real Pub 15-T calculation. State fields drive CA (DE 4) and NY (IT-2104) withholding; other states show NOT_IMPLEMENTED on the run until their tables ship.</p>
+              <div className="space-y-4">
+                {team.map(m => {
+                const f = edit[m.id] || {};
+                const num = (key, w = "w-28") => <Input type="number" step="0.01" min={0} value={f[key] ?? ""} onChange={e => setEditRow(m.id, { [key]: e.target.value })} className={`bg-[#0F1218] border-[#222838] ${w} font-mono`} />;
+                return <div key={m.id} className="rounded-lg border border-[#222838] p-3">
+                    <div className="text-sm text-gray-100 mb-2">{m.name} <span className="text-xs text-gray-500">· {roleLabel(m.role)}</span></div>
+                    <div className="flex flex-wrap gap-3 items-end text-xs">
+                      <div><Label className="text-xs">{t("payroll.department")}</Label><Input value={f.department ?? ""} onChange={e => setEditRow(m.id, { department: e.target.value })} className="bg-[#0F1218] border-[#222838] w-32" /></div>
+                      <div><Label className="text-xs">{t("payroll.workState")}</Label><Input maxLength={2} value={f.work_state ?? ""} onChange={e => setEditRow(m.id, { work_state: e.target.value.toUpperCase() })} className="bg-[#0F1218] border-[#222838] w-16 font-mono" placeholder="CA" /></div>
+                      <div><Label className="text-xs">{t("payroll.filingStatus")}</Label>
+                        <Select value={f.filing_status || "single"} onValueChange={v => setEditRow(m.id, { filing_status: v })}>
+                          <SelectTrigger className="bg-[#0F1218] border-[#222838] w-52"><SelectValue /></SelectTrigger>
+                          <SelectContent className="bg-[#14171E] border-[#222838] text-gray-100">
+                            {FILING_STATUSES.map(s => <SelectItem key={s} value={s}>{s.replaceAll("_", " ")}</SelectItem>)}
+                          </SelectContent>
+                        </Select></div>
+                      <div><Label className="text-xs">{t("payroll.w4Dependents")}</Label>{num("w4_dependents")}</div>
+                      <div><Label className="text-xs">{t("payroll.w4OtherIncome")}</Label>{num("w4_other_income")}</div>
+                      <div><Label className="text-xs">{t("payroll.w4DeductionsAmt")}</Label>{num("w4_deductions")}</div>
+                      <div><Label className="text-xs">{t("payroll.w4Extra")}</Label>{num("w4_extra_withholding")}</div>
+                      <div><Label className="text-xs">{t("payroll.stateAllowances")}</Label>{num("state_allowances", "w-20")}</div>
+                      <div><Label className="text-xs">{t("payroll.stateDedAllowances")}</Label>{num("state_deduction_allowances", "w-20")}</div>
+                      <label className="flex items-center gap-1.5 text-gray-300 pb-2"><input type="checkbox" checked={!!f.w4_multiple_jobs} onChange={e => setEditRow(m.id, { w4_multiple_jobs: e.target.checked })} /> {t("payroll.multipleJobs")}</label>
+                      <label className="flex items-center gap-1.5 text-gray-300 pb-2"><input type="checkbox" checked={!!f.w4_on_file} onChange={e => setEditRow(m.id, { w4_on_file: e.target.checked })} /> {t("payroll.w4OnFile")}</label>
+                      <Button size="sm" className="h-8 bg-amber-600 hover:bg-amber-500 text-black mb-0.5" onClick={() => saveSettings(m.id)}>{t("payroll.save")}</Button>
+                    </div>
+                  </div>;
+              })}
+              </div>
+            </div>}
+
+            <p className="text-xs text-gray-600 mt-3">Pay settings are stored per team member. Hourly members enter hours per run (overtime at 1.5× over 40 hrs/week); salary members are paid their monthly salary ÷ periods per year (52/26/12). Withholding is calculated from the real 2026 tables — tracked here, remitted by you.</p>
+            <p className="text-xs text-gray-600 mt-1">{t("payroll.sutaNote")}</p>
           </Card>
         </TabsContent>
       </Tabs>

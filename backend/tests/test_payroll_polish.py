@@ -1,5 +1,7 @@
-"""Payroll-lite polish: neutral role labels (keys stable), employer FICA match
-posting + FUTA/SUTA disclaimer, and the full draft->approve->post flow.
+"""Payroll flow tests: neutral role labels (keys stable), employer FICA match
+posting, and the full draft->approve->post flow — updated for the payroll
+TRACKING engine (real Pub 15-T gross-to-net; see test_payroll_tracking.py for
+calculation goldens).
 
 No live MongoDB needed (fully mocked). Run from the backend directory with:
     python -m pytest tests/test_payroll_polish.py
@@ -9,8 +11,10 @@ What this covers:
     it); the neutral "Staff" label lives in the frontend (roles.barber i18n key)
     and is not asserted here — role keys must simply pass through unchanged.
   - employer FICA match (7.65%) is computed per item, summed into
-    totals["employer_tax_cents"], and posted Dr 6120 / Cr 2120 (estimate).
-  - FUTA/SUTA are explicitly disclaimed, not computed.
+    totals["employer_tax_cents"], and posted Dr 6120 / Cr 2120 together with
+    the accrued FUTA (0.6% net of credit on the first $7,000).
+  - the disclaimer states the tracking scope plainly: calculates and tracks,
+    but does not pay employees, deposit taxes, or file returns.
   - end-to-end: draft (hourly pre-filled from approved time entries + salary),
     approve locks it, post writes a balanced journal entry.
 """
@@ -64,6 +68,8 @@ class _FakeColl:
         for k, v in (q or {}).items():
             if isinstance(v, dict):
                 if "$in" in v and doc.get(k) not in v["$in"]:
+                    return False
+                if "$ne" in v and doc.get(k) == v["$ne"]:
                     return False
                 if "$gte" in v and not (doc.get(k) is not None and doc[k] >= v["$gte"]):
                     return False
@@ -140,6 +146,8 @@ def _setup_db():
         pay_schedules=_FakeColl(),
         payroll_runs=_FakeColl(),
         payroll_settings=_FakeColl(),
+        payroll_liabilities=_FakeColl(),
+        payroll_pay_records=_FakeColl(),
         accounts=_FakeColl(),
         tenants=_FakeColl([{"id": "t1", "tenant_id": "t1", "name": "Test Shop"}]),
     )
@@ -178,8 +186,11 @@ def test_build_item_hourly_math_with_employer_match():
     item = _build_item(None, "monthly", RunItemIn(hours=8.0, rate=25.0), 0)
     assert item["gross_cents"] == 20000          # 8h x $25
     assert item["employer_fica_cents"] == 1530   # 7.65% of 20000
-    fica = next(d for d in item["deductions"] if d["label"].startswith("FICA"))
-    assert fica["amount_cents"] == 1530          # employee share matches employer
+    fica = sum(d["amount_cents"] for d in item["deductions"]
+               if d["label"].startswith("FICA"))
+    assert fica == 1530                          # SS 1240 + Medicare 290
+    # Pub 15-T: $200/mo annualizes to $2,400 — below any withholding.
+    assert item["federal_withholding_cents"] == 0
     assert item["net_cents"] == 20000 - 1530
 
 
@@ -200,19 +211,22 @@ def test_totals_include_employer_tax():
                     RunItemIn(), 0)
     t = _totals([a, b])
     assert t["gross_cents"] == 420000
-    assert t["tax_deductions_cents"] == 1530 + 30600   # employee FICA only
-    assert t["employer_tax_cents"] == 1530 + 30600     # employer match
+    # employee taxes: a FICA 1530 (+ $0 fed); b FICA 30600 + Pub 15-T fed
+    # withholding 29833 ($48,000/yr single: (5800 + 22% x 11,500)/12 = $298.33).
+    assert t["tax_deductions_cents"] == 1530 + 30600 + 29833
+    assert t["employer_tax_cents"] == 1530 + 30600     # employer FICA match
+    assert t["employer_futa_cents"] == 120 + 2400      # 0.6% net FUTA, first $7k
     assert t["net_cents"] == a["net_cents"] + b["net_cents"]
 
 
 # ---------------- disclaimers stay honest ----------------
 
-def test_disclaimer_covers_no_filing_and_futa_suta():
+def test_disclaimer_states_tracking_scope_plainly():
     d = payroll.DISCLAIMER
-    assert "does not withhold or file taxes" in d
-    assert "does not run direct deposit" in d
-    assert "FUTA/SUTA" in d
-    assert "not estimated or filed" in d
+    assert "does not pay employees" in d
+    assert "does not deposit taxes" in d
+    assert "does not file returns" in d
+    assert "calculates real withholding" in d
 
 
 # ---------------- account bootstrap ----------------
@@ -251,14 +265,16 @@ def test_e2e_draft_computes_gross_net_and_time_entry_prefill():
     assert hourly["gross_cents"] == 20000
     assert hourly["net_cents"] == 20000 - 1530
 
-    # salary member: monthly salary / 12 periods
+    # salary member: monthly salary; real Pub 15-T withholding now applies
+    # ($4,000/mo single -> $298.33/mo federal) on top of FICA $306.00.
     assert salary["gross_cents"] == 400000
-    assert salary["net_cents"] == 400000 - 30600
+    assert salary["federal_withholding_cents"] == 29833
+    assert salary["net_cents"] == 400000 - 30600 - 29833
 
     t = doc["totals"]
     assert t["gross_cents"] == 420000
     assert t["employer_tax_cents"] == 32130
-    assert t["net_cents"] == 387870
+    assert t["net_cents"] == 18470 + 339567
 
 
 def test_e2e_approve_locks_then_post_writes_balanced_je():
@@ -284,11 +300,14 @@ def test_e2e_approve_locks_then_post_writes_balanced_je():
         return sum(l.get(side, 0) for l in lines if l["account_code"] == code)
 
     assert amt("6110", "debit") == 420000            # gross wages
-    assert amt("6120", "debit") == 32130             # employer FICA match (est.)
-    assert amt("2120", "credit") == 32130 + 32130    # employee tax + employer match
-    assert amt("2320", "credit") == 387870           # net pay owed
+    # employer taxes: FICA match 32130 + FUTA accrual 2520 (0.6% net on the
+    # run's gross, all under the $7,000 FUTA wage base).
+    assert amt("6120", "debit") == 32130 + 2520
+    # employee taxes withheld: FICA 32130 + federal withholding 29833.
+    assert amt("2120", "credit") == (32130 + 29833) + (32130 + 2520)
+    assert amt("2320", "credit") == 358037           # net pay owed
     memos = [l.get("memo", "") for l in lines]
-    assert any("FICA match" in m for m in memos)
+    assert any("FICA/FUTA/SUTA" in m for m in memos)
 
 
 def test_e2e_post_requires_approve():
@@ -316,6 +335,7 @@ def test_e2e_payslip_carries_disclaimer():
         rid = doc["id"]
         item_id = doc["items"][0]["id"]
         slip = _run(payroll.get_payslip(rid, item_id, _user()))
-    assert "does not withhold or file taxes" in slip["disclaimer"]
+    assert "does not pay employees" in slip["disclaimer"]
+    assert "does not file returns" in slip["disclaimer"]
     assert slip["employee"]["name"] == "Alex"
     assert slip["gross_cents"] == 20000
