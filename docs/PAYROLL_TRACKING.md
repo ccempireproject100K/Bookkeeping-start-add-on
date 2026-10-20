@@ -91,6 +91,9 @@ that were actually used.
   but a wage base is also required, so an override alone stays
   NOT_IMPLEMENTED until that state's base is configured in code).
 - NYC / Yonkers local withholding (noted on every NY workpaper).
+- CA SDI (employee-paid disability insurance, 1.3% for 2026, no wage cap)
+  is not yet withheld — CA pay stubs understate employee deductions by
+  that amount until it ships.
 - Direct deposit, tax deposits, and all filing — by design (see above).
 - Pre-2020 W-4 allowance-based withholding (the engine implements the
   2020+ W-4; employees without a W-4 on file use the IRS-prescribed
