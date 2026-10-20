@@ -3,6 +3,12 @@
 Takes the workspace's real numbers (current cash, trailing average monthly net)
 and projects N months forward with a proposed cost layered in — a hire, a truck,
 a lease. Verdicts: yes / tight / no, with the lowest projected cash point.
+
+NOTE (forecast v2): these hire / one-time / recurring shapes also exist as
+scenario event shapes on the cash-flow forecast (POST /budget/forecast/events,
+shape = hire | one_time | recurring), where they layer onto the dated
+known-curve instead of a monthly run-rate. These endpoints remain supported;
+the forecast scenarios are the unified home for saved what-ifs.
 """
 from datetime import date
 from typing import Optional
