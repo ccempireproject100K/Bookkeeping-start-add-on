@@ -95,8 +95,27 @@ def _account_type_map():
     return m
 
 
+def _normal_balance_map():
+    """Normal-balance lookup covering the base chart AND every niche
+    pack's lines — the same universe as _account_type_map(). Pack
+    revenue codes are credit-normal and pack trade-expense codes are
+    debit-normal (exactly as full_coa seeds them); building this map
+    from BASE_COA alone left every pack code out, so report math in
+    lib/ledger.py defaulted pack revenue to debit-normal and negated
+    it on the P&L and balance sheet. Base entries are inserted first
+    and win on any code collision."""
+    from lib.niches import all_packs
+    m = {c[0]: c[3] for c in BASE_COA}
+    for p in all_packs():
+        for a in p.get("revenue_accounts", []):
+            m.setdefault(a["code"], "credit")
+        for a in p.get("trade_expense_accounts", []):
+            m.setdefault(a["code"], "debit")
+    return m
+
+
 ACCOUNT_TYPE_OF = _account_type_map()
-NORMAL_BALANCE_OF = {c[0]: c[3] for c in BASE_COA}
+NORMAL_BALANCE_OF = _normal_balance_map()
 NAME_OF = {c[0]: c[1] for c in BASE_COA}
 
 # Foreign-exchange accounts (multi-currency Phase 3). NOT part of BASE_COA:
