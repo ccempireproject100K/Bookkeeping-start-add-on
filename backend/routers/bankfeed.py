@@ -213,11 +213,15 @@ async def exchange(body: ExchangeIn, user: dict = Depends(require("ops:manage"))
     return {"connection_id": conn_id, "accounts": linked}
 
 
-@router.post("/sync")
-async def sync(body: SyncIn, user: dict = Depends(require("ops:manage"))):
+async def sync_connections(user, connection_id: str = "") -> dict:
+    """Sync transactions for one tenant's Plaid connection(s) — the shared
+    core behind the manual /sync endpoint, the scheduler's periodic bank
+    sync, and webhook-triggered syncs. Idempotent: the Plaid cursor only
+    advances once a page is fully processed, and inserts dedupe on the
+    Plaid transaction id."""
     cid, sec, env, base = _require_plaid()
     f = _fernet()
-    q = {"id": body.connection_id} if body.connection_id else {}
+    q = {"id": connection_id} if connection_id else {}
     conns = await connections(user).find_list(q, limit=50)
     if not conns:
         raise HTTPException(404, "No bank connection found. Connect a bank first.")
@@ -262,12 +266,56 @@ async def sync(body: SyncIn, user: dict = Depends(require("ops:manage"))):
     return {"added": added, "duplicates": dups}
 
 
+@router.post("/sync")
+async def sync(body: SyncIn, user: dict = Depends(require("ops:manage"))):
+    return await sync_connections(user, body.connection_id or "")
+
+
+async def sync_item(item_id: str) -> dict:
+    """Sync the tenant that owns a Plaid item (webhook / scheduler entry
+    point). Honours the same plan gate the router enforces: a tenant whose
+    plan no longer includes bank_feeds is skipped, not synced."""
+    conn = await db.bank_connections.find_one({"item_id": item_id}, {"_id": 0})
+    if not conn:
+        return {"synced": False, "reason": "unknown_item"}
+    tenant = await db.tenants.find_one({"id": conn["tenant_id"]}, {"_id": 0})
+    from lib.plans import effective_plan, plan_includes
+    if not plan_includes(effective_plan(tenant or {}), "bank_feeds"):
+        return {"synced": False, "reason": "plan_gate"}
+    user = {"id": "plaid-sync", "tenant_id": conn["tenant_id"],
+            "email": "plaid-sync@system", "name": "Plaid sync", "role": "system"}
+    res = await sync_connections(user)
+    return {"synced": True, **res}
+
+
+_pending_syncs: set = set()
+
+
+async def _webhook_sync(item_id: str):
+    try:
+        res = await sync_item(item_id)
+        logger.info("bankfeed webhook sync for item %s: %s", item_id, res)
+    except Exception:
+        logger.exception("bankfeed webhook sync failed for item %s", item_id)
+
+
+def _kick_item_sync(item_id: str):
+    """Fire-and-forget a webhook-triggered sync, keeping a strong reference
+    so the task isn't garbage-collected mid-flight."""
+    task = asyncio.create_task(_webhook_sync(item_id))
+    _pending_syncs.add(task)
+    task.add_done_callback(_pending_syncs.discard)
+    return task
+
+
 @router.post("/webhook")
 async def webhook(request: Request):
-    """Plaid transaction webhooks (TRANSACTIONS SYNC_UPDATES etc.). Logged here;
-    the next /sync (manual or cron) pulls the actual changes. No session auth:
-    Plaid calls this server-to-server, so authenticity is established via the
-    `Plaid-Verification` JWT signature instead (see lib/plaid_webhook.py).
+    """Plaid transaction webhooks (TRANSACTIONS SYNC_UPDATES etc.). Logged
+    here, and a TRANSACTIONS webhook immediately kicks a background sync for
+    the owning tenant (plan-gated; the scheduler's periodic sweep remains as
+    a backstop). No session auth: Plaid calls this server-to-server, so
+    authenticity is established via the `Plaid-Verification` JWT signature
+    instead (see lib/plaid_webhook.py).
 
     The signature is computed over the RAW request body, so the body is read
     as bytes first and only parsed to JSON after verification. Verification is
@@ -294,6 +342,8 @@ async def webhook(request: Request):
     await db.bank_webhooks.insert_one({
         "webhook_type": body.get("webhook_type"), "webhook_code": body.get("webhook_code"),
         "item_id": body.get("item_id"), "received_at": now_iso(), "raw": str(body)[:2000]})
+    if body.get("webhook_type") == "TRANSACTIONS" and body.get("item_id"):
+        _kick_item_sync(body["item_id"])
     return {"ok": True}
 
 

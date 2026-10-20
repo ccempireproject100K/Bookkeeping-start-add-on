@@ -308,6 +308,7 @@ async def migrate_encrypt_pii(user: dict = Depends(require("ledger:admin"))):
     - contractors.tax_id -> tax_id_enc + tax_id_last4 (plaintext then unset)
     - contractors.tax_id_enc holding PLAINTEXT (pre-encryption router wrote it
       directly) -> encrypted in place; Fernet tokens start with "gAAAAA"
+    - vendors.tax_id -> tax_id_enc + tax_id_last4 (plaintext then unset)
     - users.payout_account / payout_routing -> payout_*_enc + *_last4 (plaintext then unset)
     Run after any agent stored plaintext; safe to run repeatedly.
     """
@@ -336,6 +337,17 @@ async def migrate_encrypt_pii(user: dict = Depends(require("ledger:admin"))):
             {"_id": c["_id"]},
             {"$set": {"tax_id_enc": pii_encrypt(enc), "tax_id_last4": last4(enc)}})
         contractors_n += 1
+    vendors_n = 0
+    async for v in db.vendors.find(
+            {"tax_id": {"$exists": True, "$ne": ""}}):
+        tax_id = (v.get("tax_id") or "").strip()
+        if not tax_id:
+            continue
+        await db.vendors.update_one(
+            {"_id": v["_id"]},
+            {"$set": {"tax_id_enc": pii_encrypt(tax_id), "tax_id_last4": last4(tax_id)},
+             "$unset": {"tax_id": ""}})
+        vendors_n += 1
     users_n = 0
     async for u in db.users.find({"$or": [{"payout_account": {"$exists": True, "$ne": ""}},
                                           {"payout_routing": {"$exists": True, "$ne": ""}}]}):
@@ -358,8 +370,9 @@ async def migrate_encrypt_pii(user: dict = Depends(require("ledger:admin"))):
             await db.users.update_one({"_id": u["_id"]}, op)
             users_n += 1
     await _audit(user, "pii.migrate", "system", "pii",
-                 {"contractors": contractors_n, "users": users_n})
-    return {"ok": True, "contractors_encrypted": contractors_n, "users_encrypted": users_n}
+                 {"contractors": contractors_n, "vendors": vendors_n, "users": users_n})
+    return {"ok": True, "contractors_encrypted": contractors_n,
+            "vendors_encrypted": vendors_n, "users_encrypted": users_n}
 
 
 class SwitchBody(BaseModel):

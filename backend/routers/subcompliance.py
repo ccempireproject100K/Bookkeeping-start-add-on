@@ -14,6 +14,7 @@ from db import db
 from lib.audit import audit
 from lib.auth import require
 from lib.base import Scoped, now_iso, today_str
+from routers.vendors import public_vendor
 
 router = APIRouter(prefix="/subcompliance", tags=["subcompliance"])
 
@@ -52,9 +53,13 @@ def _status(v: dict, today: str) -> dict:
 async def list_subs(user: dict = Depends(require("ledger:read"))):
     today = today_str()[:10]
     docs = await _subs(user).find_list({"is_1099": True}, sort=[("name", 1)], limit=500)
+    out = []
     for d in docs:
-        d["compliance_status"] = _status(d, today)
-    return docs
+        # public_vendor: a vendor's full TIN / ciphertext never leave the API.
+        pub = public_vendor(d)
+        pub["compliance_status"] = _status(d, today)
+        out.append(pub)
+    return out
 
 
 class ComplianceBody(BaseModel):
@@ -76,8 +81,9 @@ async def set_compliance(vendor_id: str, body: ComplianceBody,
     await audit(user, "subcompliance.update", "vendor", vendor_id,
                 {"w9": comp["w9_received"], "insurance_expiry": comp["insurance_expiry"]})
     v = await _subs(user).find_one({"id": vendor_id})
-    v["compliance_status"] = _status(v, today_str()[:10])
-    return v
+    pub = public_vendor(v)
+    pub["compliance_status"] = _status(v, today_str()[:10])
+    return pub
 
 
 @router.get("/dashboard")

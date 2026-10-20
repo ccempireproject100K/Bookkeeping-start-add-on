@@ -121,7 +121,8 @@ async def cpa_package(year: str = Query("2026"),
         pay_totals[py.get("vendor_id")] = pay_totals.get(py.get("vendor_id"), 0) + (py.get("amount_cents") or 0)
     files["contractors_1099.csv"] = _csv_str(
         ["Name", "Tax ID on file", "W-9 on file", f"{year} Paid", "Needs 1099 (>= $600)"],
-        [[s.get("name"), "yes" if s.get("tax_id") else "no",
+        [[s.get("name"), "yes" if (s.get("tax_id") or s.get("tax_id_enc")
+                                   or s.get("tax_id_last4")) else "no",
           "yes" if (s.get("compliance") or {}).get("w9_received") else "no",
           _money(pay_totals.get(s["id"], 0)),
           "yes" if pay_totals.get(s["id"], 0) >= 60000 else "no"] for s in subs])

@@ -186,7 +186,7 @@ export default function Expenses() {
                     <td className="px-4 py-3 text-gray-100">{v.name}</td>
                     <td className="px-4 py-3 text-gray-400 text-xs">{v.email || v.phone || "—"}</td>
                     <td className="px-4 py-3">{v.is_1099 ? <span className="px-2 py-0.5 rounded-full text-xs bg-amber-500/10 text-amber-400 border border-amber-500/20">1099</span> : <span className="text-gray-600">—</span>}</td>
-                    <td className="px-4 py-3 text-gray-400 font-mono text-xs">{v.tax_id || "—"}</td>
+                    <td className="px-4 py-3 text-gray-400 font-mono text-xs">{v.tax_id_masked || "—"}</td>
                     {canManage && <td className="px-4 py-3 text-right">
                         <button onClick={() => delVendor(v)} aria-label={`Delete ${v.name}`} data-testid={`vendor-delete-${v.id}`} className="inline-flex items-center justify-center w-8 h-8 rounded text-gray-500 hover:text-rose-400 hover:bg-rose-500/10"><Trash2 size={15} /></button>
                       </td>}
@@ -228,7 +228,7 @@ export default function Expenses() {
                   <th className="px-4 py-3 text-right font-medium">{t("expenses.paid")}</th><th className="px-4 py-3 text-left font-medium">{t("expenses.reportable600")}</th></tr></thead>
                 <tbody>
                   {report1099.vendors.map(v => <tr key={v.vendor_id} className="border-b border-[#171c26]">
-                      <td className="px-4 py-3 text-gray-100">{v.name}</td><td className="px-4 py-3 text-gray-400 font-mono text-xs">{v.tax_id || "—"}</td>
+                      <td className="px-4 py-3 text-gray-100">{v.name}</td><td className="px-4 py-3 text-gray-400 font-mono text-xs">{v.tax_id_masked || "—"}</td>
                       <td className="px-4 py-3 text-right font-mono text-gray-200">{dollars(v.paid)}</td>
                       <td className="px-4 py-3">{v.reportable ? <span className="text-amber-400">{t("expenses.yes")}</span> : <span className="text-gray-600">{t("expenses.no")}</span>}</td>
                     </tr>)}
