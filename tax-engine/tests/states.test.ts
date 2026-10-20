@@ -28,6 +28,14 @@ describe('California (real implementation)', () => {
     expect(r.state?.totalTaxCents).toBe(277_097);
   });
 
+  it('carries the QBI before/after fields on federal only, never on the state result', () => {
+    expect(r.federal.incomeTaxBeforeQbiCents).toBe(752_660);
+    expect(r.federal.incomeTaxCents).toBe(534_382);
+    expect(r.state?.incomeTaxBeforeQbiCents).toBeUndefined();
+    expect(r.state?.qbiDeductionCents).toBeUndefined();
+    expect(r.state?.incomeTaxCents).toBeUndefined();
+  });
+
   it('combines federal + state in the total and breakdown', () => {
     expect(r.totalLiabilityCents).toBe(1_664_746 + 277_097);
     expect(r.breakdown.some((c) => c.jurisdiction === 'US-CA' && c.type === 'state_income_tax')).toBe(true);

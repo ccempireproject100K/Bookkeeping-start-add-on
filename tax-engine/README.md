@@ -55,6 +55,13 @@ calculateTax(netProfit: number, jurisdiction: string, taxProfile: TaxProfile): T
 (90%-of-current vs prior-year comparison), `status`, `notes`, and
 `workpapers`.
 
+The federal result (`result.federal`) additionally carries the **QBI
+before/after pair as first-class named fields** — `incomeTaxBeforeQbiCents`,
+`qbiDeductionCents`, and `incomeTaxCents` (the final post-QBI figure, equal
+to the `income_tax` breakdown component) — so a UI can render "Income tax
+before QBI deduction: $7,526.60 · QBI deduction: −$11,649.64 · Income tax
+you actually owe: $5,343.82" without digging through the workpapers.
+
 ### Status discipline
 
 `status` is `OK`, `PARTIAL`, or `NOT_IMPLEMENTED` — and a state module is

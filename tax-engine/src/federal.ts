@@ -229,6 +229,18 @@ export function computeFederalDetailed(
   step('Taxable income', 'Taxable income before QBI − QBI deduction.', taxableIncomeCents);
 
   // ---- Income tax ---------------------------------------------------------
+  // The before/after QBI pair is a first-class output (owner requirement):
+  // the same bracket engine runs on taxable income before the deduction so
+  // the QBI benefit is a visible, auditable number — not buried in the trace.
+  const incomeTaxBeforeQbiCents = computeBracketTax(
+    taxableBeforeQbiCents,
+    cfg.brackets[status],
+  ).totalCents;
+  step(
+    'Income tax before QBI deduction',
+    'Bracket tax on taxable income BEFORE the §199A deduction.',
+    incomeTaxBeforeQbiCents,
+  );
   const bracketResult = computeBracketTax(taxableIncomeCents, cfg.brackets[status]);
   for (const line of bracketResult.lines) {
     if (line.taxableCents > 0) {
@@ -241,6 +253,13 @@ export function computeFederalDetailed(
   }
   const incomeTaxCents = bracketResult.totalCents;
   step('Income tax', 'Sum of bracket lines (ordinary rates; preferential capital-gains rates not modeled).', incomeTaxCents);
+  if (qbiDeductionCents > 0) {
+    step(
+      'QBI tax benefit',
+      'Income tax before QBI − income tax after QBI: the cash value of the deduction at these brackets.',
+      incomeTaxBeforeQbiCents - incomeTaxCents,
+    );
+  }
   components.push({
     jurisdiction: cfg.jurisdiction,
     type: 'income_tax',
@@ -281,6 +300,9 @@ export function computeFederalDetailed(
     status: 'OK',
     components,
     totalTaxCents,
+    incomeTaxBeforeQbiCents,
+    qbiDeductionCents,
+    incomeTaxCents,
     safeHarbor,
     schedule,
     notes,

@@ -105,6 +105,18 @@ export interface JurisdictionResult {
   localityStatus?: 'NOT_IMPLEMENTED';
   components: TaxComponent[];
   totalTaxCents: number;
+  /**
+   * Federal result only — the QBI before/after pair, as first-class fields
+   * (owner requirement): income tax computed on taxable income BEFORE the
+   * §199A deduction, so a UI can show "before QBI · deduction · tax owed"
+   * without digging through the workpapers.
+   */
+  incomeTaxBeforeQbiCents?: number;
+  /** Federal result only — the §199A QBI deduction actually applied. */
+  qbiDeductionCents?: number;
+  /** Federal result only — final income tax AFTER the QBI deduction
+   *  (identical to the `income_tax` component in `components`). */
+  incomeTaxCents?: number;
   safeHarbor: SafeHarborComparison;
   schedule: QuarterlyPayment[];
   notes: string[];

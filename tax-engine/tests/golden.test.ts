@@ -52,6 +52,20 @@ describe('golden example — $80,000 net profit, single, no W-2 wages', () => {
     expect(comp('income_tax')).toBeLessThan(noQbiTaxCents);
   });
 
+  it('exposes the before/after QBI pair as first-class fields on the federal result', () => {
+    // Owner requirement: both numbers, named fields, no workpaper digging.
+    // Before ≈ the owner's ~$7,500 reading; after ≈ the strict-ordering
+    // ~$5,300 reading. (752660 = $7,526.60; 1164964 = $11,649.64;
+    // 534382 = $5,343.82.)
+    expect(r.federal.incomeTaxBeforeQbiCents).toBe(752_660);
+    expect(r.federal.qbiDeductionCents).toBe(1_164_964);
+    expect(r.federal.incomeTaxCents).toBe(534_382);
+    // The first-class field and the breakdown component agree.
+    expect(r.federal.incomeTaxCents).toBe(comp('income_tax'));
+    // The benefit is the difference — $2,182.78 at these brackets.
+    expect((r.federal.incomeTaxBeforeQbiCents ?? 0) - (r.federal.incomeTaxCents ?? 0)).toBe(218_278);
+  });
+
   it('totals $16,647.46 and spreads the safe harbor exactly', () => {
     expect(r.totalLiabilityCents).toBe(1_664_746);
     expect(r.status).toBe('OK');
