@@ -32,6 +32,11 @@ class JurisdictionIn(BaseModel):
     state: str = Field(..., max_length=2)     # 2-letter code
     rate_pct: float = Field(..., ge=0, le=30)  # e.g. 8.25
     notes: Optional[str] = Field(default="", max_length=200)
+    # Optional filing schedule — when set, the cash-flow forecast projects
+    # collected tax onto the filing due dates (see routers/budget.py).
+    filing_frequency: Optional[str] = Field(
+        default=None, pattern=r"^(monthly|quarterly|annual)$")
+    filing_due_day: Optional[int] = Field(default=None, ge=1, le=28)
 
 
 class JurisdictionPatch(BaseModel):
@@ -39,6 +44,9 @@ class JurisdictionPatch(BaseModel):
     rate_pct: Optional[float] = Field(default=None, ge=0, le=30)
     notes: Optional[str] = Field(default=None, max_length=200)
     active: Optional[bool] = None
+    filing_frequency: Optional[str] = Field(
+        default=None, pattern=r"^(monthly|quarterly|annual)$")
+    filing_due_day: Optional[int] = Field(default=None, ge=1, le=28)
 
 
 @router.get("/jurisdictions")
@@ -65,6 +73,10 @@ async def create_jurisdiction(body: JurisdictionIn,
         "notes": (body.notes or "").strip(), "active": True,
         "created_at": now_iso(),
     }
+    if body.filing_frequency is not None:
+        doc["filing_frequency"] = body.filing_frequency
+    if body.filing_due_day is not None:
+        doc["filing_due_day"] = body.filing_due_day
     await _coll(user).insert_one(doc)
     doc.pop("_id", None)
     return doc
@@ -84,6 +96,10 @@ async def update_jurisdiction(jid: str, body: JurisdictionPatch,
         patch["notes"] = body.notes.strip()
     if body.active is not None:
         patch["active"] = body.active
+    if body.filing_frequency is not None:
+        patch["filing_frequency"] = body.filing_frequency
+    if body.filing_due_day is not None:
+        patch["filing_due_day"] = body.filing_due_day
     if not patch:
         raise HTTPException(400, "Nothing to update")
     r = await _coll(user).update_one(

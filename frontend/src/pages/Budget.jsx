@@ -81,6 +81,119 @@ export default function Budget() {
   const [data, setData] = useState(null);
   const [cats, setCats] = useState([]);
   const [fc, setFc] = useState(null);
+  const [runRate, setRunRate] = useState(false);
+  const [expDates, setExpDates] = useState(false);
+  const [haircut, setHaircut] = useState(0);
+  const [shiftDays, setShiftDays] = useState(0);
+  const [scenarios, setScenarios] = useState([]);
+  const [scenarioId, setScenarioId] = useState("");
+  const [scenName, setScenName] = useState("");
+  const [events, setEvents] = useState([]);
+  const [evForm, setEvForm] = useState({
+    name: "",
+    direction: "out",
+    amount: "",
+    date: "",
+    frequency: "",
+    shape: "custom",
+    annual_salary: ""
+  });
+  const [showItems, setShowItems] = useState(false);
+  const loadScenarios = () => api.get("/budget/forecast/scenarios").then(setScenarios).catch(() => {});
+  const loadEvents = () => api.get("/budget/forecast/events").then(setEvents).catch(() => {});
+  const saveScenario = async e => {
+    e.preventDefault();
+    try {
+      const sc = await api.post("/budget/forecast/scenarios", {
+        name: scenName.trim(),
+        run_rate: runRate,
+        expected_pay_dates: expDates,
+        payroll: true,
+        tax: true,
+        excluded_keys: [],
+        ar_haircut_pct: Number(haircut) || 0,
+        ar_shift_days: Number(shiftDays) || 0
+      });
+      toast.success("Scenario saved");
+      setScenName("");
+      loadScenarios();
+      setScenarioId(sc.id);
+    } catch (err) {
+      toast.error(errMsg(err));
+    }
+  };
+  const delScenario = async () => {
+    try {
+      await api.del(`/budget/forecast/scenarios/${scenarioId}`);
+      toast.success("Scenario deleted");
+      setScenarioId("");
+      loadScenarios();
+    } catch (e) {
+      toast.error(errMsg(e));
+    }
+  };
+  const excludeItem = async key => {
+    const sc = scenarios.find(s => s.id === scenarioId);
+    if (!sc) {
+      toast.error("Save or select a scenario first — exclusions live on scenarios");
+      return;
+    }
+    try {
+      const {
+        id,
+        tenant_id,
+        created_at,
+        updated_at,
+        ...rest
+      } = sc;
+      await api.put(`/budget/forecast/scenarios/${sc.id}`, {
+        ...rest,
+        excluded_keys: [...(sc.excluded_keys || []), key]
+      });
+      loadScenarios();
+      loadFc();
+    } catch (err) {
+      toast.error(errMsg(err));
+    }
+  };
+  const addEvent = async e => {
+    e.preventDefault();
+    try {
+      await api.post("/budget/forecast/events", {
+        name: evForm.name.trim(),
+        direction: evForm.direction,
+        amount: parseFloat(evForm.amount) || 0,
+        date: evForm.date,
+        frequency: evForm.frequency || null,
+        shape: evForm.shape,
+        scenario_id: scenarioId || null,
+        annual_salary: evForm.shape === "hire" ? parseFloat(evForm.annual_salary) || 0 : null
+      });
+      toast.success("Event added");
+      setEvForm({
+        name: "",
+        direction: "out",
+        amount: "",
+        date: "",
+        frequency: "",
+        shape: "custom",
+        annual_salary: ""
+      });
+      loadEvents();
+      loadFc();
+    } catch (err) {
+      toast.error(errMsg(err));
+    }
+  };
+  const delEvent = async id => {
+    try {
+      await api.del(`/budget/forecast/events/${id}`);
+      loadEvents();
+      loadFc();
+    } catch (e) {
+      toast.error(errMsg(e));
+    }
+  };
   const [form, setForm] = useState({
     category: "",
     amount: ""
@@ -92,16 +205,31 @@ export default function Budget() {
       totals: {}
     });
   });
-  const loadFc = () => api.get(`/budget/forecast?days=${days}`).then(setFc).catch(e => {
-    toast.error(errMsg(e));
-    setFc(null);
-  });
+  const loadFc = () => {
+    const p = new URLSearchParams({
+      days: String(days)
+    });
+    if (runRate) p.set("run_rate", "true");
+    if (expDates) p.set("expected_pay_dates", "true");
+    if (scenarioId) p.set("scenario_id", scenarioId); else {
+      if (Number(haircut) > 0) p.set("ar_haircut_pct", String(haircut));
+      if (Number(shiftDays) !== 0) p.set("ar_shift_days", String(shiftDays));
+    }
+    api.get(`/budget/forecast?${p.toString()}`).then(setFc).catch(e => {
+      toast.error(errMsg(e));
+      setFc(null);
+    });
+  };
   useEffect(() => {
     loadBudget();
   }, [period]);
   useEffect(() => {
     loadFc();
-  }, [days]);
+  }, [days, runRate, expDates, scenarioId, haircut, shiftDays]);
+  useEffect(() => {
+    loadScenarios();
+    loadEvents();
+  }, []);
   useEffect(() => {
     api.get("/budget/categories").then(setCats).catch(() => {});
   }, []);
@@ -226,7 +354,34 @@ export default function Budget() {
             {[30, 60, 90].map(d => <Button key={d} size="sm" variant={days === d ? "default" : "outline"} className={`h-7 ${days === d ? "bg-amber-600 hover:bg-amber-500 text-black" : "border-[#222838]"}`} onClick={() => setDays(d)}>{d}d</Button>)}
           </div>
         </div>
+        <div className="mb-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-gray-300">
+          <label className="flex items-center gap-1.5">
+            <input type="checkbox" checked={runRate} onChange={e => setRunRate(e.target.checked)} data-testid="fc-runrate" />
+            Run-rate band <span className="text-gray-500">(trailing 90d cash, net of scheduled items)</span>
+          </label>
+          <label className="flex items-center gap-1.5">
+            <input type="checkbox" checked={expDates} onChange={e => setExpDates(e.target.checked)} data-testid="fc-expdates" />
+            Expected pay dates <span className="text-gray-500">(customers' own history)</span>
+          </label>
+          <label className="flex items-center gap-1.5">Scenario
+            <select value={scenarioId} onChange={e => setScenarioId(e.target.value)} className="bg-[#0F1218] border border-[#222838] rounded-md h-7 px-2 text-xs text-gray-200" data-testid="fc-scenario">
+              <option value="">Base forecast</option>
+              {scenarios.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+            </select>
+          </label>
+          {!scenarioId && <>
+            <label className="flex items-center gap-1.5">AR haircut %
+              <Input type="number" min={0} max={100} value={haircut} onChange={e => setHaircut(e.target.value)} className="bg-[#0F1218] border-[#222838] w-16 h-7 font-mono" data-testid="fc-haircut" />
+            </label>
+            <label className="flex items-center gap-1.5">AR shift days
+              <Input type="number" value={shiftDays} onChange={e => setShiftDays(e.target.value)} className="bg-[#0F1218] border-[#222838] w-16 h-7 font-mono" data-testid="fc-shift" />
+            </label>
+          </>}
+        </div>
         {fc ? <>
+            {fc.alerts?.first_below_date && <div className="mb-4 rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-300" data-testid="fc-lowcash">
+              Cash is projected to dip below {money(fc.alerts.threshold_cents)} on {fc.alerts.first_below_date} (low point {money(fc.min_cash_cents)} on {fc.min_cash_date}).
+            </div>}
             <div className="mb-4 grid grid-cols-2 gap-2 text-sm md:grid-cols-4">
               <div className="rounded-lg bg-[#0F1218] border border-[#222838] p-3"><div className="text-xs text-gray-500">{t("budget.cashToday")}</div><div className="font-mono font-medium text-gray-100">{money(fc.start_cash_cents)}</div></div>
               <div className="rounded-lg bg-[#0F1218] border border-[#222838] p-3"><div className="text-xs text-gray-500">{t("budget.projectedIn")} {days}d</div><div className="font-mono font-medium text-gray-100">{money(fc.end_cash_cents)}</div></div>
@@ -236,10 +391,105 @@ export default function Budget() {
                 <div className="font-mono text-xs text-red-400">−{money(fc.scheduled.bills_cents)}</div></div>
             </div>
             <CashBars points={fc.points} />
+            <div className="mt-4 grid grid-cols-2 gap-2 text-xs md:grid-cols-4">
+              <div className="rounded-lg bg-[#0F1218] border border-[#222838] p-2.5"><div className="text-gray-500">Recurring</div><div className="font-mono text-emerald-400">+{money(fc.scheduled.recurring_inflow_cents)}</div><div className="font-mono text-red-400">−{money(fc.scheduled.recurring_outflow_cents)}</div></div>
+              <div className="rounded-lg bg-[#0F1218] border border-[#222838] p-2.5"><div className="text-gray-500">Payroll (based on last run)</div><div className="font-mono text-red-400">−{money(fc.scheduled.payroll_cents)}</div></div>
+              <div className="rounded-lg bg-[#0F1218] border border-[#222838] p-2.5"><div className="text-gray-500">Tax estimates + sales tax</div><div className="font-mono text-red-400">−{money((fc.scheduled.tax_cents || 0) + (fc.scheduled.sales_tax_cents || 0))}</div></div>
+              <div className="rounded-lg bg-[#0F1218] border border-[#222838] p-2.5"><div className="text-gray-500">Manual events</div><div className="font-mono text-emerald-400">+{money(fc.scheduled.events_in_cents)}</div><div className="font-mono text-red-400">−{money(fc.scheduled.events_out_cents)}</div></div>
+            </div>
+            {fc.notes?.length > 0 && <div className="mt-4 rounded-lg border border-amber-500/30 bg-amber-500/5 px-3 py-2 text-xs text-amber-200/90" data-testid="fc-notes">
+              <div className="font-medium mb-1">Coverage notes</div>
+              <ul className="list-disc pl-4 space-y-0.5">{fc.notes.map((n, i) => <li key={i}>{n}</li>)}</ul>
+            </div>}
             <div className="mt-4 text-xs text-gray-500">
               <div className="font-medium text-gray-300 mb-1">{t("budget.assumptions")}</div>
               <ul className="list-disc pl-4 space-y-0.5">{fc.assumptions.map((a, i) => <li key={i}>{a}</li>)}</ul>
-              <p className="mt-2">{t("budget.baseline")} {money(fc.avg_daily_inflow_cents)}/day in, {money(fc.avg_daily_outflow_cents)}/day out (trailing 90d). Recurring: +{money(fc.scheduled.recurring_inflow_cents)} {t("budget.in")}{money(fc.scheduled.recurring_outflow_cents)} {t("budget.out")}</p>
+              <p className="mt-2">Run-rate band: {money(fc.avg_daily_inflow_cents)}/day in, {money(fc.avg_daily_outflow_cents)}/day out (trailing 90d cash, excluding scheduled categories) — {fc.layers?.run_rate?.enabled ? "included in the curve above" : "not included; tick the band to layer it on"}.</p>
+              {fc.layers?.expected_pay_dates?.adjustments?.length > 0 && <p className="mt-1">{fc.layers.expected_pay_dates.adjustments.map(a => `${a.customer} usually pays ~${a.avg_days_late} days ${a.avg_days_late >= 0 ? "late" : "early"} (${a.samples} invoices)`).join("; ")}</p>}
+            </div>
+
+            <div className="mt-6">
+              <h4 className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">13-week roll-up</h4>
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs" data-testid="fc-weekly">
+                  <thead><tr className="text-gray-500 border-b border-[#222838]">
+                    <th className="py-2 text-left font-medium">Week</th>
+                    <th className="py-2 text-right font-medium">In</th>
+                    <th className="py-2 text-right font-medium">Out</th>
+                    <th className="py-2 text-right font-medium">Net</th>
+                    <th className="py-2 text-right font-medium">End cash</th></tr></thead>
+                  <tbody>
+                    {(fc.weekly || []).map(w => <tr key={w.week} className="border-b border-[#171c26]">
+                      <td className="py-1.5 text-gray-300">{w.start_date} → {w.end_date}</td>
+                      <td className="py-1.5 text-right font-mono text-emerald-400">{money(w.inflow_cents)}</td>
+                      <td className="py-1.5 text-right font-mono text-red-400">{money(w.outflow_cents)}</td>
+                      <td className={`py-1.5 text-right font-mono ${w.net_cents < 0 ? "text-red-400" : "text-gray-200"}`}>{money(w.net_cents)}</td>
+                      <td className={`py-1.5 text-right font-mono ${w.end_cash_cents < 0 ? "text-red-400" : "text-gray-100"}`}>{money(w.end_cash_cents)}</td></tr>)}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div className="mt-6">
+              <button className="text-xs font-semibold uppercase tracking-wider text-gray-400" onClick={() => setShowItems(s => !s)} data-testid="fc-items-toggle">
+                {showItems ? "Hide" : "Show"} the {fc.items?.length || 0} scheduled items behind this curve
+              </button>
+              {showItems && <div className="mt-2 max-h-72 overflow-y-auto">
+                <table className="w-full text-xs" data-testid="fc-items">
+                  <tbody>
+                    {(fc.items || []).map(i => <tr key={i.key} className="border-b border-[#171c26]">
+                      <td className="py-1.5 text-gray-400 font-mono">{i.date}</td>
+                      <td className="py-1.5 text-gray-300">{i.label}</td>
+                      <td className="py-1.5 text-gray-500">{i.kind.replace("_", " ")}</td>
+                      <td className={`py-1.5 text-right font-mono ${i.direction === "in" ? "text-emerald-400" : "text-red-400"}`}>{i.direction === "in" ? "+" : "−"}{money(i.amount_cents)}</td>
+                      <td className="py-1.5 text-right">{canWrite && <button className="text-gray-600 hover:text-amber-400" title="Exclude this item in the selected scenario" onClick={() => excludeItem(i.key)}>exclude</button>}</td></tr>)}
+                  </tbody>
+                </table>
+              </div>}
+            </div>
+
+            <div className="mt-6 border-t border-[#222838] pt-4">
+              <h4 className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">What-if events {scenarioId ? "(base + this scenario)" : "(base forecast)"}</h4>
+              {events.length > 0 && <ul className="mb-3 space-y-1 text-xs">
+                {events.map(ev => <li key={ev.id} className="flex items-center justify-between rounded bg-[#0F1218] border border-[#222838] px-2.5 py-1.5">
+                  <span className="text-gray-300">{ev.name} <span className="text-gray-500">· {ev.date}{ev.frequency ? ` · ${ev.frequency}` : ""}{ev.scenario_id ? " · scenario" : ""}</span></span>
+                  <span className="flex items-center gap-2">
+                    <span className={`font-mono ${ev.direction === "in" ? "text-emerald-400" : "text-red-400"}`}>{ev.direction === "in" ? "+" : "−"}{money(ev.amount_cents)}</span>
+                    {canWrite && <button onClick={() => delEvent(ev.id)} className="text-gray-600 hover:text-rose-400"><Trash2 size={12} /></button>}
+                  </span></li>)}
+              </ul>}
+              {canWrite && <form className="flex flex-wrap items-end gap-2" onSubmit={addEvent}>
+                <div><Label className="text-xs">Name</Label><Input value={evForm.name} onChange={e => setEvForm({ ...evForm, name: e.target.value })} className="bg-[#0F1218] border-[#222838] w-40" required /></div>
+                <div><Label className="text-xs">Shape</Label>
+                  <select value={evForm.shape} onChange={e => setEvForm({ ...evForm, shape: e.target.value })} className="bg-[#0F1218] border border-[#222838] rounded-md h-9 px-2 text-sm text-gray-200">
+                    <option value="custom">Custom</option>
+                    <option value="one_time">One-time</option>
+                    <option value="recurring">Recurring cost</option>
+                    <option value="hire">New hire</option>
+                  </select></div>
+                <div><Label className="text-xs">Direction</Label>
+                  <select value={evForm.direction} onChange={e => setEvForm({ ...evForm, direction: e.target.value })} className="bg-[#0F1218] border border-[#222838] rounded-md h-9 px-2 text-sm text-gray-200">
+                    <option value="out">Money out</option>
+                    <option value="in">Money in</option>
+                  </select></div>
+                {evForm.shape === "hire"
+                  ? <div><Label className="text-xs">Annual salary</Label><Input type="number" step="0.01" min={0} value={evForm.annual_salary} onChange={e => setEvForm({ ...evForm, annual_salary: e.target.value })} className="bg-[#0F1218] border-[#222838] w-28 font-mono" required /></div>
+                  : <div><Label className="text-xs">Amount</Label><Input type="number" step="0.01" min={0} value={evForm.amount} onChange={e => setEvForm({ ...evForm, amount: e.target.value })} className="bg-[#0F1218] border-[#222838] w-28 font-mono" required /></div>}
+                <div><Label className="text-xs">Date</Label><Input type="date" value={evForm.date} onChange={e => setEvForm({ ...evForm, date: e.target.value })} className="bg-[#0F1218] border-[#222838] w-36" required /></div>
+                {evForm.shape !== "one_time" && evForm.shape !== "hire" && <div><Label className="text-xs">Repeats</Label>
+                  <select value={evForm.frequency} onChange={e => setEvForm({ ...evForm, frequency: e.target.value })} className="bg-[#0F1218] border border-[#222838] rounded-md h-9 px-2 text-sm text-gray-200">
+                    <option value="">Never</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="quarterly">Quarterly</option>
+                  </select></div>}
+                <Button size="sm" type="submit" className="bg-amber-600 hover:bg-amber-500 text-black"><Plus size={14} className="mr-1" /> Add event</Button>
+              </form>}
+              {canWrite && <form className="mt-3 flex flex-wrap items-end gap-2" onSubmit={saveScenario}>
+                <div><Label className="text-xs">Save current toggles + sliders as a scenario</Label><Input value={scenName} onChange={e => setScenName(e.target.value)} className="bg-[#0F1218] border-[#222838] w-52" placeholder="e.g. Slow-paying winter" required /></div>
+                <Button size="sm" type="submit" variant="outline" className="border-[#222838]">Save scenario</Button>
+                {scenarioId && <Button size="sm" type="button" variant="outline" className="border-[#222838]" onClick={delScenario}>Delete selected scenario</Button>}
+              </form>}
             </div>
           </> : <p className="text-sm text-gray-500">{t("budget.projecting")}</p>}
       </Card>
