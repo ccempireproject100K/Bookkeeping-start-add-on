@@ -448,8 +448,18 @@ async def _payroll_items(tenant_id, today, end):
                          "yet — its payroll is not projected.")
             continue
         t = found[0].get("totals") or {}
-        cost = (t.get("gross_cents") or 0) - (t.get("booth_rent_cents") or 0) \
-            + (t.get("employer_tax_cents") or 0)
+        booth = t.get("booth_rent_cents") or 0
+        if t.get("employer_cost_cents") is not None:
+            # Post-#149 totals: employer_cost_cents already includes gross
+            # plus ALL employer taxes (FICA + FUTA + SUTA + ETT), while
+            # employer_tax_cents was narrowed to employer FICA only — the
+            # old formula would under-project by FUTA+SUTA+ETT per run.
+            cost = t["employer_cost_cents"] - booth
+        else:
+            # Legacy runs posted before #149: employer_tax_cents was the
+            # FULL employer-tax figure and no employer_cost_cents exists.
+            cost = (t.get("gross_cents") or 0) - booth \
+                + (t.get("employer_tax_cents") or 0)
         if cost <= 0:
             continue
         try:
@@ -561,10 +571,17 @@ def _st_due_dates(freq: str, due_day: int, today: date, end: date) -> list[date]
 
 async def _sales_tax_items(tenant_id, today, end):
     """Tax layer, sales-tax part: for jurisdictions with a filing schedule
-    configured (filing_frequency + filing_due_day, set on the sales-tax
-    jurisdiction), project this period's collected tax onto the filing due
-    dates in the window. Jurisdictions without a schedule produce an
-    explicit gap note — never a silent zero."""
+    (filing_frequency + filing_due_day on the sales-tax jurisdiction),
+    project this period's collected tax onto the filing due dates in the
+    window. Since PR #150 those fields are ALWAYS stored on a jurisdiction
+    (defaults monthly / due day 20), so every current jurisdiction
+    projects; only pre-#150 legacy jurisdictions lacking the fields count
+    as unconfigured, and if none is configured the layer emits an explicit
+    gap note — never a silent zero. Registrations are #150's filing-
+    obligation record (its worksheets key on db.sales_tax_registrations):
+    a tenant projecting from jurisdiction schedules with NO registration
+    on file also gets a note — the dates are schedule-based, not
+    registration-confirmed."""
     items, notes = [], []
     jurs = await Scoped(db.tax_jurisdictions, tenant_id).find_list({}, limit=200)
     configured = [j for j in jurs
@@ -573,6 +590,15 @@ async def _sales_tax_items(tenant_id, today, end):
         notes.append("Sales tax is tracked but no jurisdiction has a filing "
                      "schedule configured — sales-tax payments are not projected.")
         return items, notes
+    if configured:
+        regs = await Scoped(db.sales_tax_registrations, tenant_id).find_list(
+            {}, limit=1)
+        if not regs:
+            notes.append(
+                "Sales tax: no state registration is on file — payment dates "
+                "follow each jurisdiction's filing schedule. Add registrations "
+                "under Sales Tax settings so due dates reflect your actual "
+                "filing obligations.")
     for j in configured:
         freq = j["filing_frequency"]
         if freq == "monthly":
