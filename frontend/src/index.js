@@ -3,6 +3,7 @@ import ReactDOM from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import "@/index.css";
 import App from "@/App";
+import * as serviceWorkerRegistration from "@/serviceWorkerRegistration";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -21,3 +22,7 @@ root.render(
     </QueryClientProvider>
   </React.StrictMode>,
 );
+
+// PWA: install the app shell cache (production only; see
+// public/service-worker.js for the caching strategy).
+serviceWorkerRegistration.register();

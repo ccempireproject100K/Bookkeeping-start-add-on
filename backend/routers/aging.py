@@ -37,28 +37,53 @@ def _summarize(items):
     }
 
 
+def _remaining(doc, total_cents):
+    """Open balance of a bill/invoice: total minus what's been paid.
+
+    Legacy docs written before partial payments existed may lack
+    ``paid_cents``; mirror the default the bills/invoices routers use
+    (fully paid iff status == "paid", else nothing paid yet)."""
+    paid = doc.get("paid_cents", total_cents if doc.get("status") == "paid" else 0)
+    return total_cents - paid, paid
+
+
 async def _ar(tenant_id, as_of):
-    invoices = await Scoped(db.invoices, tenant_id).find_list({"status": "issued"})
+    # Both freshly issued and partially-paid invoices carry an open balance.
+    # (Selecting only "issued" silently dropped every partial payment.)
+    invoices = await Scoped(db.invoices, tenant_id).find_list(
+        {"status": {"$in": ["issued", "partial"]}})
     out = []
     for inv in invoices:
+        remaining, paid = _remaining(inv, inv["total_cents"])
+        if remaining <= 0:
+            continue
         ref = inv.get("due_date") or (inv.get("created_at") or "")[:10] or as_of
         out.append({
             "name": inv["client_name"], "ref": inv.get("issue_entry"),
-            "due_date": ref, "amount_cents": inv["total_cents"],
-            "amount": cents_to_dollars(inv["total_cents"]), "bucket": _bucket(ref, as_of),
+            "due_date": ref, "amount_cents": remaining,
+            "amount": cents_to_dollars(remaining), "bucket": _bucket(ref, as_of),
+            "billed_cents": inv["total_cents"], "paid_cents": paid,
         })
     return _summarize(out)
 
 
 async def _ap(tenant_id, as_of):
-    bills = await Scoped(db.bills, tenant_id).find_list({"status": "open"})
+    # Both open and partially-paid bills belong in AP aging, at their
+    # remaining balance. (Selecting only "open" silently dropped every
+    # partially-paid bill from the report.)
+    bills = await Scoped(db.bills, tenant_id).find_list(
+        {"status": {"$in": ["open", "partial"]}})
     out = []
     for b in bills:
+        remaining, paid = _remaining(b, b["amount_cents"])
+        if remaining <= 0:
+            continue
         ref = b.get("due_date") or b.get("bill_date") or as_of
         out.append({
             "name": b["vendor"], "ref": b.get("issue_entry"),
-            "due_date": ref, "amount_cents": b["amount_cents"],
-            "amount": cents_to_dollars(b["amount_cents"]), "bucket": _bucket(ref, as_of),
+            "due_date": ref, "amount_cents": remaining,
+            "amount": cents_to_dollars(remaining), "bucket": _bucket(ref, as_of),
+            "billed_cents": b["amount_cents"], "paid_cents": paid,
         })
     return _summarize(out)
 

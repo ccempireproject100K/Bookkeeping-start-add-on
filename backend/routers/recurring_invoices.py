@@ -1,7 +1,9 @@
 """Recurring invoice templates: schedule definitions that materialize real (issued)
-invoices through the exact same issue logic as a manual invoice. Materialization is
-manual — the "generate due" endpoint creates invoices for every active template
-whose next_run has arrived, then advances next_run by the template's frequency."""
+invoices through the exact same issue logic as a manual invoice. Materialization
+runs through ``run_due_for_user`` — invoked by the "generate due" endpoint and,
+hourly, by the scheduler (lib/scheduler.run_recurring_invoices). Either way it
+creates invoices for every active template whose next_run has arrived, then
+advances next_run by the template's frequency."""
 from datetime import date, timedelta
 from typing import List, Optional
 
@@ -109,11 +111,12 @@ async def delete_template(rid: str, user: dict = Depends(require("ops:manage")))
     return {"ok": True}
 
 
-@router.post("/run-due")
-async def run_due(user: dict = Depends(require("ops:manage"))):
-    """Create issued invoices for every active template whose next_run has arrived,
-    advancing each template by its frequency. Safe to call repeatedly — a template
-    is only generated when next_run <= today."""
+async def run_due_for_user(user: dict) -> dict:
+    """Create issued invoices for every active template of the user's tenant
+    whose next_run has arrived, advancing each template by its frequency.
+    Safe to call repeatedly — a template is only generated when
+    next_run <= today. Shared by the manual endpoint below and the
+    scheduler's hourly job (lib/scheduler.run_recurring_invoices)."""
     today = today_str()
     made = []
     for t in await coll(user).find_list({"active": True, "next_run": {"$lte": today}}):
@@ -132,3 +135,8 @@ async def run_due(user: dict = Depends(require("ops:manage"))):
                      "invoice_id": inv["id"], "total_cents": inv["total_cents"],
                      "next_run": nxt})
     return {"generated": len(made), "invoices": made}
+
+
+@router.post("/run-due")
+async def run_due(user: dict = Depends(require("ops:manage"))):
+    return await run_due_for_user(user)
