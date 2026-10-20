@@ -292,10 +292,11 @@ def test_annual_variance_pct_and_zero_budget_edge(monkeypatch):
         ])
         fake = SimpleNamespace(budgets=budgets_c)
         monkeypatch.setattr(R, "db", fake)
-        # actuals come from the journal (revenue lines debit the revenue account
-        # per this repo's ledger convention): 4000 revenue 200000, 5000 expense 40000
+        # actuals come from the journal (posting CREDITs revenue accounts —
+        # lib/posting.py cr() — so a revenue balance is credit-heavy):
+        # 4000 revenue 200000, 5000 expense 40000
         monkeypatch.setattr(R.L, "_balances", AsyncMock(return_value={
-            "4000": {"debit": 200000, "credit": 0},
+            "4000": {"debit": 0, "credit": 200000},
             "5000": {"debit": 40000, "credit": 0},
             "6100": {"debit": 1000, "credit": 0},  # unknown type -> excluded
         }))
@@ -317,7 +318,7 @@ def test_annual_unbudgeted_account_pct_is_none(monkeypatch):
         fake = SimpleNamespace(budgets=FakeCollection([]))
         monkeypatch.setattr(R, "db", fake)
         monkeypatch.setattr(R.L, "_balances", AsyncMock(return_value={
-            "4000": {"debit": 100000, "credit": 0},
+            "4000": {"debit": 0, "credit": 100000},  # revenue posts as a credit
         }))
         d = await R.budget_vs_actual("2026", OWNER)
         rows = {r["code"]: r for r in d["rows"]}
