@@ -81,6 +81,27 @@ class Location(BaseModel):
     address: str
 
 
+class StructuredAddress(BaseModel):
+    """Sales-tax v1: a structured service / ship-to address. The state
+    drives jurisdiction resolution and sourcing; the free-text
+    `locations` above remain for display."""
+    street: str = ""
+    city: str = ""
+    state: str = ""
+    zip5: str = ""
+    zip4: Optional[str] = None
+
+
+class ExemptionInfo(BaseModel):
+    """Exemption-certificate metadata (v1 stores metadata + a document
+    reference only — no validation against state databases)."""
+    type: str = "resale"                 # resale | nonprofit | government | other
+    certificate_id: str = ""
+    state: str = ""
+    expires_on: Optional[str] = None
+    document_ref: Optional[str] = None
+
+
 class CustomerFiscal(BaseModel):
     """Mexican receptor fiscal block (playbook §3.2). Optional everywhere;
     required only when a CFDI is stamped to this customer. Validated with
@@ -98,6 +119,9 @@ class CustomerBody(BaseModel):
     phone: Optional[str] = None
     locations: List[Location] = []
     fiscal: Optional[CustomerFiscal] = None
+    ship_to: Optional[StructuredAddress] = None
+    tax_exempt: bool = False
+    exemption: Optional[ExemptionInfo] = None
 
 
 def _fiscal_or_422(body: CustomerBody):
@@ -158,6 +182,9 @@ async def create_customer(body: CustomerBody,
             "id": new_id(), "name": body.name, "email": body.email, "phone": body.phone,
             "locations": [l.model_dump() for l in body.locations], "created_at": now_iso(),
             "active": True, "deleted_at": None, "fiscal": _fiscal_or_422(body),
+            "ship_to": body.ship_to.model_dump() if body.ship_to else None,
+            "tax_exempt": bool(body.tax_exempt),
+            "exemption": body.exemption.model_dump() if body.exemption else None,
         }
         if idem_key:
             doc["sync_key"] = idem_key
@@ -191,6 +218,9 @@ async def update_customer(customer_id: str, body: CustomerBody,
         "name": body.name, "email": body.email, "phone": body.phone,
         "locations": [l.model_dump() for l in body.locations],
         "fiscal": _fiscal_or_422(body),
+        "ship_to": body.ship_to.model_dump() if body.ship_to else None,
+        "tax_exempt": bool(body.tax_exempt),
+        "exemption": body.exemption.model_dump() if body.exemption else None,
         "updated_at": now_iso(),
     }})
     updated = await coll(user).find_one({"id": customer_id})

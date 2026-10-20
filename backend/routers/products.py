@@ -8,6 +8,7 @@ from lib.base import Scoped, new_id, now_iso, today_str, to_cents
 from lib.auth import require, get_current_user
 from lib import ledger as L
 from lib import posting as P
+from lib.sales_tax_engine import TAX_CATEGORIES
 
 router = APIRouter(prefix="/products", tags=["products"])
 
@@ -31,6 +32,14 @@ class ProductBody(BaseModel):
     reorder_point: int = 0
     commissionable: bool = True
     image_url: Optional[str] = None
+    tax_category: Optional[str] = None   # sales-tax v1 category (lib/sales_tax_engine)
+
+
+def _tax_category_or_422(value):
+    if value is not None and value not in TAX_CATEGORIES:
+        raise HTTPException(status_code=422,
+                            detail=f"Unknown tax_category {value!r}")
+    return value
 
 
 @router.post("")
@@ -41,6 +50,7 @@ async def create_product(body: ProductBody, user: dict = Depends(require("ops:ma
         "unit_cost_cents": to_cents(body.unit_cost), "quantity_on_hand": int(body.quantity_on_hand),
         "reorder_point": int(body.reorder_point),
         "commissionable": body.commissionable, "image_url": body.image_url, "created_at": now_iso(),
+        "tax_category": _tax_category_or_422(body.tax_category) or "general_goods",
     }
     await coll(user).insert_one(doc)
     doc.pop("_id", None)
@@ -52,6 +62,7 @@ class ProductPatch(BaseModel):
     price: Optional[float] = None
     reorder_point: Optional[int] = None
     type: Optional[str] = None
+    tax_category: Optional[str] = None
 
 
 @router.patch("/{product_id}")
@@ -68,6 +79,8 @@ async def update_product(product_id: str, body: ProductPatch, user: dict = Depen
         updates["reorder_point"] = int(body.reorder_point)
     if body.type is not None:
         updates["type"] = body.type
+    if body.tax_category is not None:
+        updates["tax_category"] = _tax_category_or_422(body.tax_category)
     if updates:
         await coll(user).update_one({"id": product_id}, {"$set": updates})
     return {"id": product_id, **updates}

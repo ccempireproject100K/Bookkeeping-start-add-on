@@ -8,6 +8,7 @@ from lib.base import Scoped, new_id, now_iso, today_str, to_cents
 from lib.auth import require, get_current_user
 from lib import ledger as L
 from lib import posting as P
+from lib import sales_tax_engine as STE
 
 router = APIRouter(prefix="/pos", tags=["pos"])
 
@@ -29,6 +30,11 @@ class SellBody(BaseModel):
     discount: float = 0
     product_items: List[ProductItem] = []
     service_items: List[ServiceItem] = []
+    # Sales-tax v1: when a jurisdiction is given, the backend engine
+    # calculates the tax from its stacked components (snapshot stored
+    # on the sale). Without one, the legacy tenant flat rate applies
+    # and the snapshot says so.
+    tax_jurisdiction_id: Optional[str] = None
 
 
 @router.get("/sales")
@@ -48,6 +54,7 @@ async def sell(body: SellBody, user: dict = Depends(require("ops:sell"))):
     service_subtotal = 0
     cogs_cents = 0
     cart = []
+    tax_lines = []
 
     # product lines (atomic stock decrement)
     for it in body.product_items:
@@ -65,6 +72,8 @@ async def sell(body: SellBody, user: dict = Depends(require("ops:sell"))):
         cogs_cents += int(p["unit_cost_cents"]) * it.qty
         rev_by_code[p["revenue_code"]] = rev_by_code.get(p["revenue_code"], 0) + amt
         cart.append({"name": p["name"], "qty": it.qty, "amount_cents": amt})
+        tax_lines.append({"name": p["name"], "amount_cents": amt,
+                          "tax_category": p.get("tax_category") or "general_goods"})
 
     # service lines
     for sv in body.service_items:
@@ -73,6 +82,8 @@ async def sell(body: SellBody, user: dict = Depends(require("ops:sell"))):
         code = P.REVENUE_FOR.get(sv.service_type, "4020")
         rev_by_code[code] = rev_by_code.get(code, 0) + amt
         cart.append({"name": sv.name, "qty": 1, "amount_cents": amt})
+        tax_lines.append({"name": sv.name, "amount_cents": amt,
+                          "tax_category": "labor_service"})
 
     subtotal = product_subtotal + service_subtotal
     if subtotal == 0:
@@ -81,6 +92,44 @@ async def sell(body: SellBody, user: dict = Depends(require("ops:sell"))):
     disc_on_products = round(discount_cents * product_subtotal / subtotal) if subtotal else 0
     taxable = max(product_subtotal - disc_on_products, 0)
     tax_cents = round(taxable * rate)
+
+    # Sales-tax v1: an explicit jurisdiction switches the register to
+    # the backend engine — stacked components, per-category taxability,
+    # and a stored snapshot. The discount is apportioned across all
+    # lines for the tax base in engine mode.
+    jur = None
+    if body.tax_jurisdiction_id:
+        jur = await db.tax_jurisdictions.find_one(
+            {"id": body.tax_jurisdiction_id, "tenant_id": tenant_id, "active": True})
+        if not jur:
+            raise HTTPException(status_code=422, detail="Unknown or inactive tax jurisdiction")
+    if jur is not None:
+        eng_lines = []
+        for tl in tax_lines:
+            share = round(discount_cents * tl["amount_cents"] / subtotal) if subtotal else 0
+            eng_lines.append({"name": tl["name"],
+                              "amount_cents": max(tl["amount_cents"] - share, 0),
+                              "tax_category": tl["tax_category"], "taxable": None})
+        components, _eff = STE.resolve_components_as_of(jur, today_str())
+        calc = STE.calculate_tax(lines=eng_lines, components=components,
+                                 state=jur["state"])
+        tax_cents = calc["tax_cents"]
+        taxable = calc["taxable_sales_cents"]
+        tax_snapshot = {
+            "engine": STE.ENGINE_NAME, "engine_version": STE.ENGINE_VERSION,
+            "calculated_on": today_str(), "components": components,
+            "combined_rate_pct": calc["combined_rate_pct"],
+            "taxable_cents": taxable, "tax_cents": tax_cents,
+            "lines": calc["lines"], "cpa_note": STE.CPA_NOTE,
+        }
+    else:
+        tax_snapshot = {
+            "engine": "pos-flat", "engine_version": STE.ENGINE_VERSION,
+            "calculated_on": today_str(), "components": [],
+            "combined_rate_pct": round(rate * 100, 4),
+            "taxable_cents": taxable, "tax_cents": tax_cents, "lines": [],
+            "cpa_note": STE.CPA_NOTE,
+        }
 
     commission_cents = 0
     if body.barber_id:
@@ -104,6 +153,11 @@ async def sell(body: SellBody, user: dict = Depends(require("ops:sell"))):
         "total_cents": total_cents, "cogs_cents": cogs_cents, "commission_cents": commission_cents,
         "barber_id": body.barber_id, "entry_id": entry["id"], "entry_number": entry["number"],
         "created_at": now_iso(),
+        # Sales-tax v1: accounting date for liability periodisation +
+        # the jurisdiction/snapshot the tax came from.
+        "sale_date": today_str(),
+        "tax_jurisdiction_id": body.tax_jurisdiction_id,
+        "tax_snapshot": tax_snapshot,
     }
     await Scoped(db.sales, tenant_id).insert_one(sale)
     sale.pop("_id", None)
