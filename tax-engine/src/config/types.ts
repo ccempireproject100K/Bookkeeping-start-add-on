@@ -82,6 +82,12 @@ export interface StateConfig extends ConfigMeta {
   brackets?: BracketsByStatus;
   /** e.g. California's 1% Mental Health Services Tax over $1M. */
   surtax?: { label: string; threshold: number; rate: number };
+  /**
+   * Known omissions/simplifications for this state, disclosed in every
+   * result's workpapers and notes — the same disclosure pattern as the
+   * federal QBI W-2 wage / UBIA limitation warning.
+   */
+  knownOmissions?: { label: string; detail: string }[];
   safeHarbor?: SafeHarborParams;
   installmentPcts?: number[];
   /** Present when implementation === 'no-tax': why the liability is truly zero. */

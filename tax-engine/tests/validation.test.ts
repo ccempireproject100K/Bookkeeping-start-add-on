@@ -31,12 +31,23 @@ describe('validateJurisdictions — freshness', () => {
     expect(health[0]?.ageInDays).toBe(224);
   });
 
-  it('flags provisional configs in the health list without failing them', () => {
+  it('reports the provisional flag in the health list without failing the config', () => {
     const health = validateJurisdictions({ asOf: '2026-10-20' });
     const ca = health.find((h) => h.jurisdiction === 'US-CA');
+    const ny = health.find((h) => h.jurisdiction === 'US-NY');
     const us = health.find((h) => h.jurisdiction === 'US');
-    expect(ca?.provisional).toBe(true);
+    // CA and NY were verified against FTB / NY DTF sources on 2026-10-20 —
+    // their provisional flags are lifted.
+    expect(ca?.provisional).toBe(false);
+    expect(ny?.provisional).toBe(false);
     expect(us?.provisional).toBe(false);
+    // A config still marked provisional is flagged in the list, not failed.
+    const synth = validateJurisdictions({
+      asOf: '2026-10-20',
+      configs: [{ ...NEW_YORK_2026, provisional: true }],
+    });
+    expect(synth[0]?.provisional).toBe(true);
+    expect(synth[0]?.status).toBe('ok');
   });
 });
 

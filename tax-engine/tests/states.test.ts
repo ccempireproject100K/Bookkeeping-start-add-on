@@ -22,7 +22,7 @@ describe('California (real implementation)', () => {
   const r = calculateTax(80_000, 'US-CA', GOLDEN);
 
   it('computes a sane, hand-checked state tax on the golden profile', () => {
-    // PROVISIONAL 2026 table; hand-checked: taxable $68,448.18 on federal
+    // Verified 2026 table; hand-checked: taxable $68,448.18 on federal
     // AGI $74,348.18 − $5,900 std ded → 1/2/4/6/8% lines = $2,770.97.
     expect(r.state?.status).toBe('OK');
     expect(r.state?.totalTaxCents).toBe(277_097);
@@ -54,7 +54,7 @@ describe('California (real implementation)', () => {
 
 describe('New York (real implementation) + NYC locality', () => {
   it('computes a sane, hand-checked state tax on the golden profile', () => {
-    // PROVISIONAL 2026 table; hand-checked: taxable $66,348.18 on federal
+    // Verified 2026 table; hand-checked: taxable $66,348.18 on federal
     // AGI $74,348.18 − $8,000 std ded → 3.9/4.4/5.15/5.4% lines = $3,417.80.
     const r = calculateTax(80_000, 'US-NY', GOLDEN);
     expect(r.state?.totalTaxCents).toBe(341_780);
@@ -71,6 +71,74 @@ describe('New York (real implementation) + NYC locality', () => {
     expect(withCity.state?.totalTaxCents).toBe(stateOnly.state?.totalTaxCents);
     expect(withCity.status).toBe('PARTIAL');
     expect(withCity.notes.some((n) => n.includes('NYC'))).toBe(true);
+  });
+});
+
+describe('California — head of household uses FTB Schedule Z', () => {
+  it('has its own HoH table, not the joint table', () => {
+    expect(CALIFORNIA_2026.brackets?.head_of_household[0]?.upTo).toBe(22_927);
+    expect(CALIFORNIA_2026.brackets?.head_of_household).not.toEqual(
+      CALIFORNIA_2026.brackets?.married_filing_jointly,
+    );
+  });
+
+  it('computes the hand-checked Schedule Z tax at $150k profit', () => {
+    // Federal AGI $139,402.83 (SE tax $21,194.33, half-SE $10,597.17) −
+    // $11,800 HoH std ded → taxable $127,602.83. Schedule Z lines:
+    // 1/2/4/6/8% = $229.27/$627.78/$628.08/$998.16/$1,256.16, plus 9.3% on
+    // $25,246.83 over $102,356 = $2,347.96 → $6,087.41. (The retired joint
+    // stand-in returned $4,798.47 — it understated HoH tax at this income.)
+    const r = calculateTax(150_000, 'US-CA', { filingStatus: 'head_of_household' });
+    expect(r.state?.status).toBe('OK');
+    expect(r.state?.totalTaxCents).toBe(608_741);
+  });
+});
+
+describe('New York — head of household uses its own threshold table', () => {
+  it('has its own HoH table, not the single table', () => {
+    expect(NEW_YORK_2026.brackets?.head_of_household[0]?.upTo).toBe(12_800);
+    expect(NEW_YORK_2026.brackets?.head_of_household).not.toEqual(
+      NEW_YORK_2026.brackets?.single,
+    );
+  });
+
+  it('computes the hand-checked HoH-table tax at $150k profit', () => {
+    // Federal AGI $139,402.83 − $11,200 HoH std ded → taxable $128,202.83.
+    // HoH lines: 3.9/4.4/5.15/5.4% = $499.20/$213.40/$167.38/$4,684.50,
+    // plus 5.9% on $20,552.83 over $107,650 = $1,212.62 → $6,777.10. (The
+    // retired single-table stand-in returned $6,995.72 — it overstated.)
+    const r = calculateTax(150_000, 'US-NY', { filingStatus: 'head_of_household' });
+    expect(r.state?.status).toBe('OK');
+    expect(r.state?.totalTaxCents).toBe(677_710);
+  });
+});
+
+describe('California — exemption credit omission is disclosed, not silent', () => {
+  const r = calculateTax(80_000, 'US-CA', GOLDEN);
+
+  it('carries the omission notice in the CA workpaper steps', () => {
+    const caPaper = r.workpapers.find((w) => w.jurisdiction === 'US-CA');
+    const step = caPaper?.steps.find((s) => s.label.includes('Personal exemption credit'));
+    expect(step).toBeDefined();
+    expect(step?.detail).toContain('NOT modeled');
+    expect(step?.detail).toContain('$158');
+    expect(step?.detail).toContain('$316');
+    expect(step?.detail).toContain('overstate');
+  });
+
+  it('carries the omission notice in the CA result notes', () => {
+    expect(
+      r.state?.notes.some(
+        (n) => n.includes('personal exemption credit') && n.includes('NOT modeled'),
+      ),
+    ).toBe(true);
+  });
+
+  it('does not leak the CA omission into other states', () => {
+    const ny = calculateTax(80_000, 'US-NY', GOLDEN);
+    expect(ny.state?.notes.some((n) => n.includes('exemption credit'))).toBe(false);
+    const nyPaper = ny.workpapers.find((w) => w.jurisdiction === 'US-NY');
+    expect(nyPaper?.steps.some((s) => s.label.includes('exemption credit'))).toBe(false);
   });
 });
 

@@ -126,6 +126,11 @@ export function progressiveCalculator(
     }
     step(`Total ${cfg.stateCode} tax`, 'Bracket tax plus any surtax.', totalCents);
 
+    for (const omission of cfg.knownOmissions ?? []) {
+      step(omission.label, omission.detail);
+      notes.push(omission.detail);
+    }
+
     const safeHarbor = computeSafeHarbor(totalCents, profile, cfg.safeHarbor);
     const remainingCents = maxCents(
       0,

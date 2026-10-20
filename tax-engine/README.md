@@ -164,11 +164,15 @@ records the config **version and SHA-256 hash** actually used.
 
 - **Federal — verified** 2026-10-20 against IRS Rev. Proc. 2025-32
   (IR-2025-103) and the SSA wage-base announcement. `provisional: false`.
-- **CA and NY — PROVISIONAL.** Their 2026 tables are the cross-checked
-  choice among conflicting secondary summaries (sources named in each
-  config file). Results and validation both surface the flag. Re-verify
-  against the official FTB 2026 rate schedules and the NY DTF tables
-  before production reliance.
+- **CA — verified** 2026-10-20 directly against FTB Tax News, October
+  2026, "2026 Indexing" (Schedules X/Y/Z and standard deductions match
+  exactly). `provisional: false`. Head of household uses Schedule Z.
+- **NY — verified** 2026-10-20 against the NYS DTF 2026 Estimated Tax
+  Instructions table as reproduced by incometaxpro.com (citing
+  tax.ny.gov) and corroborated by multiple secondary sources — one notch
+  below a direct primary-source check, since the DTF PDF itself was not
+  opened. `provisional: false`. Head of household has its own threshold
+  table.
 
 ## Validation layer
 
@@ -214,10 +218,14 @@ per-jurisdiction health list:
    threshold, non-SSTB results carry a workpaper warning instead.
 7. **Preferential capital-gains rates are not modeled** — all income is
    taxed at ordinary rates; capital gains only reduce the QBI cap base.
-8. CA simplifications: MFJ thresholds = 2× single; HoH uses the joint
-   table. NY simplifications: HoH uses the single table; the tax-benefit
-   recapture above $107,650 of NY AGI is not modeled; MCTMT is not
-   modeled.
+8. CA simplifications: MFJ thresholds = 2× single. The **personal
+   exemption credit is not modeled** ($158 single/MFS/HoH, $316 joint,
+   plus the $491 dependent credit and its high-income phaseout — 2026,
+   per FTB), so CA estimates overstate tax by up to the credit amount;
+   every CA result discloses this in its workpapers and notes (owner
+   decision 2026-10-20: document, don't model yet). NY simplifications:
+   the tax-benefit recapture above $107,650 of NY AGI is not modeled;
+   MCTMT is not modeled.
 9. State due dates reuse the federal statutory dates and federal holiday
    rollover; state holiday calendars are not modeled.
 10. `paymentsAlreadyMade` nets against the **federal** requirement. State
