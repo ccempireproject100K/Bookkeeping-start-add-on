@@ -292,7 +292,8 @@ export default function Invoices() {
                   {juris.map(j => <SelectItem key={j.id} value={j.id}>{j.name} · {j.rate_pct}%</SelectItem>)}
                 </SelectContent>
               </Select></div>
-            <div><Label className="text-xs">{t("invoices.tax")}</Label><Input data-testid="invoice-tax" value={tax} onChange={e => setTax(e.target.value)} className="bg-[#0F1218] border-[#222838] font-mono" /></div>
+            <div><Label className="text-xs">{t("invoices.tax")}</Label><Input data-testid="invoice-tax" value={tax} onChange={e => setTax(e.target.value)} className="bg-[#0F1218] border-[#222838] font-mono" />
+              <p className="text-[11px] text-gray-500 mt-1">Estimate only — when a jurisdiction applies, the backend calculates the final tax at issue and stores the full breakdown on the invoice.</p></div>
           </div>
           <DialogFooter><Button data-testid="invoice-save" onClick={create} className="bg-amber-600 hover:bg-amber-500 text-black">{t("invoices.issueInvoice")}</Button></DialogFooter>
         </DialogContent>

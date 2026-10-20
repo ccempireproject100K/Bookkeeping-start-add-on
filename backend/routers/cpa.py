@@ -60,10 +60,10 @@ async def cpa_package(year: str = Query("2026"),
         rows += [[r["code"], r["name"], _money(r["amount"])] for r in bs[sec]]
     files["balance_sheet.csv"] = _csv_str(["Code", "Account", "Amount"], rows)
 
-    # Trial balance
+    # Trial balance (L.trial_balance returns {"rows": [...]})
     tb = await L.trial_balance(db, tenant_id, end)
     rows = [[r["code"], r["name"], _money(r["debit"]), _money(r["credit"])]
-            for r in tb]
+            for r in tb["rows"]]
     files["trial_balance.csv"] = _csv_str(["Code", "Account", "Debit", "Credit"], rows)
 
     # General ledger detail
@@ -126,6 +126,40 @@ async def cpa_package(year: str = Query("2026"),
           _money(pay_totals.get(s["id"], 0)),
           "yes" if pay_totals.get(s["id"], 0) >= 60000 else "no"] for s in subs])
 
+    # Sales-tax return-preparation worksheets (per state × quarter).
+    # Preparation only — these are the figures the owner files in each
+    # state portal; nothing here is a filed return.
+    try:
+        from lib import sales_tax_engine as STE
+        from routers.sales_tax import build_worksheet
+        st_rows = await Scoped(db.tax_jurisdictions, tenant_id).find_list(limit=500)
+        st_states = sorted({j.get("state") for j in st_rows if j.get("state")})
+        ws_rows = []
+        for st in st_states:
+            for q in (1, 2, 3, 4):
+                s, e, key = STE.period_bounds(int(year), quarter=q)
+                ws = await build_worksheet(tenant_id, st, s, e, key)
+                ln = ws["lines"]
+                if not ws["counts"]["documents"] and not ln["tax_collected_cents"]:
+                    continue
+                ws_rows.append([st, key, ws["registered"],
+                                _money(ln["gross_sales_cents"]),
+                                _money(ln["less_exempt_sales_cents"]),
+                                _money(ln["less_nontaxable_sales_cents"]),
+                                _money(ln["less_marketplace_facilitated_sales_cents"]),
+                                _money(ln["taxable_sales_cents"]),
+                                _money(ln["tax_collected_cents"]),
+                                _money(ln["less_tax_reversed_cents"]),
+                                _money(ln["amount_due_cents"])])
+        if ws_rows:
+            files["sales_tax_worksheets.csv"] = _csv_str(
+                ["State", "Period", "Registered", "Gross Sales", "Exempt Sales",
+                 "Non-taxable Sales", "Marketplace-Facilitated Sales",
+                 "Taxable Sales", "Tax Collected", "Tax Reversed", "Amount Due"],
+                ws_rows)
+    except Exception:
+        pass  # the package must never fail because of the sales-tax add-on
+
     # README
     files["README.txt"] = (
         f"CPA TAX PACKAGE — {year}\n"
@@ -140,7 +174,10 @@ async def cpa_package(year: str = Query("2026"),
         "- expenses.csv — vendor expenses with categories\n"
         "- invoices.csv — issued invoices with paid/balance\n"
         "- mileage_log.csv — business miles with IRS rates applied\n"
-        "- contractors_1099.csv — 1099-eligible vendors, W-9 status, amounts paid\n\n"
+        "- contractors_1099.csv — 1099-eligible vendors, W-9 status, amounts paid\n"
+        "- sales_tax_worksheets.csv — per-state quarterly sales-tax return\n"
+        "  PREPARATION figures (not filed returns; the owner files in each\n"
+        "  state portal)\n\n"
         "Questions about any figure: every line traces to a journal entry number\n"
         "in general_ledger.csv.\n")
 

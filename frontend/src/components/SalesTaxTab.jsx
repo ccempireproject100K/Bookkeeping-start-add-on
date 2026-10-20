@@ -79,6 +79,9 @@ export default function SalesTaxTab({
   const rows = liab?.jurisdictions || [];
   const unassigned = rows.find(r => r.jurisdiction_id === "unassigned");
   return <div className="space-y-4">
+      <div className="rounded-lg border border-sky-500/30 bg-sky-500/10 px-3 py-2 text-xs text-sky-200" data-testid="st-preparation-note">
+        Preparation only: this app calculates sales tax and prepares return worksheets — it does <strong>not</strong> file returns or remit payments. You file in your state's portal, then record the payment here.
+      </div>
       <Card>
         <h3 className="font-semibold text-gray-100 mb-1 flex items-center gap-2">
           <MapPin className="w-4 h-4" /> {t("salestaxtab.taxJurisdictions")}</h3>
