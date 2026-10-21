@@ -62,6 +62,8 @@ import Payroll from "@/pages/Payroll";
 import Budget from "@/pages/Budget";
 import Tax from "@/pages/Tax";
 import Settings from "@/pages/Settings";
+import Marketplace from "@/pages/Marketplace";
+import Developers from "@/pages/Developers";
 import AuditLog from "@/pages/AuditLog";
 import InviteAccept from "@/pages/InviteAccept";
 import { useTranslation } from "react-i18next";
@@ -145,6 +147,8 @@ function App() {
               <Route path="tax" element={<Tax />} />
               <Route path="audit" element={<AuditLog />} />
               <Route path="settings" element={<Settings />} />
+              <Route path="marketplace" element={<Marketplace />} />
+              <Route path="developers" element={<Developers />} />
             </Route>
           </Routes>
         </BrowserRouter>
