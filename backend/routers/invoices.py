@@ -8,6 +8,7 @@ from db import db
 from lib.base import Scoped, new_id, now_iso, today_str, to_cents, cents_to_dollars
 from lib.auth import require, get_current_user
 from lib import idempotency as idem
+from lib import developer as dev
 from lib.integration_auth import actor_label, get_sync_actor
 from lib import ledger as L
 from lib import posting as P
@@ -246,6 +247,11 @@ async def issue_invoice(body: InvoiceBody,
         await coll(user).insert_one(doc)
         doc.pop("_id", None)
         doc.pop("sync_key", None)
+        await dev.emit_event(user["tenant_id"], "invoice.created", {
+            "invoice_id": inv_id, "client_name": doc.get("client_name"),
+            "customer_id": doc.get("customer_id"),
+            "total_cents": doc.get("total_cents"),
+            "currency": doc.get("currency"), "status": doc.get("status")})
         return await sess.complete(_enrich(doc), resource_id=inv_id)
     except HTTPException as e:
         await sess.fail(e.status_code, str(e.detail))
@@ -401,6 +407,14 @@ async def _pay_invoice_inner(invoice_id: str, body: PayBody, user: dict,
         pmt["sync_result"] = result
     await coll(user).update_one({"id": invoice_id}, {"$set": {"status": status, "paid_cents": new_paid},
                                                      "$push": {"payments": pmt}})
+    await dev.emit_event(user["tenant_id"], "payment.received", {
+        "invoice_id": invoice_id, "amount_cents": pmt["amount_cents"],
+        "paid_cents": result["paid_cents"],
+        "balance_cents": result["balance_cents"], "status": result["status"]})
+    if result["status"] == "paid":
+        await dev.emit_event(user["tenant_id"], "invoice.paid", {
+            "invoice_id": invoice_id, "total_cents": inv["total_cents"],
+            "paid_cents": result["paid_cents"]})
     return await sess.complete(result, resource_id=invoice_id)
 
 
