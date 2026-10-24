@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Mind at Ease</string>
+    <string name="title_activity_main">Mind at Ease</string>
+    <string name="package_name">com.mindatease.bookkeeping</string>
+    <string name="custom_url_scheme">com.mindatease.bookkeeping</string>
+</resources>

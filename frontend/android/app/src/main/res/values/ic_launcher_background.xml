@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Fallback colour form of the brand launcher background. -->
+    <color name="ic_launcher_background">#B45309</color>
+</resources>
