@@ -28,6 +28,7 @@ class RegisterBody(BaseModel):
     niche_id: Optional[str] = None
     market_code: Optional[str] = None  # one of the 46 market packs; validated in create_workspace
     plan: Optional[str] = None  # light | medium | heavy; default light + 30-day trial
+    ref: Optional[str] = None  # empire referral code; stored on the tenant, first-touch only
 
     @field_validator("password")
     @classmethod
@@ -77,7 +78,7 @@ async def _audit(user, action, entity, entity_id, details=None):
     })
 
 
-async def create_workspace(email, password, name, shop_name, role="owner", tenant_id=None, commission_rate=0, niche_id=None, plan=None, market_code=None):
+async def create_workspace(email, password, name, shop_name, role="owner", tenant_id=None, commission_rate=0, niche_id=None, plan=None, market_code=None, ref=None):
     from lib.niches import get_pack, DEFAULT_NICHE
     from lib.markets import get_market
     from lib.currencies import is_supported
@@ -112,6 +113,13 @@ async def create_workspace(email, password, name, shop_name, role="owner", tenan
         }
         tenant.update(new_trial_fields())       # Light + 30-day Medium trial
         tenant["plan"] = stored_plan            # explicit signup choice wins on expiry
+        # Referral attribution (empire program): first-touch wins — the
+        # code is stamped once, here at tenant creation, and no later
+        # signup or call may overwrite it. Codes are TC-issued 8-char
+        # uppercase; normalize case/space so a pasted link always matches.
+        code = ref.strip().upper() if isinstance(ref, str) else ""
+        if code:
+            tenant["referred_by_code"] = code[:64]
         await db.tenants.insert_one(tenant)
         await seed_coa(Scoped(db.accounts, tenant_id), niche_id)
     user = {
@@ -131,7 +139,7 @@ async def register(body: RegisterBody, response: Response):
                  "Please choose a different one.")
     user = await create_workspace(body.email, body.password, body.name, body.shop_name,
                                   niche_id=body.niche_id, plan=body.plan,
-                                  market_code=body.market_code)
+                                  market_code=body.market_code, ref=body.ref)
     await _issue(response, user)
     return _public(user)
 

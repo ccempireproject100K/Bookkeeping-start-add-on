@@ -12,7 +12,7 @@ from lib.ratelimit import RateLimitMiddleware
 from lib.security_headers import ContentSecurityPolicyMiddleware, SecurityHeadersMiddleware
 from routers import plans
 from routers import (auth, ledger, products, pos, invoices, cashclose, dashboard,
-                     bills, aging, giftcards, commissions, customers, jobs,
+                     bills, billing, aging, giftcards, commissions, customers, jobs,
                      banking, vendors, reports, estimates,
                      recurring_invoices, reminders, backup, bankfeed, copilot,
                      time, portal, payroll, budget, tax, sales_tax, edition, totp, audit,
@@ -47,7 +47,7 @@ async def health():
 
 for r in (auth.router, ledger.router, products.router, pos.router,
           invoices.router, cashclose.router, dashboard.router,
-          bills.router, aging.router, giftcards.router, commissions.router,
+          bills.router, billing.router, aging.router, giftcards.router, commissions.router,
           customers.router, jobs.router, banking.router, vendors.router,
           reports.router, estimates.router,
           recurring_invoices.router, reminders.router, backup.router,
@@ -119,6 +119,13 @@ async def startup():
         (db.webhook_subscriptions, [("tenant_id", 1), ("created_at", -1)], {}),
         (db.webhook_deliveries, [("tenant_id", 1), ("created_at", -1)], {}),
         (db.webhook_deliveries, [("status", 1), ("next_retry_at", 1)], {}),
+        # Subscription billing (Stripe): the billing webhook shares the
+        # stripe_webhook_events unique index above; the referral outbox
+        # holds exactly one record per product payment (the empire
+        # referral ledger ingest reads it).
+        (db.referral_payment_events, [("product", 1), ("payment_id", 1)], {"unique": True}),
+        (db.tenants, "billing.subscription_id", {}),
+        (db.tenants, "billing.stripe_customer_id", {}),
     ]
     for coll, keys, opts in indexes:
         try:

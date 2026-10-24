@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { PageHeader, Card } from "@/components/Page";
 import { Button } from "@/components/ui/button";
@@ -16,7 +16,7 @@ import OpeningBalances from "@/components/OpeningBalances";
 import BrandingCard from "@/components/BrandingCard";
 import CurrencyPicker from "@/components/CurrencyPicker";
 import { usePlan } from "@/hooks/usePlan";
-import { Globe, Crown } from "lucide-react";
+import { Globe, Crown, CreditCard } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 function BaseCurrencyCard() {
@@ -184,6 +184,113 @@ function PlanCard() {
     )}
   </Card>;
 }
+const BILLING_STATUS_LABEL = {
+  active: "Active",
+  past_due: "Past due",
+  canceled: "Canceled",
+  incomplete: "Payment confirmation pending",
+};
+function BillingCard() {
+  // Stripe subscription billing for this workspace's own plan. The plan
+  // itself changes only when Stripe's webhook confirms money — this card
+  // starts Checkout / opens the Stripe portal and reports state; it
+  // never claims a plan changed because the browser came back.
+  const { user } = useAuth();
+  const [data, setData] = useState(null);
+  const [busy, setBusy] = useState("");
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search).get("billing");
+    if (q === "success") {
+      toast.success("Thanks — Stripe is confirming your subscription. Your plan updates automatically once the payment lands.");
+    } else if (q === "cancelled") {
+      toast.info("Checkout cancelled — no charge was made.");
+    }
+    api.get("/billing/status").then(setData).catch(() => setData(null));
+  }, []);
+  if (!data) return null;
+  const isOwner = user?.role === "owner";
+  const billing = data.billing;
+  const catalog = Object.fromEntries((data.catalog || []).map(c => [c.plan, c]));
+  const periodEnd = billing?.current_period_end
+    ? new Date(billing.current_period_end).toLocaleDateString() : null;
+  const go = async (kind, planKey) => {
+    setBusy(kind + (planKey || ""));
+    try {
+      if (kind === "checkout") {
+        const res = await api.post("/billing/checkout", {
+          plan: planKey, origin_url: window.location.origin });
+        window.location.href = res.checkout_url;
+      } else {
+        const res = await api.post("/billing/portal-session", {
+          origin_url: window.location.origin });
+        window.location.href = res.url;
+      }
+    } catch (e) {
+      toast.error(errMsg(e));
+      setBusy("");
+    }
+  };
+  return <Card>
+    <h3 className="font-semibold text-gray-100 mb-1 flex items-center gap-2">
+      <CreditCard className="w-4 h-4" /> Billing
+    </h3>
+    {billing?.status ? (
+      <p className="text-sm text-gray-400 mb-1">
+        Subscription: {BILLING_STATUS_LABEL[billing.status] || billing.status}
+        {billing.plan && catalog[billing.plan] ? ` — ${catalog[billing.plan].name}` : ""}
+        {periodEnd && billing.status === "active" ? `. Paid through ${periodEnd}.` : ""}
+        {billing.cancel_at_period_end ? " Set to cancel at the end of this period." : ""}
+      </p>
+    ) : (
+      <p className="text-sm text-gray-400 mb-1">No subscription on file for this workspace.</p>
+    )}
+    {billing?.status === "past_due" && (
+      <p className="text-sm text-amber-300 mb-2">
+        Your last payment failed. Update your card in Manage billing to keep your plan.
+      </p>
+    )}
+    {!data.configured ? (
+      <p className="text-sm text-gray-500">
+        Online billing isn&apos;t switched on yet — plans are recorded by your
+        provider, and subscribing here unlocks once Stripe is configured.
+        Light is $18.99/mo and Medium is $39.99/mo when it opens.
+      </p>
+    ) : isOwner ? (
+      <div className="space-y-3">
+        <div className="flex flex-wrap items-center gap-2">
+          {["light", "medium"].map(p => {
+            const current = billing?.plan === p && billing?.status === "active";
+            return (
+              <Button key={p} size="sm" variant={current ? "default" : "outline"}
+                      disabled={!!busy || current}
+                      onClick={() => go("checkout", p)}>
+                {current ? `${catalog[p]?.name} — current` : `${billing?.status === "active" ? "Switch to" : "Subscribe —"} ${catalog[p]?.name} (${catalog[p]?.display})`}
+              </Button>
+            );
+          })}
+          {billing?.has_billing_account && (
+            <Button size="sm" variant="outline" disabled={!!busy}
+                    onClick={() => go("portal")}>
+              Manage billing
+            </Button>
+          )}
+        </div>
+        <p className="text-xs text-gray-500">
+          Manage billing opens Stripe&apos;s portal — cancel, switch plans, or
+          update your card there. Plan changes here take effect when Stripe
+          confirms the payment.
+        </p>
+      </div>
+    ) : (
+      <p className="text-sm text-gray-500">Only the workspace owner can change billing.</p>
+    )}
+    <p className="text-xs text-gray-500 mt-3">
+      Books Heavy ({catalog.heavy?.display || "volume-based"}) isn&apos;t sold
+      online — it&apos;s sized to your books and set up one-to-one. Contact the
+      Mind At Ease team to set it up.
+    </p>
+  </Card>;
+}
 export default function Settings() {
   const {
     t
@@ -192,6 +299,7 @@ export default function Settings() {
       <PageHeader title={t("settings.settings")} subtitle="Workspace security and preferences" testid="settings-page" />
       <div className="space-y-4">
         <PlanCard />
+        <BillingCard />
         <SecurityAlerts />
         <TotpSettings />
         <PasskeySettings />
