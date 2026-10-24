@@ -7,6 +7,7 @@ from db import db
 from lib.base import Scoped, new_id, now_iso
 from lib.auth import require, get_current_user
 from lib import idempotency as idem
+from lib import developer as dev
 from lib.integration_auth import actor_label, get_sync_actor
 
 router = APIRouter(prefix="/customers", tags=["customers"])
@@ -191,6 +192,8 @@ async def create_customer(body: CustomerBody,
         await coll(user).insert_one(doc)
         doc.pop("_id", None)
         doc.pop("sync_key", None)
+        await dev.emit_event(user["tenant_id"], "customer.created", {
+            "customer_id": doc["id"], "name": doc.get("name")})
         return await sess.complete(doc, resource_id=doc["id"])
     except HTTPException as e:
         await sess.fail(e.status_code, str(e.detail))

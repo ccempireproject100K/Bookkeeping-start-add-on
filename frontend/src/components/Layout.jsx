@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
-import { LayoutDashboard, BookOpen, FileText, Scale, ScrollText, Landmark, TrendingUp, Lock, Scissors, Receipt, Wallet, Package, LogOut, ShieldCheck, Hourglass, Gift, Coins, Briefcase, PieChart, Users, Building2, FileSignature, Waves, Target, BarChart3, ReceiptText, Repeat, DatabaseBackup, Bot, Clock, FileCheck2, Camera, Car, HandCoins, Calculator, Activity, Tag, SlidersHorizontal, Rocket, Gauge, Mic, Layers, Sparkles, ClipboardList, Link2 } from "lucide-react";
+import { LayoutDashboard, BookOpen, FileText, Scale, ScrollText, Landmark, TrendingUp, Lock, Scissors, Receipt, Wallet, Package, LogOut, ShieldCheck, Hourglass, Gift, Coins, Briefcase, PieChart, Users, Building2, FileSignature, Waves, Target, BarChart3, ReceiptText, Repeat, DatabaseBackup, Bot, Clock, FileCheck2, Camera, Car, HandCoins, Calculator, Activity, Tag, SlidersHorizontal, Rocket, Gauge, Mic, Layers, Sparkles, ClipboardList, Link2, Store, KeyRound } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
@@ -380,6 +380,20 @@ const NAV = [{
   labelKey: "nav.settings",
   icon: ShieldCheck,
   testid: "nav-settings",
+  roles: ["owner"],
+  groupKey: "navGroup.operations"
+}, {
+  to: "/marketplace",
+  labelKey: "nav.marketplace",
+  icon: Store,
+  testid: "nav-marketplace",
+  roles: ALL,
+  groupKey: "navGroup.operations"
+}, {
+  to: "/developers",
+  labelKey: "nav.developers",
+  icon: KeyRound,
+  testid: "nav-developers",
   roles: ["owner"],
   groupKey: "navGroup.operations"
 }];
