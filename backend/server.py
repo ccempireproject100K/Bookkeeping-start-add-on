@@ -105,19 +105,12 @@ async def startup():
         # sync_key stamps let an interrupted sync retry find its resource.
         (db.customers, [("tenant_id", 1), ("sync_key", 1)], {}),
         (db.invoices, [("tenant_id", 1), ("sync_key", 1)], {}),
-        # Stripe webhook events are shared by invoice payments and
-        # subscription billing: both reconciliations are idempotent by
-        # event id — the unique index is the enforcement.
+        # Invoice payments (Stripe Connect): webhook reconciliation is
+        # idempotent by event id — the unique index is the enforcement.
         (db.stripe_webhook_events, "id", {"unique": True}),
-        # Invoice payments (Stripe Connect).
         (db.payment_transactions, "session_id", {}),
         (db.payment_transactions, "payment_intent_id", {}),
         (db.tenants, "stripe_connect.account_id", {}),
-        # Referral payment events: exactly one record per product payment
-        # (empire referral ledger ingest reads this outbox).
-        (db.referral_payment_events, [("product", 1), ("payment_id", 1)], {"unique": True}),
-        (db.tenants, "billing.subscription_id", {}),
-        (db.tenants, "billing.stripe_customer_id", {}),
         # Marketplace / developers: API keys are looked up by hash;
         # webhook subscriptions + deliveries are tenant-scoped, and the
         # delivery retry sweep scans by (status, next_retry_at).
@@ -126,6 +119,13 @@ async def startup():
         (db.webhook_subscriptions, [("tenant_id", 1), ("created_at", -1)], {}),
         (db.webhook_deliveries, [("tenant_id", 1), ("created_at", -1)], {}),
         (db.webhook_deliveries, [("status", 1), ("next_retry_at", 1)], {}),
+        # Subscription billing (Stripe): the billing webhook shares the
+        # stripe_webhook_events unique index above; the referral outbox
+        # holds exactly one record per product payment (the empire
+        # referral ledger ingest reads it).
+        (db.referral_payment_events, [("product", 1), ("payment_id", 1)], {"unique": True}),
+        (db.tenants, "billing.subscription_id", {}),
+        (db.tenants, "billing.stripe_customer_id", {}),
     ]
     for coll, keys, opts in indexes:
         try:
