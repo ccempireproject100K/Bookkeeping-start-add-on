@@ -110,18 +110,27 @@ class _FakePipe:
         return out
 
 
-def _b64url_int(n: int) -> str:
-    raw = n.to_bytes((n.bit_length() + 7) // 8, "big")
+def _b64url_int(n: int, length: int = None) -> str:
+    # JWK EC coordinates are fixed-width (RFC 7518 section 6.2): a P-256
+    # coordinate is always 32 bytes, leading zero bytes included. Encoding
+    # at minimal length instead makes roughly 1-in-128 generated keypairs
+    # produce a 31-byte coordinate, which PyJWT's ECAlgorithm.from_jwk
+    # rejects -- that was the intermittent TestPlaidVerify flake (healthy
+    # signatures failing with "invalid verification key material").
+    size = length if length is not None else (n.bit_length() + 7) // 8
+    raw = n.to_bytes(size, "big")
     return base64.urlsafe_b64encode(raw).rstrip(b"=").decode()
 
 
-def _ec_keypair():
-    priv = ec.generate_private_key(ec.SECP256R1())
+def _ec_keypair(priv=None):
+    if priv is None:
+        priv = ec.generate_private_key(ec.SECP256R1())
     pub = priv.public_key().public_numbers()
+    coord_len = (priv.curve.key_size + 7) // 8  # 32 for P-256
     jwk = {
         "kty": "EC", "crv": "P-256", "alg": "ES256", "use": "sig",
         "kid": "test-kid-1",
-        "x": _b64url_int(pub.x), "y": _b64url_int(pub.y),
+        "x": _b64url_int(pub.x, coord_len), "y": _b64url_int(pub.y, coord_len),
     }
     pem = priv.private_bytes(
         serialization.Encoding.PEM,
@@ -323,6 +332,30 @@ class TestPlaidVerify:
         ok, reason = pw.verify_plaid_webhook(
             body, {"plaid-verification": token}, "cid", "sec", "https://x")
         assert ok is False and "alg" in reason
+
+    def test_accepts_key_with_leading_zero_coordinate(self, monkeypatch):
+        # Regression for the intermittent full-suite flake: the fixed
+        # private scalar 43 yields a P-256 point whose y coordinate has a
+        # leading zero byte (31 significant bytes). The JWK must still
+        # encode it at the full 32-byte width, or from_jwk rejects the
+        # key and even a healthy signature fails verification.
+        priv = ec.derive_private_key(43, ec.SECP256R1())
+        jwk, pem = _ec_keypair(priv)
+
+        def _decode(s):
+            return base64.urlsafe_b64decode(s + "=" * (-len(s) % 4))
+
+        assert len(_decode(jwk["x"])) == 32 and len(_decode(jwk["y"])) == 32
+        body = b'{"webhook_type":"TRANSACTIONS","webhook_code":"SYNC_UPDATES"}'
+        token = _plaid_jwt(pem, "test-kid-1", body)
+        monkeypatch.setattr(pw, "_fetch_key", lambda *a: jwk)
+        headers = {"plaid-verification": token}
+        ok, reason = pw.verify_plaid_webhook(
+            body, headers, "cid", "sec", "https://sandbox.plaid.com")
+        assert ok is True and reason == "ok"
+        ok, reason = pw.verify_plaid_webhook(
+            body + b" ", headers, "cid", "sec", "https://sandbox.plaid.com")
+        assert ok is False and reason == "body hash mismatch"
 
 
 class TestWebhookEndpoint:
