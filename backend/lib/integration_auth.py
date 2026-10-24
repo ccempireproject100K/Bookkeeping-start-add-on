@@ -41,6 +41,12 @@ from lib.base import new_id, now_iso
 
 TOKEN_PREFIX = "mae1."
 CREDENTIAL_SCOPES = ["books:sync"]
+# Platform credentials (empire referral ledger, B1): same token format
+# and storage, but bound to a PRODUCT identity instead of a tenant —
+# referral reporting is platform-level (a product reporting its own
+# members' payments), so the tenant-bound class cannot express it.
+PLATFORM_SCOPES = ["referrals:sync"]
+PLATFORMS = ["trade_circle", "books", "momo"]
 DEFAULT_EXPIRES_DAYS = 365
 MAX_EXPIRES_DAYS = 730
 
@@ -102,6 +108,7 @@ def new_credential_doc(*, tenant_id: str, created_by: str, label: str,
     now = datetime.now(timezone.utc)
     doc = {
         "id": new_id(),
+        "kind": "tenant",
         "tenant_id": tenant_id,
         "client_id": client_id,
         "secret_hash": hash_secret(secret),
@@ -117,10 +124,44 @@ def new_credential_doc(*, tenant_id: str, created_by: str, label: str,
     return doc, full
 
 
+def new_platform_credential_doc(*, platform: str, created_by: str,
+                                label: str, expires_in_days: int):
+    """Build the stored document for a platform-bound credential.
+
+    Same shape and lifecycle as a tenant credential, except
+    ``tenant_id`` is None and the binding is ``platform`` — the actor
+    this credential authenticates AS is the reporting product itself.
+    Returns (doc, full_credential_string).
+    """
+    if platform not in PLATFORMS:
+        raise ValueError(f"Unknown platform: {platform!r}")
+    client_id, secret, full = mint_credential_material()
+    now = datetime.now(timezone.utc)
+    doc = {
+        "id": new_id(),
+        "kind": "platform",
+        "platform": platform,
+        "tenant_id": None,
+        "client_id": client_id,
+        "secret_hash": hash_secret(secret),
+        "label": label or f"{platform} referral sync",
+        "scopes": list(PLATFORM_SCOPES),
+        "created_at": now_iso(),
+        "created_by": created_by,
+        "expires_at": (now + timedelta(days=expires_in_days)).isoformat(),
+        "revoked_at": None,
+        "rotated_at": None,
+        "last_used_at": None,
+    }
+    return doc, full
+
+
 def public_view(doc: dict) -> dict:
     """Metadata-only view of a credential — never secret material."""
     return {
         "id": doc.get("id"),
+        "kind": doc.get("kind", "tenant"),
+        "platform": doc.get("platform"),
         "client_id": doc.get("client_id"),
         "label": doc.get("label"),
         "scopes": doc.get("scopes", []),
@@ -164,7 +205,9 @@ async def authenticate_integration_token(token: str) -> dict:
         pass  # bookkeeping about the credential must not break sync
     return {
         "id": f"integration:{client_id}",
-        "tenant_id": cred["tenant_id"],
+        "kind": cred.get("kind", "tenant"),
+        "platform": cred.get("platform"),
+        "tenant_id": cred.get("tenant_id"),
         "email": f"integration+{client_id}@system.local",
         "name": f"Integration ({cred.get('label') or 'sync'})",
         "role": "integration",
@@ -172,6 +215,30 @@ async def authenticate_integration_token(token: str) -> dict:
         "integration_client_id": client_id,
         "scopes": cred.get("scopes", []),
     }
+
+
+async def get_platform_actor(request: Request) -> dict:
+    """Dependency for the empire referral ledger's ingest surface.
+
+    Only a PLATFORM-bound credential with the `referrals:sync` scope
+    is accepted: a tenant credential (even a valid one) is the wrong
+    class — it speaks for one workspace, not for a product — and is
+    refused 403, as is a platform credential missing the scope.
+    """
+    token = _bearer(request)
+    if not is_integration_token(token):
+        raise HTTPException(status_code=401,
+                            detail="Integration credential required")
+    actor = await authenticate_integration_token(token)
+    if actor.get("kind") != "platform":
+        raise HTTPException(
+            status_code=403,
+            detail="A platform credential is required for referral sync")
+    if "referrals:sync" not in actor.get("scopes", []):
+        raise HTTPException(
+            status_code=403,
+            detail="Integration credential lacks the referrals:sync scope")
+    return actor
 
 
 def _bearer(request: Request) -> str:
