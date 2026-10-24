@@ -12,7 +12,7 @@ from lib.ratelimit import RateLimitMiddleware
 from lib.security_headers import ContentSecurityPolicyMiddleware, SecurityHeadersMiddleware
 from routers import plans
 from routers import (auth, ledger, products, pos, invoices, cashclose, dashboard,
-                     bills, aging, giftcards, commissions, customers, jobs,
+                     bills, billing, aging, giftcards, commissions, customers, jobs,
                      banking, vendors, reports, estimates,
                      recurring_invoices, reminders, backup, bankfeed, copilot,
                      time, portal, payroll, budget, tax, sales_tax, edition, totp, audit,
@@ -47,7 +47,7 @@ async def health():
 
 for r in (auth.router, ledger.router, products.router, pos.router,
           invoices.router, cashclose.router, dashboard.router,
-          bills.router, aging.router, giftcards.router, commissions.router,
+          bills.router, billing.router, aging.router, giftcards.router, commissions.router,
           customers.router, jobs.router, banking.router, vendors.router,
           reports.router, estimates.router,
           recurring_invoices.router, reminders.router, backup.router,
@@ -105,6 +105,14 @@ async def startup():
         # sync_key stamps let an interrupted sync retry find its resource.
         (db.customers, [("tenant_id", 1), ("sync_key", 1)], {}),
         (db.invoices, [("tenant_id", 1), ("sync_key", 1)], {}),
+        # Subscription billing (Stripe): webhook reconciliation is
+        # idempotent by event id — the unique index is the enforcement.
+        (db.stripe_webhook_events, "id", {"unique": True}),
+        # Referral payment events: exactly one record per product payment
+        # (empire referral ledger ingest reads this outbox).
+        (db.referral_payment_events, [("product", 1), ("payment_id", 1)], {"unique": True}),
+        (db.tenants, "billing.subscription_id", {}),
+        (db.tenants, "billing.stripe_customer_id", {}),
         # Marketplace / developers: API keys are looked up by hash;
         # webhook subscriptions + deliveries are tenant-scoped, and the
         # delivery retry sweep scans by (status, next_retry_at).

@@ -24,6 +24,9 @@ export default function Register() {
   const { user, register } = useAuth();
   const navigate = useNavigate();
   const [form, setForm] = useState({ name: "", shop_name: "", email: "", password: "" });
+  // Empire referral code from the invite link (?ref=CODE). First-touch:
+  // the server stamps it on the workspace at creation and never replaces it.
+  const [refCode] = useState(() => new URLSearchParams(window.location.search).get("ref") || "");
   const [nicheId, setNicheId] = useState("");
   const [marketCode, setMarketCode] = useState(() => readMarketChoice() || "US");
   const [niches, setNiches] = useState([]);
@@ -48,6 +51,7 @@ export default function Register() {
         ...form,
         niche_id: nicheId || null,
         market_code: marketCode || null,
+        ref: refCode || null,
       });
       writeMarketChoice(marketCode);
       toast.success("Welcome to Mind at Ease Solutions");
