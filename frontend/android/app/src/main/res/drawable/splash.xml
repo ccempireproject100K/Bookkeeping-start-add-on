@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Launch splash: brand dark background (#0B0D10, the app theme colour)
+     with the brand mark centred. Replaces the template splash PNGs so the
+     splash is defined entirely by this file. Artwork geometry mirrors
+     frontend/public/icons/icon.svg. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#0B0D10" />
+        </shape>
+    </item>
+    <item
+        android:width="168dp"
+        android:height="168dp"
+        android:gravity="center">
+        <vector
+            android:width="168dp"
+            android:height="168dp"
+            android:viewportWidth="512"
+            android:viewportHeight="512">
+            <path
+                android:pathData="M96,0 L416,0 A96,96 0 0 1 512,96 L512,416 A96,96 0 0 1 416,512 L96,512 A96,96 0 0 1 0,416 L0,96 A96,96 0 0 1 96,0 Z"
+                android:fillColor="#B45309" />
+            <path
+                android:pathData="M128,384 L128,128 L256,272 L384,128 L384,384"
+                android:fillColor="#00000000"
+                android:strokeColor="#0B0D10"
+                android:strokeWidth="36"
+                android:strokeLineCap="round"
+                android:strokeLineJoin="round" />
+        </vector>
+    </item>
+</layer-list>
