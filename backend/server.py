@@ -11,6 +11,7 @@ from db import db, get_client
 from lib.ratelimit import RateLimitMiddleware
 from lib.security_headers import ContentSecurityPolicyMiddleware, SecurityHeadersMiddleware
 from routers import plans
+from routers import referrals
 from routers import (auth, ledger, products, pos, invoices, cashclose, dashboard,
                      bills, billing, aging, giftcards, commissions, customers, jobs,
                      banking, vendors, reports, estimates,
@@ -46,6 +47,7 @@ async def health():
 
 
 for r in (auth.router, ledger.router, products.router, pos.router,
+          referrals.router,
           invoices.router, cashclose.router, dashboard.router,
           bills.router, billing.router, aging.router, giftcards.router, commissions.router,
           customers.router, jobs.router, banking.router, vendors.router,
@@ -86,6 +88,22 @@ app.add_middleware(ContentSecurityPolicyMiddleware)
 @app.on_event("startup")
 async def startup():
     indexes = [
+        # Empire referral ledger (B1-B3): person codes are globally
+        # unique; raw events dedupe on their deterministic key;
+        # earnings are one per (product, payment); a payout batch key
+        # (Stripe batch / TC migration) can land exactly once. The
+        # stripe_webhook_events unique index below is shared by both
+        # Stripe webhook endpoints (same collection, same unique key,
+        # per-endpoint claim shapes; see REFERRAL_HOST_BUILD.md).
+        (db.empire_persons, "code", {"unique": True}),
+        (db.empire_persons, "emails", {}),
+        (db.referral_events, "dedupe_key", {"unique": True}),
+        (db.referral_attributions, "id", {"unique": True}),
+        (db.referral_earnings, "id", {"unique": True}),
+        (db.referral_earnings, [("referrer_id", 1), ("product", 1)], {}),
+        (db.referral_payouts, "batch_key", {"unique": True}),
+        (db.referral_pay_batches, "id", {"unique": True}),
+        (db.referral_payout_queue, [("referrer_id", 1), ("status", 1)], {}),
         (db.users, "email", {"unique": True}),
         (db.accounts, [("tenant_id", 1), ("code", 1)], {"unique": True}),
         (db.journal_entries, [("tenant_id", 1), ("status", 1), ("entry_date", 1)], {}),
