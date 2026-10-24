@@ -11,6 +11,7 @@ from db import db, get_client
 from lib.ratelimit import RateLimitMiddleware
 from lib.security_headers import ContentSecurityPolicyMiddleware, SecurityHeadersMiddleware
 from routers import plans
+from routers import referrals
 from routers import (auth, ledger, products, pos, invoices, cashclose, dashboard,
                      bills, billing, aging, giftcards, commissions, customers, jobs,
                      banking, vendors, reports, estimates,
@@ -21,7 +22,7 @@ from routers import (auth, ledger, products, pos, invoices, cashclose, dashboard
                      playground, combo, kpis, benchmarks, voice, taxposture,
                      whitelabel, entities, cleanup, purchase_orders,
                      fx, market_packs, cfdi, integrations, marketplace,
-                     developers, referrals)
+                     developers, invoice_payments)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("mindatease")
@@ -46,6 +47,7 @@ async def health():
 
 
 for r in (auth.router, ledger.router, products.router, pos.router,
+          referrals.router,
           invoices.router, cashclose.router, dashboard.router,
           bills.router, billing.router, aging.router, giftcards.router, commissions.router,
           customers.router, jobs.router, banking.router, vendors.router,
@@ -62,8 +64,7 @@ for r in (auth.router, ledger.router, products.router, pos.router,
           whitelabel.router, entities.router, cleanup.router,
           purchase_orders.router, fx.router, fx.currencies_router,
           market_packs.router, cfdi.router, integrations.router,
-          marketplace.router, developers.router,
-          referrals.router):
+          marketplace.router, developers.router, invoice_payments.router):
     api_router.include_router(r)
 api_router.include_router(plans.router)
 
@@ -87,6 +88,22 @@ app.add_middleware(ContentSecurityPolicyMiddleware)
 @app.on_event("startup")
 async def startup():
     indexes = [
+        # Empire referral ledger (B1-B3): person codes are globally
+        # unique; raw events dedupe on their deterministic key;
+        # earnings are one per (product, payment); a payout batch key
+        # (Stripe batch / TC migration) can land exactly once. The
+        # stripe_webhook_events unique index below is shared by both
+        # Stripe webhook endpoints (same collection, same unique key,
+        # per-endpoint claim shapes; see REFERRAL_HOST_BUILD.md).
+        (db.empire_persons, "code", {"unique": True}),
+        (db.empire_persons, "emails", {}),
+        (db.referral_events, "dedupe_key", {"unique": True}),
+        (db.referral_attributions, "id", {"unique": True}),
+        (db.referral_earnings, "id", {"unique": True}),
+        (db.referral_earnings, [("referrer_id", 1), ("product", 1)], {}),
+        (db.referral_payouts, "batch_key", {"unique": True}),
+        (db.referral_pay_batches, "id", {"unique": True}),
+        (db.referral_payout_queue, [("referrer_id", 1), ("status", 1)], {}),
         (db.users, "email", {"unique": True}),
         (db.accounts, [("tenant_id", 1), ("code", 1)], {"unique": True}),
         (db.journal_entries, [("tenant_id", 1), ("status", 1), ("entry_date", 1)], {}),
@@ -106,30 +123,12 @@ async def startup():
         # sync_key stamps let an interrupted sync retry find its resource.
         (db.customers, [("tenant_id", 1), ("sync_key", 1)], {}),
         (db.invoices, [("tenant_id", 1), ("sync_key", 1)], {}),
-        # Subscription billing (Stripe): webhook reconciliation is
+        # Invoice payments (Stripe Connect): webhook reconciliation is
         # idempotent by event id — the unique index is the enforcement.
         (db.stripe_webhook_events, "id", {"unique": True}),
-        # Referral payment events: exactly one record per product payment
-        # (empire referral ledger ingest reads this outbox).
-        (db.referral_payment_events, [("product", 1), ("payment_id", 1)], {"unique": True}),
-        (db.tenants, "billing.subscription_id", {}),
-        (db.tenants, "billing.stripe_customer_id", {}),
-        # Empire referral ledger (B1–B3): person codes are globally
-        # unique; raw events dedupe on their deterministic key;
-        # earnings are one per (product, payment); a payout batch key
-        # (Stripe batch / TC migration) can land exactly once. Note:
-        # stripe_webhook_events.id above is shared with the sibling
-        # invoice-payments set — same collection, same unique key,
-        # per-endpoint claim shapes (see REFERRAL_HOST_BUILD.md).
-        (db.empire_persons, "code", {"unique": True}),
-        (db.empire_persons, "emails", {}),
-        (db.referral_events, "dedupe_key", {"unique": True}),
-        (db.referral_attributions, "id", {"unique": True}),
-        (db.referral_earnings, "id", {"unique": True}),
-        (db.referral_earnings, [("referrer_id", 1), ("product", 1)], {}),
-        (db.referral_payouts, "batch_key", {"unique": True}),
-        (db.referral_pay_batches, "id", {"unique": True}),
-        (db.referral_payout_queue, [("referrer_id", 1), ("status", 1)], {}),
+        (db.payment_transactions, "session_id", {}),
+        (db.payment_transactions, "payment_intent_id", {}),
+        (db.tenants, "stripe_connect.account_id", {}),
         # Marketplace / developers: API keys are looked up by hash;
         # webhook subscriptions + deliveries are tenant-scoped, and the
         # delivery retry sweep scans by (status, next_retry_at).
@@ -138,6 +137,13 @@ async def startup():
         (db.webhook_subscriptions, [("tenant_id", 1), ("created_at", -1)], {}),
         (db.webhook_deliveries, [("tenant_id", 1), ("created_at", -1)], {}),
         (db.webhook_deliveries, [("status", 1), ("next_retry_at", 1)], {}),
+        # Subscription billing (Stripe): the billing webhook shares the
+        # stripe_webhook_events unique index above; the referral outbox
+        # holds exactly one record per product payment (the empire
+        # referral ledger ingest reads it).
+        (db.referral_payment_events, [("product", 1), ("payment_id", 1)], {"unique": True}),
+        (db.tenants, "billing.subscription_id", {}),
+        (db.tenants, "billing.stripe_customer_id", {}),
     ]
     for coll, keys, opts in indexes:
         try:
