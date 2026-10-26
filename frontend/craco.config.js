@@ -101,6 +101,18 @@ let webpackConfig = {
       return webpackConfig;
     },
   },
+  jest: {
+    configure: (jestConfig) => {
+      // Mirror the webpack "@" alias so tests can import app modules
+      // (e.g. lib/i18n) that use it — previously only alias-free modules
+      // were testable.
+      jestConfig.moduleNameMapper = {
+        ...jestConfig.moduleNameMapper,
+        "^@/(.*)$": "<rootDir>/src/$1",
+      };
+      return jestConfig;
+    },
+  },
 };
 
 webpackConfig.devServer = (devServerConfig) => {

@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { api, errMsg } from "@/lib/api";
 import { asPackList } from "@/lib/packs";
 import { asMarketList, readMarketChoice, writeMarketChoice } from "@/lib/markets";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { ArrowRight } from "lucide-react";
 
 const selectCls =
@@ -66,9 +67,12 @@ export default function Register() {
   return (
     <div className="min-h-screen bg-[#0B0D10] text-gray-100 flex items-center justify-center p-6">
       <div className="w-full max-w-md animate-rise">
-        <div className="flex items-center gap-3 mb-8">
-          <div className="w-10 h-10 rounded-lg brand-mark" />
-          <span className="font-display font-bold text-xl">Mind at Ease Solutions</span>
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg brand-mark" />
+            <span className="font-display font-bold text-xl">Mind at Ease Solutions</span>
+          </div>
+          <LanguageSwitcher compact />
         </div>
         <h1 className="font-display text-2xl font-bold mb-1">Create your workspace</h1>
         <p className="text-sm text-gray-500 mb-6">

@@ -11,6 +11,7 @@ import { asMarketList, findMarket, readMarketChoice } from "@/lib/markets";
 import FaceIcon from "@/components/FaceIcon";
 import { KeyRound, ArrowRight, Fingerprint } from "lucide-react";
 import { loginWithPasskey, passkeysSupported } from "@/lib/webauthn";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { useTranslation } from "react-i18next";
 const DEMOS = [{
   role: "Owner",
@@ -134,7 +135,10 @@ export default function Login() {
       </div>
 
       {/* Form side */}
-      <div className="flex items-center justify-center p-6 sm:p-10">
+      <div className="relative flex items-center justify-center p-6 sm:p-10">
+        <div className="absolute top-4 right-4">
+          <LanguageSwitcher compact />
+        </div>
         <div className="w-full max-w-sm animate-rise">
           <div className="lg:hidden flex items-center gap-3 mb-8">
             <div className="w-9 h-9 rounded-lg brand-mark" />
