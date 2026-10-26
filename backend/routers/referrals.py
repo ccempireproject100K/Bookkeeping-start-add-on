@@ -383,27 +383,58 @@ async def _display(person: dict) -> dict:
 
 
 @router.get("/admin/balances")
-async def admin_balances(user: dict = Depends(require("ledger:admin"))):
+async def admin_balances(user: dict = Depends(require("ledger:admin")),
+                         limit: int = 200, offset: int = 0):
     """Every referrer with referral activity: per-site pots with
-    locked/frozen state, empire payable, and payout preference."""
-    ids = set(await db.referral_earnings.distinct("referrer_id"))
-    async for att in db.referral_attributions.find(
-            {"referrer_id": {"$ne": None}}, {"referrer_id": 1}):
-        ids.add(att["referrer_id"])
+    locked/frozen state, empire payable, and payout preference.
+
+    The pots come from grouped aggregations over the ledger
+    (R.empire_buckets + R._summary_dict — the same assembly
+    site_summary uses), never a per-referrer scan: the old
+    implementation re-read every earning in the empire for every
+    page load (4.5 s at 6,445 earnings; load test §5.1). Rows are
+    globally sorted by payable desc, then email, and paginated with
+    limit/offset over that order."""
+    earn_totals, adjustments, paying, att_products, frozen_ids = \
+        await R.empire_buckets()
+    ids = {r for (r, _p) in earn_totals} | {r for (r, _p) in att_products}
+    persons = {}
+    if ids:
+        async for p in db.empire_persons.find(
+                {"id": {"$in": sorted(ids, key=lambda v: (v is None, v))}}):
+            persons[p["id"]] = p
     rows = []
-    for rid in sorted(ids):
-        person = await R.person_by_id(rid)
+    for rid in ids:
+        person = persons.get(rid)
         if person is None:
             continue
-        summary = await R.empire_summary(person)
+        # is_frozen, empire-wide: an open dispute anywhere, or the
+        # manual-review flag on the person record.
+        frozen = rid in frozen_ids or bool(person.get("review"))
+        sites = {}
+        totals = {"pending": 0, "available": 0, "paid": 0,
+                  "clawed_back": 0, "earned_cents": 0, "payable": 0}
+        for product in R.PRODUCTS:
+            key = (rid, product)
+            if key not in earn_totals and key not in att_products:
+                continue
+            site = R._summary_dict(
+                product,
+                earn_totals.get(key, {"pending": 0, "available": 0,
+                                      "paid": 0, "clawed_back": 0}),
+                adjustments.get(key, 0), frozen, paying.get(key, 0))
+            sites[product] = site
+            for k in totals:
+                totals[k] += site[k]
         row = await _display(person)
-        row.update({"sites": summary["sites"],
-                    "payable": summary["payable"],
-                    "frozen": summary["frozen"],
-                    "under_review": summary["under_review"],
-                    "eligible": summary["eligible"]})
+        row.update({"sites": sites,
+                    "payable": totals["payable"],
+                    "frozen": frozen,
+                    "under_review": bool(person.get("review")),
+                    "eligible": R.good_standing(person, frozen)})
         rows.append(row)
-    return sorted(rows, key=lambda r: (-r["payable"], r["email"] or ""))
+    rows = sorted(rows, key=lambda r: (-r["payable"], r["email"] or ""))
+    return rows[offset:offset + limit]
 
 
 @router.get("/admin/payouts")

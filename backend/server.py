@@ -102,6 +102,13 @@ async def startup():
         (db.referral_attributions, "id", {"unique": True}),
         (db.referral_earnings, "id", {"unique": True}),
         (db.referral_earnings, [("referrer_id", 1), ("product", 1)], {}),
+        # Summary reads (aggregation-backed since the referral perf
+        # fix): per-site paying counts group by referred person, the
+        # pending-adjustment sums and the frozen check key off
+        # (referrer, product[, status]).
+        (db.referral_earnings, [("referrer_id", 1), ("product", 1), ("referred_id", 1)], {}),
+        (db.referral_adjustments, [("referrer_id", 1), ("product", 1), ("status", 1)], {}),
+        (db.referral_disputes, [("referrer_id", 1), ("status", 1)], {}),
         (db.referral_payouts, "batch_key", {"unique": True}),
         (db.referral_pay_batches, "id", {"unique": True}),
         (db.referral_payout_queue, [("referrer_id", 1), ("status", 1)], {}),
