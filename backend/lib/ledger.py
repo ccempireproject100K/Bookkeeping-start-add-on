@@ -9,6 +9,7 @@ from lib.coa import ACCOUNT_TYPE_OF, NORMAL_BALANCE_OF, NAME_OF, TYPE_ORDER
 from lib.currencies import normalize as normalize_currency
 from lib.currencies import DEFAULT_CURRENCY, decimals_for
 from lib import fx as FX
+from lib.audit import append_audit
 
 
 def _scoped(db, tenant_id):
@@ -23,8 +24,8 @@ def _scoped(db, tenant_id):
 
 
 async def audit(db, tenant_id, user, action, detail):
-    await Scoped(db.audit_log, tenant_id).insert_one({
-        "id": new_id(),
+    await append_audit(db, {
+        "id": new_id(), "tenant_id": tenant_id,
         "actor": (user or {}).get("email", "system"),
         "action": action,
         "detail": detail,

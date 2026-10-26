@@ -46,11 +46,25 @@ export default function PortalLinksTab({
     t
   } = useTranslation();
   const [links, setLinks] = useState(null);
+  const [reports, setReports] = useState([]);
   const [invoiceId, setInvoiceId] = useState("");
   const [expiry, setExpiry] = useState(String(24 * 7));
   const [fresh, setFresh] = useState(null); // {url, client_name, expires_at}
   const [busy, setBusy] = useState(false);
-  const load = () => api.get("/portal/links").then(setLinks).catch(() => setLinks([]));
+  const loadReports = () => api.get("/portal/payment-reports?status=pending").then(setReports).catch(() => setReports([]));
+  const load = () => {
+    api.get("/portal/links").then(setLinks).catch(() => setLinks([]));
+    loadReports();
+  };
+  const decideReport = async (id, action) => {
+    try {
+      await api.post(`/portal/payment-reports/${id}/${action}`, {});
+      toast.success(action === "confirm" ? "Payment confirmed — it's posted to the invoice now." : "Report rejected — nothing was posted.");
+      loadReports();
+    } catch (e) {
+      toast.error(errMsg(e));
+    }
+  };
   useEffect(() => {
     load();
   }, []);
@@ -130,6 +144,38 @@ export default function PortalLinksTab({
               <Copy size={14} className="mr-1" /> {t("portallinkstab.copy")}</Button>
           </div>}
       </Card>
+
+      {reports.length > 0 && <Card className="p-0 overflow-hidden" data-testid="portal-pending-reports-card">
+        <div className="px-5 pt-4 pb-2">
+          <h3 className="font-semibold text-gray-100">Reported payments — waiting for your confirmation</h3>
+          <p className="text-sm text-gray-500">A client reported paying outside the portal. Nothing is posted to their invoice until you confirm it.</p>
+        </div>
+        <table className="w-full text-sm" data-testid="table-portal-payment-reports">
+          <thead><tr className="text-xs uppercase tracking-wider text-gray-500 border-b border-[#222838]">
+            <th className="px-5 py-3 text-left font-medium">Client</th>
+            <th className="px-5 py-3 text-left font-medium">Invoice</th>
+            <th className="px-5 py-3 text-left font-medium">Reported</th>
+            <th className="px-5 py-3 text-right font-medium">Amount</th>
+            <th className="px-5 py-3 text-right font-medium">Actions</th>
+          </tr></thead>
+          <tbody>
+            {reports.map(r => <tr key={r.id} className="border-b border-[#171c26] hover:bg-[#161b25]">
+                <td className="px-5 py-3 text-gray-100">{r.client_name || "—"}</td>
+                <td className="px-5 py-3 text-gray-400">{r.invoice_ref}</td>
+                <td className="px-5 py-3 text-gray-400 text-xs whitespace-nowrap">{fmtDate(r.date)} · {r.method}{r.reference ? ` · ${r.reference}` : ""}</td>
+                <td className="px-5 py-3 text-right font-mono text-gray-100">{money(r.amount_cents)}</td>
+                <td className="px-5 py-3 text-right">
+                  <div className="flex justify-end gap-1">
+                    <Button size="sm" variant="ghost" className="text-emerald-400 hover:text-emerald-300" onClick={() => decideReport(r.id, "confirm")} data-testid={`plink-confirm-${r.id}`}>
+                      <CheckCircle2 size={14} className="mr-1" /> Confirm</Button>
+                    <Button size="sm" variant="ghost" className="text-rose-400 hover:text-rose-300" onClick={() => decideReport(r.id, "reject")} data-testid={`plink-reject-${r.id}`}>
+                      <Ban size={14} className="mr-1" /> Reject</Button>
+                  </div>
+                </td>
+              </tr>)}
+          </tbody>
+        </table>
+      </Card>}
 
       <Card className="p-0 overflow-hidden">
         <table className="w-full text-sm" data-testid="table-portal-links">

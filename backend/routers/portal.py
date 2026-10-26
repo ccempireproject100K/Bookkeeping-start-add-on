@@ -3,7 +3,13 @@
 The owner generates a link per invoice (from the API: POST /portal/links with
 invoice_id or customer_id). The customer opens it with NO login and can:
   - view that invoice (details + amounts only),
-  - pay it (posts a real journal entry and clears AR, same as an in-shop payment),
+  - REPORT a payment they made outside the portal (bank/cash/card). A report
+    is recorded as PENDING and posts NOTHING: only when the shop confirms it
+    (POST /portal/payment-reports/{id}/confirm, ops:manage) does the journal
+    entry post — exactly once — and the invoice totals move. The shop can
+    also reject a report, which leaves no journal trace. (Security audit
+    2026-10-26, N-1; owner ruling: reports say pending until the shop
+    confirms.)
   - pay by card via Stripe Checkout (POST /portal/checkout/{token}); the
     signature-verified webhook (POST /portal/stripe/webhook) fulfills the
     payment exactly once. Stripe is KEY-GATED: without STRIPE_SECRET_KEY the
@@ -24,6 +30,7 @@ from typing import Optional
 import os
 
 from db import db
+from lib.audit import append_audit
 from lib.base import Scoped, new_id, now_iso, today_str, to_cents
 from lib.auth import require
 from lib import ledger as L
@@ -40,7 +47,7 @@ DEFAULT_TTL_HOURS = 24 * 7  # 7 days
 
 
 async def _audit(user, action, entity, entity_id, details=None):
-    await db.audit_log.insert_one({
+    await append_audit(db, {
         "id": new_id(), "tenant_id": user["tenant_id"],
         "actor_id": user["id"], "actor_name": user.get("name"),
         "actor_role": user.get("role"), "action": action, "entity": entity,
@@ -320,6 +327,26 @@ def _strip_invoice(inv: dict) -> dict:
     }
 
 
+async def _pending_reports(tenant_id: str, invoice_id: str) -> list:
+    """Customer payment reports still waiting for the shop to confirm.
+    Degrades to [] when the collection is unavailable (minimal test
+    doubles) — a report can never be recorded without it anyway."""
+    coll = getattr(db, "portal_payment_reports", None)
+    if coll is None:
+        return []
+    rows = await coll.find(
+        {"tenant_id": tenant_id, "invoice_id": invoice_id,
+         "status": "pending"},
+        {"_id": 0, "amount_cents": 1, "method": 1, "reference": 1,
+         "date": 1, "status": 1}).sort("created_at", 1).to_list(50)
+    return rows
+
+
+async def _pending_total_cents(tenant_id: str, invoice_id: str) -> int:
+    return sum(r.get("amount_cents", 0)
+               for r in await _pending_reports(tenant_id, invoice_id))
+
+
 @router.get("/view/{token}")
 async def portal_view(token: str):
     """Public: view the linked invoice. No login required. Invoice details + amounts only."""
@@ -329,11 +356,14 @@ async def portal_view(token: str):
     if not inv:
         raise HTTPException(status_code=404, detail="Invoice not found")
     tenant = await db.tenants.find_one({"id": link["tenant_id"]}, {"_id": 0, "name": 1})
+    pending = await _pending_reports(link["tenant_id"], inv["id"])
     # Card payments are key-gated (see the Stripe section below). The
     # publishable key is safe to expose — it is public by design.
     return {"business": (tenant or {}).get("name", ""), "invoice": _strip_invoice(inv),
             "card_payments_enabled": _stripe_configured(),
-            "stripe_publishable_key": _stripe_cfg()[1] or None}
+            "stripe_publishable_key": _stripe_cfg()[1] or None,
+            "pending_reports": pending,
+            "pending_cents": sum(r.get("amount_cents", 0) for r in pending)}
 
 
 class PortalPayIn(BaseModel):
@@ -344,9 +374,14 @@ class PortalPayIn(BaseModel):
 
 @router.post("/pay/{token}")
 async def portal_pay(token: str, body: PortalPayIn):
-    """Public: customer pays the linked invoice. Posts a real journal entry
-    (Dr cash / Cr AR 1200), updates the invoice paid totals, and marks the
-    link used once the invoice is paid in full."""
+    """Public: customer REPORTS a payment made outside the portal.
+
+    The report is recorded as pending and posts NOTHING — no journal
+    entry, no change to the invoice totals (audit N-1). The shop sees
+    it under GET /portal/payment-reports and either confirms it (the
+    journal entry posts then, exactly once) or rejects it. Amounts
+    already reported-and-pending count against the balance, so the
+    same dollars can't be reported twice."""
     link = await _lookup_link(token)
     inv = await db.invoices.find_one(
         {"tenant_id": link["tenant_id"], "id": link["invoice_id"]})
@@ -359,43 +394,202 @@ async def portal_pay(token: str, body: PortalPayIn):
     cents = to_cents(body.amount)
     if cents <= 0:
         raise HTTPException(status_code=422, detail="Invalid payment amount")
-    if cents > balance:
+    pending = await _pending_total_cents(link["tenant_id"], inv["id"])
+    if cents > balance - pending:
+        if pending > 0:
+            raise HTTPException(
+                status_code=422,
+                detail="That amount is already reported and waiting for "
+                       "the shop to confirm it")
         raise HTTPException(status_code=422, detail="Amount exceeds the balance due")
 
+    report = {
+        "id": new_id(), "tenant_id": link["tenant_id"],
+        "invoice_id": inv["id"], "customer_id": inv.get("customer_id"),
+        "token_hash": _digest(token),
+        "date": today_str(), "amount_cents": cents,
+        "method": body.payment_method, "reference": body.reference,
+        "status": "pending", "created_at": now_iso(),
+        "entry_number": None, "decided_by": None, "decided_at": None,
+        "decision_note": "",
+    }
+    await db.portal_payment_reports.insert_one(report)
     actor = {"id": "portal", "email": "portal@client", "name": "Client portal",
              "role": "owner", "tenant_id": link["tenant_id"]}
-    cash = P._cash_account(body.payment_method)
+    await _audit(actor, "portal.payment.reported", "invoice", inv["id"],
+                 {"amount_cents": cents, "method": body.payment_method,
+                  "report_id": report["id"],
+                  "tenant_id": link["tenant_id"]})
+    return {"ok": True, "status": "pending_confirmation",
+            "report_id": report["id"], "amount_cents": cents,
+            "paid_cents": paid, "balance_cents": balance,
+            "pending_cents": pending + cents}
+
+
+# ------------------------------------- shop side: payment-report decisions
+#
+# A reported payment becomes real only here. Confirm claims the report
+# atomically (pending -> confirmed) BEFORE posting, the same claim
+# pattern as the password-reset fix (audit F-1): two confirms racing —
+# or a double-click — produce exactly one journal entry; the loser is
+# answered from the winner's state. Rejecting a pending report leaves
+# no journal trace and frees the reported amount for a fresh report
+# or a card checkout.
+
+def _report_view(row: dict) -> dict:
+    return {k: v for k, v in row.items() if k not in ("_id", "token_hash")}
+
+
+@router.get("/payment-reports")
+async def list_payment_reports(status: str = "pending",
+                               user: dict = Depends(require("ops:manage"))):
+    """Payment reports for this shop (default: still pending), newest
+    first, with the invoice ref + client name attached for the UI."""
+    q = {} if status == "all" else {"status": status}
+    rows = await Scoped(db.portal_payment_reports, user["tenant_id"]).find_list(
+        q, sort=[("created_at", -1)], limit=200)
+    inv_coll = Scoped(db.invoices, user["tenant_id"])
+    for r in rows:
+        inv = await inv_coll.find_one({"id": r["invoice_id"]})
+        r["invoice_ref"] = (inv or {}).get("issue_entry") or r["invoice_id"]
+        r["client_name"] = (inv or {}).get("client_name", "")
+    return [_report_view(r) for r in rows]
+
+
+class ReportDecisionIn(BaseModel):
+    note: str = Field(default="", max_length=300)
+
+
+@router.post("/payment-reports/{report_id}/confirm")
+async def confirm_payment_report(report_id: str,
+                                 user: dict = Depends(require("ops:manage"))):
+    """Confirm a customer-reported payment: post the journal entry
+    (Dr cash / Cr AR 1200), move the invoice totals, burn the portal
+    link if the invoice is now paid in full. Idempotent — confirming
+    an already-confirmed report returns its recorded result and posts
+    nothing more."""
+    coll = Scoped(db.portal_payment_reports, user["tenant_id"])
+    report = await coll.find_one({"id": report_id})
+    if not report:
+        raise HTTPException(status_code=404, detail="Payment report not found")
+    if report["status"] == "confirmed":
+        return {"ok": True, "already_confirmed": True,
+                "status": "confirmed", "report_id": report_id,
+                "entry_number": report.get("entry_number"),
+                "invoice_status": report.get("invoice_status")}
+    if report["status"] == "rejected":
+        raise HTTPException(status_code=409,
+                            detail="This report was rejected — ask the "
+                                   "customer to report the payment again")
+    inv = await Scoped(db.invoices, user["tenant_id"]).find_one(
+        {"id": report["invoice_id"]})
+    if not inv:
+        raise HTTPException(status_code=404, detail="Invoice not found")
+    paid = inv.get("paid_cents", 0)
+    balance = inv["total_cents"] - paid
+    cents = report["amount_cents"]
+    if cents > balance:
+        raise HTTPException(
+            status_code=409,
+            detail="The report exceeds the invoice's remaining balance "
+                   "— reject it and ask the customer to report again")
+
+    claim = await coll.update_one(
+        {"id": report_id, "status": "pending"},
+        {"$set": {"status": "confirmed", "decided_by": user.get("name"),
+                  "decided_at": now_iso()}})
+    if not claim.matched_count:
+        # Lost the race — answer from the winner's state, post nothing.
+        fresh = await coll.find_one({"id": report_id})
+        if fresh and fresh["status"] == "confirmed":
+            return {"ok": True, "already_confirmed": True,
+                    "status": "confirmed", "report_id": report_id,
+                    "entry_number": fresh.get("entry_number"),
+                    "invoice_status": fresh.get("invoice_status")}
+        raise HTTPException(status_code=409,
+                            detail="This report was just decided")
+
+    cash = P._cash_account(report["method"])
     inv_currency = normalize_currency(inv.get("currency") or "USD")
-    entry = await L.post_journal_entry(db, link["tenant_id"], actor, {
-        "entry_date": today_str(), "source": "portal_payment", "source_ref": inv["id"],
-        "memo": f"Client portal payment — {inv['client_name']}",
+    entry = await L.post_journal_entry(db, user["tenant_id"], user, {
+        "entry_date": today_str(), "source": "portal_payment",
+        "source_ref": inv["id"],
+        "memo": f"Client portal payment — {inv['client_name']} "
+                f"(customer-reported, shop-confirmed)",
         "lines": [P.dr(cash, cents, "Client portal payment"),
                   P.cr("1200", cents, "AR cleared")],
         "currency": inv_currency,
     }, status="posted")
     # Realized FX vs the invoice currency (best-effort; never breaks payment).
     await FXP.post_realized_fx(
-        db=db, tenant_id=link["tenant_id"], user=actor, kind="invoice",
+        db=db, tenant_id=user["tenant_id"], user=user, kind="invoice",
         doc=inv, pay_currency=inv_currency, pay_amount_minor=cents,
         applied_doc_minor=cents, pay_date=today_str())
 
     new_paid = paid + cents
-    status = "paid" if new_paid >= inv["total_cents"] else "partial"
+    inv_status = "paid" if new_paid >= inv["total_cents"] else "partial"
     pmt = {"date": today_str(), "amount_cents": cents, "cash_cents": cents,
-           "credit_cents": 0, "method": body.payment_method,
-           "reference": body.reference, "entry": entry["number"], "source": "portal"}
+           "credit_cents": 0, "method": report["method"],
+           "reference": report.get("reference", ""), "entry": entry["number"],
+           "source": "portal", "report_id": report_id,
+           "confirmed_by": user.get("name")}
     await db.invoices.update_one(
-        {"tenant_id": link["tenant_id"], "id": inv["id"]},
-        {"$set": {"status": status, "paid_cents": new_paid}, "$push": {"payments": pmt}})
-    if status == "paid":
+        {"tenant_id": user["tenant_id"], "id": inv["id"]},
+        {"$set": {"status": inv_status, "paid_cents": new_paid},
+         "$push": {"payments": pmt}})
+    if inv_status == "paid" and report.get("token_hash"):
         await db.portal_links.update_one(
-            {"token_hash": _digest(token)}, {"$set": {"used": True}})
-    await _audit(actor, "portal.payment", "invoice", inv["id"],
-                 {"amount_cents": cents, "method": body.payment_method,
-                  "entry_number": entry["number"], "tenant_id": link["tenant_id"]})
-    return {"ok": True, "status": status, "paid_cents": new_paid,
-            "balance_cents": inv["total_cents"] - new_paid,
-            "entry_number": entry["number"]}
+            {"token_hash": report["token_hash"]}, {"$set": {"used": True}})
+    await coll.update_one(
+        {"id": report_id},
+        {"$set": {"entry_number": entry["number"],
+                  "invoice_status": inv_status}})
+    await _audit(user, "portal.payment.confirmed", "invoice", inv["id"],
+                 {"amount_cents": cents, "method": report["method"],
+                  "report_id": report_id, "entry_number": entry["number"]})
+    return {"ok": True, "already_confirmed": False, "status": "confirmed",
+            "report_id": report_id, "entry_number": entry["number"],
+            "invoice_status": inv_status, "paid_cents": new_paid,
+            "balance_cents": inv["total_cents"] - new_paid}
+
+
+@router.post("/payment-reports/{report_id}/reject")
+async def reject_payment_report(report_id: str,
+                                body: Optional[ReportDecisionIn] = None,
+                                user: dict = Depends(require("ops:manage"))):
+    """Reject a reported payment. Nothing was ever posted for it, so
+    rejection leaves no journal trace; the reported amount stops
+    counting against the balance immediately."""
+    coll = Scoped(db.portal_payment_reports, user["tenant_id"])
+    report = await coll.find_one({"id": report_id})
+    if not report:
+        raise HTTPException(status_code=404, detail="Payment report not found")
+    if report["status"] == "rejected":
+        return {"ok": True, "already_rejected": True,
+                "status": "rejected", "report_id": report_id}
+    if report["status"] == "confirmed":
+        raise HTTPException(status_code=409,
+                            detail="This report was already confirmed "
+                                   "and posted")
+    claim = await coll.update_one(
+        {"id": report_id, "status": "pending"},
+        {"$set": {"status": "rejected", "decided_by": user.get("name"),
+                  "decided_at": now_iso(),
+                  "decision_note": (body.note if body else "")[:300]}})
+    if not claim.matched_count:
+        fresh = await coll.find_one({"id": report_id})
+        if fresh and fresh["status"] == "rejected":
+            return {"ok": True, "already_rejected": True,
+                    "status": "rejected", "report_id": report_id}
+        raise HTTPException(status_code=409,
+                            detail="This report was just decided")
+    await _audit(user, "portal.payment.rejected", "invoice",
+                 report["invoice_id"],
+                 {"amount_cents": report["amount_cents"],
+                  "method": report["method"], "report_id": report_id,
+                  "note": (body.note if body else "")[:300]})
+    return {"ok": True, "already_rejected": False, "status": "rejected",
+            "report_id": report_id}
 
 
 # ---------------------------------------------------------------- Stripe card checkout (live payments)
@@ -460,8 +654,18 @@ async def portal_checkout(token: str, body: PortalCheckoutIn, request: Request):
     inv = await db.invoices.find_one({"tenant_id": tid, "id": link["invoice_id"]})
     if not inv:
         raise HTTPException(status_code=404, detail="Invoice not found")
-    balance = inv["total_cents"] - inv.get("paid_cents", 0)
+    # Dollars under a pending payment report are spoken for: never
+    # charge a card for money the customer says is already on its way.
+    # If the shop rejects the report, checkout opens back up in full.
+    pending = await _pending_total_cents(tid, inv["id"])
+    balance = inv["total_cents"] - inv.get("paid_cents", 0) - pending
     if balance <= 0:
+        if pending > 0 and inv.get("paid_cents", 0) < inv["total_cents"]:
+            raise HTTPException(
+                status_code=409,
+                detail="A payment report is waiting for the shop to "
+                       "confirm it — card checkout opens again if the "
+                       "shop declines it")
         raise HTTPException(status_code=409, detail="Invoice already fully paid")
     origin = (body.origin_url or request.headers.get("origin") or "").rstrip("/")
     if not origin or not origin.startswith("http"):

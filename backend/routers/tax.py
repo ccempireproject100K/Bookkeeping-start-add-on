@@ -22,6 +22,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 
 from db import db
+from lib.audit import append_audit
 from lib.base import Scoped, new_id, now_iso, to_cents, cents_to_dollars
 from lib.auth import require, get_current_user
 from lib.plans import require_feature
@@ -34,7 +35,7 @@ EXEMPT_ENTITIES = {"c_corp", "s_corp"}   # corporations generally don't receive 
 
 
 async def _audit(user, action, entity, entity_id, details=None):
-    await db.audit_log.insert_one({
+    await append_audit(db, {
         "id": new_id(), "tenant_id": user["tenant_id"],
         "actor_id": user["id"], "actor_name": user.get("name"),
         "actor_role": user.get("role"), "action": action, "entity": entity,

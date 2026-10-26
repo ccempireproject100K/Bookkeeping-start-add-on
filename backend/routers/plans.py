@@ -8,6 +8,7 @@ from fastapi import APIRouter, Depends, Request
 from pydantic import BaseModel
 
 from db import db
+from lib.audit import append_audit
 from lib import plans
 from lib.auth import get_current_user, require
 from lib.base import new_id, now_iso
@@ -48,7 +49,7 @@ async def change_plan(body: PlanChangeBody, request: Request,
     new_plan = plans.validate_plan(body.plan)
     await db.tenants.update_one(
         {"id": user["tenant_id"]}, {"$set": {"plan": new_plan}})
-    await db.audit_log.insert_one({
+    await append_audit(db, {
         "id": new_id(), "tenant_id": user["tenant_id"],
         "actor_id": user["id"], "actor_name": user.get("name"),
         "actor_role": user.get("role"), "action": "plan.changed",

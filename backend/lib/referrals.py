@@ -138,6 +138,22 @@ async def person_by_account(product: str, account_id: str):
             "product": product, "account_id": account_id}}})
 
 
+async def person_in_product(person: dict, product: str) -> bool:
+    """True when the person holds an account or an attribution on
+    `product`. This is the scoping rule for the cross-product
+    read-back/preference surface (security audit 2026-10-26, N-3): a
+    product may resolve a person by email only when the person is one
+    of ITS OWN members in this sense — never by email alone."""
+    if not person:
+        return False
+    if any(a.get("product") == product
+           for a in person.get("product_accounts", [])):
+        return True
+    att = await db.referral_attributions.find_one(
+        {"person_id": person["id"], "product": product}, {"_id": 1})
+    return att is not None
+
+
 async def ensure_person(email: str = None, source: str = "ingest") -> dict:
     """The person for an email (normalized-email join key), creating
     one when none exists. Email matching only ever links accounts of

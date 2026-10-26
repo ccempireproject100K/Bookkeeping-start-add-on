@@ -55,7 +55,7 @@ export default function PortalView() {
       setView(v);
       if (v?.invoice) setPay(p => ({
         ...p,
-        amount: (v.invoice.balance_cents / 100).toFixed(2)
+        amount: ((v.invoice.balance_cents - (v.pending_cents || 0)) / 100).toFixed(2)
       }));
     }).catch(() => {
       setView(null);
@@ -80,7 +80,7 @@ export default function PortalView() {
         payment_method: pay.payment_method,
         reference: pay.reference
       });
-      toast.success(r.status === "paid" ? "Paid in full — thank you!" : "Payment recorded — thank you!");
+      toast.success("Payment reported — thank you! It counts toward the invoice once the shop confirms it.");
       load();
     } catch (e) {
       toast.error(errMsg(e));
@@ -136,13 +136,16 @@ export default function PortalView() {
             </div>
 
             {justPaid && <div className="mb-4 rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-emerald-300" data-testid="portal-paid-banner">{t("portalview.cardPaymentReceivedThankYouIt")}</div>}
-            {inv.balance_cents > 0 && inv.status !== "paid" && <div className="mt-6 rounded-lg bg-[#0F1218] border border-[#222838] p-4" data-testid="portal-pay">
+            {(view.pending_reports || []).length > 0 && <div className="mt-6 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-200" data-testid="portal-pending-reports">
+                {view.pending_reports.map((r, i) => <p key={i}>You reported {money(r.amount_cents)} ({r.method}){r.date ? ` on ${fmtDate(r.date)}` : ""} — waiting for the shop to confirm it. It doesn't count toward the invoice yet.</p>)}
+              </div>}
+            {inv.balance_cents > 0 && inv.status !== "paid" && (view.pending_cents || 0) < inv.balance_cents && <div className="mt-6 rounded-lg bg-[#0F1218] border border-[#222838] p-4" data-testid="portal-pay">
                 <div className="mb-2 text-sm font-semibold text-gray-100">{t("portalview.payThisInvoice")}</div>
                 {view.card_payments_enabled === false ? <div className="mb-3 rounded-lg border border-[#222838] bg-[#0F1218] p-3 text-sm text-gray-400" data-testid="portal-card-unavailable">
                     Card payments aren't set up yet — please use another payment method below or contact the business.
                   </div> : <div className="flex flex-wrap items-center gap-2 mb-3">
                   <Button onClick={payWithCard} disabled={cardBusy} className="bg-amber-600 hover:bg-amber-500 text-black font-semibold" data-testid="portal-pay-card">
-                    {cardBusy ? "Starting secure checkout…" : `Pay ${money(inv.balance_cents)} with card`}
+                    {cardBusy ? "Starting secure checkout…" : `Pay ${money(inv.balance_cents - (view.pending_cents || 0))} with card`}
                   </Button>
                   <span className="text-[11px] text-gray-600">{t("portalview.secureCheckoutViaStripe")}</span>
                 </div>}

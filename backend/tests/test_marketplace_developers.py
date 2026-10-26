@@ -13,6 +13,7 @@ import asyncio
 import copy
 import hashlib
 import hmac
+import ipaddress
 import os
 import sys
 from types import SimpleNamespace
@@ -255,6 +256,15 @@ def fdb(monkeypatch):
     for mod in (customers_r, invoices_r, developers_r, idem, iauth,
                 auth_mod, audit_mod, dev_lib):
         monkeypatch.setattr(mod, "db", fake)
+    # Webhook save-time validation resolves the destination host
+    # (audit N-2 lock). Pin resolution to a public address so the
+    # suite is deterministic in sandboxes whose intercepted resolver
+    # answers every name with a benchmarking-range address
+    # (198.18.0.0/15), which the lock correctly refuses. Delivery
+    # mechanics are unaffected — tests replace _post wholesale.
+    monkeypatch.setattr(
+        dev_lib, "_resolve_ips",
+        lambda host: [ipaddress.ip_address("93.184.215.14")])
     return fake
 
 
