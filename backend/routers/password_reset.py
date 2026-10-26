@@ -188,6 +188,19 @@ async def confirm_reset(body: ConfirmBody):
     if not user:
         raise HTTPException(status_code=400, detail=INVALID_LINK)
     now = datetime.now(timezone.utc)
+    # Claim the token ATOMICALLY before changing anything: the update
+    # only lands while the stored token is still unused, uninvalidated
+    # and unexpired, so two concurrent confirms with the same link
+    # cannot both pass — the loser gets the generic 400 and the
+    # winner's password stands. (The previous read-then-mark shape let
+    # a racing second confirm overwrite the password the first one had
+    # just set; single-use was a check, not a guarantee.)
+    claim = await db.password_resets.update_one(
+        {"id": doc["id"], "used_at": None, "invalidated": False,
+         "expires_at": {"$gt": now}},
+        {"$set": {"used_at": now}})
+    if not claim.matched_count:
+        raise HTTPException(status_code=400, detail=INVALID_LINK)
     # Bumping token_version revokes every outstanding JWT (lib.auth
     # rejects tokens whose version no longer matches the user row).
     new_version = user.get("token_version", 0) + 1
@@ -195,8 +208,6 @@ async def confirm_reset(body: ConfirmBody):
         {"id": user["id"]},
         {"$set": {"password_hash": hash_password(body.password),
                   "token_version": new_version}})
-    await db.password_resets.update_one(
-        {"id": doc["id"]}, {"$set": {"used_at": now}})
     # Nothing else outstanding for this account stays usable.
     await db.password_resets.update_many(
         {"user_id": user["id"], "used_at": None, "invalidated": False},

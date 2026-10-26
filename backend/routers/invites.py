@@ -9,6 +9,7 @@ Flow (adapted from the momoempire/Momoempire invitations pattern):
 A single login can belong to many workspaces (memberships); the workspace
 switcher (GET /auth/workspaces, POST /auth/switch) hops between them.
 """
+import hashlib
 import os
 import secrets
 
@@ -23,6 +24,24 @@ from lib.memberships import memberships
 from lib.pwned import is_pwned
 
 router = APIRouter(prefix="/invites", tags=["invites"])
+
+
+def _hash_token(raw: str) -> str:
+    """Invite tokens are stored only as SHA-256 hashes — the same rule
+    portal links and password resets follow — so a database read never
+    yields a usable invite link."""
+    return hashlib.sha256(raw.encode("utf-8")).hexdigest()
+
+
+async def _find_invite(token: str):
+    """Resolve a raw invite token to its document. New invites are
+    found by hash; the plaintext lookup remains only so invites issued
+    before hash-at-rest landed keep working until they are accepted
+    or revoked (no new document ever stores a raw token)."""
+    inv = await db.invitations.find_one({"token_hash": _hash_token(token)})
+    if inv is None:
+        inv = await db.invitations.find_one({"token": token})
+    return inv
 
 # Owner can't be granted by invite (ownership transfer is a separate,
 # deliberate action). Accountant is the tax-pro role.
@@ -60,7 +79,8 @@ async def create_invite(body: InviteIn, user: dict = Depends(require("ledger:adm
         raise HTTPException(409, "A pending invite already exists for this email")
     token = secrets.token_urlsafe(32)
     inv = {
-        "id": new_id(), "token": token, "tenant_id": user["tenant_id"],
+        "id": new_id(), "token_hash": _hash_token(token),
+        "tenant_id": user["tenant_id"],
         "email": email, "role": role, "invited_by": user["id"],
         "status": "pending", "created_at": now_iso(), "accepted_at": None,
     }
@@ -75,7 +95,8 @@ async def create_invite(body: InviteIn, user: dict = Depends(require("ledger:adm
         f"as {role}.\n\nAccept here:\n{accept_url}\n\n"
         f"The link is single-use. If you already have an account, accepting "
         f"adds this workspace to it.")
-    out = {k: v for k, v in inv.items() if k not in ("_id", "token")}
+    out = {k: v for k, v in inv.items()
+           if k not in ("_id", "token", "token_hash")}
     out["accept_url"] = accept_url
     return out
 
@@ -83,7 +104,7 @@ async def create_invite(body: InviteIn, user: dict = Depends(require("ledger:adm
 @router.get("")
 async def list_invites(user: dict = Depends(require("ledger:admin"))):
     rows = await db.invitations.find(
-        {"tenant_id": user["tenant_id"]}, {"_id": 0, "token": 0}
+        {"tenant_id": user["tenant_id"]}, {"_id": 0, "token": 0, "token_hash": 0}
     ).sort("created_at", -1).to_list(200)
     return rows
 
@@ -147,7 +168,7 @@ async def remove_member(email: str, user: dict = Depends(require("ledger:admin")
 
 @router.get("/peek/{token}")
 async def peek_invite(token: str):
-    inv = await db.invitations.find_one({"token": token}, {"_id": 0, "token": 0})
+    inv = await _find_invite(token)
     if not inv or inv.get("status") != "pending":
         raise HTTPException(404, "This invite is no longer available")
     tenant = await db.tenants.find_one({"id": inv["tenant_id"]}, {"name": 1})
@@ -161,7 +182,7 @@ async def accept_invite(body: AcceptIn, response: Response):
     # by server after auth, so this never cycles at module load.
     from routers.auth import _audit, _issue, _public
 
-    inv = await db.invitations.find_one({"token": body.token})
+    inv = await _find_invite(body.token)
     if not inv or inv.get("status") != "pending":
         raise HTTPException(400, "This invite is invalid or already used")
     email = inv["email"].lower()
@@ -197,7 +218,7 @@ async def accept_invite(body: AcceptIn, response: Response):
                      {"tenant_id": inv["tenant_id"], "role": inv["role"],
                       "existing_account": False})
     await db.invitations.update_one(
-        {"token": body.token},
+        {"id": inv["id"]},
         {"$set": {"status": "accepted", "accepted_at": now_iso()}})
     await _issue(response, user)
     return _public(user)
