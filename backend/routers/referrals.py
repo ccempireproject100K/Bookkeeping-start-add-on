@@ -633,7 +633,10 @@ async def queue_create(body: QueueIn,
                 body.referrer_id,
                 {"item_id": item["id"], "product": body.product,
                  "rail": item["rail"], "net_cents": item["net_cents"]})
-    return item
+    # Strip Mongo's _id, as the list endpoint does: the raw item
+    # carries an ObjectId FastAPI cannot serialize — the create
+    # succeeded but the operator saw HTTP 500 (load probe, §5.3).
+    return {k: v for k, v in item.items() if k != "_id"}
 
 
 @router.get("/admin/queue")
@@ -677,7 +680,10 @@ async def queue_advance(item_id: str, body: QueueAdvanceIn,
                 "referral_payout_queue", item_id,
                 {"status": item["status"], "rail": item["rail"],
                  "payout_id": item.get("payout_id")})
-    return item
+    # Same _id strip as create/list (see queue_create): the fetched
+    # item carries Mongo's ObjectId, which 500s the response after
+    # the state change already landed.
+    return {k: v for k, v in item.items() if k != "_id"}
 
 
 # --------------------------------------- operator: Melio pay-file (B3a)
@@ -823,7 +829,17 @@ async def batch_done(batch_id: str, body: BatchDoneIn,
                 item, by=user.get("email", ""),
                 reference=body.reference or batch_id)
         except R.ReferralError as e:
-            refused.append({"item_id": item_id, "reason": str(e)})
+            # A concurrent completion of this same batch may have
+            # finished the item while this call was refused by the
+            # completion claim: report what is true now, not the
+            # mid-race refusal.
+            fresh = await db.referral_payout_queue.find_one(
+                {"id": item_id})
+            if fresh and fresh.get("status") == "completed":
+                already.append({"item_id": item_id,
+                                "payout_id": fresh.get("payout_id")})
+            else:
+                refused.append({"item_id": item_id, "reason": str(e)})
             continue
         recorded.append({"item_id": item_id,
                          "payout_id": done.get("payout_id"),
