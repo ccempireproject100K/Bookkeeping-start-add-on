@@ -443,6 +443,23 @@ async def apply_refund(*, product: str, payment_id: str,
     await db.referral_earnings.update_one(
         {"id": earning["id"]},
         {"$set": {"refunded_cents": total, "share_cents": share}})
+    if earning["status"] == "paid":
+        clawed = int(earning.get("share_cents") or 0) - share
+        if clawed > 0:
+            # The money already went out the door. Rewriting the
+            # share alone leaves the member's summary permanently
+            # short of the payout record — load probe P6 measured a
+            # 225¢ gap with no balancing entry, and the refunded
+            # share was never charged against future pots. Book the
+            # difference as a negative adjustment, the dispute path's
+            # mechanism: the summary folds it into the next pot, and
+            # payout records reconcile with summaries to the cent.
+            await db.referral_adjustments.insert_one({
+                "id": new_id(), "referrer_id": earning["referrer_id"],
+                "product": earning["product"], "cents": -clawed,
+                "reason": f"Refund on payment {payment_id}",
+                "earning_id": earning["id"], "status": "pending",
+                "at": now_iso()})
     return {"earning_id": earning["id"], "net_cents": net,
             "share_cents": share}
 
@@ -989,6 +1006,15 @@ async def queue_create(referrer_id: str, product: str, *, by: str,
     return item
 
 
+async def _release_completion_claim(item_id: str, token: str):
+    """Give back a completion claim when recording failed, so the
+    item stays open and retryable (the refusal semantics below)."""
+    await db.referral_payout_queue.update_one(
+        {"id": item_id, "completion_claim": token},
+        {"$unset": {"completion_claim": "",
+                    "completion_claim_at": ""}})
+
+
 async def queue_complete(item: dict, *, by: str, reference: str = None,
                          now: datetime = None) -> dict:
     """Record the payout for a queue item whose money has moved in
@@ -996,24 +1022,73 @@ async def queue_complete(item: dict, *, by: str, reference: str = None,
     (locked/frozen/empty refuse, leaving the item open and visible)
     and pays the CURRENT cleared payable, exactly like the manual
     rail — the snapshot is the operator's Melio instruction, the
-    ledger pays what is actually payable."""
+    ledger pays what is actually payable.
+
+    Concurrency (load probe P4): two operators — or one double-click
+    — completing the same batch at once both passed the status check
+    and each recorded a payout (150¢ of records against a 75¢ pot).
+    Completion therefore starts with an atomic claim, the F-1
+    pattern: a conditional update that only one caller can land. The
+    loser re-reads the item — completed by the winner means return
+    it as-is; a live claim means refuse honestly. A claim older than
+    ten minutes is a crashed completer and may be taken over. The
+    payout itself carries a deterministic batch_key under the
+    unique index, so even a slipped claim cannot write a second
+    payout record for one queue item."""
     if item["status"] == "completed":
         return item
     await payable_or_refuse(item["referrer_id"], item["product"], now=now)
+    token = new_id()
+    stale = _iso((now or _now()) - timedelta(minutes=10))
+    claim = await db.referral_payout_queue.update_one(
+        {"id": item["id"], "status": {"$ne": "completed"},
+         "$or": [{"completion_claim": None},
+                 {"completion_claim_at": {"$lte": stale}}]},
+        {"$set": {"completion_claim": token,
+                  "completion_claim_at": _iso(now) if now else now_iso(),
+                  "updated_at": _iso(now) if now else now_iso()}})
+    if not getattr(claim, "modified_count", 0):
+        fresh = await db.referral_payout_queue.find_one({"id": item["id"]})
+        if fresh and fresh.get("status") == "completed":
+            return fresh
+        raise ReferralError(
+            "This payout is already being completed by another "
+            "operator.")
     fee = (PAPER_CHECK_FEE_CENTS
            if item["preference"] == "paper_check" else 0)
-    payout = await _record_payout_now(
-        db, item["referrer_id"], item["product"],
-        rail=item["rail"], note=f"Melio {item['preference']}",
-        by=by, reference=reference, fee_cents=fee, now=now)
+    batch_key = (f"melio-batch:{item['batch_id']}:{item['referrer_id']}"
+                 f":{item['product']}" if item.get("batch_id")
+                 else f"melio-queue:{item['id']}")
+    try:
+        payout = await _record_payout_now(
+            db, item["referrer_id"], item["product"],
+            rail=item["rail"], note=f"Melio {item['preference']}",
+            by=by, reference=reference, fee_cents=fee,
+            batch_key=batch_key, now=now)
+    except DuplicateKeyError:
+        # This item's payout already exists — a claim raced, or an
+        # earlier attempt died after recording. Adopt the record and
+        # finish marking the pot paid under it; never record twice.
+        payout = await db.referral_payouts.find_one(
+            {"batch_key": batch_key})
+        if payout is None:
+            await _release_completion_claim(item["id"], token)
+            raise
+        await mark_cleared_paid(item["referrer_id"], item["product"],
+                                payout["id"], now=now)
+    except Exception:
+        await _release_completion_claim(item["id"], token)
+        raise
     await db.referral_payout_queue.update_one(
-        {"id": item["id"]},
+        {"id": item["id"], "completion_claim": token},
         {"$set": {"status": "completed", "payout_id": payout["id"],
                   "gross_cents": payout["gross_cents"],
                   "fee_cents": payout["fee_cents"],
                   "net_cents": payout["net_cents"],
                   "completed_at": _iso(now) if now else now_iso(),
-                  "updated_at": _iso(now) if now else now_iso()}})
+                  "updated_at": _iso(now) if now else now_iso()},
+         "$unset": {"completion_claim": "",
+                    "completion_claim_at": ""}})
     item.update({"status": "completed", "payout_id": payout["id"],
                  "gross_cents": payout["gross_cents"],
                  "net_cents": payout["net_cents"]})

@@ -3,6 +3,7 @@
 Money passed in `lines` is already integer cents. Invariants I1-I10 enforced here.
 """
 from fastapi import HTTPException
+from pymongo.errors import DuplicateKeyError
 
 from lib.base import Scoped, new_id, now_iso, today_str, period_key_of, fiscal_year_of
 from lib.coa import ACCOUNT_TYPE_OF, NORMAL_BALANCE_OF, NAME_OF, TYPE_ORDER
@@ -48,7 +49,19 @@ async def ensure_period(db, tenant_id, entry_date):
             "status": "open", "locked_by": None, "locked_at": None, "year_closed": False,
             "created_at": now_iso(),
         }
-        await s["periods"].insert_one(period)
+        try:
+            await s["periods"].insert_one(period)
+        except DuplicateKeyError:
+            # A concurrent first-post into this brand-new period won
+            # the insert — the (tenant_id, key) unique index is the
+            # arbiter. Adopt the winner's period instead of failing:
+            # the load probe (§3.2) saw 15 of 20 racers take an HTTP
+            # 500 here on month-rollover mornings, every one of them
+            # fine on retry. If the winner somehow is not readable,
+            # the original error stands.
+            period = await s["periods"].find_one({"key": key})
+            if period is None:
+                raise
     return period
 
 
