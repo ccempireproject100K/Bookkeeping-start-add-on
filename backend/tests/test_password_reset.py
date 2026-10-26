@@ -252,6 +252,48 @@ def test_confirm_reuses_registration_password_rules(env):
     assert ok.password == "a" * 12
 
 
+def test_concurrent_confirms_only_one_wins(env, monkeypatch):
+    """Race pin (security audit 2026-10-26): two confirms carrying the
+    SAME token overlap — the second is launched from inside the first
+    confirm's password write, i.e. exactly the window where the old
+    read-then-mark flow still saw the token as unused. The token must
+    be claimed atomically: exactly one confirm succeeds and the
+    password left standing is the winner's."""
+    import threading
+    _ask()
+    raw = _raw_token_from_email(env)
+    orig_update = env.users.update_one
+    fired = {"done": False}
+    outcome = {}
+
+    async def racing_update(query, update):
+        result = await orig_update(query, update)
+        if not fired["done"]:
+            fired["done"] = True
+
+            def _run():
+                try:
+                    asyncio.run(pr.confirm_reset(pr.ConfirmBody(
+                        token=raw, password="racer-password-999")))
+                    outcome["second"] = "ok"
+                except HTTPException as e:
+                    outcome["second"] = e.status_code
+
+            t = threading.Thread(target=_run)
+            t.start()
+            t.join()
+        return result
+
+    monkeypatch.setattr(env.users, "update_one", racing_update)
+    out = asyncio.run(pr.confirm_reset(
+        pr.ConfirmBody(token=raw, password="winner-password-111")))
+    assert out == {"ok": True}
+    assert outcome["second"] == 400
+    assert verify_password("winner-password-111", env.user["password_hash"])
+    assert not verify_password("racer-password-999",
+                               env.user["password_hash"])
+
+
 def test_request_rate_limited_per_email(env):
     for _ in range(pr.MAX_PER_EMAIL):
         _ask()
