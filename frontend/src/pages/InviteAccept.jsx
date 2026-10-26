@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { api, errMsg } from "@/lib/api";
 import { toast } from "sonner";
 import { UserPlus, CheckCircle2, XCircle } from "lucide-react";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 /** Public invite acceptance: /invite?token=... — join a workspace. */
 import { useTranslation } from "react-i18next";
@@ -61,9 +62,12 @@ export default function InviteAccept() {
   };
   return <div className="min-h-screen flex items-center justify-center p-6 app-bg">
       <div className="w-full max-w-sm animate-rise">
-        <div className="flex items-center gap-3 mb-8">
-          <div className="w-9 h-9 rounded-lg brand-mark" />
-          <span className="font-display font-bold text-lg text-gray-50">{t("inviteaccept.workspaceInvite")}</span>
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg brand-mark" />
+            <span className="font-display font-bold text-lg text-gray-50">{t("inviteaccept.workspaceInvite")}</span>
+          </div>
+          <LanguageSwitcher compact />
         </div>
 
         {failed && <div className="rounded-xl border border-[#1b2230] bg-[#12151d] p-6 text-center">

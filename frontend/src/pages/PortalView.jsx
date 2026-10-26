@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { ReceiptText } from "lucide-react";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 /**
  * PUBLIC client portal — works WITHOUT login. Wire as a standalone route
@@ -88,6 +89,9 @@ export default function PortalView() {
   };
   return <div className="app-bg min-h-screen">
       <div className="mx-auto max-w-2xl px-4 py-10">
+        <div className="flex justify-end mb-4">
+          <LanguageSwitcher compact />
+        </div>
         {!view && !error && <p className="text-center text-gray-500 py-16">{t("portalview.loading")}</p>}
         {error && <div className="card-surface p-8 text-center" data-testid="portal-error">
             <p className="font-semibold text-gray-100">{t("portalview.thisLinkDidnTWork")}</p>

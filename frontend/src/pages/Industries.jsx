@@ -6,6 +6,7 @@ import { asPackList } from "@/lib/packs";
 import { asMarketList, findMarket, readMarketChoice, writeMarketChoice } from "@/lib/markets";
 import FaceIcon from "@/components/FaceIcon";
 import MarketSelect from "@/components/MarketSelect";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 /** Public index of all trade editions. Data-driven from the niche packs
  *  (GET /niches) — a new pack file on the backend is a new card here.
@@ -57,9 +58,12 @@ export default function Industries() {
             <div className="w-10 h-10 rounded-lg brand-mark" />
             <span className="font-display font-bold text-xl">Mind at Ease Solutions</span>
           </div>
-          <Link to="/login" className="text-sm hover:opacity-80" style={{ color: accent }}>
-            Sign in <ArrowRight size={14} className="inline ml-1" />
-          </Link>
+          <div className="flex items-center gap-4">
+            <LanguageSwitcher compact />
+            <Link to="/login" className="text-sm hover:opacity-80" style={{ color: accent }}>
+              Sign in <ArrowRight size={14} className="inline ml-1" />
+            </Link>
+          </div>
         </div>
 
         <h1 className="font-display text-4xl font-bold leading-tight mb-4">

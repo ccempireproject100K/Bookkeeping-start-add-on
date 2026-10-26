@@ -6,6 +6,7 @@ import { findPack } from "@/lib/packs";
 import { asSkin, readMarketChoice, writeMarketChoice } from "@/lib/markets";
 import FaceIcon from "@/components/FaceIcon";
 import MarketSelect from "@/components/MarketSelect";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 /** Public landing page for one trade edition, rendered entirely from its
  *  niche pack (GET /niches): product name, tagline, terminology, services,
@@ -113,6 +114,7 @@ export default function TradeLanding() {
           </div>
           <div className="flex items-center gap-4">
             <MarketSelect value={marketCode} onChange={pickMarket} testId="trade-market-select" />
+            <LanguageSwitcher compact />
             <Link to="/login" className="text-sm text-amber-500 hover:text-amber-400">
               Sign in <ArrowRight size={14} className="inline ml-1" />
             </Link>
