@@ -109,7 +109,22 @@ let webpackConfig = {
       jestConfig.moduleNameMapper = {
         ...jestConfig.moduleNameMapper,
         "^@/(.*)$": "<rootDir>/src/$1",
+        // react-router-dom v7 requires the "react-router/dom" subpath
+        // export, which this jest version's resolver can't follow —
+        // point it at the same CJS file the package export resolves to.
+        "^react-router/dom$":
+          "<rootDir>/node_modules/react-router/dist/development/dom-export.js",
       };
+      // src/components/ui carries both a .jsx and a .tsx variant of
+      // several components; the production build resolves the .jsx
+      // (Radix) set — the .tsx set imports @base-ui/react, which is not
+      // a dependency. Jest's default extension order prefers .tsx, so
+      // align it with the build or component tests load the wrong kit.
+      jestConfig.moduleFileExtensions = [
+        "web.js", "js", "web.jsx", "jsx",
+        "web.ts", "ts", "web.tsx", "tsx",
+        "json", "web.mjs", "mjs", "node",
+      ];
       return jestConfig;
     },
   },

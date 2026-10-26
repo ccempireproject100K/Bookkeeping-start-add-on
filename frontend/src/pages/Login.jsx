@@ -12,6 +12,7 @@ import FaceIcon from "@/components/FaceIcon";
 import { KeyRound, ArrowRight, Fingerprint } from "lucide-react";
 import { loginWithPasskey, passkeysSupported } from "@/lib/webauthn";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
+import { LOGIN } from "@/constants/testIds";
 import { useTranslation } from "react-i18next";
 const DEMOS = [{
   role: "Owner",
@@ -155,6 +156,9 @@ export default function Login() {
             <div>
               <Label className="text-xs text-gray-400">{t("login.password")}</Label>
               <Input data-testid="login-password" type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" className="mt-1 bg-[#14171E] border-[#222838]" />
+              <div className="mt-1.5 text-right">
+                <Link to="/forgot-password" data-testid={LOGIN.forgotPasswordLink} className="text-xs text-gray-500 hover:text-amber-400">{t("login.forgotPassword")}</Link>
+              </div>
             </div>
             {totpNeeded && <div>
                 <Label className="text-xs text-gray-400">{t("login.authenticatorCode")}</Label>

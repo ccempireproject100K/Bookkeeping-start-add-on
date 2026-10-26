@@ -12,6 +12,7 @@ from lib.ratelimit import RateLimitMiddleware
 from lib.security_headers import ContentSecurityPolicyMiddleware, SecurityHeadersMiddleware
 from routers import plans
 from routers import referrals
+from routers import password_reset
 from routers import (auth, ledger, products, pos, invoices, cashclose, dashboard,
                      bills, billing, aging, giftcards, commissions, customers, jobs,
                      banking, vendors, reports, estimates,
@@ -46,7 +47,7 @@ async def health():
         return {"db": "error", "detail": str(e)}
 
 
-for r in (auth.router, ledger.router, products.router, pos.router,
+for r in (auth.router, password_reset.router, ledger.router, products.router, pos.router,
           referrals.router,
           invoices.router, cashclose.router, dashboard.router,
           bills.router, billing.router, aging.router, giftcards.router, commissions.router,
