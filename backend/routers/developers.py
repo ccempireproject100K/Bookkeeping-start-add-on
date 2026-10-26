@@ -17,6 +17,7 @@ entry). v1 is read-only and tenant-scoped by construction — the
 tenant always comes from the key record, never from the request.
 Amounts are integer cents, like everywhere else in the product.
 """
+import asyncio
 from typing import List, Optional
 from urllib.parse import urlparse
 
@@ -91,9 +92,10 @@ class CreateWebhookBody(BaseModel):
 def _validate_webhook_body(body: CreateWebhookBody) -> str:
     url = (body.url or "").strip()
     parsed = urlparse(url)
-    if parsed.scheme not in ("http", "https") or not parsed.netloc:
+    # https only (audit N-2): there is no self-hosting carve-out.
+    if parsed.scheme != "https" or not parsed.netloc:
         raise HTTPException(status_code=422,
-                            detail="Webhook url must be an http(s) URL")
+                            detail="Webhook url must be an https URL")
     if not body.events:
         raise HTTPException(status_code=422,
                             detail="Subscribe to at least one event")
@@ -120,6 +122,13 @@ async def create_webhook(body: CreateWebhookBody,
     this response; verify deliveries with it (HMAC-SHA256 over the raw
     body, X-MAE-Signature-256: sha256=<hex>)."""
     url = _validate_webhook_body(body)
+    # The destination must resolve only to public addresses (audit
+    # N-2). Delivery re-checks with a fresh resolution on every hop,
+    # so a passing save is never the last word.
+    try:
+        await asyncio.to_thread(dev.assert_webhook_url_public, url)
+    except dev.WebhookUrlError as e:
+        raise HTTPException(status_code=422, detail=str(e))
     doc, secret = dev.new_subscription_doc(
         tenant_id=user["tenant_id"], created_by=user.get("email", ""),
         url=url, events=body.events)

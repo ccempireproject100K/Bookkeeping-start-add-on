@@ -6,6 +6,7 @@ from fastapi import APIRouter, Response, HTTPException, Depends, Request
 from pydantic import BaseModel, EmailStr, Field, field_validator
 
 from db import db
+from lib.audit import append_audit
 from lib.base import Scoped, new_id, now_iso
 from lib.auth import (
     hash_password, verify_password, create_access_token,
@@ -70,7 +71,7 @@ def _public(user: dict) -> dict:
 
 
 async def _audit(user, action, entity, entity_id, details=None):
-    await db.audit_log.insert_one({
+    await append_audit(db, {
         "id": new_id(), "tenant_id": user["tenant_id"],
         "actor_id": user["id"], "actor_name": user.get("name"),
         "actor_role": user.get("role"), "action": action, "entity": entity,

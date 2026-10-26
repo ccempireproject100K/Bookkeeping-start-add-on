@@ -25,11 +25,14 @@ Two machine surfaces, both following the house patterns:
 import asyncio
 import hashlib
 import hmac
+import ipaddress
 import json
 import logging
 import secrets as _secrets
+import socket
 import time
 from datetime import datetime, timedelta, timezone
+from urllib.parse import urljoin, urlparse
 
 import requests
 from fastapi import HTTPException, Request
@@ -250,11 +253,107 @@ def public_delivery_view(doc: dict) -> dict:
     }
 
 
+# ------------------------------------------------------- webhook URL safety
+#
+# Webhook destinations are member-supplied URLs the server POSTs to —
+# a blind SSRF surface if unchecked (security audit 2026-10-26, N-2;
+# owner ruling: the straight lock, no self-hosting carve-out).
+# Rules, enforced at save time AND again inside every delivery hop:
+#   * https only;
+#   * the host must resolve ONLY to public addresses — loopback,
+#     private, link-local, CGNAT, multicast, reserved and
+#     documentation ranges are all refused;
+#   * redirects are followed manually (max 3) and EVERY hop's target
+#     is re-validated and re-resolved before it is requested, so a
+#     public URL cannot bounce the delivery onto an internal address.
+# Validation never trusts an earlier check: _post re-resolves at send
+# time, so DNS answers that changed since save cannot smuggle a
+# private target in. (Residual, stated honestly: `requests` resolves
+# again when it connects, milliseconds later — the standard
+# re-validation mitigation, short of full IP-pinned TLS.)
+
+class WebhookUrlError(ValueError):
+    """A webhook destination that must never be saved or sent to."""
+
+
+def _resolve_ips(host: str) -> list:
+    """All addresses a host resolves to ([] when unresolvable).
+    Module-level so tests can pin resolution without real DNS."""
+    try:
+        infos = socket.getaddrinfo(host, None, proto=socket.IPPROTO_TCP)
+    except Exception:
+        return []
+    out = []
+    for info in infos:
+        try:
+            ip = ipaddress.ip_address(info[4][0])
+        except ValueError:
+            continue
+        if ip not in out:
+            out.append(ip)
+    return out
+
+
+def _ip_is_public(ip) -> bool:
+    # is_global is False for loopback/private/link-local/CGNAT/
+    # reserved/documentation ranges; multicast reports global, so it
+    # is excluded explicitly.
+    return ip.is_global and not ip.is_multicast
+
+
+def assert_webhook_url_public(url: str) -> None:
+    """Raise WebhookUrlError unless `url` is an https URL whose host
+    resolves only to public addresses. When the host cannot be
+    resolved at all, the check is inconclusive and passes — delivery
+    re-checks with a fresh resolution and refuses then; nothing is
+    ever SENT without a passing check."""
+    parsed = urlparse(url or "")
+    if parsed.scheme != "https" or not parsed.hostname:
+        raise WebhookUrlError("Webhook url must be an https URL")
+    host = parsed.hostname
+    try:
+        literal = ipaddress.ip_address(host)
+    except ValueError:
+        literal = None
+    if literal is not None:
+        if not _ip_is_public(literal):
+            raise WebhookUrlError(
+                "Webhook url points at a non-public address")
+        return
+    if host == "localhost" or host.endswith(".localhost") \
+            or host.endswith(".local"):
+        raise WebhookUrlError("Webhook url host is not public")
+    ips = _resolve_ips(host)
+    if ips and not all(_ip_is_public(ip) for ip in ips):
+        raise WebhookUrlError(
+            "Webhook url resolves to a non-public address")
+
+
+_MAX_REDIRECTS = 3
+_REDIRECT_STATUSES = (301, 302, 303, 307, 308)
+
+
 def _post(url: str, body: bytes, headers: dict) -> int:
     """One synchronous HTTP POST (run via asyncio.to_thread). Returns
-    the response status code. `requests` is the house HTTP client —
-    httpx is not in requirements."""
-    resp = requests.post(url, data=body, headers=headers, timeout=10)
+    the final response status code. `requests` is the house HTTP
+    client — httpx is not in requirements.
+
+    Every hop — the initial URL and each redirect target — is
+    validated and re-resolved via assert_webhook_url_public BEFORE it
+    is requested; a hop that fails validation raises WebhookUrlError
+    and is never sent (deliver() records it as a failed attempt)."""
+    current = url
+    for hop in range(_MAX_REDIRECTS + 1):
+        assert_webhook_url_public(current)
+        resp = requests.post(current, data=body, headers=headers,
+                             timeout=10, allow_redirects=False)
+        if resp.status_code in _REDIRECT_STATUSES:
+            location = resp.headers.get("Location") or resp.headers.get(
+                "location")
+            if location and hop < _MAX_REDIRECTS:
+                current = urljoin(current, location)
+                continue
+        return resp.status_code
     return resp.status_code
 
 

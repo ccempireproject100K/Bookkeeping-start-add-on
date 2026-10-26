@@ -27,6 +27,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field
 
 from db import db
+from lib.audit import append_audit
 from lib.base import Scoped, new_id, now_iso, to_cents
 from lib.auth import require
 from lib.plans import require_feature
@@ -87,7 +88,7 @@ def _fernet() -> Fernet:
 
 
 async def _audit(user, action, entity, entity_id, details=None):
-    await db.audit_log.insert_one({
+    await append_audit(db, {
         "id": new_id(), "tenant_id": user["tenant_id"],
         "actor_id": user["id"], "actor_name": user.get("name"),
         "actor_role": user.get("role"), "action": action, "entity": entity,

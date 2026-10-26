@@ -12,6 +12,7 @@ from pydantic import BaseModel, Field
 from typing import Optional
 
 from db import db
+from lib.audit import append_audit
 from lib.base import Scoped, new_id, now_iso, today_str
 from lib.auth import PERMISSIONS, require
 
@@ -19,7 +20,7 @@ router = APIRouter(prefix="/time", tags=["time"])
 
 
 async def _audit(user, action, entity, entity_id, details=None):
-    await db.audit_log.insert_one({
+    await append_audit(db, {
         "id": new_id(), "tenant_id": user["tenant_id"],
         "actor_id": user["id"], "actor_name": user.get("name"),
         "actor_role": user.get("role"), "action": action, "entity": entity,

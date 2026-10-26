@@ -66,11 +66,21 @@ def _product_for(actor: dict, body_product: Optional[str]) -> str:
 
 async def _person_for_readback(actor: dict, account_id: str = None,
                                email: str = None):
+    """Resolve the member a platform credential is asking about.
+
+    Account ids resolve product-scoped by construction. The email
+    fallback is scoped too (security audit 2026-10-26, N-3): it
+    resolves only when the person holds an account/attribution on the
+    CALLER's product. An out-of-scope email gets the same 404 as an
+    unknown one — no cross-product enumeration oracle."""
     person = None
     if account_id:
         person = await R.person_by_account(actor["platform"], account_id)
     if person is None and email:
-        person = await R.person_by_email(email)
+        candidate = await R.person_by_email(email)
+        if candidate is not None and await R.person_in_product(
+                candidate, actor["platform"]):
+            person = candidate
     if person is None:
         raise HTTPException(status_code=404,
                             detail="No referral member found")
@@ -239,12 +249,22 @@ async def set_preference(body: PreferenceIn,
             detail="Paper check carries a $2.00 fee deducted from each "
                    "payout. The member must see and acknowledge that "
                    "fee before this preference can be set.")
+    # Same scoping as read-back (audit N-3): a platform credential may
+    # set a preference only for a member of its OWN product — resolved
+    # by its product-scoped account id, or by email when the person
+    # holds an account/attribution on the caller's product. An
+    # out-of-scope or unknown email is a 404, and this path never
+    # creates a person (the old ensure_person fallback did, for any
+    # email any credential supplied).
     person = None
     if body.account_id:
         person = await R.person_by_account(actor["platform"],
                                            body.account_id)
     if person is None and body.email:
-        person = await R.ensure_person(body.email)
+        candidate = await R.person_by_email(body.email)
+        if candidate is not None and await R.person_in_product(
+                candidate, actor["platform"]):
+            person = candidate
     if person is None:
         raise HTTPException(status_code=404,
                             detail="No referral member found")

@@ -26,6 +26,7 @@ from pydantic import BaseModel
 from pymongo.errors import DuplicateKeyError
 
 from db import db
+from lib.audit import append_audit
 from lib import billing, plans
 from lib.auth import get_current_user, require
 from lib.base import new_id, now_iso
@@ -48,7 +49,7 @@ def _origin(body_origin: str, request: Request) -> str:
 
 
 async def _audit_user(user, action, details=None):
-    await db.audit_log.insert_one({
+    await append_audit(db, {
         "id": new_id(), "tenant_id": user["tenant_id"],
         "actor_id": user["id"], "actor_name": user.get("name"),
         "actor_role": user.get("role"), "action": action,
@@ -58,7 +59,7 @@ async def _audit_user(user, action, details=None):
 
 
 async def _audit_system(tenant_id, action, details=None):
-    await db.audit_log.insert_one({
+    await append_audit(db, {
         "id": new_id(), "tenant_id": tenant_id,
         "actor_id": "stripe_webhook", "actor_name": "Stripe webhook",
         "actor_role": "system", "action": action,

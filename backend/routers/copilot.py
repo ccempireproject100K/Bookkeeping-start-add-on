@@ -39,6 +39,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
 from db import db
+from lib.audit import append_audit
 from lib.pii import scrub_secrets
 from lib.plans import require_feature
 from lib.base import Scoped, new_id, now_iso, today_str, cents_to_dollars, to_cents
@@ -78,7 +79,7 @@ def actions(user):
 
 
 async def _audit(user, action, entity, entity_id, details=None):
-    await db.audit_log.insert_one({
+    await append_audit(db, {
         "id": new_id(), "tenant_id": user["tenant_id"],
         "actor_id": user["id"], "actor_name": user.get("name"),
         "actor_role": user.get("role"), "action": action, "entity": entity,

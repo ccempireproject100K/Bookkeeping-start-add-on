@@ -13,6 +13,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from pydantic import BaseModel
 
 from db import db
+from lib.audit import append_audit
 from lib.base import new_id, now_iso
 from lib.auth import require, get_current_user
 
@@ -30,7 +31,7 @@ MAIN_COLLECTIONS = [
 
 
 async def _audit(user, action, entity, entity_id, details=None):
-    await db.audit_log.insert_one({
+    await append_audit(db, {
         "id": new_id(), "tenant_id": user["tenant_id"],
         "actor_id": user["id"], "actor_name": user.get("name"),
         "actor_role": user.get("role"), "action": action, "entity": entity,
