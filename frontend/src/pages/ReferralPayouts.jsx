@@ -37,11 +37,25 @@ export default function ReferralPayouts() {
     () => localStorage.getItem("melioBatchId") || "");
   const [busy, setBusy] = useState(false);
 
+  const loadBalances = async () => {
+    // The endpoint paginates (limit/offset over a global sort);
+    // walk the pages so the table always shows every referrer.
+    const PAGE = 200;
+    const all = [];
+    for (let offset = 0; ; offset += PAGE) {
+      const page = await api.get(
+        `/referrals/admin/balances?limit=${PAGE}&offset=${offset}`);
+      all.push(...(page || []));
+      if (!page || page.length < PAGE) break;
+    }
+    return all;
+  };
+
   const load = async () => {
     setLoading(true);
     try {
       const [b, q] = await Promise.all([
-        api.get("/referrals/admin/balances"),
+        loadBalances(),
         api.get("/referrals/admin/queue"),
       ]);
       setBalances(b || []);

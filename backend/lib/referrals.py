@@ -552,41 +552,84 @@ async def apply_dispute(*, product: str, dispute_id: str,
 
 # ---------------------------------------------------------------- summaries
 
+def _bucket_sums(cutoff: str) -> dict:
+    """The site pot's per-status share sums as $group accumulators,
+    splitting pending earnings at the clearing cutoff. earned_at and
+    the cutoff are both `_iso` strings, so the lexicographic compare
+    is the chronological compare — the same test the original
+    cursor-iterating implementation made in Python."""
+    def _sum_when(cond):
+        return {"$sum": {"$cond": [cond, "$share_cents", 0]}}
+    return {
+        "pending": _sum_when({"$and": [
+            {"$eq": ["$status", "pending"]},
+            {"$gt": ["$earned_at", cutoff]}]}),
+        "available": _sum_when({"$and": [
+            {"$eq": ["$status", "pending"]},
+            {"$lte": ["$earned_at", cutoff]}]}),
+        "paid": _sum_when({"$eq": ["$status", "paid"]}),
+        "clawed_back": _sum_when({"$eq": ["$status", "clawed_back"]}),
+    }
+
+
+def _paying_stages(match: dict, person_key) -> list:
+    """The paying-referral count as aggregation stages: the best
+    (largest) net per referred person under `match`, then a count of
+    the persons whose best net is positive. `person_key` is the
+    per-person $group _id — "$referred_id" when the match already
+    pins one (referrer, product), or a key carrying them when the
+    caller regroups per site afterwards."""
+    return [
+        {"$match": match},
+        {"$group": {"_id": person_key,
+                    "max_net": {"$max": {"$subtract": [
+                        "$revenue_cents",
+                        {"$ifNull": ["$refunded_cents", 0]}]}}}},
+        {"$group": {"_id": None,
+                    "n": {"$sum": {"$cond": [
+                        {"$gt": ["$max_net", 0]}, 1, 0]}}}},
+    ]
+
+
 async def paying_referral_count(referrer_id: str, product: str) -> int:
     """Distinct referred persons with real money on THIS site: at
     least one earning here that still stands (not clawed back) with
     net revenue above zero. Read from the earnings ledger, never a
     counter that could drift — TC's rule, per site."""
-    ids = set()
-    async for e in db.referral_earnings.find(
-            {"referrer_id": referrer_id, "product": product,
-             "status": {"$in": ["pending", "paid", "not_eligible"]}},
-            {"referred_id": 1, "revenue_cents": 1, "refunded_cents": 1}):
-        if e["revenue_cents"] - e.get("refunded_cents", 0) > 0:
-            ids.add(e["referred_id"])
-    return len(ids)
+    rows = await db.referral_earnings.aggregate(_paying_stages(
+        {"referrer_id": referrer_id, "product": product,
+         "status": {"$in": ["pending", "paid", "not_eligible"]}},
+        "$referred_id")).to_list(1)
+    return int(rows[0]["n"]) if rows else 0
 
 
-async def site_summary(referrer_id: str, product: str,
-                       now: datetime = None) -> dict:
-    """TC's summary buckets for one site pot."""
-    now = now or _now()
-    cutoff = _iso(now - timedelta(days=CLEARING_DAYS))
+async def _site_parts(referrer_id: str, product: str, cutoff: str):
+    """(totals, pending_adjustments, paying_count) for one site pot,
+    from grouped aggregations — one small result row per query, so
+    the read is bounded by the answer, not by the ledger."""
     totals = {"pending": 0, "available": 0, "paid": 0, "clawed_back": 0}
-    async for e in db.referral_earnings.find(
-            {"referrer_id": referrer_id, "product": product}):
-        if e["status"] == "pending":
-            bucket = "available" if e["earned_at"] <= cutoff else "pending"
-            totals[bucket] += e["share_cents"]
-        elif e["status"] in ("paid", "clawed_back"):
-            totals[e["status"]] += e["share_cents"]
-    adjust = 0
-    async for a in db.referral_adjustments.find(
-            {"referrer_id": referrer_id, "product": product,
-             "status": "pending"}):
-        adjust += a["cents"]
-    frozen = await is_frozen(referrer_id)
+    rows = await db.referral_earnings.aggregate([
+        {"$match": {"referrer_id": referrer_id, "product": product}},
+        {"$group": {"_id": None, **_bucket_sums(cutoff)}},
+    ]).to_list(1)
+    if rows:
+        for k in totals:
+            totals[k] = rows[0].get(k) or 0
+    adj = await db.referral_adjustments.aggregate([
+        {"$match": {"referrer_id": referrer_id, "product": product,
+                    "status": "pending"}},
+        {"$group": {"_id": None, "total": {"$sum": "$cents"}}},
+    ]).to_list(1)
+    adjust = (adj[0].get("total") or 0) if adj else 0
     paying = await paying_referral_count(referrer_id, product)
+    return totals, adjust, paying
+
+
+def _summary_dict(product: str, totals: dict, adjust: int,
+                  frozen: bool, paying: int) -> dict:
+    """The site-summary shape, assembled from precomputed parts.
+    site_summary and the empire-wide admin read share this so the
+    two paths can never drift apart."""
     locked = paying < UNLOCK_REFERRALS
     cleared = max(0, totals["available"] + adjust)
     return {
@@ -605,6 +648,73 @@ async def site_summary(referrer_id: str, product: str,
         "frozen": frozen,
         "clearing_days": CLEARING_DAYS,
     }
+
+
+async def site_summary(referrer_id: str, product: str,
+                       now: datetime = None) -> dict:
+    """TC's summary buckets for one site pot."""
+    now = now or _now()
+    cutoff = _iso(now - timedelta(days=CLEARING_DAYS))
+    totals, adjust, paying = await _site_parts(referrer_id, product,
+                                               cutoff)
+    frozen = await is_frozen(referrer_id)
+    return _summary_dict(product, totals, adjust, frozen, paying)
+
+
+async def empire_buckets(now: datetime = None):
+    """Every site pot's raw parts for the whole empire, from grouped
+    aggregations — the read behind the admin balances page, whose
+    cost used to be O(the entire ledger) in Python per page load
+    (load test 2026-10-26 §5.1: 4.5 s at 6,445 earnings).
+
+    Returns (earn_totals, adjustments, paying, att_products, frozen):
+      earn_totals / adjustments / paying are keyed by
+      (referrer_id, product); att_products is the set of
+      (referrer_id, product) pairs holding an attribution;
+      frozen is the set of referrer ids with an open dispute
+      anywhere (the review-flag half of is_frozen is per-person and
+      stays with the caller, which holds the person records).
+    Site inclusion still follows empire_summary's rule — a product
+    appears for a referrer when they have earnings or an attribution
+    there — so the adjustments/paying maps only ever supply values
+    for included sites, exactly as the per-site reads did."""
+    now = now or _now()
+    cutoff = _iso(now - timedelta(days=CLEARING_DAYS))
+    earn_totals = {}
+    async for row in db.referral_earnings.aggregate([
+            {"$group": {"_id": {"r": "$referrer_id", "p": "$product"},
+                        **_bucket_sums(cutoff)}}]):
+        totals = {"pending": 0, "available": 0, "paid": 0,
+                  "clawed_back": 0}
+        for k in totals:
+            totals[k] = row.get(k) or 0
+        earn_totals[(row["_id"]["r"], row["_id"]["p"])] = totals
+    adjustments = {}
+    async for row in db.referral_adjustments.aggregate([
+            {"$match": {"status": "pending"}},
+            {"$group": {"_id": {"r": "$referrer_id", "p": "$product"},
+                        "total": {"$sum": "$cents"}}}]):
+        adjustments[(row["_id"]["r"], row["_id"]["p"])] = \
+            row.get("total") or 0
+    paying = {}
+    stages = _paying_stages(
+        {"status": {"$in": ["pending", "paid", "not_eligible"]}},
+        {"r": "$referrer_id", "p": "$product", "d": "$referred_id"})
+    # Replace the bare-count tail with a per-site regroup.
+    stages[-1] = {"$group": {
+        "_id": {"r": "$_id.r", "p": "$_id.p"},
+        "n": {"$sum": {"$cond": [{"$gt": ["$max_net", 0]}, 1, 0]}}}}
+    async for row in db.referral_earnings.aggregate(stages):
+        paying[(row["_id"]["r"], row["_id"]["p"])] = int(row["n"])
+    att_products = set()
+    async for row in db.referral_attributions.aggregate([
+            {"$match": {"referrer_id": {"$ne": None}}},
+            {"$group": {"_id": {"r": "$referrer_id",
+                                "p": "$product"}}}]):
+        att_products.add((row["_id"]["r"], row["_id"]["p"]))
+    frozen = set(await db.referral_disputes.distinct(
+        "referrer_id", {"status": "open"}))
+    return earn_totals, adjustments, paying, att_products, frozen
 
 
 async def empire_summary(person: dict, now: datetime = None) -> dict:

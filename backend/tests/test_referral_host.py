@@ -90,6 +90,89 @@ def _apply_set(doc, changes):
             doc[k] = v
 
 
+def _truthy(v):
+    """Mongo expression truthiness: false/null/0/"" are false."""
+    return v is not None and v is not False and v != 0 and v != ""
+
+
+def _eval_expr(expr, doc):
+    """Evaluate the small Mongo expression language the referral
+    summary pipelines use: field refs, literals, $cond/$and/$or,
+    comparisons, $subtract, $ifNull. Plain dicts are document
+    literals (e.g. a $group key of {"r": "$referrer_id"})."""
+    if isinstance(expr, str):
+        return _get_path(doc, expr[1:]) if expr.startswith("$") else expr
+    if isinstance(expr, list):
+        return [_eval_expr(e, doc) for e in expr]
+    if isinstance(expr, dict):
+        if len(expr) == 1:
+            op, arg = next(iter(expr.items()))
+            if op == "$cond":
+                if isinstance(arg, dict):
+                    c, t, e = arg["if"], arg["then"], arg["else"]
+                else:
+                    c, t, e = arg
+                return (_eval_expr(t, doc) if _truthy(_eval_expr(c, doc))
+                        else _eval_expr(e, doc))
+            if op in ("$and", "$or"):
+                vals = [_truthy(_eval_expr(a, doc)) for a in arg]
+                return all(vals) if op == "$and" else any(vals)
+            if op in ("$eq", "$ne", "$gt", "$gte", "$lt", "$lte"):
+                a, b = (_eval_expr(x, doc) for x in arg)
+                if op == "$eq":
+                    return a == b
+                if op == "$ne":
+                    return a != b
+                if a is None or b is None:
+                    return False
+                return {"$gt": a > b, "$gte": a >= b,
+                        "$lt": a < b, "$lte": a <= b}[op]
+            if op == "$subtract":
+                a, b = (_eval_expr(x, doc) for x in arg)
+                return None if a is None or b is None else a - b
+            if op == "$ifNull":
+                v = _eval_expr(arg[0], doc)
+                return v if v is not None else _eval_expr(arg[1], doc)
+        return {k: _eval_expr(v, doc) for k, v in expr.items()}
+    return expr
+
+
+def _freeze_key(v):
+    if isinstance(v, dict):
+        return tuple(sorted((k, _freeze_key(x)) for k, x in v.items()))
+    if isinstance(v, list):
+        return tuple(_freeze_key(x) for x in v)
+    return v
+
+
+def _aggregate_group(docs, spec):
+    groups = {}
+    order = []
+    acc_fields = [f for f in spec if f != "_id"]
+    for d in docs:
+        key = _eval_expr(spec.get("_id"), d)
+        fkey = _freeze_key(key)
+        if fkey not in groups:
+            groups[fkey] = {"_id": deepcopy(key)}
+            for f in acc_fields:
+                op = next(iter(spec[f]))
+                groups[fkey][f] = 0 if op == "$sum" else None
+            order.append(fkey)
+        g = groups[fkey]
+        for f in acc_fields:
+            op, expr = next(iter(spec[f].items()))
+            v = _eval_expr(expr, d)
+            if op == "$sum":
+                if isinstance(v, (int, float)) and not isinstance(v, bool):
+                    g[f] += v
+            elif op == "$max":
+                if v is not None and (g[f] is None or v > g[f]):
+                    g[f] = v
+            else:
+                raise ValueError(f"fake aggregate: bad accumulator {op}")
+    return [groups[k] for k in order]
+
+
 class _Result:
     def __init__(self, matched, modified=None):
         self.matched_count = matched
@@ -144,6 +227,29 @@ class _FakeCollection:
 
     def find(self, q=None, projection=None):
         return _Cursor([d for d in self.docs if _matches(d, q)])
+
+    def aggregate(self, pipeline):
+        docs = deepcopy(self.docs)
+        for stage in pipeline:
+            op, spec = next(iter(stage.items()))
+            if op == "$match":
+                docs = [d for d in docs if _matches(d, spec)]
+            elif op == "$group":
+                docs = _aggregate_group(docs, spec)
+            elif op == "$sort":
+                for key, direction in reversed(list(spec.items())):
+                    docs = sorted(
+                        docs,
+                        key=lambda d: (_get_path(d, key) is None,
+                                       _get_path(d, key)),
+                        reverse=direction < 0)
+            elif op == "$skip":
+                docs = docs[spec:]
+            elif op == "$limit":
+                docs = docs[:spec]
+            else:
+                raise ValueError(f"fake aggregate: unsupported {op}")
+        return _Cursor(docs)
 
     async def insert_one(self, doc):
         for key in _UNIQUE.get(self.name, []):

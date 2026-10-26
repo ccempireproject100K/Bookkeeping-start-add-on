@@ -1,0 +1,1702 @@
+{
+ "balances": [
+  {
+   "eligible": true,
+   "email": "whale@oracle.example",
+   "empire_id": "whale",
+   "frozen": false,
+   "name": null,
+   "payable": 419425,
+   "payout_preference": "bank_transfer",
+   "sites": {
+    "trade_circle": {
+     "adjustments": 0,
+     "available": 419425,
+     "clawed_back": 0,
+     "clearing_days": 60,
+     "earned_cents": 536350,
+     "frozen": false,
+     "locked": false,
+     "locked_cents": 0,
+     "paid": 0,
+     "payable": 419425,
+     "paying_referrals": 250,
+     "pending": 116925,
+     "product": "trade_circle",
+     "unlock_at": 3
+    }
+   },
+   "under_review": false
+  },
+  {
+   "eligible": true,
+   "email": "mixed@oracle.example",
+   "empire_id": "mixed",
+   "frozen": false,
+   "name": null,
+   "payable": 8000,
+   "payout_preference": "stripe",
+   "sites": {
+    "books": {
+     "adjustments": 0,
+     "available": 0,
+     "clawed_back": 0,
+     "clearing_days": 60,
+     "earned_cents": 8700,
+     "frozen": false,
+     "locked": false,
+     "locked_cents": 0,
+     "paid": 8225,
+     "payable": 0,
+     "paying_referrals": 7,
+     "pending": 475,
+     "product": "books",
+     "unlock_at": 3
+    },
+    "momo": {
+     "adjustments": 0,
+     "available": 8000,
+     "clawed_back": 0,
+     "clearing_days": 60,
+     "earned_cents": 8250,
+     "frozen": false,
+     "locked": false,
+     "locked_cents": 0,
+     "paid": 0,
+     "payable": 8000,
+     "paying_referrals": 3,
+     "pending": 250,
+     "product": "momo",
+     "unlock_at": 3
+    }
+   },
+   "under_review": false
+  },
+  {
+   "eligible": true,
+   "email": "boundary_b@oracle.example",
+   "empire_id": "boundary_b",
+   "frozen": false,
+   "name": null,
+   "payable": 750,
+   "payout_preference": "stripe",
+   "sites": {
+    "momo": {
+     "adjustments": 0,
+     "available": 750,
+     "clawed_back": 0,
+     "clearing_days": 60,
+     "earned_cents": 750,
+     "frozen": false,
+     "locked": false,
+     "locked_cents": 0,
+     "paid": 0,
+     "payable": 750,
+     "paying_referrals": 3,
+     "pending": 0,
+     "product": "momo",
+     "unlock_at": 3
+    },
+    "trade_circle": {
+     "adjustments": 0,
+     "available": 150,
+     "clawed_back": 0,
+     "clearing_days": 60,
+     "earned_cents": 150,
+     "frozen": false,
+     "locked": true,
+     "locked_cents": 150,
+     "paid": 0,
+     "payable": 0,
+     "paying_referrals": 2,
+     "pending": 0,
+     "product": "trade_circle",
+     "unlock_at": 3
+    }
+   },
+   "under_review": false
+  },
+  {
+   "eligible": true,
+   "email": "boundary_a@oracle.example",
+   "empire_id": "boundary_a",
+   "frozen": false,
+   "name": null,
+   "payable": 675,
+   "payout_preference": "paper_check",
+   "sites": {
+    "books": {
+     "adjustments": 0,
+     "available": 950,
+     "clawed_back": 0,
+     "clearing_days": 60,
+     "earned_cents": 950,
+     "frozen": false,
+     "locked": true,
+     "locked_cents": 950,
+     "paid": 0,
+     "payable": 0,
+     "paying_referrals": 2,
+     "pending": 0,
+     "product": "books",
+     "unlock_at": 3
+    },
+    "trade_circle": {
+     "adjustments": 0,
+     "available": 675,
+     "clawed_back": 0,
+     "clearing_days": 60,
+     "earned_cents": 675,
+     "frozen": false,
+     "locked": false,
+     "locked_cents": 0,
+     "paid": 0,
+     "payable": 675,
+     "paying_referrals": 3,
+     "pending": 0,
+     "product": "trade_circle",
+     "unlock_at": 3
+    }
+   },
+   "under_review": false
+  },
+  {
+   "eligible": true,
+   "email": "att_only@oracle.example",
+   "empire_id": "att_only",
+   "frozen": false,
+   "name": null,
+   "payable": 0,
+   "payout_preference": "stripe",
+   "sites": {
+    "books": {
+     "adjustments": 0,
+     "available": 0,
+     "clawed_back": 0,
+     "clearing_days": 60,
+     "earned_cents": 0,
+     "frozen": false,
+     "locked": true,
+     "locked_cents": 0,
+     "paid": 0,
+     "payable": 0,
+     "paying_referrals": 0,
+     "pending": 0,
+     "product": "books",
+     "unlock_at": 3
+    },
+    "momo": {
+     "adjustments": 0,
+     "available": 0,
+     "clawed_back": 0,
+     "clearing_days": 60,
+     "earned_cents": 0,
+     "frozen": false,
+     "locked": true,
+     "locked_cents": 0,
+     "paid": 0,
+     "payable": 0,
+     "paying_referrals": 0,
+     "pending": 0,
+     "product": "momo",
+     "unlock_at": 3
+    }
+   },
+   "under_review": false
+  },
+  {
+   "eligible": true,
+   "email": "disp_lost@oracle.example",
+   "empire_id": "disp_lost",
+   "frozen": false,
+   "name": null,
+   "payable": 0,
+   "payout_preference": "stripe",
+   "sites": {
+    "momo": {
+     "adjustments": 0,
+     "available": 0,
+     "clawed_back": 0,
+     "clearing_days": 60,
+     "earned_cents": 250,
+     "frozen": false,
+     "locked": true,
+     "locked_cents": 0,
+     "paid": 0,
+     "payable": 0,
+     "paying_referrals": 1,
+     "pending": 250,
+     "product": "momo",
+     "unlock_at": 3
+    },
+    "trade_circle": {
+     "adjustments": 0,
+     "available": 0,
+     "clawed_back": 450,
+     "clearing_days": 60,
+     "earned_cents": 0,
+     "frozen": false,
+     "locked": true,
+     "locked_cents": 0,
+     "paid": 0,
+     "payable": 0,
+     "paying_referrals": 0,
+     "pending": 0,
+     "product": "trade_circle",
+     "unlock_at": 3
+    }
+   },
+   "under_review": false
+  },
+  {
+   "eligible": false,
+   "email": "disp_open@oracle.example",
+   "empire_id": "disp_open",
+   "frozen": true,
+   "name": null,
+   "payable": 0,
+   "payout_preference": "stripe",
+   "sites": {
+    "books": {
+     "adjustments": 0,
+     "available": 0,
+     "clawed_back": 475,
+     "clearing_days": 60,
+     "earned_cents": 0,
+     "frozen": true,
+     "locked": true,
+     "locked_cents": 0,
+     "paid": 0,
+     "payable": 0,
+     "paying_referrals": 0,
+     "pending": 0,
+     "product": "books",
+     "unlock_at": 3
+    },
+    "momo": {
+     "adjustments": 0,
+     "available": 0,
+     "clawed_back": 4000,
+     "clearing_days": 60,
+     "earned_cents": 0,
+     "frozen": true,
+     "locked": true,
+     "locked_cents": 0,
+     "paid": 0,
+     "payable": 0,
+     "paying_referrals": 0,
+     "pending": 0,
+     "product": "momo",
+     "unlock_at": 3
+    },
+    "trade_circle": {
+     "adjustments": -675,
+     "available": 0,
+     "clawed_back": 675,
+     "clearing_days": 60,
+     "earned_cents": 225,
+     "frozen": true,
+     "locked": true,
+     "locked_cents": 0,
+     "paid": 0,
+     "payable": 0,
+     "paying_referrals": 1,
+     "pending": 225,
+     "product": "trade_circle",
+     "unlock_at": 3
+    }
+   },
+   "under_review": false
+  },
+  {
+   "eligible": true,
+   "email": "disp_won@oracle.example",
+   "empire_id": "disp_won",
+   "frozen": false,
+   "name": null,
+   "payable": 0,
+   "payout_preference": "stripe",
+   "sites": {
+    "books": {
+     "adjustments": 0,
+     "available": 0,
+     "clawed_back": 0,
+     "clearing_days": 60,
+     "earned_cents": 475,
+     "frozen": false,
+     "locked": true,
+     "locked_cents": 0,
+     "paid": 0,
+     "payable": 0,
+     "paying_referrals": 1,
+     "pending": 475,
+     "product": "books",
+     "unlock_at": 3
+    },
+    "trade_circle": {
+     "adjustments": 0,
+     "available": 0,
+     "clawed_back": 0,
+     "clearing_days": 60,
+     "earned_cents": 225,
+     "frozen": false,
+     "locked": false,
+     "locked_cents": 0,
+     "paid": 225,
+     "payable": 0,
+     "paying_referrals": 3,
+     "pending": 0,
+     "product": "trade_circle",
+     "unlock_at": 3
+    }
+   },
+   "under_review": false
+  },
+  {
+   "eligible": false,
+   "email": "notelig@oracle.example",
+   "empire_id": "notelig",
+   "frozen": false,
+   "name": null,
+   "payable": 0,
+   "payout_preference": "stripe",
+   "sites": {
+    "trade_circle": {
+     "adjustments": 0,
+     "available": 0,
+     "clawed_back": 0,
+     "clearing_days": 60,
+     "earned_cents": 0,
+     "frozen": false,
+     "locked": false,
+     "locked_cents": 0,
+     "paid": 0,
+     "payable": 0,
+     "paying_referrals": 6,
+     "pending": 0,
+     "product": "trade_circle",
+     "unlock_at": 3
+    }
+   },
+   "under_review": false
+  },
+  {
+   "eligible": false,
+   "email": "review@oracle.example",
+   "empire_id": "review",
+   "frozen": true,
+   "name": null,
+   "payable": 0,
+   "payout_preference": "stripe",
+   "sites": {
+    "trade_circle": {
+     "adjustments": 0,
+     "available": 675,
+     "clawed_back": 0,
+     "clearing_days": 60,
+     "earned_cents": 675,
+     "frozen": true,
+     "locked": false,
+     "locked_cents": 0,
+     "paid": 0,
+     "payable": 0,
+     "paying_referrals": 3,
+     "pending": 0,
+     "product": "trade_circle",
+     "unlock_at": 3
+    }
+   },
+   "under_review": true
+  },
+  {
+   "eligible": true,
+   "email": "window@oracle.example",
+   "empire_id": "window",
+   "frozen": false,
+   "name": null,
+   "payable": 0,
+   "payout_preference": "stripe",
+   "sites": {
+    "trade_circle": {
+     "adjustments": 0,
+     "available": 150,
+     "clawed_back": 0,
+     "clearing_days": 60,
+     "earned_cents": 150,
+     "frozen": false,
+     "locked": true,
+     "locked_cents": 150,
+     "paid": 0,
+     "payable": 0,
+     "paying_referrals": 2,
+     "pending": 0,
+     "product": "trade_circle",
+     "unlock_at": 3
+    }
+   },
+   "under_review": false
+  }
+ ],
+ "empire": {
+  "att_only": {
+   "eligible": true,
+   "empire_id": "att_only",
+   "frozen": false,
+   "paper_check_fee_cents": 200,
+   "payable": 0,
+   "payout_preference": "stripe",
+   "payouts": [],
+   "sites": {
+    "books": {
+     "adjustments": 0,
+     "available": 0,
+     "clawed_back": 0,
+     "clearing_days": 60,
+     "earned_cents": 0,
+     "frozen": false,
+     "locked": true,
+     "locked_cents": 0,
+     "paid": 0,
+     "payable": 0,
+     "paying_referrals": 0,
+     "pending": 0,
+     "product": "books",
+     "unlock_at": 3
+    },
+    "momo": {
+     "adjustments": 0,
+     "available": 0,
+     "clawed_back": 0,
+     "clearing_days": 60,
+     "earned_cents": 0,
+     "frozen": false,
+     "locked": true,
+     "locked_cents": 0,
+     "paid": 0,
+     "payable": 0,
+     "paying_referrals": 0,
+     "pending": 0,
+     "product": "momo",
+     "unlock_at": 3
+    }
+   },
+   "terms": {
+    "clearing_days": 60,
+    "months": 6,
+    "review_chargebacks": 3,
+    "share_percent": 25,
+    "unlock_is_per_site": true,
+    "unlock_referrals": 3
+   },
+   "totals": {
+    "available": 0,
+    "clawed_back": 0,
+    "earned_cents": 0,
+    "paid": 0,
+    "payable": 0,
+    "pending": 0
+   },
+   "under_review": false
+  },
+  "boundary_a": {
+   "eligible": true,
+   "empire_id": "boundary_a",
+   "frozen": false,
+   "paper_check_fee_cents": 200,
+   "payable": 675,
+   "payout_preference": "paper_check",
+   "payouts": [],
+   "sites": {
+    "books": {
+     "adjustments": 0,
+     "available": 950,
+     "clawed_back": 0,
+     "clearing_days": 60,
+     "earned_cents": 950,
+     "frozen": false,
+     "locked": true,
+     "locked_cents": 950,
+     "paid": 0,
+     "payable": 0,
+     "paying_referrals": 2,
+     "pending": 0,
+     "product": "books",
+     "unlock_at": 3
+    },
+    "trade_circle": {
+     "adjustments": 0,
+     "available": 675,
+     "clawed_back": 0,
+     "clearing_days": 60,
+     "earned_cents": 675,
+     "frozen": false,
+     "locked": false,
+     "locked_cents": 0,
+     "paid": 0,
+     "payable": 675,
+     "paying_referrals": 3,
+     "pending": 0,
+     "product": "trade_circle",
+     "unlock_at": 3
+    }
+   },
+   "terms": {
+    "clearing_days": 60,
+    "months": 6,
+    "review_chargebacks": 3,
+    "share_percent": 25,
+    "unlock_is_per_site": true,
+    "unlock_referrals": 3
+   },
+   "totals": {
+    "available": 1625,
+    "clawed_back": 0,
+    "earned_cents": 1625,
+    "paid": 0,
+    "payable": 675,
+    "pending": 0
+   },
+   "under_review": false
+  },
+  "boundary_b": {
+   "eligible": true,
+   "empire_id": "boundary_b",
+   "frozen": false,
+   "paper_check_fee_cents": 200,
+   "payable": 750,
+   "payout_preference": "stripe",
+   "payouts": [],
+   "sites": {
+    "momo": {
+     "adjustments": 0,
+     "available": 750,
+     "clawed_back": 0,
+     "clearing_days": 60,
+     "earned_cents": 750,
+     "frozen": false,
+     "locked": false,
+     "locked_cents": 0,
+     "paid": 0,
+     "payable": 750,
+     "paying_referrals": 3,
+     "pending": 0,
+     "product": "momo",
+     "unlock_at": 3
+    },
+    "trade_circle": {
+     "adjustments": 0,
+     "available": 150,
+     "clawed_back": 0,
+     "clearing_days": 60,
+     "earned_cents": 150,
+     "frozen": false,
+     "locked": true,
+     "locked_cents": 150,
+     "paid": 0,
+     "payable": 0,
+     "paying_referrals": 2,
+     "pending": 0,
+     "product": "trade_circle",
+     "unlock_at": 3
+    }
+   },
+   "terms": {
+    "clearing_days": 60,
+    "months": 6,
+    "review_chargebacks": 3,
+    "share_percent": 25,
+    "unlock_is_per_site": true,
+    "unlock_referrals": 3
+   },
+   "totals": {
+    "available": 900,
+    "clawed_back": 0,
+    "earned_cents": 900,
+    "paid": 0,
+    "payable": 750,
+    "pending": 0
+   },
+   "under_review": false
+  },
+  "disp_lost": {
+   "eligible": true,
+   "empire_id": "disp_lost",
+   "frozen": false,
+   "paper_check_fee_cents": 200,
+   "payable": 0,
+   "payout_preference": "stripe",
+   "payouts": [],
+   "sites": {
+    "momo": {
+     "adjustments": 0,
+     "available": 0,
+     "clawed_back": 0,
+     "clearing_days": 60,
+     "earned_cents": 250,
+     "frozen": false,
+     "locked": true,
+     "locked_cents": 0,
+     "paid": 0,
+     "payable": 0,
+     "paying_referrals": 1,
+     "pending": 250,
+     "product": "momo",
+     "unlock_at": 3
+    },
+    "trade_circle": {
+     "adjustments": 0,
+     "available": 0,
+     "clawed_back": 450,
+     "clearing_days": 60,
+     "earned_cents": 0,
+     "frozen": false,
+     "locked": true,
+     "locked_cents": 0,
+     "paid": 0,
+     "payable": 0,
+     "paying_referrals": 0,
+     "pending": 0,
+     "product": "trade_circle",
+     "unlock_at": 3
+    }
+   },
+   "terms": {
+    "clearing_days": 60,
+    "months": 6,
+    "review_chargebacks": 3,
+    "share_percent": 25,
+    "unlock_is_per_site": true,
+    "unlock_referrals": 3
+   },
+   "totals": {
+    "available": 0,
+    "clawed_back": 450,
+    "earned_cents": 250,
+    "paid": 0,
+    "payable": 0,
+    "pending": 250
+   },
+   "under_review": false
+  },
+  "disp_open": {
+   "eligible": false,
+   "empire_id": "disp_open",
+   "frozen": true,
+   "paper_check_fee_cents": 200,
+   "payable": 0,
+   "payout_preference": "stripe",
+   "payouts": [
+    {
+     "currency": "usd",
+     "fee_cents": 0,
+     "gross_cents": 675,
+     "net_cents": 675,
+     "product": "trade_circle",
+     "rail": "manual",
+     "reference": "oracle"
+    }
+   ],
+   "sites": {
+    "books": {
+     "adjustments": 0,
+     "available": 0,
+     "clawed_back": 475,
+     "clearing_days": 60,
+     "earned_cents": 0,
+     "frozen": true,
+     "locked": true,
+     "locked_cents": 0,
+     "paid": 0,
+     "payable": 0,
+     "paying_referrals": 0,
+     "pending": 0,
+     "product": "books",
+     "unlock_at": 3
+    },
+    "momo": {
+     "adjustments": 0,
+     "available": 0,
+     "clawed_back": 4000,
+     "clearing_days": 60,
+     "earned_cents": 0,
+     "frozen": true,
+     "locked": true,
+     "locked_cents": 0,
+     "paid": 0,
+     "payable": 0,
+     "paying_referrals": 0,
+     "pending": 0,
+     "product": "momo",
+     "unlock_at": 3
+    },
+    "trade_circle": {
+     "adjustments": -675,
+     "available": 0,
+     "clawed_back": 675,
+     "clearing_days": 60,
+     "earned_cents": 225,
+     "frozen": true,
+     "locked": true,
+     "locked_cents": 0,
+     "paid": 0,
+     "payable": 0,
+     "paying_referrals": 1,
+     "pending": 225,
+     "product": "trade_circle",
+     "unlock_at": 3
+    }
+   },
+   "terms": {
+    "clearing_days": 60,
+    "months": 6,
+    "review_chargebacks": 3,
+    "share_percent": 25,
+    "unlock_is_per_site": true,
+    "unlock_referrals": 3
+   },
+   "totals": {
+    "available": 0,
+    "clawed_back": 5150,
+    "earned_cents": 225,
+    "paid": 0,
+    "payable": 0,
+    "pending": 225
+   },
+   "under_review": false
+  },
+  "disp_won": {
+   "eligible": true,
+   "empire_id": "disp_won",
+   "frozen": false,
+   "paper_check_fee_cents": 200,
+   "payable": 0,
+   "payout_preference": "stripe",
+   "payouts": [
+    {
+     "currency": "usd",
+     "fee_cents": 0,
+     "gross_cents": 225,
+     "net_cents": 225,
+     "product": "trade_circle",
+     "rail": "manual",
+     "reference": "oracle"
+    }
+   ],
+   "sites": {
+    "books": {
+     "adjustments": 0,
+     "available": 0,
+     "clawed_back": 0,
+     "clearing_days": 60,
+     "earned_cents": 475,
+     "frozen": false,
+     "locked": true,
+     "locked_cents": 0,
+     "paid": 0,
+     "payable": 0,
+     "paying_referrals": 1,
+     "pending": 475,
+     "product": "books",
+     "unlock_at": 3
+    },
+    "trade_circle": {
+     "adjustments": 0,
+     "available": 0,
+     "clawed_back": 0,
+     "clearing_days": 60,
+     "earned_cents": 225,
+     "frozen": false,
+     "locked": false,
+     "locked_cents": 0,
+     "paid": 225,
+     "payable": 0,
+     "paying_referrals": 3,
+     "pending": 0,
+     "product": "trade_circle",
+     "unlock_at": 3
+    }
+   },
+   "terms": {
+    "clearing_days": 60,
+    "months": 6,
+    "review_chargebacks": 3,
+    "share_percent": 25,
+    "unlock_is_per_site": true,
+    "unlock_referrals": 3
+   },
+   "totals": {
+    "available": 0,
+    "clawed_back": 0,
+    "earned_cents": 700,
+    "paid": 225,
+    "payable": 0,
+    "pending": 475
+   },
+   "under_review": false
+  },
+  "mixed": {
+   "eligible": true,
+   "empire_id": "mixed",
+   "frozen": false,
+   "paper_check_fee_cents": 200,
+   "payable": 8000,
+   "payout_preference": "stripe",
+   "payouts": [
+    {
+     "currency": "usd",
+     "fee_cents": 0,
+     "gross_cents": 1725,
+     "net_cents": 1725,
+     "product": "books",
+     "rail": "manual",
+     "reference": "oracle p1"
+    },
+    {
+     "currency": "usd",
+     "fee_cents": 0,
+     "gross_cents": 6500,
+     "net_cents": 6500,
+     "product": "books",
+     "rail": "manual",
+     "reference": "oracle p2"
+    }
+   ],
+   "sites": {
+    "books": {
+     "adjustments": 0,
+     "available": 0,
+     "clawed_back": 0,
+     "clearing_days": 60,
+     "earned_cents": 8700,
+     "frozen": false,
+     "locked": false,
+     "locked_cents": 0,
+     "paid": 8225,
+     "payable": 0,
+     "paying_referrals": 7,
+     "pending": 475,
+     "product": "books",
+     "unlock_at": 3
+    },
+    "momo": {
+     "adjustments": 0,
+     "available": 8000,
+     "clawed_back": 0,
+     "clearing_days": 60,
+     "earned_cents": 8250,
+     "frozen": false,
+     "locked": false,
+     "locked_cents": 0,
+     "paid": 0,
+     "payable": 8000,
+     "paying_referrals": 3,
+     "pending": 250,
+     "product": "momo",
+     "unlock_at": 3
+    }
+   },
+   "terms": {
+    "clearing_days": 60,
+    "months": 6,
+    "review_chargebacks": 3,
+    "share_percent": 25,
+    "unlock_is_per_site": true,
+    "unlock_referrals": 3
+   },
+   "totals": {
+    "available": 8000,
+    "clawed_back": 0,
+    "earned_cents": 16950,
+    "paid": 8225,
+    "payable": 8000,
+    "pending": 725
+   },
+   "under_review": false
+  },
+  "notelig": {
+   "eligible": false,
+   "empire_id": "notelig",
+   "frozen": false,
+   "paper_check_fee_cents": 200,
+   "payable": 0,
+   "payout_preference": "stripe",
+   "payouts": [],
+   "sites": {
+    "trade_circle": {
+     "adjustments": 0,
+     "available": 0,
+     "clawed_back": 0,
+     "clearing_days": 60,
+     "earned_cents": 0,
+     "frozen": false,
+     "locked": false,
+     "locked_cents": 0,
+     "paid": 0,
+     "payable": 0,
+     "paying_referrals": 6,
+     "pending": 0,
+     "product": "trade_circle",
+     "unlock_at": 3
+    }
+   },
+   "terms": {
+    "clearing_days": 60,
+    "months": 6,
+    "review_chargebacks": 3,
+    "share_percent": 25,
+    "unlock_is_per_site": true,
+    "unlock_referrals": 3
+   },
+   "totals": {
+    "available": 0,
+    "clawed_back": 0,
+    "earned_cents": 0,
+    "paid": 0,
+    "payable": 0,
+    "pending": 0
+   },
+   "under_review": false
+  },
+  "review": {
+   "eligible": false,
+   "empire_id": "review",
+   "frozen": true,
+   "paper_check_fee_cents": 200,
+   "payable": 0,
+   "payout_preference": "stripe",
+   "payouts": [],
+   "sites": {
+    "trade_circle": {
+     "adjustments": 0,
+     "available": 675,
+     "clawed_back": 0,
+     "clearing_days": 60,
+     "earned_cents": 675,
+     "frozen": true,
+     "locked": false,
+     "locked_cents": 0,
+     "paid": 0,
+     "payable": 0,
+     "paying_referrals": 3,
+     "pending": 0,
+     "product": "trade_circle",
+     "unlock_at": 3
+    }
+   },
+   "terms": {
+    "clearing_days": 60,
+    "months": 6,
+    "review_chargebacks": 3,
+    "share_percent": 25,
+    "unlock_is_per_site": true,
+    "unlock_referrals": 3
+   },
+   "totals": {
+    "available": 675,
+    "clawed_back": 0,
+    "earned_cents": 675,
+    "paid": 0,
+    "payable": 0,
+    "pending": 0
+   },
+   "under_review": true
+  },
+  "whale": {
+   "eligible": true,
+   "empire_id": "whale",
+   "frozen": false,
+   "paper_check_fee_cents": 200,
+   "payable": 419425,
+   "payout_preference": "bank_transfer",
+   "payouts": [],
+   "sites": {
+    "trade_circle": {
+     "adjustments": 0,
+     "available": 419425,
+     "clawed_back": 0,
+     "clearing_days": 60,
+     "earned_cents": 536350,
+     "frozen": false,
+     "locked": false,
+     "locked_cents": 0,
+     "paid": 0,
+     "payable": 419425,
+     "paying_referrals": 250,
+     "pending": 116925,
+     "product": "trade_circle",
+     "unlock_at": 3
+    }
+   },
+   "terms": {
+    "clearing_days": 60,
+    "months": 6,
+    "review_chargebacks": 3,
+    "share_percent": 25,
+    "unlock_is_per_site": true,
+    "unlock_referrals": 3
+   },
+   "totals": {
+    "available": 419425,
+    "clawed_back": 0,
+    "earned_cents": 536350,
+    "paid": 0,
+    "payable": 419425,
+    "pending": 116925
+   },
+   "under_review": false
+  },
+  "window": {
+   "eligible": true,
+   "empire_id": "window",
+   "frozen": false,
+   "paper_check_fee_cents": 200,
+   "payable": 0,
+   "payout_preference": "stripe",
+   "payouts": [],
+   "sites": {
+    "trade_circle": {
+     "adjustments": 0,
+     "available": 150,
+     "clawed_back": 0,
+     "clearing_days": 60,
+     "earned_cents": 150,
+     "frozen": false,
+     "locked": true,
+     "locked_cents": 150,
+     "paid": 0,
+     "payable": 0,
+     "paying_referrals": 2,
+     "pending": 0,
+     "product": "trade_circle",
+     "unlock_at": 3
+    }
+   },
+   "terms": {
+    "clearing_days": 60,
+    "months": 6,
+    "review_chargebacks": 3,
+    "share_percent": 25,
+    "unlock_is_per_site": true,
+    "unlock_referrals": 3
+   },
+   "totals": {
+    "available": 150,
+    "clawed_back": 0,
+    "earned_cents": 150,
+    "paid": 0,
+    "payable": 0,
+    "pending": 0
+   },
+   "under_review": false
+  }
+ },
+ "paying": {
+  "att_only": {
+   "books": 0,
+   "momo": 0,
+   "trade_circle": 0
+  },
+  "boundary_a": {
+   "books": 2,
+   "momo": 0,
+   "trade_circle": 3
+  },
+  "boundary_b": {
+   "books": 0,
+   "momo": 3,
+   "trade_circle": 2
+  },
+  "disp_lost": {
+   "books": 0,
+   "momo": 1,
+   "trade_circle": 0
+  },
+  "disp_open": {
+   "books": 0,
+   "momo": 0,
+   "trade_circle": 1
+  },
+  "disp_won": {
+   "books": 1,
+   "momo": 0,
+   "trade_circle": 3
+  },
+  "mixed": {
+   "books": 7,
+   "momo": 3,
+   "trade_circle": 0
+  },
+  "notelig": {
+   "books": 0,
+   "momo": 0,
+   "trade_circle": 6
+  },
+  "review": {
+   "books": 0,
+   "momo": 0,
+   "trade_circle": 3
+  },
+  "whale": {
+   "books": 0,
+   "momo": 0,
+   "trade_circle": 250
+  },
+  "window": {
+   "books": 0,
+   "momo": 0,
+   "trade_circle": 2
+  }
+ },
+ "site": {
+  "att_only": {
+   "books": {
+    "adjustments": 0,
+    "available": 0,
+    "clawed_back": 0,
+    "clearing_days": 60,
+    "earned_cents": 0,
+    "frozen": false,
+    "locked": true,
+    "locked_cents": 0,
+    "paid": 0,
+    "payable": 0,
+    "paying_referrals": 0,
+    "pending": 0,
+    "product": "books",
+    "unlock_at": 3
+   },
+   "momo": {
+    "adjustments": 0,
+    "available": 0,
+    "clawed_back": 0,
+    "clearing_days": 60,
+    "earned_cents": 0,
+    "frozen": false,
+    "locked": true,
+    "locked_cents": 0,
+    "paid": 0,
+    "payable": 0,
+    "paying_referrals": 0,
+    "pending": 0,
+    "product": "momo",
+    "unlock_at": 3
+   },
+   "trade_circle": {
+    "adjustments": 0,
+    "available": 0,
+    "clawed_back": 0,
+    "clearing_days": 60,
+    "earned_cents": 0,
+    "frozen": false,
+    "locked": true,
+    "locked_cents": 0,
+    "paid": 0,
+    "payable": 0,
+    "paying_referrals": 0,
+    "pending": 0,
+    "product": "trade_circle",
+    "unlock_at": 3
+   }
+  },
+  "boundary_a": {
+   "books": {
+    "adjustments": 0,
+    "available": 950,
+    "clawed_back": 0,
+    "clearing_days": 60,
+    "earned_cents": 950,
+    "frozen": false,
+    "locked": true,
+    "locked_cents": 950,
+    "paid": 0,
+    "payable": 0,
+    "paying_referrals": 2,
+    "pending": 0,
+    "product": "books",
+    "unlock_at": 3
+   },
+   "momo": {
+    "adjustments": 0,
+    "available": 0,
+    "clawed_back": 0,
+    "clearing_days": 60,
+    "earned_cents": 0,
+    "frozen": false,
+    "locked": true,
+    "locked_cents": 0,
+    "paid": 0,
+    "payable": 0,
+    "paying_referrals": 0,
+    "pending": 0,
+    "product": "momo",
+    "unlock_at": 3
+   },
+   "trade_circle": {
+    "adjustments": 0,
+    "available": 675,
+    "clawed_back": 0,
+    "clearing_days": 60,
+    "earned_cents": 675,
+    "frozen": false,
+    "locked": false,
+    "locked_cents": 0,
+    "paid": 0,
+    "payable": 675,
+    "paying_referrals": 3,
+    "pending": 0,
+    "product": "trade_circle",
+    "unlock_at": 3
+   }
+  },
+  "boundary_b": {
+   "books": {
+    "adjustments": 0,
+    "available": 0,
+    "clawed_back": 0,
+    "clearing_days": 60,
+    "earned_cents": 0,
+    "frozen": false,
+    "locked": true,
+    "locked_cents": 0,
+    "paid": 0,
+    "payable": 0,
+    "paying_referrals": 0,
+    "pending": 0,
+    "product": "books",
+    "unlock_at": 3
+   },
+   "momo": {
+    "adjustments": 0,
+    "available": 750,
+    "clawed_back": 0,
+    "clearing_days": 60,
+    "earned_cents": 750,
+    "frozen": false,
+    "locked": false,
+    "locked_cents": 0,
+    "paid": 0,
+    "payable": 750,
+    "paying_referrals": 3,
+    "pending": 0,
+    "product": "momo",
+    "unlock_at": 3
+   },
+   "trade_circle": {
+    "adjustments": 0,
+    "available": 150,
+    "clawed_back": 0,
+    "clearing_days": 60,
+    "earned_cents": 150,
+    "frozen": false,
+    "locked": true,
+    "locked_cents": 150,
+    "paid": 0,
+    "payable": 0,
+    "paying_referrals": 2,
+    "pending": 0,
+    "product": "trade_circle",
+    "unlock_at": 3
+   }
+  },
+  "disp_lost": {
+   "books": {
+    "adjustments": 0,
+    "available": 0,
+    "clawed_back": 0,
+    "clearing_days": 60,
+    "earned_cents": 0,
+    "frozen": false,
+    "locked": true,
+    "locked_cents": 0,
+    "paid": 0,
+    "payable": 0,
+    "paying_referrals": 0,
+    "pending": 0,
+    "product": "books",
+    "unlock_at": 3
+   },
+   "momo": {
+    "adjustments": 0,
+    "available": 0,
+    "clawed_back": 0,
+    "clearing_days": 60,
+    "earned_cents": 250,
+    "frozen": false,
+    "locked": true,
+    "locked_cents": 0,
+    "paid": 0,
+    "payable": 0,
+    "paying_referrals": 1,
+    "pending": 250,
+    "product": "momo",
+    "unlock_at": 3
+   },
+   "trade_circle": {
+    "adjustments": 0,
+    "available": 0,
+    "clawed_back": 450,
+    "clearing_days": 60,
+    "earned_cents": 0,
+    "frozen": false,
+    "locked": true,
+    "locked_cents": 0,
+    "paid": 0,
+    "payable": 0,
+    "paying_referrals": 0,
+    "pending": 0,
+    "product": "trade_circle",
+    "unlock_at": 3
+   }
+  },
+  "disp_open": {
+   "books": {
+    "adjustments": 0,
+    "available": 0,
+    "clawed_back": 475,
+    "clearing_days": 60,
+    "earned_cents": 0,
+    "frozen": true,
+    "locked": true,
+    "locked_cents": 0,
+    "paid": 0,
+    "payable": 0,
+    "paying_referrals": 0,
+    "pending": 0,
+    "product": "books",
+    "unlock_at": 3
+   },
+   "momo": {
+    "adjustments": 0,
+    "available": 0,
+    "clawed_back": 4000,
+    "clearing_days": 60,
+    "earned_cents": 0,
+    "frozen": true,
+    "locked": true,
+    "locked_cents": 0,
+    "paid": 0,
+    "payable": 0,
+    "paying_referrals": 0,
+    "pending": 0,
+    "product": "momo",
+    "unlock_at": 3
+   },
+   "trade_circle": {
+    "adjustments": -675,
+    "available": 0,
+    "clawed_back": 675,
+    "clearing_days": 60,
+    "earned_cents": 225,
+    "frozen": true,
+    "locked": true,
+    "locked_cents": 0,
+    "paid": 0,
+    "payable": 0,
+    "paying_referrals": 1,
+    "pending": 225,
+    "product": "trade_circle",
+    "unlock_at": 3
+   }
+  },
+  "disp_won": {
+   "books": {
+    "adjustments": 0,
+    "available": 0,
+    "clawed_back": 0,
+    "clearing_days": 60,
+    "earned_cents": 475,
+    "frozen": false,
+    "locked": true,
+    "locked_cents": 0,
+    "paid": 0,
+    "payable": 0,
+    "paying_referrals": 1,
+    "pending": 475,
+    "product": "books",
+    "unlock_at": 3
+   },
+   "momo": {
+    "adjustments": 0,
+    "available": 0,
+    "clawed_back": 0,
+    "clearing_days": 60,
+    "earned_cents": 0,
+    "frozen": false,
+    "locked": true,
+    "locked_cents": 0,
+    "paid": 0,
+    "payable": 0,
+    "paying_referrals": 0,
+    "pending": 0,
+    "product": "momo",
+    "unlock_at": 3
+   },
+   "trade_circle": {
+    "adjustments": 0,
+    "available": 0,
+    "clawed_back": 0,
+    "clearing_days": 60,
+    "earned_cents": 225,
+    "frozen": false,
+    "locked": false,
+    "locked_cents": 0,
+    "paid": 225,
+    "payable": 0,
+    "paying_referrals": 3,
+    "pending": 0,
+    "product": "trade_circle",
+    "unlock_at": 3
+   }
+  },
+  "mixed": {
+   "books": {
+    "adjustments": 0,
+    "available": 0,
+    "clawed_back": 0,
+    "clearing_days": 60,
+    "earned_cents": 8700,
+    "frozen": false,
+    "locked": false,
+    "locked_cents": 0,
+    "paid": 8225,
+    "payable": 0,
+    "paying_referrals": 7,
+    "pending": 475,
+    "product": "books",
+    "unlock_at": 3
+   },
+   "momo": {
+    "adjustments": 0,
+    "available": 8000,
+    "clawed_back": 0,
+    "clearing_days": 60,
+    "earned_cents": 8250,
+    "frozen": false,
+    "locked": false,
+    "locked_cents": 0,
+    "paid": 0,
+    "payable": 8000,
+    "paying_referrals": 3,
+    "pending": 250,
+    "product": "momo",
+    "unlock_at": 3
+   },
+   "trade_circle": {
+    "adjustments": 0,
+    "available": 0,
+    "clawed_back": 0,
+    "clearing_days": 60,
+    "earned_cents": 0,
+    "frozen": false,
+    "locked": true,
+    "locked_cents": 0,
+    "paid": 0,
+    "payable": 0,
+    "paying_referrals": 0,
+    "pending": 0,
+    "product": "trade_circle",
+    "unlock_at": 3
+   }
+  },
+  "notelig": {
+   "books": {
+    "adjustments": 0,
+    "available": 0,
+    "clawed_back": 0,
+    "clearing_days": 60,
+    "earned_cents": 0,
+    "frozen": false,
+    "locked": true,
+    "locked_cents": 0,
+    "paid": 0,
+    "payable": 0,
+    "paying_referrals": 0,
+    "pending": 0,
+    "product": "books",
+    "unlock_at": 3
+   },
+   "momo": {
+    "adjustments": 0,
+    "available": 0,
+    "clawed_back": 0,
+    "clearing_days": 60,
+    "earned_cents": 0,
+    "frozen": false,
+    "locked": true,
+    "locked_cents": 0,
+    "paid": 0,
+    "payable": 0,
+    "paying_referrals": 0,
+    "pending": 0,
+    "product": "momo",
+    "unlock_at": 3
+   },
+   "trade_circle": {
+    "adjustments": 0,
+    "available": 0,
+    "clawed_back": 0,
+    "clearing_days": 60,
+    "earned_cents": 0,
+    "frozen": false,
+    "locked": false,
+    "locked_cents": 0,
+    "paid": 0,
+    "payable": 0,
+    "paying_referrals": 6,
+    "pending": 0,
+    "product": "trade_circle",
+    "unlock_at": 3
+   }
+  },
+  "review": {
+   "books": {
+    "adjustments": 0,
+    "available": 0,
+    "clawed_back": 0,
+    "clearing_days": 60,
+    "earned_cents": 0,
+    "frozen": true,
+    "locked": true,
+    "locked_cents": 0,
+    "paid": 0,
+    "payable": 0,
+    "paying_referrals": 0,
+    "pending": 0,
+    "product": "books",
+    "unlock_at": 3
+   },
+   "momo": {
+    "adjustments": 0,
+    "available": 0,
+    "clawed_back": 0,
+    "clearing_days": 60,
+    "earned_cents": 0,
+    "frozen": true,
+    "locked": true,
+    "locked_cents": 0,
+    "paid": 0,
+    "payable": 0,
+    "paying_referrals": 0,
+    "pending": 0,
+    "product": "momo",
+    "unlock_at": 3
+   },
+   "trade_circle": {
+    "adjustments": 0,
+    "available": 675,
+    "clawed_back": 0,
+    "clearing_days": 60,
+    "earned_cents": 675,
+    "frozen": true,
+    "locked": false,
+    "locked_cents": 0,
+    "paid": 0,
+    "payable": 0,
+    "paying_referrals": 3,
+    "pending": 0,
+    "product": "trade_circle",
+    "unlock_at": 3
+   }
+  },
+  "whale": {
+   "books": {
+    "adjustments": 0,
+    "available": 0,
+    "clawed_back": 0,
+    "clearing_days": 60,
+    "earned_cents": 0,
+    "frozen": false,
+    "locked": true,
+    "locked_cents": 0,
+    "paid": 0,
+    "payable": 0,
+    "paying_referrals": 0,
+    "pending": 0,
+    "product": "books",
+    "unlock_at": 3
+   },
+   "momo": {
+    "adjustments": 0,
+    "available": 0,
+    "clawed_back": 0,
+    "clearing_days": 60,
+    "earned_cents": 0,
+    "frozen": false,
+    "locked": true,
+    "locked_cents": 0,
+    "paid": 0,
+    "payable": 0,
+    "paying_referrals": 0,
+    "pending": 0,
+    "product": "momo",
+    "unlock_at": 3
+   },
+   "trade_circle": {
+    "adjustments": 0,
+    "available": 419425,
+    "clawed_back": 0,
+    "clearing_days": 60,
+    "earned_cents": 536350,
+    "frozen": false,
+    "locked": false,
+    "locked_cents": 0,
+    "paid": 0,
+    "payable": 419425,
+    "paying_referrals": 250,
+    "pending": 116925,
+    "product": "trade_circle",
+    "unlock_at": 3
+   }
+  },
+  "window": {
+   "books": {
+    "adjustments": 0,
+    "available": 0,
+    "clawed_back": 0,
+    "clearing_days": 60,
+    "earned_cents": 0,
+    "frozen": false,
+    "locked": true,
+    "locked_cents": 0,
+    "paid": 0,
+    "payable": 0,
+    "paying_referrals": 0,
+    "pending": 0,
+    "product": "books",
+    "unlock_at": 3
+   },
+   "momo": {
+    "adjustments": 0,
+    "available": 0,
+    "clawed_back": 0,
+    "clearing_days": 60,
+    "earned_cents": 0,
+    "frozen": false,
+    "locked": true,
+    "locked_cents": 0,
+    "paid": 0,
+    "payable": 0,
+    "paying_referrals": 0,
+    "pending": 0,
+    "product": "momo",
+    "unlock_at": 3
+   },
+   "trade_circle": {
+    "adjustments": 0,
+    "available": 150,
+    "clawed_back": 0,
+    "clearing_days": 60,
+    "earned_cents": 150,
+    "frozen": false,
+    "locked": true,
+    "locked_cents": 150,
+    "paid": 0,
+    "payable": 0,
+    "paying_referrals": 2,
+    "pending": 0,
+    "product": "trade_circle",
+    "unlock_at": 3
+   }
+  }
+ }
+}
