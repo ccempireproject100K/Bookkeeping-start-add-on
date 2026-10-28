@@ -71,7 +71,7 @@ export default function GiftCards() {
   if (!out) return <Loading />;
   return <div className="animate-rise">
       <PageHeader title={t("giftcards.giftCards")} subtitle="Prepaid packages as deferred revenue (2200 Unearned Revenue)" testid="gift-cards-page">
-        {isOwner && <Button data-testid="btn-issue-gift-card" onClick={() => setIssueOpen(true)} className="bg-amber-600 hover:bg-amber-500 text-black font-semibold"><Plus size={16} className="mr-1" />{t("giftcards.issueCard")}</Button>}
+        {isOwner && <Button data-testid="btn-issue-gift-card" onClick={() => setIssueOpen(true)} className="bg-amber-600 hover:bg-amber-500 text-black font-semibold"><Plus size={16} className="me-1" />{t("giftcards.issueCard")}</Button>}
       </PageHeader>
 
       <div className="grid sm:grid-cols-3 gap-4 mb-6">
@@ -85,23 +85,23 @@ export default function GiftCards() {
       <Card className="p-0 overflow-hidden">
         <table className="w-full text-sm" data-testid="table-gift-cards">
           <thead><tr className="text-xs uppercase tracking-wider text-gray-500 border-b border-[#222838]">
-            <th className="px-5 py-3 text-left font-medium">{t("giftcards.code")}</th>
-            <th className="px-5 py-3 text-left font-medium">{t("giftcards.recipient")}</th>
-            <th className="px-5 py-3 text-left font-medium">{t("giftcards.issued")}</th>
-            <th className="px-5 py-3 text-right font-medium">{t("giftcards.initial")}</th>
-            <th className="px-5 py-3 text-right font-medium">{t("giftcards.balance")}</th>
-            <th className="px-5 py-3 text-left font-medium">{t("giftcards.status")}</th>
-            {isOwner && <th className="px-5 py-3 text-right font-medium">{t("giftcards.actions")}</th>}
+            <th className="px-5 py-3 text-start font-medium">{t("giftcards.code")}</th>
+            <th className="px-5 py-3 text-start font-medium">{t("giftcards.recipient")}</th>
+            <th className="px-5 py-3 text-start font-medium">{t("giftcards.issued")}</th>
+            <th className="px-5 py-3 text-end font-medium">{t("giftcards.initial")}</th>
+            <th className="px-5 py-3 text-end font-medium">{t("giftcards.balance")}</th>
+            <th className="px-5 py-3 text-start font-medium">{t("giftcards.status")}</th>
+            {isOwner && <th className="px-5 py-3 text-end font-medium">{t("giftcards.actions")}</th>}
           </tr></thead>
           <tbody>
             {cards.map(c => <tr key={c.id} className="border-b border-[#171c26] hover:bg-[#161b25]">
                 <td className="px-5 py-3 font-mono text-amber-400">{c.code}</td>
                 <td className="px-5 py-3 text-gray-200">{c.recipient}</td>
                 <td className="px-5 py-3 text-gray-400">{fmtDate(c.created_at?.slice(0, 10))}</td>
-                <td className="px-5 py-3 text-right font-mono text-gray-400">{money(c.initial_cents)}</td>
-                <td className="px-5 py-3 text-right font-mono text-gray-100">{money(c.balance_cents)}</td>
+                <td className="px-5 py-3 text-end font-mono text-gray-400">{money(c.initial_cents)}</td>
+                <td className="px-5 py-3 text-end font-mono text-gray-100">{money(c.balance_cents)}</td>
                 <td className="px-5 py-3"><span className={`px-2 py-0.5 rounded-full text-xs border capitalize ${c.status === "active" ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-gray-500/10 text-gray-400 border-gray-500/20"}`}>{c.status}</span></td>
-                {isOwner && <td className="px-5 py-3 text-right">{c.status === "active" && <Button size="sm" className="h-7 bg-amber-600 hover:bg-amber-500 text-black" onClick={() => {
+                {isOwner && <td className="px-5 py-3 text-end">{c.status === "active" && <Button size="sm" className="h-7 bg-amber-600 hover:bg-amber-500 text-black" onClick={() => {
                 setRedeemCard(c);
                 setRedeemAmt("");
               }} data-testid={`redeem-${c.code}`}>{t("giftcards.redeem")}</Button>}</td>}

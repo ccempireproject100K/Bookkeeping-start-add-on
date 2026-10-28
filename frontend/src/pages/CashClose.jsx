@@ -109,17 +109,17 @@ export default function CashClose() {
           <div className="px-5 py-4 border-b border-[#222838]"><h3 className="font-display font-semibold">{t("cashclose.history")}</h3></div>
           <table className="w-full text-sm" data-testid="table-cash-closes">
             <thead><tr className="text-xs uppercase tracking-wider text-gray-500 border-b border-[#222838]">
-              <th className="px-5 py-3 text-left font-medium">{t("cashclose.date")}</th>
-              <th className="px-5 py-3 text-right font-medium">{t("cashclose.expected")}</th>
-              <th className="px-5 py-3 text-right font-medium">{t("cashclose.counted")}</th>
-              <th className="px-5 py-3 text-right font-medium">{t("cashclose.variance")}</th>
+              <th className="px-5 py-3 text-start font-medium">{t("cashclose.date")}</th>
+              <th className="px-5 py-3 text-end font-medium">{t("cashclose.expected")}</th>
+              <th className="px-5 py-3 text-end font-medium">{t("cashclose.counted")}</th>
+              <th className="px-5 py-3 text-end font-medium">{t("cashclose.variance")}</th>
             </tr></thead>
             <tbody>
               {history.map(c => <tr key={c.id} className="border-b border-[#171c26]">
                   <td className="px-5 py-3 text-gray-300">{fmtDate(c.date)}</td>
-                  <td className="px-5 py-3 text-right font-mono text-gray-400">{money(c.expected_cents)}</td>
-                  <td className="px-5 py-3 text-right font-mono text-gray-200">{money(c.counted_cents)}</td>
-                  <td className={`px-5 py-3 text-right font-mono ${c.variance_cents === 0 ? "text-gray-400" : c.variance_cents > 0 ? "text-emerald-400" : "text-rose-400"}`}>{money(c.variance_cents)}</td>
+                  <td className="px-5 py-3 text-end font-mono text-gray-400">{money(c.expected_cents)}</td>
+                  <td className="px-5 py-3 text-end font-mono text-gray-200">{money(c.counted_cents)}</td>
+                  <td className={`px-5 py-3 text-end font-mono ${c.variance_cents === 0 ? "text-gray-400" : c.variance_cents > 0 ? "text-emerald-400" : "text-rose-400"}`}>{money(c.variance_cents)}</td>
                 </tr>)}
               {history.length === 0 && <tr><td colSpan={4} className="px-5 py-12 text-center text-gray-500">{t("cashclose.noClosesYet")}</td></tr>}
             </tbody>

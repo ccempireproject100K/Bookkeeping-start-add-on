@@ -323,8 +323,8 @@ export default function Banking() {
   return <div className="animate-rise">
       <PageHeader title={t("banking.banking")} subtitle="Accounts, imports, categorization & reconciliation" testid="banking-page">
         {canManage && <>
-          <Button data-testid="btn-transfer" variant="outline" onClick={() => setXferOpen(true)} className="border-[#222838]"><ArrowLeftRight size={15} className="mr-1" />{t("banking.transfer")}</Button>
-          <Button data-testid="btn-add-account" onClick={() => setAddOpen(true)} className="bg-amber-600 hover:bg-amber-500 text-black font-semibold"><Plus size={16} className="mr-1" />{t("banking.addAccount")}</Button>
+          <Button data-testid="btn-transfer" variant="outline" onClick={() => setXferOpen(true)} className="border-[#222838]"><ArrowLeftRight size={15} className="me-1" />{t("banking.transfer")}</Button>
+          <Button data-testid="btn-add-account" onClick={() => setAddOpen(true)} className="bg-amber-600 hover:bg-amber-500 text-black font-semibold"><Plus size={16} className="me-1" />{t("banking.addAccount")}</Button>
         </>}
       </PageHeader>
 
@@ -342,9 +342,9 @@ export default function Banking() {
             </div>
             {feed.configured && canManage && <div className="flex gap-2">
                 {feed.connections.length > 0 && <Button data-testid="bankfeed-sync" variant="outline" size="sm" disabled={feedBusy} onClick={syncFeed} className="border-[#222838]">
-                    <RefreshCw size={14} className="mr-1" /> {t("banking.syncNow")}</Button>}
+                    <RefreshCw size={14} className="me-1" /> {t("banking.syncNow")}</Button>}
                 <Button data-testid="bankfeed-connect" size="sm" disabled={feedBusy} onClick={connectBank} className="bg-amber-600 hover:bg-amber-500 text-black">
-                  <Landmark size={14} className="mr-1" /> {t("banking.connectBank")}</Button>
+                  <Landmark size={14} className="me-1" /> {t("banking.connectBank")}</Button>
               </div>}
           </div>
           {feed.configured && feed.connections.length > 0 && <div className="mt-3 space-y-2">
@@ -362,7 +362,7 @@ export default function Banking() {
 
       {/* Account cards */}
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6" data-testid="bank-account-cards">
-        {accounts.map(a => <button key={a.id} data-testid={`bank-acct-${a.id}`} onClick={() => setSelected(a.id)} className={`text-left card-surface p-4 transition-all ${selected === a.id ? "ring-2 ring-amber-500/50" : "hover:bg-[#161b25]"}`}>
+        {accounts.map(a => <button key={a.id} data-testid={`bank-acct-${a.id}`} onClick={() => setSelected(a.id)} className={`text-start card-surface p-4 transition-all ${selected === a.id ? "ring-2 ring-amber-500/50" : "hover:bg-[#161b25]"}`}>
             <div className="flex items-center gap-2 text-gray-400 text-xs uppercase tracking-wide">
               {a.kind === "credit_card" ? <CreditCard size={14} /> : <Landmark size={14} />}{a.kind === "credit_card" ? "Credit Card" : "Bank"}
             </div>
@@ -386,8 +386,8 @@ export default function Banking() {
               direction: "in"
             });
             setManOpen(true);
-          }} className="border-[#222838]"><Plus size={14} className="mr-1" />{t("banking.addTransaction")}</Button>
-              <Button data-testid="btn-import" variant="outline" size="sm" onClick={() => setImportOpen(true)} className="border-[#222838]"><Upload size={14} className="mr-1" />{t("banking.importCSV")}</Button>
+          }} className="border-[#222838]"><Plus size={14} className="me-1" />{t("banking.addTransaction")}</Button>
+              <Button data-testid="btn-import" variant="outline" size="sm" onClick={() => setImportOpen(true)} className="border-[#222838]"><Upload size={14} className="me-1" />{t("banking.importCSV")}</Button>
               <Button data-testid="btn-reconcile" size="sm" onClick={() => {
             setRecForm({
               statement_date: today(),
@@ -395,28 +395,28 @@ export default function Banking() {
               txn_ids: txns.filter(t => t.status !== "unmatched" && !t.reconciled).map(t => t.id)
             });
             setRecOpen(true);
-          }} className="bg-emerald-600 hover:bg-emerald-500 text-black"><CheckCircle2 size={14} className="mr-1" />{t("banking.reconcile")}</Button>
+          }} className="bg-emerald-600 hover:bg-emerald-500 text-black"><CheckCircle2 size={14} className="me-1" />{t("banking.reconcile")}</Button>
             </>}
           </div>
 
           {tab === "transactions" && <Card className="p-0 overflow-hidden">
               <table className="w-full text-sm" data-testid="table-bank-txns">
                 <thead><tr className="text-xs uppercase tracking-wider text-gray-500 border-b border-[#222838]">
-                  <th className="px-4 py-3 text-left font-medium">{t("banking.date")}</th>
-                  <th className="px-4 py-3 text-left font-medium">{t("banking.description")}</th>
-                  <th className="px-4 py-3 text-right font-medium">{t("banking.amount")}</th>
-                  <th className="px-4 py-3 text-left font-medium">{t("banking.category")}</th>
-                  <th className="px-4 py-3 text-left font-medium">{t("banking.status")}</th>
-                  {canManage && <th className="px-4 py-3 text-right font-medium">{t("banking.action")}</th>}
+                  <th className="px-4 py-3 text-start font-medium">{t("banking.date")}</th>
+                  <th className="px-4 py-3 text-start font-medium">{t("banking.description")}</th>
+                  <th className="px-4 py-3 text-end font-medium">{t("banking.amount")}</th>
+                  <th className="px-4 py-3 text-start font-medium">{t("banking.category")}</th>
+                  <th className="px-4 py-3 text-start font-medium">{t("banking.status")}</th>
+                  {canManage && <th className="px-4 py-3 text-end font-medium">{t("banking.action")}</th>}
                 </tr></thead>
                 <tbody>
                   {txns.map(t => <tr key={t.id} className="border-b border-[#171c26] hover:bg-[#161b25]">
                       <td className="px-4 py-3 text-gray-400">{fmtDate(t.txn_date)}</td>
-                      <td className="px-4 py-3 text-gray-100">{t.description}{t.suggested_code && !t.category_code && <span className="ml-2 text-xs text-amber-500/70">{t("banking.rule")}{t.suggested_code}</span>}</td>
-                      <td className={`px-4 py-3 text-right font-mono ${t.amount_cents < 0 ? "text-rose-400" : "text-emerald-400"}`}>{money(t.amount_cents)}</td>
+                      <td className="px-4 py-3 text-gray-100">{t.description}{t.suggested_code && !t.category_code && <span className="ms-2 text-xs text-amber-500/70">{t("banking.rule")}{t.suggested_code}</span>}</td>
+                      <td className={`px-4 py-3 text-end font-mono ${t.amount_cents < 0 ? "text-rose-400" : "text-emerald-400"}`}>{money(t.amount_cents)}</td>
                       <td className="px-4 py-3 text-gray-400">{t.category_code || "—"}</td>
                       <td className="px-4 py-3"><span className={`px-2 py-0.5 rounded-full text-xs border capitalize ${STATUS_CLS[t.status] || ""}`}>{t.reconciled ? "reconciled" : t.status}</span></td>
-                      {canManage && <td className="px-4 py-3 text-right">
+                      {canManage && <td className="px-4 py-3 text-end">
                         {t.status === "unmatched" && <div className="flex justify-end gap-1">
                             <Button size="sm" variant="ghost" className="h-7 text-sky-400 hover:text-sky-300" data-testid={`match-${t.id}`} onClick={() => openMatch(t)}>{t("banking.match")}</Button>
                             <Button size="sm" className="h-7 bg-amber-600 hover:bg-amber-500 text-black" data-testid={`categorize-${t.id}`} onClick={() => {
@@ -445,7 +445,7 @@ export default function Banking() {
                       <SelectTrigger data-testid="rule-category" className="bg-[#0F1218] border-[#222838]"><SelectValue placeholder={t("banking.account")} /></SelectTrigger>
                       <SelectContent className="bg-[#14171E] border-[#222838] text-gray-100 max-h-72">{catOptions.map(c => <SelectItem key={c.code} value={c.code}>{c.code} · {c.name}</SelectItem>)}</SelectContent>
                     </Select></div>
-                  <Button data-testid="btn-add-rule" onClick={addRule} className="bg-amber-600 hover:bg-amber-500 text-black"><Wand2 size={14} className="mr-1" />{t("banking.addRule")}</Button>
+                  <Button data-testid="btn-add-rule" onClick={addRule} className="bg-amber-600 hover:bg-amber-500 text-black"><Wand2 size={14} className="me-1" />{t("banking.addRule")}</Button>
                 </div>}
               <div className="space-y-2" data-testid="rules-list">
                 {rules.map(r => <div key={r.id} className="flex items-center justify-between bg-[#0F1218] border border-[#222838] rounded-lg px-4 py-2 text-sm">
@@ -459,18 +459,18 @@ export default function Banking() {
           {tab === "reconciliations" && <Card className="p-0 overflow-hidden">
               <table className="w-full text-sm" data-testid="table-recons">
                 <thead><tr className="text-xs uppercase tracking-wider text-gray-500 border-b border-[#222838]">
-                  <th className="px-4 py-3 text-left font-medium">{t("banking.statementDate")}</th>
-                  <th className="px-4 py-3 text-right font-medium">{t("banking.endingBalance")}</th>
-                  <th className="px-4 py-3 text-right font-medium">{t("banking.cleared")}</th>
-                  <th className="px-4 py-3 text-right font-medium">{t("banking.difference")}</th>
-                  <th className="px-4 py-3 text-left font-medium">{t("banking.status")}</th>
+                  <th className="px-4 py-3 text-start font-medium">{t("banking.statementDate")}</th>
+                  <th className="px-4 py-3 text-end font-medium">{t("banking.endingBalance")}</th>
+                  <th className="px-4 py-3 text-end font-medium">{t("banking.cleared")}</th>
+                  <th className="px-4 py-3 text-end font-medium">{t("banking.difference")}</th>
+                  <th className="px-4 py-3 text-start font-medium">{t("banking.status")}</th>
                 </tr></thead>
                 <tbody>
                   {recons.map(r => <tr key={r.id} className="border-b border-[#171c26]">
                       <td className="px-4 py-3 text-gray-300">{fmtDate(r.statement_date)}</td>
-                      <td className="px-4 py-3 text-right font-mono text-gray-200">{money(r.statement_ending_cents)}</td>
-                      <td className="px-4 py-3 text-right font-mono text-gray-400">{money(r.cleared_cents)}</td>
-                      <td className={`px-4 py-3 text-right font-mono ${r.difference_cents === 0 ? "text-emerald-400" : "text-rose-400"}`}>{money(r.difference_cents)}</td>
+                      <td className="px-4 py-3 text-end font-mono text-gray-200">{money(r.statement_ending_cents)}</td>
+                      <td className="px-4 py-3 text-end font-mono text-gray-400">{money(r.cleared_cents)}</td>
+                      <td className={`px-4 py-3 text-end font-mono ${r.difference_cents === 0 ? "text-emerald-400" : "text-rose-400"}`}>{money(r.difference_cents)}</td>
                       <td className="px-4 py-3"><span className={`px-2 py-0.5 rounded-full text-xs border capitalize ${r.status === "completed" ? STATUS_CLS.cleared : STATUS_CLS.unmatched}`}>{r.status}</span></td>
                     </tr>)}
                   {recons.length === 0 && <tr><td colSpan={5} className="px-5 py-12 text-center text-gray-500">{t("banking.noReconciliationsYet")}</td></tr>}
@@ -592,14 +592,14 @@ export default function Banking() {
           {matchTxn && <div className="text-sm text-gray-400">{matchTxn.description} · <span className="font-mono">{money(matchTxn.amount_cents)}</span> · {fmtDate(matchTxn.txn_date)}</div>}
           <p className="text-xs text-gray-500">{t("banking.linkThisToAJournalEntry")}</p>
           <div className="max-h-64 overflow-y-auto space-y-1" data-testid="match-candidates">
-            {candidates.map((c, i) => <button key={c.id} onClick={() => setMatchId(c.id)} data-testid={`match-pick-${c.id}`} className={`w-full text-left px-3 py-2 rounded-lg border text-sm transition-colors ${matchId === c.id ? "border-amber-500/60 bg-amber-500/10" : "border-[#222838] hover:bg-[#161b25]"}`}>
+            {candidates.map((c, i) => <button key={c.id} onClick={() => setMatchId(c.id)} data-testid={`match-pick-${c.id}`} className={`w-full text-start px-3 py-2 rounded-lg border text-sm transition-colors ${matchId === c.id ? "border-amber-500/60 bg-amber-500/10" : "border-[#222838] hover:bg-[#161b25]"}`}>
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-gray-100 font-mono">{c.number}</span>
                   <span className="font-mono text-gray-300">{money(c.total_cents)}</span>
                 </div>
                 <div className="flex items-center justify-between gap-2 mt-0.5">
                   <span className="text-xs text-gray-500 truncate">{c.memo || c.source}</span>
-                  <span className="text-xs text-gray-500 whitespace-nowrap">{fmtDate(c.entry_date)}{i === 0 && c._amtDiff === 0 && <span className="ml-2 text-emerald-400">{t("banking.bestMatch")}</span>}</span>
+                  <span className="text-xs text-gray-500 whitespace-nowrap">{fmtDate(c.entry_date)}{i === 0 && c._amtDiff === 0 && <span className="ms-2 text-emerald-400">{t("banking.bestMatch")}</span>}</span>
                 </div>
               </button>)}
             {candidates.length === 0 && <div className="text-gray-500 text-sm py-6 text-center">{t("banking.noCandidateEntriesFound")}</div>}

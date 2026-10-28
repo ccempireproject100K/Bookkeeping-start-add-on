@@ -63,7 +63,7 @@ export default function TradeLanding() {
           <h1 className="font-display text-3xl font-bold mb-3">That industry isn't on the list yet</h1>
           <p className="text-gray-400 mb-6">Mind at Ease Solutions covers 33 trades — yours may be one of them.</p>
           <Link to="/industries" className="text-amber-500 hover:text-amber-400 text-sm">
-            <ArrowLeft size={14} className="inline mr-1" /> See all industries
+            <ArrowLeft size={14} className="inline me-1 rtl:-scale-x-100" /> See all industries
           </Link>
         </div>
       </div>
@@ -116,7 +116,7 @@ export default function TradeLanding() {
             <MarketSelect value={marketCode} onChange={pickMarket} testId="trade-market-select" />
             <LanguageSwitcher compact />
             <Link to="/login" className="text-sm text-amber-500 hover:text-amber-400">
-              Sign in <ArrowRight size={14} className="inline ml-1" />
+              Sign in <ArrowRight size={14} className="inline ms-1 rtl:-scale-x-100" />
             </Link>
           </div>
         </div>
@@ -134,7 +134,7 @@ export default function TradeLanding() {
           <p className="text-xl text-gray-300 leading-relaxed mb-4">{pack.tagline}</p>
           {market && (
             <p data-testid="trade-market-face" className="text-sm text-gray-400 mb-8">
-              <span className="text-base mr-1">{market.flag}</span>
+              <span className="text-base me-1">{market.flag}</span>
               {market.name} edition — {(skin.languages || []).join(" / ").toUpperCase()} · {skin.currency}
             </p>
           )}
@@ -144,7 +144,7 @@ export default function TradeLanding() {
               className="px-5 py-3 rounded-lg bg-amber-600 hover:bg-amber-500 text-black font-semibold text-sm"
               style={market ? { backgroundColor: accent } : undefined}
             >
-              Start with {pack.product_name} <ArrowRight size={15} className="inline ml-1" />
+              Start with {pack.product_name} <ArrowRight size={15} className="inline ms-1 rtl:-scale-x-100" />
             </Link>
             <Link
               to="/industries"

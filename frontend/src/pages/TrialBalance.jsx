@@ -35,25 +35,25 @@ export default function TrialBalance() {
             <table className="w-full text-sm" data-testid="table-trial-balance">
               <thead>
                 <tr className="text-xs uppercase tracking-wider text-gray-500 border-b border-[#222838]">
-                  <th className="px-5 py-3 text-left font-medium">{t("trialbalance.code")}</th>
-                  <th className="px-5 py-3 text-left font-medium">{t("trialbalance.account")}</th>
-                  <th className="px-5 py-3 text-right font-medium">{t("trialbalance.debit")}</th>
-                  <th className="px-5 py-3 text-right font-medium">{t("trialbalance.credit")}</th>
+                  <th className="px-5 py-3 text-start font-medium">{t("trialbalance.code")}</th>
+                  <th className="px-5 py-3 text-start font-medium">{t("trialbalance.account")}</th>
+                  <th className="px-5 py-3 text-end font-medium">{t("trialbalance.debit")}</th>
+                  <th className="px-5 py-3 text-end font-medium">{t("trialbalance.credit")}</th>
                 </tr>
               </thead>
               <tbody>
                 {data.rows.map(r => <tr key={r.code} className="border-b border-[#171c26] hover:bg-[#161b25]">
                     <td className="px-5 py-2.5 font-mono text-amber-400">{r.code}</td>
                     <td className="px-5 py-2.5 text-gray-200">{r.name}</td>
-                    <td className="px-5 py-2.5 text-right font-mono text-emerald-400">{r.debit ? money(r.debit) : ""}</td>
-                    <td className="px-5 py-2.5 text-right font-mono text-rose-400">{r.credit ? money(r.credit) : ""}</td>
+                    <td className="px-5 py-2.5 text-end font-mono text-emerald-400">{r.debit ? money(r.debit) : ""}</td>
+                    <td className="px-5 py-2.5 text-end font-mono text-rose-400">{r.credit ? money(r.credit) : ""}</td>
                   </tr>)}
               </tbody>
               <tfoot>
                 <tr className="border-t-2 border-[#2a3140] font-semibold">
                   <td className="px-5 py-3" colSpan={2}>{t("trialbalance.totals")}</td>
-                  <td className="px-5 py-3 text-right font-mono text-emerald-300" data-testid="tb-total-debit">{money(data.total_debit)}</td>
-                  <td className="px-5 py-3 text-right font-mono text-rose-300" data-testid="tb-total-credit">{money(data.total_credit)}</td>
+                  <td className="px-5 py-3 text-end font-mono text-emerald-300" data-testid="tb-total-debit">{money(data.total_debit)}</td>
+                  <td className="px-5 py-3 text-end font-mono text-rose-300" data-testid="tb-total-credit">{money(data.total_credit)}</td>
                 </tr>
               </tfoot>
             </table>

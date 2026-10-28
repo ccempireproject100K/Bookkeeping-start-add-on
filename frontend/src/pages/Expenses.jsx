@@ -145,27 +145,27 @@ export default function Expenses() {
       <PageHeader title={t("expenses.expensesVendors")} subtitle="Direct expenses, vendor records, credits & 1099" testid="expenses-page" />
       <Tabs defaultValue="expenses">
         <TabsList className="bg-[#14171E] border border-[#222838]">
-          <TabsTrigger value="expenses" data-testid="tab-expenses"><Receipt size={14} className="mr-1" />{t("expenses.expenses")}</TabsTrigger>
-          <TabsTrigger value="vendors" data-testid="tab-vendors"><Users size={14} className="mr-1" />{t("expenses.vendors")}</TabsTrigger>
-          <TabsTrigger value="credits" data-testid="tab-credits"><Undo2 size={14} className="mr-1" />{t("expenses.credits")}</TabsTrigger>
-          <TabsTrigger value="1099" data-testid="tab-1099"><FileText size={14} className="mr-1" />1099</TabsTrigger>
+          <TabsTrigger value="expenses" data-testid="tab-expenses"><Receipt size={14} className="me-1" />{t("expenses.expenses")}</TabsTrigger>
+          <TabsTrigger value="vendors" data-testid="tab-vendors"><Users size={14} className="me-1" />{t("expenses.vendors")}</TabsTrigger>
+          <TabsTrigger value="credits" data-testid="tab-credits"><Undo2 size={14} className="me-1" />{t("expenses.credits")}</TabsTrigger>
+          <TabsTrigger value="1099" data-testid="tab-1099"><FileText size={14} className="me-1" />1099</TabsTrigger>
         </TabsList>
 
         <TabsContent value="expenses" className="mt-4">
-          {canManage && <div className="mb-3 flex justify-end"><Button data-testid="btn-new-expense" onClick={() => setExpOpen(true)} className="bg-amber-600 hover:bg-amber-500 text-black font-semibold"><Plus size={16} className="mr-1" />{t("expenses.newExpense")}</Button></div>}
+          {canManage && <div className="mb-3 flex justify-end"><Button data-testid="btn-new-expense" onClick={() => setExpOpen(true)} className="bg-amber-600 hover:bg-amber-500 text-black font-semibold"><Plus size={16} className="me-1" />{t("expenses.newExpense")}</Button></div>}
           <Card className="p-0 overflow-hidden">
             <table className="w-full text-sm" data-testid="table-expenses">
               <thead><tr className="text-xs uppercase tracking-wider text-gray-500 border-b border-[#222838]">
-                <th className="px-4 py-3 text-left font-medium">{t("expenses.date")}</th><th className="px-4 py-3 text-left font-medium">{t("expenses.vendor")}</th>
-                <th className="px-4 py-3 text-left font-medium">{t("expenses.category")}</th><th className="px-4 py-3 text-left font-medium">{t("expenses.receipt")}</th>
-                <th className="px-4 py-3 text-right font-medium">{t("expenses.amount")}</th></tr></thead>
+                <th className="px-4 py-3 text-start font-medium">{t("expenses.date")}</th><th className="px-4 py-3 text-start font-medium">{t("expenses.vendor")}</th>
+                <th className="px-4 py-3 text-start font-medium">{t("expenses.category")}</th><th className="px-4 py-3 text-start font-medium">{t("expenses.receipt")}</th>
+                <th className="px-4 py-3 text-end font-medium">{t("expenses.amount")}</th></tr></thead>
               <tbody>
                 {expenses.map(e => <tr key={e.id} className="border-b border-[#171c26] hover:bg-[#161b25]">
                     <td className="px-4 py-3 text-gray-400">{fmtDate(e.expense_date)}</td>
                     <td className="px-4 py-3 text-gray-100">{e.vendor}<div className="text-xs text-gray-500">{e.description}</div></td>
                     <td className="px-4 py-3 text-gray-400">{e.category_name}</td>
                     <td className="px-4 py-3 text-gray-500 text-xs">{e.receipt ? `📎 ${e.receipt.merchant || "attached"}` : "—"}</td>
-                    <td className="px-4 py-3 text-right font-mono text-rose-400">{money(e.amount_cents)}</td>
+                    <td className="px-4 py-3 text-end font-mono text-rose-400">{money(e.amount_cents)}</td>
                   </tr>)}
                 {expenses.length === 0 && <tr><td colSpan={5} className="px-5 py-12 text-center text-gray-500">{t("expenses.noExpensesYet")}</td></tr>}
               </tbody>
@@ -174,20 +174,20 @@ export default function Expenses() {
         </TabsContent>
 
         <TabsContent value="vendors" className="mt-4">
-          {canManage && <div className="mb-3 flex justify-end"><Button data-testid="btn-new-vendor" onClick={() => setVenOpen(true)} className="bg-amber-600 hover:bg-amber-500 text-black font-semibold"><Plus size={16} className="mr-1" />{t("expenses.newVendor")}</Button></div>}
+          {canManage && <div className="mb-3 flex justify-end"><Button data-testid="btn-new-vendor" onClick={() => setVenOpen(true)} className="bg-amber-600 hover:bg-amber-500 text-black font-semibold"><Plus size={16} className="me-1" />{t("expenses.newVendor")}</Button></div>}
           <Card className="p-0 overflow-hidden">
             <table className="w-full text-sm" data-testid="table-vendors">
               <thead><tr className="text-xs uppercase tracking-wider text-gray-500 border-b border-[#222838]">
-                <th className="px-4 py-3 text-left font-medium">{t("expenses.vendor")}</th><th className="px-4 py-3 text-left font-medium">{t("expenses.contact")}</th>
-                <th className="px-4 py-3 text-left font-medium">1099</th><th className="px-4 py-3 text-left font-medium">{t("expenses.taxID")}</th>
-                {canManage && <th className="px-4 py-3 text-right font-medium">{t("expenses.actions")}</th>}</tr></thead>
+                <th className="px-4 py-3 text-start font-medium">{t("expenses.vendor")}</th><th className="px-4 py-3 text-start font-medium">{t("expenses.contact")}</th>
+                <th className="px-4 py-3 text-start font-medium">1099</th><th className="px-4 py-3 text-start font-medium">{t("expenses.taxID")}</th>
+                {canManage && <th className="px-4 py-3 text-end font-medium">{t("expenses.actions")}</th>}</tr></thead>
               <tbody>
                 {vendors.map(v => <tr key={v.id} className="border-b border-[#171c26] hover:bg-[#161b25]">
                     <td className="px-4 py-3 text-gray-100">{v.name}</td>
                     <td className="px-4 py-3 text-gray-400 text-xs">{v.email || v.phone || "—"}</td>
                     <td className="px-4 py-3">{v.is_1099 ? <span className="px-2 py-0.5 rounded-full text-xs bg-amber-500/10 text-amber-400 border border-amber-500/20">1099</span> : <span className="text-gray-600">—</span>}</td>
                     <td className="px-4 py-3 text-gray-400 font-mono text-xs">{v.tax_id_masked || "—"}</td>
-                    {canManage && <td className="px-4 py-3 text-right">
+                    {canManage && <td className="px-4 py-3 text-end">
                         <button onClick={() => delVendor(v)} aria-label={`Delete ${v.name}`} data-testid={`vendor-delete-${v.id}`} className="inline-flex items-center justify-center w-8 h-8 rounded text-gray-500 hover:text-rose-400 hover:bg-rose-500/10"><Trash2 size={15} /></button>
                       </td>}
                   </tr>)}
@@ -198,17 +198,17 @@ export default function Expenses() {
         </TabsContent>
 
         <TabsContent value="credits" className="mt-4">
-          {canManage && <div className="mb-3 flex justify-end"><Button data-testid="btn-new-vendor-credit" onClick={() => setCrOpen(true)} className="bg-amber-600 hover:bg-amber-500 text-black font-semibold"><Plus size={16} className="mr-1" />{t("expenses.newVendorCredit")}</Button></div>}
+          {canManage && <div className="mb-3 flex justify-end"><Button data-testid="btn-new-vendor-credit" onClick={() => setCrOpen(true)} className="bg-amber-600 hover:bg-amber-500 text-black font-semibold"><Plus size={16} className="me-1" />{t("expenses.newVendorCredit")}</Button></div>}
           <Card className="p-0 overflow-hidden">
             <table className="w-full text-sm" data-testid="table-vendor-credits">
               <thead><tr className="text-xs uppercase tracking-wider text-gray-500 border-b border-[#222838]">
-                <th className="px-4 py-3 text-left font-medium">{t("expenses.vendor")}</th><th className="px-4 py-3 text-left font-medium">{t("expenses.memo")}</th>
-                <th className="px-4 py-3 text-right font-medium">{t("expenses.amount")}</th><th className="px-4 py-3 text-right font-medium">{t("expenses.remaining")}</th></tr></thead>
+                <th className="px-4 py-3 text-start font-medium">{t("expenses.vendor")}</th><th className="px-4 py-3 text-start font-medium">{t("expenses.memo")}</th>
+                <th className="px-4 py-3 text-end font-medium">{t("expenses.amount")}</th><th className="px-4 py-3 text-end font-medium">{t("expenses.remaining")}</th></tr></thead>
               <tbody>
                 {credits.map(c => <tr key={c.id} className="border-b border-[#171c26]">
                     <td className="px-4 py-3 text-gray-100">{c.vendor}</td><td className="px-4 py-3 text-gray-400">{c.memo}</td>
-                    <td className="px-4 py-3 text-right font-mono text-gray-300">{money(c.amount_cents)}</td>
-                    <td className="px-4 py-3 text-right font-mono text-emerald-400">{money(c.remaining_cents)}</td>
+                    <td className="px-4 py-3 text-end font-mono text-gray-300">{money(c.amount_cents)}</td>
+                    <td className="px-4 py-3 text-end font-mono text-emerald-400">{money(c.remaining_cents)}</td>
                   </tr>)}
                 {credits.length === 0 && <tr><td colSpan={4} className="px-5 py-12 text-center text-gray-500">{t("expenses.noVendorCredits")}</td></tr>}
               </tbody>
@@ -224,12 +224,12 @@ export default function Expenses() {
             </div>
             {report1099 && <table className="w-full text-sm" data-testid="table-1099">
                 <thead><tr className="text-xs uppercase tracking-wider text-gray-500 border-b border-[#222838]">
-                  <th className="px-4 py-3 text-left font-medium">{t("expenses.vendor")}</th><th className="px-4 py-3 text-left font-medium">{t("expenses.taxID")}</th>
-                  <th className="px-4 py-3 text-right font-medium">{t("expenses.paid")}</th><th className="px-4 py-3 text-left font-medium">{t("expenses.reportable600")}</th></tr></thead>
+                  <th className="px-4 py-3 text-start font-medium">{t("expenses.vendor")}</th><th className="px-4 py-3 text-start font-medium">{t("expenses.taxID")}</th>
+                  <th className="px-4 py-3 text-end font-medium">{t("expenses.paid")}</th><th className="px-4 py-3 text-start font-medium">{t("expenses.reportable600")}</th></tr></thead>
                 <tbody>
                   {report1099.vendors.map(v => <tr key={v.vendor_id} className="border-b border-[#171c26]">
                       <td className="px-4 py-3 text-gray-100">{v.name}</td><td className="px-4 py-3 text-gray-400 font-mono text-xs">{v.tax_id_masked || "—"}</td>
-                      <td className="px-4 py-3 text-right font-mono text-gray-200">{dollars(v.paid)}</td>
+                      <td className="px-4 py-3 text-end font-mono text-gray-200">{dollars(v.paid)}</td>
                       <td className="px-4 py-3">{v.reportable ? <span className="text-amber-400">{t("expenses.yes")}</span> : <span className="text-gray-600">{t("expenses.no")}</span>}</td>
                     </tr>)}
                   {report1099.vendors.length === 0 && <tr><td colSpan={4} className="px-5 py-10 text-center text-gray-500">{t("expenses.no1099VendorsFound")}</td></tr>}

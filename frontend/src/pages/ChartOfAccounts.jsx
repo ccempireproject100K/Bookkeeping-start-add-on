@@ -70,7 +70,7 @@ export default function ChartOfAccounts() {
         {isOwner && <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
               <Button data-testid="btn-new-account" className="bg-amber-600 hover:bg-amber-500 text-black font-semibold">
-                <Plus size={16} className="mr-1" /> {t("chartofaccounts.newAccount")}</Button>
+                <Plus size={16} className="me-1" /> {t("chartofaccounts.newAccount")}</Button>
             </DialogTrigger>
             <DialogContent className="bg-[#14171E] border-[#222838]">
               <DialogHeader><DialogTitle>{t("chartofaccounts.newAccount")}</DialogTitle></DialogHeader>
@@ -112,13 +112,13 @@ export default function ChartOfAccounts() {
               <tbody>
                 {byType(t).map(a => <tr key={a.code} className="border-b border-[#171c26] hover:bg-[#161b25]">
                     <td className="px-5 py-2.5 font-mono text-amber-400 w-24">{a.code}</td>
-                    <td className="px-5 py-2.5 text-gray-200">{a.name}{a.archived && <span className="ml-2 text-xs text-rose-400">{t("chartofaccounts.archived2")}</span>}</td>
-                    <td className="px-5 py-2.5 text-right">
+                    <td className="px-5 py-2.5 text-gray-200">{a.name}{a.archived && <span className="ms-2 text-xs text-rose-400">{t("chartofaccounts.archived2")}</span>}</td>
+                    <td className="px-5 py-2.5 text-end">
                       <span className={`text-xs px-2 py-0.5 rounded-full ${a.normal_balance === "debit" ? "bg-emerald-500/10 text-emerald-400" : "bg-rose-500/10 text-rose-400"}`}>
                         {a.normal_balance === "debit" ? "DR normal" : "CR normal"}
                       </span>
                     </td>
-                    <td className="px-5 py-2.5 w-12 text-right">
+                    <td className="px-5 py-2.5 w-12 text-end">
                       {isOwner && !a.is_system && !a.archived && <button onClick={() => archive(a.code)} className="text-gray-500 hover:text-rose-400" title={t("chartofaccounts.archive")}><Archive size={15} /></button>}
                     </td>
                   </tr>)}

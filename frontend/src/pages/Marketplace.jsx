@@ -63,8 +63,8 @@ export default function Marketplace() {
 
       <div className="mb-4 flex flex-wrap items-center gap-2">
         <div className="relative">
-          <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
-          <Input className="pl-8 w-64" placeholder="Search integrations…" value={q} onChange={(e) => setQ(e.target.value)} />
+          <Search className="absolute start-2 top-2.5 h-4 w-4 text-gray-400" />
+          <Input className="ps-8 w-64" placeholder="Search integrations…" value={q} onChange={(e) => setQ(e.target.value)} />
         </div>
         {["All", ...(data.categories || []).map((c) => c.name)].map((c) => (
           <Button key={c} size="sm" variant={category === c ? "default" : "outline"} onClick={() => setCategory(c)}>
@@ -79,7 +79,7 @@ export default function Marketplace() {
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {listings.map((l) => (
-          <button key={l.slug} onClick={() => setSelected(l)} className="text-left">
+          <button key={l.slug} onClick={() => setSelected(l)} className="text-start">
             <Card>
               <div className="flex items-start justify-between gap-2">
                 <div>
@@ -107,7 +107,7 @@ export default function Marketplace() {
                 <p className="text-gray-400">{STATUS_BLURB[selected.status]}</p>
                 <div>
                   <div className="mb-1 flex items-center gap-1 font-medium"><ListChecks className="h-4 w-4" /> What you need to connect</div>
-                  <ul className="list-disc pl-5 text-gray-300">
+                  <ul className="list-disc ps-5 text-gray-300">
                     {(selected.connect_needs || []).map((n, i) => <li key={i}>{n}</li>)}
                   </ul>
                 </div>

@@ -16,7 +16,7 @@ function Section({
   } = useTranslation();
   return <div className="mb-5">
       <div className="text-xs uppercase tracking-widest text-gray-500 mb-2">{title}</div>
-      {data.items.length === 0 ? <div className="text-gray-600 text-sm pl-2">{t("cashflow.noActivity")}</div> : data.items.map(it => <div key={it.code} className="flex justify-between py-1.5 border-b border-[#171c26] text-sm">
+      {data.items.length === 0 ? <div className="text-gray-600 text-sm ps-2">{t("cashflow.noActivity")}</div> : data.items.map(it => <div key={it.code} className="flex justify-between py-1.5 border-b border-[#171c26] text-sm">
           <span className="text-gray-300">{it.code} · {it.name}</span>
           <span className={`font-mono ${it.amount_cents < 0 ? "text-rose-400" : "text-emerald-400"}`}>{dollars(it.amount)}</span>
         </div>)}
@@ -40,7 +40,7 @@ export default function CashFlow() {
   if (!data) return <Loading />;
   return <div className="animate-rise">
       <PageHeader title={t("cashflow.cashFlowStatement")} subtitle="Operating, investing & financing activities" testid="cashflow-page">
-        <Button data-testid="btn-cashflow-csv" variant="outline" onClick={() => downloadCsv(`/reports/cash-flow.csv?date_from=${from}&date_to=${to}`, "cash_flow.csv")} className="border-[#222838]"><Download size={15} className="mr-1" />{t("cashflow.csv")}</Button>
+        <Button data-testid="btn-cashflow-csv" variant="outline" onClick={() => downloadCsv(`/reports/cash-flow.csv?date_from=${from}&date_to=${to}`, "cash_flow.csv")} className="border-[#222838]"><Download size={15} className="me-1" />{t("cashflow.csv")}</Button>
       </PageHeader>
       <div className="flex items-end gap-3 mb-5">
         <div><Label className="text-xs">{t("cashflow.from")}</Label><Input data-testid="cf-from" type="date" value={from} onChange={e => setFrom(e.target.value)} className="bg-[#0F1218] border-[#222838]" /></div>

@@ -135,3 +135,52 @@ describe("LanguageSwitcher reflects and drives the same mechanism", () => {
     expect(html).toContain('data-testid="language-switcher"');
   });
 });
+
+describe("Hindi and Arabic", () => {
+  beforeEach(() => {
+    window.localStorage.clear();
+  });
+
+  afterEach(() => {
+    window.localStorage.clear();
+  });
+
+  it("a Hindi or Arabic browser opens in that language", () => {
+    setNavigator("hi-IN", ["hi-IN", "en-US"]);
+    expect(loadI18nModule().default.language).toBe("hi");
+    window.localStorage.clear();
+    setNavigator("ar-SA", ["ar-SA"]);
+    expect(loadI18nModule().default.language).toBe("ar");
+  });
+
+  it("Arabic turns the page right to left; switching back restores left to right", () => {
+    setNavigator("en-US", ["en-US"]);
+    const mod = loadI18nModule();
+    mod.setLanguage("ar");
+    expect(document.documentElement.dir).toBe("rtl");
+    expect(document.documentElement.lang).toBe("ar");
+    mod.setLanguage("hi");
+    expect(document.documentElement.dir).toBe("ltr");
+    expect(document.documentElement.lang).toBe("hi");
+    mod.setLanguage("en");
+    expect(document.documentElement.dir).toBe("ltr");
+  });
+
+  it("money keeps Western digits in Arabic and uses the Indian grouping in Hindi", () => {
+    setNavigator("en-US", ["en-US"]);
+    const mod = loadI18nModule();
+    mod.setLanguage("ar");
+    const ar = (123456.78).toLocaleString(mod.getActiveLocale(), { style: "currency", currency: "USD" });
+    expect(ar).toMatch(/123,456\.78/);
+    mod.setLanguage("hi");
+    const hi = (123456.78).toLocaleString(mod.getActiveLocale(), { style: "currency", currency: "USD" });
+    expect(hi).toMatch(/1,23,456\.78/);
+  });
+
+  it("both appear in the switcher, named in their own language", () => {
+    const mod = loadI18nModule();
+    expect(mod.SUPPORTED_LANGUAGES.map((l) => l.code)).toEqual(["en", "es", "fr", "zh-CN", "hi", "ar"]);
+    expect(mod.SUPPORTED_LANGUAGES.find((l) => l.code === "hi").label).toBe("हिन्दी");
+    expect(mod.SUPPORTED_LANGUAGES.find((l) => l.code === "ar").label).toBe("العربية");
+  });
+});

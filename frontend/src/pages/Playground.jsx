@@ -59,7 +59,7 @@ function PlaygroundInner() {
       <PageHeader title={t("playground.scenarioPlayground")} subtitle="Drag the levers — watch the year play out, live." actions={<Button variant="outline" onClick={() => {
       setLevers(DEFAULTS);
       run(DEFAULTS);
-    }}><RotateCcw size={14} className="mr-1" />{t("playground.reset")}</Button>} />
+    }}><RotateCcw size={14} className="me-1" />{t("playground.reset")}</Button>} />
       <div className="grid lg:grid-cols-[340px_1fr] gap-6">
         <Card className="p-5 space-y-5 h-fit">
           <div className="text-sm font-medium flex items-center gap-2"><SlidersHorizontal size={15} /> {t("playground.levers")}</div>

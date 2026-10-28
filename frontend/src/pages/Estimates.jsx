@@ -144,23 +144,23 @@ export default function Estimates() {
         </TabsList>
 
         <TabsContent value="estimates" className="mt-4">
-          {canManage && <div className="mb-3 flex justify-end"><Button data-testid="btn-new-estimate" onClick={() => setOpen(true)} className="bg-amber-600 hover:bg-amber-500 text-black font-semibold"><Plus size={16} className="mr-1" />{t("estimates.newEstimate")}</Button></div>}
+          {canManage && <div className="mb-3 flex justify-end"><Button data-testid="btn-new-estimate" onClick={() => setOpen(true)} className="bg-amber-600 hover:bg-amber-500 text-black font-semibold"><Plus size={16} className="me-1" />{t("estimates.newEstimate")}</Button></div>}
           <Card className="p-0 overflow-hidden">
             <table className="w-full text-sm" data-testid="table-estimates">
               <thead><tr className="text-xs uppercase tracking-wider text-gray-500 border-b border-[#222838]">
-                <th className="px-4 py-3 text-left font-medium">{t("estimates.number")}</th><th className="px-4 py-3 text-left font-medium">{t("estimates.client")}</th>
-                <th className="px-4 py-3 text-right font-medium">{t("estimates.total")}</th><th className="px-4 py-3 text-left font-medium">{t("estimates.status")}</th>
-                {canManage && <th className="px-4 py-3 text-right font-medium">{t("estimates.actions")}</th>}</tr></thead>
+                <th className="px-4 py-3 text-start font-medium">{t("estimates.number")}</th><th className="px-4 py-3 text-start font-medium">{t("estimates.client")}</th>
+                <th className="px-4 py-3 text-end font-medium">{t("estimates.total")}</th><th className="px-4 py-3 text-start font-medium">{t("estimates.status")}</th>
+                {canManage && <th className="px-4 py-3 text-end font-medium">{t("estimates.actions")}</th>}</tr></thead>
               <tbody>
                 {estimates.map(e => <tr key={e.id} className="border-b border-[#171c26] hover:bg-[#161b25]">
                     <td className="px-4 py-3 font-mono text-amber-400">{e.number}</td>
                     <td className="px-4 py-3 text-gray-100">{e.client_name}</td>
-                    <td className="px-4 py-3 text-right font-mono text-gray-200">{money(e.total_cents)}</td>
+                    <td className="px-4 py-3 text-end font-mono text-gray-200">{money(e.total_cents)}</td>
                     <td className="px-4 py-3"><span className={`px-2 py-0.5 rounded-full text-xs border capitalize ${STATUS_CLS[e.status] || ""}`}>{e.status}</span></td>
-                    {canManage && <td className="px-4 py-3 text-right space-x-2">
+                    {canManage && <td className="px-4 py-3 text-end space-x-2 rtl:space-x-reverse">
                       {e.status === "draft" && <Button size="sm" variant="outline" className="h-7 border-[#222838]" data-testid={`send-${e.id}`} onClick={() => setStatus(e.id, "sent")}>{t("estimates.markSent")}</Button>}
                       {(e.status === "draft" || e.status === "sent") && <Button size="sm" variant="outline" className="h-7 border-[#222838]" onClick={() => setStatus(e.id, "accepted")}>{t("estimates.accept")}</Button>}
-                      {e.status !== "converted" && e.status !== "declined" && <Button size="sm" className="h-7 bg-emerald-600 hover:bg-emerald-500 text-black" data-testid={`convert-${e.id}`} onClick={() => convert(e.id)}><ArrowRightLeft size={13} className="mr-1" />{t("estimates.convert")}</Button>}
+                      {e.status !== "converted" && e.status !== "declined" && <Button size="sm" className="h-7 bg-emerald-600 hover:bg-emerald-500 text-black" data-testid={`convert-${e.id}`} onClick={() => convert(e.id)}><ArrowRightLeft size={13} className="me-1" />{t("estimates.convert")}</Button>}
                     </td>}
                   </tr>)}
                 {estimates.length === 0 && <tr><td colSpan={canManage ? 5 : 4} className="px-5 py-12 text-center text-gray-500">{t("estimates.noEstimatesYet")}</td></tr>}
@@ -170,19 +170,19 @@ export default function Estimates() {
         </TabsContent>
 
         <TabsContent value="recurring" className="mt-4">
-          {canManage && <div className="mb-3 flex justify-end"><Button data-testid="btn-new-recurring" onClick={() => setRecOpen(true)} className="bg-amber-600 hover:bg-amber-500 text-black font-semibold"><Plus size={16} className="mr-1" />{t("estimates.newTemplate")}</Button></div>}
+          {canManage && <div className="mb-3 flex justify-end"><Button data-testid="btn-new-recurring" onClick={() => setRecOpen(true)} className="bg-amber-600 hover:bg-amber-500 text-black font-semibold"><Plus size={16} className="me-1" />{t("estimates.newTemplate")}</Button></div>}
           <Card className="p-0 overflow-hidden">
             <table className="w-full text-sm" data-testid="table-recurring">
               <thead><tr className="text-xs uppercase tracking-wider text-gray-500 border-b border-[#222838]">
-                <th className="px-4 py-3 text-left font-medium">{t("estimates.client")}</th><th className="px-4 py-3 text-left font-medium">{t("estimates.frequency")}</th>
-                <th className="px-4 py-3 text-left font-medium">{t("estimates.lastGenerated")}</th><th className="px-4 py-3 text-right font-medium">{t("estimates.count")}</th>
-                {canManage && <th className="px-4 py-3 text-right font-medium">{t("estimates.action")}</th>}</tr></thead>
+                <th className="px-4 py-3 text-start font-medium">{t("estimates.client")}</th><th className="px-4 py-3 text-start font-medium">{t("estimates.frequency")}</th>
+                <th className="px-4 py-3 text-start font-medium">{t("estimates.lastGenerated")}</th><th className="px-4 py-3 text-end font-medium">{t("estimates.count")}</th>
+                {canManage && <th className="px-4 py-3 text-end font-medium">{t("estimates.action")}</th>}</tr></thead>
               <tbody>
                 {recurring.map(r => <tr key={r.id} className="border-b border-[#171c26]">
                     <td className="px-4 py-3 text-gray-100">{r.client_name}</td><td className="px-4 py-3 text-gray-400 capitalize">{r.frequency}</td>
                     <td className="px-4 py-3 text-gray-400">{r.last_generated ? fmtDate(r.last_generated) : "—"}</td>
-                    <td className="px-4 py-3 text-right text-gray-300">{r.generated_count}</td>
-                    {canManage && <td className="px-4 py-3 text-right"><Button size="sm" className="h-7 bg-amber-600 hover:bg-amber-500 text-black" data-testid={`generate-${r.id}`} onClick={() => generate(r.id)}><RefreshCw size={13} className="mr-1" />{t("estimates.generate")}</Button></td>}
+                    <td className="px-4 py-3 text-end text-gray-300">{r.generated_count}</td>
+                    {canManage && <td className="px-4 py-3 text-end"><Button size="sm" className="h-7 bg-amber-600 hover:bg-amber-500 text-black" data-testid={`generate-${r.id}`} onClick={() => generate(r.id)}><RefreshCw size={13} className="me-1" />{t("estimates.generate")}</Button></td>}
                   </tr>)}
                 {recurring.length === 0 && <tr><td colSpan={canManage ? 5 : 4} className="px-5 py-12 text-center text-gray-500">{t("estimates.noRecurringTemplates")}</td></tr>}
               </tbody>
@@ -206,14 +206,14 @@ export default function Estimates() {
               const c = [...lines];
               c[i].amount = e.target.value;
               setLines(c);
-            }} className="bg-[#0F1218] border-[#222838] w-28 font-mono text-right" data-testid={`est-line-amount-${i}`} />
+            }} className="bg-[#0F1218] border-[#222838] w-28 font-mono text-end" data-testid={`est-line-amount-${i}`} />
                 {lines.length > 1 && <button onClick={() => setLines(lines.filter((_, x) => x !== i))} className="text-gray-600 hover:text-rose-400"><Trash2 size={14} /></button>}
               </div>)}
             <Button variant="ghost" size="sm" onClick={() => setLines([...lines, {
             name: "",
             revenue_code: "4300",
             amount: ""
-          }])} className="text-amber-400 hover:bg-amber-500/10"><FilePlus size={14} className="mr-1" />{t("estimates.addLine")}</Button>
+          }])} className="text-amber-400 hover:bg-amber-500/10"><FilePlus size={14} className="me-1" />{t("estimates.addLine")}</Button>
           </div>
           <div><Label className="text-xs">{t("estimates.tax")}</Label><Input data-testid="est-tax" value={tax} onChange={e => setTax(e.target.value)} className="bg-[#0F1218] border-[#222838] w-32 font-mono" /></div>
           <DialogFooter><Button data-testid="est-save" onClick={create} className="bg-amber-600 hover:bg-amber-500 text-black">{t("estimates.createEstimate")}</Button></DialogFooter>
@@ -244,7 +244,7 @@ export default function Estimates() {
                 ...recForm,
                 lines: c
               });
-            }} className="bg-[#0F1218] border-[#222838] w-28 font-mono text-right" data-testid={`recinv-amount-${i}`} />
+            }} className="bg-[#0F1218] border-[#222838] w-28 font-mono text-end" data-testid={`recinv-amount-${i}`} />
               </div>)}
             <Button variant="ghost" size="sm" onClick={() => setRecForm({
             ...recForm,
@@ -253,7 +253,7 @@ export default function Estimates() {
               revenue_code: "4300",
               amount: ""
             }]
-          })} className="text-amber-400 hover:bg-amber-500/10"><FilePlus size={14} className="mr-1" />{t("estimates.addLine")}</Button>
+          })} className="text-amber-400 hover:bg-amber-500/10"><FilePlus size={14} className="me-1" />{t("estimates.addLine")}</Button>
           </div>
           <DialogFooter><Button data-testid="rec-save" onClick={createRecurring} className="bg-amber-600 hover:bg-amber-500 text-black">{t("estimates.createTemplate")}</Button></DialogFooter>
         </DialogContent>

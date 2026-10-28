@@ -107,7 +107,7 @@ export default function Inventory() {
   const totalValue = products.reduce((s, p) => s + p.quantity_on_hand * p.unit_cost_cents, 0);
   return <div className="animate-rise">
       <PageHeader title={t("inventory.inventory")} subtitle={`${products.length} products • ${money(totalValue)} at cost`} testid="inventory-page">
-        {isOwner && <Button data-testid="btn-add-product" onClick={() => setAddOpen(true)} className="bg-amber-600 hover:bg-amber-500 text-black font-semibold"><Plus size={16} className="mr-1" /> {t("inventory.addProduct")}</Button>}
+        {isOwner && <Button data-testid="btn-add-product" onClick={() => setAddOpen(true)} className="bg-amber-600 hover:bg-amber-500 text-black font-semibold"><Plus size={16} className="me-1" /> {t("inventory.addProduct")}</Button>}
       </PageHeader>
 
       {lowStock.length > 0 && <div className="mb-4 rounded-lg border border-amber-500/30 bg-amber-500/10 p-4" data-testid="low-stock-alert">
@@ -130,26 +130,26 @@ export default function Inventory() {
           <table className="w-full text-sm" data-testid="table-inventory">
             <thead>
               <tr className="text-xs uppercase tracking-wider text-gray-500 border-b border-[#222838]">
-                <th className="px-5 py-3 text-left font-medium">{t("inventory.product")}</th>
-                <th className="px-5 py-3 text-left font-medium">{t("inventory.type")}</th>
-                <th className="px-5 py-3 text-right font-medium">{t("inventory.price")}</th>
-                <th className="px-5 py-3 text-right font-medium">{t("inventory.avgCost")}</th>
-                <th className="px-5 py-3 text-right font-medium">{t("inventory.onHand")}</th>
-                <th className="px-5 py-3 text-right font-medium">{t("inventory.value")}</th>
-                {isOwner && <th className="px-5 py-3 text-right font-medium">{t("inventory.actions")}</th>}
+                <th className="px-5 py-3 text-start font-medium">{t("inventory.product")}</th>
+                <th className="px-5 py-3 text-start font-medium">{t("inventory.type")}</th>
+                <th className="px-5 py-3 text-end font-medium">{t("inventory.price")}</th>
+                <th className="px-5 py-3 text-end font-medium">{t("inventory.avgCost")}</th>
+                <th className="px-5 py-3 text-end font-medium">{t("inventory.onHand")}</th>
+                <th className="px-5 py-3 text-end font-medium">{t("inventory.value")}</th>
+                {isOwner && <th className="px-5 py-3 text-end font-medium">{t("inventory.actions")}</th>}
               </tr>
             </thead>
             <tbody>
               {products.map(p => <tr key={p.id} className="border-b border-[#171c26] hover:bg-[#161b25]">
                   <td className="px-5 py-3 text-gray-100">{p.name}</td>
                   <td className="px-5 py-3"><span className="text-xs px-2 py-0.5 rounded-full bg-[#222838] text-gray-300 capitalize">{p.type}</span></td>
-                  <td className="px-5 py-3 text-right font-mono text-gray-300">{money(p.price_cents)}</td>
-                  <td className="px-5 py-3 text-right font-mono text-gray-400">{money(p.unit_cost_cents)}</td>
-                  <td className="px-5 py-3 text-right font-mono text-gray-200">{p.quantity_on_hand}</td>
-                  <td className="px-5 py-3 text-right font-mono text-amber-400">{money(p.quantity_on_hand * p.unit_cost_cents)}</td>
-                  {isOwner && <td className="px-5 py-3 text-right space-x-1">
-                      <Button size="sm" variant="ghost" className="h-7 text-emerald-400 hover:bg-emerald-500/10" onClick={() => setRestockFor(p)} data-testid={`restock-${p.id}`}><PackagePlus size={14} className="mr-1" />{t("inventory.restock")}</Button>
-                      <Button size="sm" variant="ghost" className="h-7 text-amber-400 hover:bg-amber-500/10" onClick={() => setAdjustFor(p)} data-testid={`adjust-${p.id}`}><Sliders size={14} className="mr-1" />{t("inventory.adjust")}</Button>
+                  <td className="px-5 py-3 text-end font-mono text-gray-300">{money(p.price_cents)}</td>
+                  <td className="px-5 py-3 text-end font-mono text-gray-400">{money(p.unit_cost_cents)}</td>
+                  <td className="px-5 py-3 text-end font-mono text-gray-200">{p.quantity_on_hand}</td>
+                  <td className="px-5 py-3 text-end font-mono text-amber-400">{money(p.quantity_on_hand * p.unit_cost_cents)}</td>
+                  {isOwner && <td className="px-5 py-3 text-end space-x-1 rtl:space-x-reverse">
+                      <Button size="sm" variant="ghost" className="h-7 text-emerald-400 hover:bg-emerald-500/10" onClick={() => setRestockFor(p)} data-testid={`restock-${p.id}`}><PackagePlus size={14} className="me-1" />{t("inventory.restock")}</Button>
+                      <Button size="sm" variant="ghost" className="h-7 text-amber-400 hover:bg-amber-500/10" onClick={() => setAdjustFor(p)} data-testid={`adjust-${p.id}`}><Sliders size={14} className="me-1" />{t("inventory.adjust")}</Button>
                     </td>}
                 </tr>)}
               {products.length === 0 && <tr><td colSpan={isOwner ? 7 : 6} className="px-5 py-12 text-center text-gray-500">{t("inventory.noProducts")}</td></tr>}

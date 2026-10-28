@@ -33,7 +33,7 @@ export default function Kpis() {
             </div>
             <div className="text-3xl font-semibold">
               {c.unit === "$" ? `$${c.value.toLocaleString()}` : `${c.value}${c.unit === "/day" || c.unit === "days" ? "" : c.unit}`}
-              {(c.unit === "/day" || c.unit === "days") && <span className="text-sm text-gray-500 ml-1">{c.unit}</span>}
+              {(c.unit === "/day" || c.unit === "days") && <span className="text-sm text-gray-500 ms-1">{c.unit}</span>}
             </div>
             {c.hint && <div className="text-xs text-gray-600 mt-1">{c.hint}</div>}
             <div className="text-[10px] text-gray-700 mt-1">{c.samples} {t("kpis.samples")}</div>

@@ -157,15 +157,15 @@ export default function Receipts() {
           e.target.value = "";
         }} />
             <Button onClick={() => fileRef.current?.click()} disabled={uploading} data-testid="receipt-upload">
-              <Upload size={14} className="mr-1" />{uploading ? "Uploading…" : "Upload receipts"}
+              <Upload size={14} className="me-1" />{uploading ? "Uploading…" : "Upload receipts"}
             </Button>
           </div>
         </Card>}
       <Card className="p-0 overflow-hidden">
         <table className="w-full text-sm">
-          <thead><tr className="text-left text-gray-500 border-b border-[#222838]">
+          <thead><tr className="text-start text-gray-500 border-b border-[#222838]">
             <th className="px-4 py-3 font-medium">{t("receipts.receipt")}</th><th className="px-4 py-3 font-medium">{t("receipts.vendor")}</th>
-            <th className="px-4 py-3 font-medium">{t("receipts.date")}</th><th className="px-4 py-3 font-medium text-right">{t("receipts.amount")}</th>
+            <th className="px-4 py-3 font-medium">{t("receipts.date")}</th><th className="px-4 py-3 font-medium text-end">{t("receipts.amount")}</th>
             <th className="px-4 py-3 font-medium">{t("receipts.status")}</th><th className="px-4 py-3"></th>
           </tr></thead>
           <tbody>
@@ -175,16 +175,16 @@ export default function Receipts() {
                 </td>
                 <td className="px-4 py-3">{r.extracted?.vendor || <span className="text-gray-600 text-xs">{r.filename}</span>}</td>
                 <td className="px-4 py-3 text-gray-400 text-xs">{r.extracted?.date ? fmtDate(r.extracted.date) : fmtDate(r.created_at)}</td>
-                <td className="px-4 py-3 text-right font-mono">{r.extracted?.amount ? money(r.extracted.amount * 100) : "—"}</td>
+                <td className="px-4 py-3 text-end font-mono">{r.extracted?.amount ? money(r.extracted.amount * 100) : "—"}</td>
                 <td className="px-4 py-3">
                   <span className={`text-xs px-2 py-0.5 rounded-full ${STATUS_STYLE[r.status] || ""}`}>{r.status}</span>
                 </td>
-                <td className="px-4 py-3 text-right whitespace-nowrap">
-                  {canManage && r.status === "uploaded" && <Button size="sm" variant="outline" className="mr-1" disabled={scanning === r.id} onClick={() => scan(r)} data-testid={`scan-${r.id}`}>
-                      <ScanLine size={13} className="mr-1" />{scanning === r.id ? "Reading…" : "AI scan"}
+                <td className="px-4 py-3 text-end whitespace-nowrap">
+                  {canManage && r.status === "uploaded" && <Button size="sm" variant="outline" className="me-1" disabled={scanning === r.id} onClick={() => scan(r)} data-testid={`scan-${r.id}`}>
+                      <ScanLine size={13} className="me-1" />{scanning === r.id ? "Reading…" : "AI scan"}
                     </Button>}
-                  {canManage && r.status === "scanned" && <Button size="sm" className="mr-1" onClick={() => openReview(r)} data-testid={`review-${r.id}`}>
-                      <CheckCircle2 size={13} className="mr-1" />{t("receipts.reviewPost")}</Button>}
+                  {canManage && r.status === "scanned" && <Button size="sm" className="me-1" onClick={() => openReview(r)} data-testid={`review-${r.id}`}>
+                      <CheckCircle2 size={13} className="me-1" />{t("receipts.reviewPost")}</Button>}
                   {canManage && r.status !== "posted" && <Button size="sm" variant="ghost" onClick={() => del(r.id)}><Trash2 size={13} /></Button>}
                 </td>
               </tr>)}

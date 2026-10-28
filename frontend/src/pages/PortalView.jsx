@@ -112,13 +112,13 @@ export default function PortalView() {
 
             <table className="w-full text-sm mt-6">
               <thead><tr className="text-xs uppercase tracking-wider text-gray-500 border-b border-[#222838]">
-                <th className="py-2 text-left font-medium">{t("portalview.description")}</th>
-                <th className="py-2 text-right font-medium">{t("portalview.amount")}</th>
+                <th className="py-2 text-start font-medium">{t("portalview.description")}</th>
+                <th className="py-2 text-end font-medium">{t("portalview.amount")}</th>
               </tr></thead>
               <tbody>
                 {inv.lines.map((l, i) => <tr key={i} className="border-b border-[#171c26]">
                     <td className="py-2 text-gray-200">{l.name || l.kind}</td>
-                    <td className="py-2 text-right font-mono text-gray-200">{money(l.amount_cents)}</td>
+                    <td className="py-2 text-end font-mono text-gray-200">{money(l.amount_cents)}</td>
                   </tr>)}
               </tbody>
             </table>

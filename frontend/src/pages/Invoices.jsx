@@ -164,7 +164,7 @@ export default function Invoices() {
   const invCredits = payInv ? credits.filter(c => c.client_name === payInv.client_name && c.remaining_cents > 0) : [];
   return <div className="animate-rise">
       <PageHeader title={t("invoices.invoices")} subtitle="Receivables — partial payments, credits & statements" testid="invoices-page">
-        {isOwner && <Button data-testid="btn-new-invoice" onClick={openNewInvoice} className="bg-amber-600 hover:bg-amber-500 text-black font-semibold"><Plus size={16} className="mr-1" /> {t("invoices.newInvoice")}</Button>}
+        {isOwner && <Button data-testid="btn-new-invoice" onClick={openNewInvoice} className="bg-amber-600 hover:bg-amber-500 text-black font-semibold"><Plus size={16} className="me-1" /> {t("invoices.newInvoice")}</Button>}
       </PageHeader>
 
       <Tabs defaultValue="invoices">
@@ -180,22 +180,22 @@ export default function Invoices() {
             <table className="w-full text-sm" data-testid="table-invoices">
               <thead>
                 <tr className="text-xs uppercase tracking-wider text-gray-500 border-b border-[#222838]">
-                  <th className="px-5 py-3 text-left font-medium">{t("invoices.client")}</th>
-                  <th className="px-5 py-3 text-left font-medium">{t("invoices.issued")}</th>
-                  <th className="px-5 py-3 text-right font-medium">{t("invoices.total")}</th>
-                  <th className="px-5 py-3 text-right font-medium">{t("invoices.balance")}</th>
-                  <th className="px-5 py-3 text-left font-medium">{t("invoices.status")}</th>
-                  {isOwner && <th className="px-5 py-3 text-right font-medium">{t("invoices.actions")}</th>}
+                  <th className="px-5 py-3 text-start font-medium">{t("invoices.client")}</th>
+                  <th className="px-5 py-3 text-start font-medium">{t("invoices.issued")}</th>
+                  <th className="px-5 py-3 text-end font-medium">{t("invoices.total")}</th>
+                  <th className="px-5 py-3 text-end font-medium">{t("invoices.balance")}</th>
+                  <th className="px-5 py-3 text-start font-medium">{t("invoices.status")}</th>
+                  {isOwner && <th className="px-5 py-3 text-end font-medium">{t("invoices.actions")}</th>}
                 </tr>
               </thead>
               <tbody>
                 {invoices.map(inv => <tr key={inv.id} className="border-b border-[#171c26] hover:bg-[#161b25]">
                     <td className="px-5 py-3 text-gray-100">{inv.client_name}</td>
                     <td className="px-5 py-3 text-gray-400">{fmtDate(inv.created_at?.slice(0, 10))}</td>
-                    <td className="px-5 py-3 text-right font-mono text-gray-200">{moneyFor(inv.total_cents, inv.currency)}</td>
-                    <td className="px-5 py-3 text-right font-mono text-amber-400">{moneyFor(inv.balance_cents, inv.currency)}</td>
+                    <td className="px-5 py-3 text-end font-mono text-gray-200">{moneyFor(inv.total_cents, inv.currency)}</td>
+                    <td className="px-5 py-3 text-end font-mono text-amber-400">{moneyFor(inv.balance_cents, inv.currency)}</td>
                     <td className="px-5 py-3"><span className={`px-2 py-0.5 rounded-full text-xs border capitalize ${STATUS_CLS[inv.status] || ""}`}>{inv.status}</span></td>
-                    {isOwner && <td className="px-5 py-3 text-right">
+                    {isOwner && <td className="px-5 py-3 text-end">
                         <div className="flex justify-end gap-1">
                           {inv.balance_cents > 0 && <>
                               <Button size="sm" variant="ghost" title={t("invoices.copyA7DayPaymentLink")} onClick={async () => {
@@ -228,20 +228,20 @@ export default function Invoices() {
         <TabsContent value="credits" className="mt-4">
           {isOwner && <div className="flex justify-end mb-3">
               <Button onClick={() => setCreditOpen(true)} className="bg-amber-600 hover:bg-amber-500 text-black font-semibold" data-testid="credit-issue-open">
-                <Plus size={15} className="mr-1" /> {t("invoices.issueCredit")}</Button>
+                <Plus size={15} className="me-1" /> {t("invoices.issueCredit")}</Button>
             </div>}
           <Card className="p-0 overflow-hidden">
             <table className="w-full text-sm" data-testid="table-cust-credits">
               <thead><tr className="text-xs uppercase tracking-wider text-gray-500 border-b border-[#222838]">
-                <th className="px-5 py-3 text-left font-medium">{t("invoices.customer")}</th><th className="px-5 py-3 text-left font-medium">{t("invoices.source")}</th>
-                <th className="px-5 py-3 text-right font-medium">{t("invoices.amount")}</th><th className="px-5 py-3 text-right font-medium">{t("invoices.remaining")}</th>
-                {isOwner && <th className="px-5 py-3 text-right font-medium">{t("invoices.actions")}</th>}</tr></thead>
+                <th className="px-5 py-3 text-start font-medium">{t("invoices.customer")}</th><th className="px-5 py-3 text-start font-medium">{t("invoices.source")}</th>
+                <th className="px-5 py-3 text-end font-medium">{t("invoices.amount")}</th><th className="px-5 py-3 text-end font-medium">{t("invoices.remaining")}</th>
+                {isOwner && <th className="px-5 py-3 text-end font-medium">{t("invoices.actions")}</th>}</tr></thead>
               <tbody>
                 {credits.map(c => <tr key={c.id} className="border-b border-[#171c26]">
                     <td className="px-5 py-3 text-gray-100">{c.client_name}</td><td className="px-5 py-3 text-gray-400 capitalize">{(c.source || "").replace("_", " ")}</td>
-                    <td className="px-5 py-3 text-right font-mono text-gray-300">{money(c.amount_cents)}</td>
-                    <td className="px-5 py-3 text-right font-mono text-emerald-400">{money(c.remaining_cents)}</td>
-                    {isOwner && <td className="px-5 py-3 text-right">
+                    <td className="px-5 py-3 text-end font-mono text-gray-300">{money(c.amount_cents)}</td>
+                    <td className="px-5 py-3 text-end font-mono text-emerald-400">{money(c.remaining_cents)}</td>
+                    {isOwner && <td className="px-5 py-3 text-end">
                         {c.remaining_cents > 0 && c.status !== "refunded" && <Button size="sm" variant="outline" className="h-7" onClick={() => setRefundFor(c)} data-testid={`credit-refund-${c.id}`}>{t("invoices.refund")}</Button>}
                       </td>}
                   </tr>)}
@@ -275,14 +275,14 @@ export default function Invoices() {
               const c = [...lines];
               c[i].amount = e.target.value;
               setLines(c);
-            }} className="bg-[#0F1218] border-[#222838] w-28 font-mono text-right" data-testid={`invoice-line-amount-${i}`} />
+            }} className="bg-[#0F1218] border-[#222838] w-28 font-mono text-end" data-testid={`invoice-line-amount-${i}`} />
                 {lines.length > 1 && <button onClick={() => setLines(lines.filter((_, x) => x !== i))} className="text-gray-600 hover:text-rose-400"><Trash2 size={14} /></button>}
               </div>)}
             <Button variant="ghost" size="sm" onClick={() => setLines([...lines, {
             name: "",
             revenue_code: "4020",
             amount: ""
-          }])} className="text-amber-400 hover:bg-amber-500/10"><FilePlus size={14} className="mr-1" />{t("invoices.addLine")}</Button>
+          }])} className="text-amber-400 hover:bg-amber-500/10"><FilePlus size={14} className="me-1" />{t("invoices.addLine")}</Button>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div><Label className="text-xs">{t("invoices.taxJurisdictionOptional")}</Label>
@@ -414,20 +414,20 @@ function RemindersTab({
       <Card className="p-0 overflow-hidden">
         <table className="w-full text-sm" data-testid="table-overdue">
           <thead><tr className="text-xs uppercase tracking-wider text-gray-500 border-b border-[#222838]">
-            <th className="px-5 py-3 text-left font-medium">{t("invoices.client")}</th>
-            <th className="px-5 py-3 text-left font-medium">{t("invoices.due")}</th>
-            <th className="px-5 py-3 text-right font-medium">{t("invoices.daysOverdue")}</th>
-            <th className="px-5 py-3 text-right font-medium">{t("invoices.balance")}</th>
-            <th className="px-5 py-3 text-right font-medium">{t("invoices.reminders")}</th>
-            {isOwner && <th className="px-5 py-3 text-right font-medium">{t("invoices.actions")}</th>}</tr></thead>
+            <th className="px-5 py-3 text-start font-medium">{t("invoices.client")}</th>
+            <th className="px-5 py-3 text-start font-medium">{t("invoices.due")}</th>
+            <th className="px-5 py-3 text-end font-medium">{t("invoices.daysOverdue")}</th>
+            <th className="px-5 py-3 text-end font-medium">{t("invoices.balance")}</th>
+            <th className="px-5 py-3 text-end font-medium">{t("invoices.reminders")}</th>
+            {isOwner && <th className="px-5 py-3 text-end font-medium">{t("invoices.actions")}</th>}</tr></thead>
           <tbody>
             {overdue.map(o => <tr key={o.invoice_id} className="border-b border-[#171c26] hover:bg-[#161b25]">
                 <td className="px-5 py-3 text-gray-100">{o.client_name}</td>
                 <td className="px-5 py-3 text-gray-400">{fmtDate(o.due_date)}</td>
-                <td className="px-5 py-3 text-right font-mono text-rose-400">{o.days_overdue}</td>
-                <td className="px-5 py-3 text-right font-mono text-amber-400">{money(o.balance_cents)}</td>
-                <td className="px-5 py-3 text-right text-gray-400">{o.reminders_count}</td>
-                {isOwner && <td className="px-5 py-3 text-right">
+                <td className="px-5 py-3 text-end font-mono text-rose-400">{o.days_overdue}</td>
+                <td className="px-5 py-3 text-end font-mono text-amber-400">{money(o.balance_cents)}</td>
+                <td className="px-5 py-3 text-end text-gray-400">{o.reminders_count}</td>
+                {isOwner && <td className="px-5 py-3 text-end">
                     <Button size="sm" variant="outline" className="h-7 border-[#222838]" onClick={() => openDraft(o)} data-testid={`remind-${o.invoice_id}`}>{t("invoices.draftReminder")}</Button>
                   </td>}
               </tr>)}
@@ -441,10 +441,10 @@ function RemindersTab({
         <Card className="p-0 overflow-hidden">
           <table className="w-full text-sm" data-testid="table-reminders">
             <thead><tr className="text-xs uppercase tracking-wider text-gray-500 border-b border-[#222838]">
-              <th className="px-5 py-3 text-left font-medium">{t("invoices.sent")}</th>
-              <th className="px-5 py-3 text-left font-medium">{t("invoices.client")}</th>
-              <th className="px-5 py-3 text-left font-medium">{t("invoices.by")}</th>
-              <th className="px-5 py-3 text-left font-medium">{t("invoices.message")}</th></tr></thead>
+              <th className="px-5 py-3 text-start font-medium">{t("invoices.sent")}</th>
+              <th className="px-5 py-3 text-start font-medium">{t("invoices.client")}</th>
+              <th className="px-5 py-3 text-start font-medium">{t("invoices.by")}</th>
+              <th className="px-5 py-3 text-start font-medium">{t("invoices.message")}</th></tr></thead>
             <tbody>
               {hist.map(r => <tr key={r.id} className="border-b border-[#171c26]">
                   <td className="px-5 py-3 text-gray-400 text-xs whitespace-nowrap">{fmtDate(r.sent_at?.slice(0, 10))}</td>

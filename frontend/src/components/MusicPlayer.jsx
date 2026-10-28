@@ -168,11 +168,11 @@ export default function MusicPlayer() {
     setTimeout(() => load(ts[0], true), 50);
   };
   if (!open) {
-    return <button onClick={() => setOpen(true)} data-testid="music-open-button" aria-label={t("musicplayer.openMusicPlayer")} className={cn("fixed bottom-4 right-4 z-30 grid size-12 place-items-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform duration-150 hover:scale-105 print:hidden", playing && "animate-pulse-dot")}>
+    return <button onClick={() => setOpen(true)} data-testid="music-open-button" aria-label={t("musicplayer.openMusicPlayer")} className={cn("fixed bottom-4 end-4 z-30 grid size-12 place-items-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform duration-150 hover:scale-105 print:hidden", playing && "animate-pulse-dot")}>
         <Music2 className="size-5" />
       </button>;
   }
-  return <div className="fixed inset-x-3 bottom-3 z-30 rounded-xl border border-border bg-card/95 p-3 shadow-2xl backdrop-blur-xl sm:left-auto sm:right-4 sm:w-80 print:hidden" data-testid="music-player">
+  return <div className="fixed inset-x-3 bottom-3 z-30 rounded-xl border border-border bg-card/95 p-3 shadow-2xl backdrop-blur-xl sm:start-auto sm:end-4 sm:w-80 print:hidden" data-testid="music-player">
       <div className="flex items-center justify-between">
         <div className="flex gap-1 rounded-md bg-muted p-0.5">
           {["radio", "files"].map(s => <button key={s} onClick={() => {
@@ -214,7 +214,7 @@ export default function MusicPlayer() {
           {list.map((t, i) => <button key={t.src} onClick={() => {
         setIdx(i);
         load(t, true);
-      }} data-testid={`music-track-${i}`} className={cn("block w-full truncate rounded px-2 py-1 text-left text-xs transition-colors duration-150 hover:bg-muted", i === idx && "bg-primary/10 font-medium")}>{t.title}</button>)}
+      }} data-testid={`music-track-${i}`} className={cn("block w-full truncate rounded px-2 py-1 text-start text-xs transition-colors duration-150 hover:bg-muted", i === idx && "bg-primary/10 font-medium")}>{t.title}</button>)}
         </div>}
     </div>;
 }

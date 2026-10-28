@@ -208,7 +208,7 @@ export default function ReferralPayouts() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left text-slate-400">
+              <tr className="text-start text-slate-400">
                 <th className="py-2">Referrer</th><th>Preference</th>
                 <th>Site</th><th>Paying</th><th>Payable</th>
                 <th>Locked</th><th>Actions</th>
@@ -234,7 +234,7 @@ export default function ReferralPayouts() {
                       <td>{s.paying_referrals} / {s.unlock_at}</td>
                       <td>{money(s.payable)}</td>
                       <td>{s.locked ? money(s.locked_cents) : "—"}</td>
-                      <td className="space-x-2 whitespace-nowrap">
+                      <td className="space-x-2 rtl:space-x-reverse whitespace-nowrap">
                         <Button size="sm" variant="outline" disabled={busy}
                           onClick={() => recordManual(row, p)}>
                           Record manual
@@ -269,7 +269,7 @@ export default function ReferralPayouts() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left text-slate-400">
+              <tr className="text-start text-slate-400">
                 <th className="py-2">Referrer</th><th>Site</th><th>Method</th>
                 <th>Gross</th><th>Fee</th><th>Net</th><th>State</th><th>Actions</th>
               </tr>
@@ -287,7 +287,7 @@ export default function ReferralPayouts() {
                   <td>{item.fee_cents ? money(item.fee_cents) : "—"}</td>
                   <td>{money(item.net_cents)}</td>
                   <td>{item.status}</td>
-                  <td className="space-x-2 whitespace-nowrap">
+                  <td className="space-x-2 rtl:space-x-reverse whitespace-nowrap">
                     {(NEXT_STATES[item.status] || []).map((st) => (
                       <Button key={st} size="sm" variant="outline" disabled={busy}
                         onClick={() => advance(item, st)}>

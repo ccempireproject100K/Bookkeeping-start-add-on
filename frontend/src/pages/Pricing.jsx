@@ -87,7 +87,7 @@ export default function Pricing() {
                     <div className="h-full bg-blue-500 rounded-full" style={{
                 width: `${b.win_rate}%`
               }} /></div>
-                  <span className="w-24 text-right text-xs text-gray-400">{b.win_rate}% · {b.samples} {t("pricing.quotes")}</span>
+                  <span className="w-24 text-end text-xs text-gray-400">{b.win_rate}% · {b.samples} {t("pricing.quotes")}</span>
                 </div>)}
             </Card>}
         </div>

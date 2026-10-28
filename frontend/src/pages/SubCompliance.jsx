@@ -76,7 +76,7 @@ export default function SubCompliance() {
         </div>}
       <Card className="p-0 overflow-hidden">
         <table className="w-full text-sm">
-          <thead><tr className="text-left text-gray-500 border-b border-[#222838]">
+          <thead><tr className="text-start text-gray-500 border-b border-[#222838]">
             <th className="px-4 py-3 font-medium">{t("subcompliance.subcontractor")}</th><th className="px-4 py-3 font-medium">{t("subcompliance.status")}</th>
             <th className="px-4 py-3 font-medium">{t("subcompliance.issues")}</th><th className="px-4 py-3"></th>
           </tr></thead>
@@ -88,9 +88,9 @@ export default function SubCompliance() {
                   <td className="px-4 py-3">
                     {st.compliant ? <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400"><ShieldCheck size={12} />{t("subcompliance.compliant")}</span> : <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-red-500/15 text-red-400"><ShieldX size={12} />{t("subcompliance.attention")}</span>}
                   </td>
-                  <td className="px-4 py-3">{(st.issues || []).map(i => <span key={i} className="text-xs px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-400 mr-1">{ISSUE_LABEL[i] || i}</span>)}
+                  <td className="px-4 py-3">{(st.issues || []).map(i => <span key={i} className="text-xs px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-400 me-1">{ISSUE_LABEL[i] || i}</span>)}
                     {!(st.issues || []).length && <span className="text-gray-600 text-xs">—</span>}</td>
-                  <td className="px-4 py-3 text-right">
+                  <td className="px-4 py-3 text-end">
                     {canManage && <Button size="sm" variant="ghost" onClick={() => openEdit(s)}><Pencil size={13} /></Button>}
                   </td>
                 </tr>;

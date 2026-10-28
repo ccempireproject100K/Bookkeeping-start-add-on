@@ -36,7 +36,7 @@ const BreadcrumbSeparator = ({
   className,
   ...props
 }) => <li role="presentation" aria-hidden="true" className={cn("[&>svg]:w-3.5 [&>svg]:h-3.5", className)} {...props}>
-    {children ?? <ChevronRight />}
+    {children ?? <ChevronRight className="rtl:-scale-x-100" />}
   </li>;
 BreadcrumbSeparator.displayName = "BreadcrumbSeparator";
 const BreadcrumbEllipsis = ({

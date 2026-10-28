@@ -122,11 +122,11 @@ function SessionsCard() {
       <p className="text-sm text-gray-500 mb-4">{t("settings.ifYouEverLoseADevice")}</p>
       <div className="flex flex-wrap gap-2">
         <Button variant="destructive" onClick={() => revokeAll(false)} disabled={busy} data-testid="settings-revoke-all">
-          <LogOut className="w-4 h-4 mr-2" />
+          <LogOut className="w-4 h-4 me-2" />
           {busy ? "Working…" : "Sign out all other devices"}
         </Button>
         <Button variant="outline" onClick={() => revokeAll(true)} disabled={busy} data-testid="settings-revoke-everywhere">
-          <LogOut className="w-4 h-4 mr-2" />{t("settings.signOutEverywhereInclThisDevice")}</Button>
+          <LogOut className="w-4 h-4 me-2" />{t("settings.signOutEverywhereInclThisDevice")}</Button>
       </div>
     </Card>;
 }

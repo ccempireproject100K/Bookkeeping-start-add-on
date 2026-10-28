@@ -100,7 +100,7 @@ export default function SalesTaxTab({
           rate_pct: e.target.value
         })} placeholder={t("salestaxtab.rate")} type="number" step="0.01" className="bg-[#14171E] border-[#222838] w-28 font-mono" data-testid="st-rate" />
             <Button onClick={addJuris} disabled={busy} data-testid="st-add" className="bg-amber-600 hover:bg-amber-500 text-black font-semibold">
-              <Plus size={15} className="mr-1" /> {t("salestaxtab.add")}</Button>
+              <Plus size={15} className="me-1" /> {t("salestaxtab.add")}</Button>
           </div>}
         {juris.length > 0 ? <ul className="space-y-2">
             {juris.map(j => <li key={j.id} className={`flex items-center justify-between rounded-lg border px-3 py-2 ${j.active ? "bg-[#14171E] border-[#222838]" : "bg-[#0F1218] border-[#1b2230] opacity-60"}`}>
@@ -117,7 +117,7 @@ export default function SalesTaxTab({
 
       <Card className="p-0 overflow-hidden">
         <div className="flex flex-wrap items-center gap-2 px-5 pt-4 pb-2">
-          <h3 className="font-semibold text-gray-100 mr-auto">{t("salestaxtab.liabilityReport")}</h3>
+          <h3 className="font-semibold text-gray-100 me-auto">{t("salestaxtab.liabilityReport")}</h3>
           <Select value={String(year)} onValueChange={v => setYear(parseInt(v, 10))}>
             <SelectTrigger className="bg-[#14171E] border-[#222838] w-24" data-testid="st-year"><SelectValue /></SelectTrigger>
             <SelectContent className="bg-[#14171E] border-[#222838] text-gray-100">
@@ -135,28 +135,28 @@ export default function SalesTaxTab({
             {money(unassigned.tax_collected_cents)} {t("salestaxtab.ofSalesTaxIsnTTagged")}</div>}
         <table className="w-full text-sm" data-testid="table-st-liability">
           <thead><tr className="text-xs uppercase tracking-wider text-gray-500 border-b border-[#222838]">
-            <th className="px-5 py-3 text-left font-medium">{t("salestaxtab.jurisdiction")}</th>
-            <th className="px-5 py-3 text-right font-medium">{t("salestaxtab.rate2")}</th>
-            <th className="px-5 py-3 text-right font-medium">{t("salestaxtab.invoices")}</th>
-            <th className="px-5 py-3 text-right font-medium">{t("salestaxtab.taxableSales")}</th>
-            <th className="px-5 py-3 text-right font-medium">{t("salestaxtab.taxCollected")}</th>
+            <th className="px-5 py-3 text-start font-medium">{t("salestaxtab.jurisdiction")}</th>
+            <th className="px-5 py-3 text-end font-medium">{t("salestaxtab.rate2")}</th>
+            <th className="px-5 py-3 text-end font-medium">{t("salestaxtab.invoices")}</th>
+            <th className="px-5 py-3 text-end font-medium">{t("salestaxtab.taxableSales")}</th>
+            <th className="px-5 py-3 text-end font-medium">{t("salestaxtab.taxCollected")}</th>
           </tr></thead>
           <tbody>
             {rows.map(r => <tr key={r.jurisdiction_id} className="border-b border-[#171c26] hover:bg-[#161b25]">
-                <td className="px-5 py-3 text-gray-100">{r.name}{r.state ? <span className="text-gray-500 text-xs ml-2">{r.state}</span> : null}</td>
-                <td className="px-5 py-3 text-right font-mono text-gray-400">{r.rate_pct != null ? `${r.rate_pct}%` : "—"}</td>
-                <td className="px-5 py-3 text-right text-gray-400">{r.invoice_count}</td>
-                <td className="px-5 py-3 text-right font-mono text-gray-300">{money(r.taxable_sales_cents)}</td>
-                <td className="px-5 py-3 text-right font-mono text-amber-400">{money(r.tax_collected_cents)}</td>
+                <td className="px-5 py-3 text-gray-100">{r.name}{r.state ? <span className="text-gray-500 text-xs ms-2">{r.state}</span> : null}</td>
+                <td className="px-5 py-3 text-end font-mono text-gray-400">{r.rate_pct != null ? `${r.rate_pct}%` : "—"}</td>
+                <td className="px-5 py-3 text-end text-gray-400">{r.invoice_count}</td>
+                <td className="px-5 py-3 text-end font-mono text-gray-300">{money(r.taxable_sales_cents)}</td>
+                <td className="px-5 py-3 text-end font-mono text-amber-400">{money(r.tax_collected_cents)}</td>
               </tr>)}
             {rows.length === 0 && <tr><td colSpan={5} className="px-5 py-12 text-center text-gray-500">{t("salestaxtab.noTaxedInvoicesInThisPeriod")}</td></tr>}
           </tbody>
           {liab && rows.length > 0 && <tfoot><tr className="border-t border-[#222838] bg-[#0F1218]">
               <td className="px-5 py-3 text-gray-200 font-semibold">{t("salestaxtab.total")}</td>
               <td />
-              <td className="px-5 py-3 text-right text-gray-300">{liab.totals.invoice_count}</td>
-              <td className="px-5 py-3 text-right font-mono text-gray-200">{money(liab.totals.taxable_sales_cents)}</td>
-              <td className="px-5 py-3 text-right font-mono text-amber-400 font-semibold">{money(liab.totals.tax_collected_cents)}</td>
+              <td className="px-5 py-3 text-end text-gray-300">{liab.totals.invoice_count}</td>
+              <td className="px-5 py-3 text-end font-mono text-gray-200">{money(liab.totals.taxable_sales_cents)}</td>
+              <td className="px-5 py-3 text-end font-mono text-amber-400 font-semibold">{money(liab.totals.tax_collected_cents)}</td>
             </tr></tfoot>}
         </table>
       </Card>

@@ -55,10 +55,10 @@ export default function FiscalPeriods() {
         <table className="w-full text-sm" data-testid="table-periods">
           <thead>
             <tr className="text-xs uppercase tracking-wider text-gray-500 border-b border-[#222838]">
-              <th className="px-5 py-3 text-left font-medium">{t("fiscalperiods.period")}</th>
-              <th className="px-5 py-3 text-left font-medium">{t("fiscalperiods.range")}</th>
-              <th className="px-5 py-3 text-left font-medium">{t("fiscalperiods.status")}</th>
-              <th className="px-5 py-3 text-right font-medium">{t("fiscalperiods.actions")}</th>
+              <th className="px-5 py-3 text-start font-medium">{t("fiscalperiods.period")}</th>
+              <th className="px-5 py-3 text-start font-medium">{t("fiscalperiods.range")}</th>
+              <th className="px-5 py-3 text-start font-medium">{t("fiscalperiods.status")}</th>
+              <th className="px-5 py-3 text-end font-medium">{t("fiscalperiods.actions")}</th>
             </tr>
           </thead>
           <tbody>
@@ -72,7 +72,7 @@ export default function FiscalPeriods() {
                       <s.icon size={12} />{s.label}
                     </span>
                   </td>
-                  <td className="px-5 py-3 text-right space-x-2">
+                  <td className="px-5 py-3 text-end space-x-2 rtl:space-x-reverse">
                     {isOwner && p.status !== "open" && <Button size="sm" variant="ghost" className="h-7 text-emerald-400 hover:bg-emerald-500/10" onClick={() => setStatus(p.key, "open")} data-testid={`reopen-${p.key}`}>{t("fiscalperiods.reopen")}</Button>}
                     {isOwner && p.status === "open" && <Button size="sm" variant="ghost" className="h-7 text-amber-400 hover:bg-amber-500/10" onClick={() => setStatus(p.key, "soft_closed")} data-testid={`soft-close-${p.key}`}>{t("fiscalperiods.softClose")}</Button>}
                     {isOwner && p.status !== "locked" && <Button size="sm" variant="ghost" className="h-7 text-rose-400 hover:bg-rose-500/10" onClick={() => setStatus(p.key, "locked")} data-testid={`lock-${p.key}`}>{t("fiscalperiods.lock")}</Button>}

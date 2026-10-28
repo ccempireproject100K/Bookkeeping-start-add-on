@@ -29,16 +29,16 @@ function EntitiesInner() {
       </div>
       <Card className="p-0 overflow-hidden">
         <table className="w-full text-sm">
-          <thead><tr className="text-left text-gray-500 border-b border-[#222838]">
-            <th className="px-4 py-3 font-medium">{t("entities.business")}</th><th className="px-4 py-3 font-medium text-right">{t("entities.revenue")}</th>
-            <th className="px-4 py-3 font-medium text-right">{t("entities.net")}</th><th className="px-4 py-3 font-medium text-right">{t("entities.cash")}</th>
+          <thead><tr className="text-start text-gray-500 border-b border-[#222838]">
+            <th className="px-4 py-3 font-medium">{t("entities.business")}</th><th className="px-4 py-3 font-medium text-end">{t("entities.revenue")}</th>
+            <th className="px-4 py-3 font-medium text-end">{t("entities.net")}</th><th className="px-4 py-3 font-medium text-end">{t("entities.cash")}</th>
           </tr></thead>
           <tbody>
             {(con?.entities || []).map(e => <tr key={e.tenant_id} className="border-b border-[#1a2030]">
                 <td className="px-4 py-3"><div className="flex items-center gap-2"><Building2 size={14} className="text-gray-500" /><span className="font-medium">{e.name}</span></div></td>
-                <td className="px-4 py-3 text-right font-mono">{money(e.revenue_cents)}</td>
-                <td className={`px-4 py-3 text-right font-mono ${e.net_cents >= 0 ? "text-emerald-400" : "text-rose-400"}`}>{money(e.net_cents)}</td>
-                <td className="px-4 py-3 text-right font-mono">{money(e.cash_cents)}</td>
+                <td className="px-4 py-3 text-end font-mono">{money(e.revenue_cents)}</td>
+                <td className={`px-4 py-3 text-end font-mono ${e.net_cents >= 0 ? "text-emerald-400" : "text-rose-400"}`}>{money(e.net_cents)}</td>
+                <td className="px-4 py-3 text-end font-mono">{money(e.cash_cents)}</td>
               </tr>)}
           </tbody>
         </table>

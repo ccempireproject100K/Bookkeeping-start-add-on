@@ -188,7 +188,7 @@ export default function Jobs() {
   if (!rows) return <Loading />;
   return <div className="animate-rise">
       <PageHeader title={t("jobs.jobs")} subtitle="Estimate, track costs, and see profit on every job" testid="jobs-page">
-        {isOwner && <Button data-testid="btn-new-job" onClick={() => setCreateOpen(true)} className="bg-amber-600 hover:bg-amber-500 text-black font-semibold"><Plus size={16} className="mr-1" />{t("jobs.newJob")}</Button>}
+        {isOwner && <Button data-testid="btn-new-job" onClick={() => setCreateOpen(true)} className="bg-amber-600 hover:bg-amber-500 text-black font-semibold"><Plus size={16} className="me-1" />{t("jobs.newJob")}</Button>}
       </PageHeader>
 
       <Card className="p-0 overflow-hidden">
@@ -196,14 +196,14 @@ export default function Jobs() {
           <table className="w-full text-sm" data-testid="table-jobs">
             <thead>
               <tr className="text-xs uppercase tracking-wider text-gray-500 border-b border-[#222838]">
-                <th className="px-5 py-3 text-left font-medium">{t("jobs.job")}</th>
-                <th className="px-5 py-3 text-left font-medium">{t("jobs.customer")}</th>
-                <th className="px-5 py-3 text-left font-medium">{t("jobs.type")}</th>
-                <th className="px-5 py-3 text-left font-medium">{t("jobs.status")}</th>
-                <th className="px-5 py-3 text-right font-medium">{t("jobs.revenue")}</th>
-                <th className="px-5 py-3 text-right font-medium">{t("jobs.cost")}</th>
-                <th className="px-5 py-3 text-right font-medium">{t("jobs.grossProfit")}</th>
-                <th className="px-5 py-3 text-right font-medium">{t("jobs.margin")}</th>
+                <th className="px-5 py-3 text-start font-medium">{t("jobs.job")}</th>
+                <th className="px-5 py-3 text-start font-medium">{t("jobs.customer")}</th>
+                <th className="px-5 py-3 text-start font-medium">{t("jobs.type")}</th>
+                <th className="px-5 py-3 text-start font-medium">{t("jobs.status")}</th>
+                <th className="px-5 py-3 text-end font-medium">{t("jobs.revenue")}</th>
+                <th className="px-5 py-3 text-end font-medium">{t("jobs.cost")}</th>
+                <th className="px-5 py-3 text-end font-medium">{t("jobs.grossProfit")}</th>
+                <th className="px-5 py-3 text-end font-medium">{t("jobs.margin")}</th>
               </tr>
             </thead>
             <tbody>
@@ -212,10 +212,10 @@ export default function Jobs() {
                   <td className="px-5 py-3 text-gray-100">{j.customer_name}</td>
                   <td className="px-5 py-3 capitalize text-gray-300">{j.job_type}</td>
                   <td className="px-5 py-3"><span className={`px-2 py-0.5 rounded-full text-xs border capitalize ${STATUS_CLS[j.status]}`}>{j.status}</span></td>
-                  <td className="px-5 py-3 text-right font-mono text-gray-300">{dollars(j.profit.revenue)}</td>
-                  <td className="px-5 py-3 text-right font-mono text-gray-400">{dollars(j.profit.cost)}</td>
-                  <td className={`px-5 py-3 text-right font-mono ${j.profit.gross_profit < 0 ? "text-rose-400" : "text-emerald-400"}`}>{dollars(j.profit.gross_profit)}</td>
-                  <td className="px-5 py-3 text-right font-mono flex items-center justify-end gap-1">
+                  <td className="px-5 py-3 text-end font-mono text-gray-300">{dollars(j.profit.revenue)}</td>
+                  <td className="px-5 py-3 text-end font-mono text-gray-400">{dollars(j.profit.cost)}</td>
+                  <td className={`px-5 py-3 text-end font-mono ${j.profit.gross_profit < 0 ? "text-rose-400" : "text-emerald-400"}`}>{dollars(j.profit.gross_profit)}</td>
+                  <td className="px-5 py-3 text-end font-mono flex items-center justify-end gap-1">
                     {j.profit.is_unprofitable && <AlertTriangle size={13} className="text-rose-400" />}
                     <span className={j.profit.gross_margin_pct < 0 ? "text-rose-400" : j.profit.gross_margin_pct < 20 ? "text-amber-400" : "text-emerald-400"}>{j.profit.gross_margin_pct}%</span>
                   </td>
@@ -315,14 +315,14 @@ function JobDetail({
       </div>
 
       {isOwner && NEXT[detail.status] && <Button size="sm" onClick={() => advance(detail)} data-testid="btn-advance-status" className="w-fit bg-amber-600 hover:bg-amber-500 text-black mt-1">
-          {NEXT_LABEL[detail.status]} <ArrowRight size={14} className="ml-1" />
+          {NEXT_LABEL[detail.status]} <ArrowRight size={14} className="ms-1 rtl:-scale-x-100" />
         </Button>}
 
       {/* Estimate vs actual */}
       <div className="mt-2">
         <h4 className="text-xs uppercase tracking-wider text-gray-500 mb-2">{t("jobs.estimateVsActual")}</h4>
         <table className="w-full text-sm">
-          <thead><tr className="text-[10px] uppercase text-gray-500 border-b border-[#222838]"><th className="py-1.5 text-left">{t("jobs.category")}</th><th className="py-1.5 text-right">{t("jobs.estimated")}</th><th className="py-1.5 text-right">{t("jobs.actual")}</th><th className="py-1.5 text-right">{t("jobs.variance")}</th></tr></thead>
+          <thead><tr className="text-[10px] uppercase text-gray-500 border-b border-[#222838]"><th className="py-1.5 text-start">{t("jobs.category")}</th><th className="py-1.5 text-end">{t("jobs.estimated")}</th><th className="py-1.5 text-end">{t("jobs.actual")}</th><th className="py-1.5 text-end">{t("jobs.variance")}</th></tr></thead>
           <tbody>
             {CATS.map(c => {
             const est = estCents[c] || 0;
@@ -330,9 +330,9 @@ function JobDetail({
             const v = act - est;
             return <tr key={c} className="border-b border-[#171c26]">
                   <td className="py-1.5 capitalize text-gray-300">{c}</td>
-                  <td className="py-1.5 text-right font-mono text-gray-500">{money(est)}</td>
-                  <td className="py-1.5 text-right font-mono text-gray-200">{money(act)}</td>
-                  <td className={`py-1.5 text-right font-mono ${v > 0 ? "text-rose-400" : v < 0 ? "text-emerald-400" : "text-gray-500"}`}>{v > 0 ? "+" : ""}{money(v)}</td>
+                  <td className="py-1.5 text-end font-mono text-gray-500">{money(est)}</td>
+                  <td className="py-1.5 text-end font-mono text-gray-200">{money(act)}</td>
+                  <td className={`py-1.5 text-end font-mono ${v > 0 ? "text-rose-400" : v < 0 ? "text-emerald-400" : "text-gray-500"}`}>{v > 0 ? "+" : ""}{money(v)}</td>
                 </tr>;
           })}
           </tbody>
@@ -389,7 +389,7 @@ function JobDetail({
                   <td className="py-1.5 capitalize text-gray-400 w-28">{c.category}</td>
                   <td className="py-1.5 text-gray-300">{c.description || "—"}</td>
                   <td className="py-1.5 font-mono text-amber-400 w-32">{c.entry_number}</td>
-                  <td className="py-1.5 text-right font-mono text-gray-200">{money(c.amount_cents)}</td>
+                  <td className="py-1.5 text-end font-mono text-gray-200">{money(c.amount_cents)}</td>
                 </tr>)}
             </tbody>
           </table>

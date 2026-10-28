@@ -234,7 +234,7 @@ export default function Tax() {
         <select value={year} onChange={e => setYear(parseInt(e.target.value, 10))} className={`${INPUT_CLS} rounded-md px-2 py-1.5 text-sm text-gray-200`} data-testid="tax-year-select">
           {[curYear, curYear - 1, curYear - 2].map(y => <option key={y} value={y}>{y}</option>)}
         </select>
-        {canWrite && <Button data-testid="tax-new-contractor" onClick={() => setShowNew(x => !x)} className="bg-amber-600 hover:bg-amber-500 text-black font-semibold"><Plus size={16} className="mr-1" /> {t("tax.addContractor")}</Button>}
+        {canWrite && <Button data-testid="tax-new-contractor" onClick={() => setShowNew(x => !x)} className="bg-amber-600 hover:bg-amber-500 text-black font-semibold"><Plus size={16} className="me-1" /> {t("tax.addContractor")}</Button>}
       </PageHeader>
 
       <Tabs defaultValue="contractors">
@@ -337,12 +337,12 @@ export default function Tax() {
         <table className="w-full text-sm" data-testid="tax-table">
           <thead>
             <tr className="text-xs uppercase tracking-wider text-gray-500 border-b border-[#222838]">
-              <th className="px-5 py-3 text-left font-medium">{t("tax.contractor")}</th>
-              <th className="px-5 py-3 text-right font-medium">{t("tax.paid")} {year}</th>
-              <th className="px-5 py-3 text-left font-medium">{t("tax.w9")}</th>
-              <th className="px-5 py-3 text-left font-medium">{t("tax.NEC")}</th>
-              <th className="px-5 py-3 text-left font-medium">{t("tax.eFile")}</th>
-              {canWrite && <th className="px-5 py-3 text-right font-medium">{t("tax.actions")}</th>}
+              <th className="px-5 py-3 text-start font-medium">{t("tax.contractor")}</th>
+              <th className="px-5 py-3 text-end font-medium">{t("tax.paid")} {year}</th>
+              <th className="px-5 py-3 text-start font-medium">{t("tax.w9")}</th>
+              <th className="px-5 py-3 text-start font-medium">{t("tax.NEC")}</th>
+              <th className="px-5 py-3 text-start font-medium">{t("tax.eFile")}</th>
+              {canWrite && <th className="px-5 py-3 text-end font-medium">{t("tax.actions")}</th>}
             </tr>
           </thead>
           <tbody>
@@ -351,7 +351,7 @@ export default function Tax() {
                   <div className="text-gray-100 font-medium">{c.name}</div>
                   <div className="text-xs text-gray-500">{ENTITY_LABEL[c.entity_type]}{c.business_name ? ` · ${c.business_name}` : ""}{c.tax_id_last4 ? ` · •••${c.tax_id_last4}` : ""}</div>
                 </td>
-                <td className="px-5 py-3 text-right">
+                <td className="px-5 py-3 text-end">
                   <button onClick={() => openHistory(c)} title={t("tax.viewPaymentHistory")} className="font-mono text-gray-200 hover:text-amber-300 hover:underline" data-testid={`tax-history-${c.id}`}>{money(c.year_total_cents)}</button>
                 </td>
                 <td className="px-5 py-3">
@@ -365,7 +365,7 @@ export default function Tax() {
                         </span>
                       </button> : <span className="text-gray-600">{t("tax.notFiled")}</span>}
                 </td>
-                {canWrite && <td className="px-5 py-3 text-right">
+                {canWrite && <td className="px-5 py-3 text-end">
                     <div className="flex justify-end gap-1">
                       <Button size="sm" variant="outline" className="h-7" onClick={() => {
                       setPayFor(c);
@@ -376,7 +376,7 @@ export default function Tax() {
                       });
                     }} data-testid={`tax-pay-${c.id}`}>{t("tax.recordPayment")}</Button>
                       {c.needs_1099 && !c.efile?.submission_id && <PlanGate feature="prep_1099" inline><Button size="sm" className="h-7 bg-amber-600 hover:bg-amber-500 text-black" onClick={() => efile(c)} disabled={!tb?.configured} title={tb?.configured ? "Create 1099-NEC draft in TaxBandits" : "Connect TaxBandits first"} data-testid={`tax-efile-${c.id}`}>
-                          <Send size={12} className="mr-1" /> {t("tax.eFile")}</Button></PlanGate>}
+                          <Send size={12} className="me-1" /> {t("tax.eFile")}</Button></PlanGate>}
                       <button onClick={() => removeContractor(c)} className="text-gray-600 hover:text-rose-400 px-1" data-testid={`tax-del-${c.id}`}><Trash2 size={14} /></button>
                     </div>
                   </td>}
@@ -397,11 +397,11 @@ export default function Tax() {
           {preview && <table className="w-full text-sm mt-3">
               <thead>
                 <tr className="text-xs uppercase tracking-wider text-gray-500 border-b border-[#222838]">
-                  <th className="py-2 text-left font-medium">{t("tax.recipient")}</th>
-                  <th className="py-2 text-left font-medium">{t("tax.tin")}</th>
-                  <th className="py-2 text-left font-medium">{t("tax.address")}</th>
-                  <th className="py-2 text-right font-medium">{t("tax.box1")}</th>
-                  <th className="py-2 text-left font-medium">{t("tax.w9")}</th>
+                  <th className="py-2 text-start font-medium">{t("tax.recipient")}</th>
+                  <th className="py-2 text-start font-medium">{t("tax.tin")}</th>
+                  <th className="py-2 text-start font-medium">{t("tax.address")}</th>
+                  <th className="py-2 text-end font-medium">{t("tax.box1")}</th>
+                  <th className="py-2 text-start font-medium">{t("tax.w9")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -409,10 +409,10 @@ export default function Tax() {
                     <td className="py-2 text-gray-100">{r.name}{r.business_name ? <span className="block text-xs text-gray-500">{r.business_name} · {ENTITY_LABEL[r.entity_type]}</span> : null}</td>
                     <td className="py-2 font-mono text-gray-300">
                       {revealedTin[r.contractor_id] ? <span>{revealedTin[r.contractor_id]}</span> : r.tin_last4 ? <span>•••{r.tin_last4}</span> : <span className="text-amber-400">{t("tax.missing")}</span>}
-                      {!revealedTin[r.contractor_id] && r.tin_last4 && canRevealPii && <button onClick={() => revealTin(r.contractor_id)} className="ml-2 text-xs text-sky-400 hover:underline" data-testid={`tax-reveal-${r.contractor_id}`}>{t("tax.reveal")}</button>}
+                      {!revealedTin[r.contractor_id] && r.tin_last4 && canRevealPii && <button onClick={() => revealTin(r.contractor_id)} className="ms-2 text-xs text-sky-400 hover:underline" data-testid={`tax-reveal-${r.contractor_id}`}>{t("tax.reveal")}</button>}
                     </td>
                     <td className="py-2 text-gray-400 text-xs">{[r.address?.street, r.address?.city, r.address?.state, r.address?.zip].filter(Boolean).join(", ") || "—"}</td>
-                    <td className="py-2 text-right font-mono text-gray-200">{money(r.box1_cents)}</td>
+                    <td className="py-2 text-end font-mono text-gray-200">{money(r.box1_cents)}</td>
                     <td className="py-2"><span className={`px-2 py-0.5 rounded-full text-xs border ${r.w9_received ? PILL_OK : PILL_WARN}`}>{r.w9_received ? "Received" : "Missing"}</span></td>
                   </tr>)}
                 {preview.recipients.length === 0 && <tr><td colSpan={5} className="py-8 text-center text-gray-500">{t("tax.noContractorsMeetThe")} {dollars(summary.threshold)} {t("tax.reportingThresholdFor")} {year}.</td></tr>}
@@ -447,25 +447,25 @@ export default function Tax() {
           {history.length === 0 ? <p className="text-sm text-gray-500 py-6 text-center">{t("tax.noPaymentsRecordedFor")} {year}.</p> : <table className="w-full text-sm">
                 <thead>
                   <tr className="text-xs uppercase tracking-wider text-gray-500 border-b border-[#222838]">
-                    <th className="py-2 text-left font-medium">{t("tax.date")}</th>
-                    <th className="py-2 text-left font-medium">{t("tax.description")}</th>
-                    <th className="py-2 text-right font-medium">{t("tax.amount2")}</th>
-                    {canWrite && <th className="py-2 text-right font-medium"> </th>}
+                    <th className="py-2 text-start font-medium">{t("tax.date")}</th>
+                    <th className="py-2 text-start font-medium">{t("tax.description")}</th>
+                    <th className="py-2 text-end font-medium">{t("tax.amount2")}</th>
+                    {canWrite && <th className="py-2 text-end font-medium"> </th>}
                   </tr>
                 </thead>
                 <tbody>
                   {history.map(p => <tr key={p.id} className="border-b border-[#171c26]" data-testid={`tax-payment-${p.id}`}>
                       <td className="py-2 text-gray-300">{fmtDate(p.date)}</td>
                       <td className="py-2 text-gray-400">{p.description || <span className="text-gray-600">—</span>}</td>
-                      <td className="py-2 text-right font-mono text-gray-100">{money(p.amount_cents)}</td>
-                      {canWrite && <td className="py-2 text-right">
+                      <td className="py-2 text-end font-mono text-gray-100">{money(p.amount_cents)}</td>
+                      {canWrite && <td className="py-2 text-end">
                           <button onClick={() => deletePayment(p)} className="text-gray-600 hover:text-rose-400" title={t("tax.deletePayment")} data-testid={`tax-payment-del-${p.id}`}><Trash2 size={14} /></button>
                         </td>}
                     </tr>)}
                 </tbody>
               </table>}
           <DialogFooter className="flex justify-between">
-            <span className="text-sm text-gray-400 mr-auto">{t("tax.yearTotal")} <strong className="font-mono text-gray-100">{money((history || []).reduce((s, p) => s + (p.amount_cents || 0), 0))}</strong></span>
+            <span className="text-sm text-gray-400 me-auto">{t("tax.yearTotal")} <strong className="font-mono text-gray-100">{money((history || []).reduce((s, p) => s + (p.amount_cents || 0), 0))}</strong></span>
             {canWrite && <Button onClick={() => {
                 setPayFor(historyFor);
                 setHistoryFor(null);
@@ -474,7 +474,7 @@ export default function Tax() {
                   amount: "",
                   description: ""
                 });
-              }} className="bg-amber-600 hover:bg-amber-500 text-black font-semibold" data-testid="tax-history-record"><Plus size={14} className="mr-1" /> {t("tax.recordPayment")}</Button>}
+              }} className="bg-amber-600 hover:bg-amber-500 text-black font-semibold" data-testid="tax-history-record"><Plus size={14} className="me-1" /> {t("tax.recordPayment")}</Button>}
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -485,7 +485,7 @@ export default function Tax() {
           {efileDetail && <div className="space-y-2 text-sm">
               {[["Status", efileDetail.status || "—"], ["Submission ID", <span key="s" className="font-mono">{efileDetail.submission_id || "—"}</span>], ["Record ID", <span key="r" className="font-mono">{efileDetail.record_id || "—"}</span>], ["Tax year", efileDetail.year || "—"], ["Amount (Box 1)", money(efileDetail.amount_cents)], ["Environment", efileDetail.sandbox ? "Sandbox (test)" : "Production"], ["Last updated", efileDetail.updated_at ? fmtDate(efileDetail.updated_at) : "—"]].map(([k, v]) => <div key={k} className="flex justify-between gap-4 py-1.5 border-b border-[#171c26]">
                   <span className="text-gray-500">{k}</span>
-                  <span className="text-gray-200 text-right">{v}</span>
+                  <span className="text-gray-200 text-end">{v}</span>
                 </div>)}
               <p className="text-xs text-gray-600 pt-1">{t("tax.thisDraftLivesInTaxBanditsReview")}</p>
             </div>}
