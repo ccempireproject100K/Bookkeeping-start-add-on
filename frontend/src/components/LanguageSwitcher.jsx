@@ -2,7 +2,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { SUPPORTED_LANGUAGES, normalizeLanguage, setLanguage } from "@/lib/i18n";
 
-// The empire language toggle: the same four languages everywhere it
+// The empire language toggle: the same languages everywhere it
 // appears. Picking one switches the UI immediately and persists the
 // choice (via lib/i18n's setLanguage) so it sticks across pages and
 // return visits until a different language is picked.
@@ -38,7 +38,7 @@ export default function LanguageSwitcher({ compact = false }) {
   return (
     <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
       <label htmlFor="language-select" style={{ fontWeight: 600 }}>
-        Language / Idioma / Langue / 语言
+        Language / Idioma / Langue / 语言 / भाषा / اللغة
       </label>
       <select
         id="language-select"

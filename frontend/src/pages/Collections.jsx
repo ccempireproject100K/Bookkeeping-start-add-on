@@ -94,10 +94,10 @@ export default function Collections() {
   });
   return <div className="space-y-6">
       <PageHeader title={t("collections.collectionsAutopilot")} subtitle="Escalating reminders, late fees, and service holds — you approve the ladder, it works the list." actions={canManage && <PlanGate feature="collections_automation" inline>
-          <Button variant="outline" onClick={() => setCfgOpen(true)}><Settings2 size={14} className="mr-1" />{t("collections.ladderConfig")}</Button>
-          <Button variant="outline" onClick={doPreview}><Eye size={14} className="mr-1" />{t("collections.preview")}</Button>
+          <Button variant="outline" onClick={() => setCfgOpen(true)}><Settings2 size={14} className="me-1" />{t("collections.ladderConfig")}</Button>
+          <Button variant="outline" onClick={doPreview}><Eye size={14} className="me-1" />{t("collections.preview")}</Button>
           <Button onClick={doRun} disabled={running || !cfg?.enabled} data-testid="collections-run">
-            <Play size={14} className="mr-1" />{running ? "Running…" : "Run autopilot"}</Button>
+            <Play size={14} className="me-1" />{running ? "Running…" : "Run autopilot"}</Button>
         </PlanGate>} />
       {!cfg?.enabled && <Card className="p-4 text-sm text-amber-400 bg-amber-500/5">{t("collections.autopilotIsOffOpenLadderConfig")}</Card>}
       <div className="grid grid-cols-2 gap-4">
@@ -114,7 +114,7 @@ export default function Collections() {
           <div className="text-sm font-medium mb-2">{t("collections.preview2")} {preview.count} {t("collections.actionsWouldRun")}</div>
           <div className="max-h-48 overflow-auto text-sm">
             {preview.actions.map((a, i) => <div key={i} className="py-1 border-b border-[#1a2030] text-gray-300">
-                <span className="text-xs px-2 py-0.5 rounded-full bg-blue-500/15 text-blue-400 mr-2">{ACTION_LABEL[a.action] || a.action}</span>
+                <span className="text-xs px-2 py-0.5 rounded-full bg-blue-500/15 text-blue-400 me-2">{ACTION_LABEL[a.action] || a.action}</span>
                 {a.client_name} · {a.days_overdue}d overdue ·  {money(a.balance_cents)}
               </div>)}
             {!preview.actions.length && <p className="text-gray-500 text-sm">{t("collections.nothingDueTheLadderIsCaught")}</p>}
@@ -122,21 +122,21 @@ export default function Collections() {
         </Card>}
       <Card className="p-0 overflow-hidden">
         <table className="w-full text-sm">
-          <thead><tr className="text-left text-gray-500 border-b border-[#222838]">
+          <thead><tr className="text-start text-gray-500 border-b border-[#222838]">
             <th className="px-4 py-3 font-medium">{t("collections.client")}</th><th className="px-4 py-3 font-medium">{t("collections.due")}</th>
-            <th className="px-4 py-3 font-medium text-right">{t("collections.overdue")}</th><th className="px-4 py-3 font-medium text-right">{t("collections.balance")}</th>
+            <th className="px-4 py-3 font-medium text-end">{t("collections.overdue")}</th><th className="px-4 py-3 font-medium text-end">{t("collections.balance")}</th>
             <th className="px-4 py-3 font-medium">{t("collections.stagesDone")}</th><th className="px-4 py-3 font-medium">{t("collections.next")}</th><th className="px-4 py-3"></th>
           </tr></thead>
           <tbody>
             {(pipe?.rows || []).map(r => <tr key={r.invoice_id} className="border-b border-[#1a2030] hover:bg-[#141926]">
                 <td className="px-4 py-3">{r.client_name}</td>
                 <td className="px-4 py-3 text-xs text-gray-400">{r.due_date ? fmtDate(r.due_date) : "—"}</td>
-                <td className="px-4 py-3 text-right text-red-400">{r.days_overdue}d</td>
-                <td className="px-4 py-3 text-right font-mono">{money(r.balance_cents)}</td>
-                <td className="px-4 py-3">{(r.stages_done || []).map(s => <span key={s} className="text-xs px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 mr-1">{s}</span>)}
+                <td className="px-4 py-3 text-end text-red-400">{r.days_overdue}d</td>
+                <td className="px-4 py-3 text-end font-mono">{money(r.balance_cents)}</td>
+                <td className="px-4 py-3">{(r.stages_done || []).map(s => <span key={s} className="text-xs px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 me-1">{s}</span>)}
                   {!r.stages_done?.length && <span className="text-gray-600 text-xs">—</span>}</td>
                 <td className="px-4 py-3 text-xs text-blue-400">{r.next_step ? ACTION_LABEL[r.next_step.action] : "caught up"}</td>
-                <td className="px-4 py-3 text-right">{r.on_hold && <PauseCircle size={15} className="inline text-amber-400" title={t("collections.servicePaused")} />}</td>
+                <td className="px-4 py-3 text-end">{r.on_hold && <PauseCircle size={15} className="inline text-amber-400" title={t("collections.servicePaused")} />}</td>
               </tr>)}
             {!(pipe?.rows || []).length && <tr><td colSpan={7} className="px-4 py-8 text-center text-gray-500 text-sm">{t("collections.nothingOverdueNice")}</td></tr>}
           </tbody>

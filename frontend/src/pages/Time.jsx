@@ -147,14 +147,14 @@ export default function Time() {
   const entryTable = (rows, showWho, actions) => <Card className="p-0 overflow-hidden">
       <table className="w-full text-sm">
         <thead><tr className="text-xs uppercase tracking-wider text-gray-500 border-b border-[#222838]">
-          <th className="px-5 py-3 text-left font-medium">Date</th>
-          {showWho && <th className="px-5 py-3 text-left font-medium">Who</th>}
-          <th className="px-5 py-3 text-left font-medium">Client</th>
-          <th className="px-5 py-3 text-left font-medium">In → Out</th>
-          <th className="px-5 py-3 text-right font-medium">Hours</th>
-          <th className="px-5 py-3 text-left font-medium">Notes</th>
-          <th className="px-5 py-3 text-left font-medium">Status</th>
-          {actions && <th className="px-5 py-3 text-right font-medium">Actions</th>}
+          <th className="px-5 py-3 text-start font-medium">Date</th>
+          {showWho && <th className="px-5 py-3 text-start font-medium">Who</th>}
+          <th className="px-5 py-3 text-start font-medium">Client</th>
+          <th className="px-5 py-3 text-start font-medium">In → Out</th>
+          <th className="px-5 py-3 text-end font-medium">Hours</th>
+          <th className="px-5 py-3 text-start font-medium">Notes</th>
+          <th className="px-5 py-3 text-start font-medium">Status</th>
+          {actions && <th className="px-5 py-3 text-end font-medium">Actions</th>}
         </tr></thead>
         <tbody>
           {rows.map(e => <tr key={e.id} className="border-b border-[#171c26] hover:bg-[#161b25]">
@@ -170,12 +170,12 @@ export default function Time() {
               minute: "2-digit"
             }) : "…"}` : "manual"}
               </td>
-              <td className="px-5 py-3 text-right font-mono text-gray-200">
+              <td className="px-5 py-3 text-end font-mono text-gray-200">
                 {e.status === "open" ? elapsed(e.clock_in) : `${e.hours}h`}
               </td>
               <td className="px-5 py-3 text-gray-500 text-xs max-w-[200px] truncate">{e.notes || "—"}</td>
               <td className="px-5 py-3"><span className={`px-2 py-0.5 rounded-full text-xs border capitalize ${STATUS_CLS[e.status] || ""}`}>{e.status}</span></td>
-              {actions && <td className="px-5 py-3 text-right">
+              {actions && <td className="px-5 py-3 text-end">
                   <div className="flex gap-1 justify-end">
                     {e.status === "logged" && <Button size="sm" className="h-7 bg-emerald-600 hover:bg-emerald-500 text-black" onClick={() => approve(e.id)}>Approve</Button>}
                     {e.status === "approved" && <Button size="sm" variant="outline" className="h-7" onClick={() => closeEntry(e.id)}>Close</Button>}
@@ -198,13 +198,13 @@ export default function Time() {
               </div>
               <div className="text-xs text-gray-500">{t("time.clockedIn")}{open.client_name ? ` · ${open.client_name}` : ""}</div>
               <Button onClick={clockOut} className="bg-rose-600 hover:bg-rose-500 text-black font-semibold" data-testid="time-clock-out">
-                <Square size={16} className="mr-1" /> {t("time.clockOut")}</Button>
+                <Square size={16} className="me-1" /> {t("time.clockOut")}</Button>
             </div> : <div className="space-y-3">
               <p className="text-sm text-gray-500">{t("time.youReClockedOut")}</p>
               <div><Label className="text-xs">{t("time.noteOptional")}</Label>
                 <Input value={clockNote} onChange={e => setClockNote(e.target.value)} className={IN} placeholder={t("time.shiftNotes")} /></div>
               <Button onClick={clockIn} className="bg-emerald-600 hover:bg-emerald-500 text-black font-semibold" data-testid="time-clock-in">
-                <Play size={16} className="mr-1" /> {t("time.clockIn")}</Button>
+                <Play size={16} className="me-1" /> {t("time.clockIn")}</Button>
             </div>}
         </Card>
         <Card>
@@ -238,7 +238,7 @@ export default function Time() {
               notes: e.target.value
             })} className={IN} placeholder={t("time.whatDidYouWorkOn")} /></div>
             <Button size="sm" onClick={logManual} disabled={!m.hours || !m.date} className="bg-amber-600 hover:bg-amber-500 text-black font-semibold">
-              <Plus size={14} className="mr-1" /> {t("time.logTime")}</Button>
+              <Plus size={14} className="me-1" /> {t("time.logTime")}</Button>
           </div>
         </Card>
       </div>

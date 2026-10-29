@@ -122,7 +122,7 @@ export default function JournalEntries() {
         reset();
         setOpen(true);
       }} className="bg-amber-600 hover:bg-amber-500 text-black font-semibold">
-            <Plus size={16} className="mr-1" /> {t("journalentries.newEntry")}</Button>}
+            <Plus size={16} className="me-1" /> {t("journalentries.newEntry")}</Button>}
       </PageHeader>
 
       <div className="flex gap-2 mb-4">
@@ -136,13 +136,13 @@ export default function JournalEntries() {
           <table className="w-full text-sm" data-testid="table-journal-entries">
             <thead>
               <tr className="text-xs uppercase tracking-wider text-gray-500 border-b border-[#222838]">
-                <th className="px-5 py-3 text-left font-medium">{t("journalentries.number")}</th>
-                <th className="px-5 py-3 text-left font-medium">{t("journalentries.date")}</th>
-                <th className="px-5 py-3 text-left font-medium">{t("journalentries.source")}</th>
-                <th className="px-5 py-3 text-left font-medium">{t("journalentries.memo")}</th>
-                <th className="px-5 py-3 text-right font-medium">{t("journalentries.amount")}</th>
-                <th className="px-5 py-3 text-left font-medium">{t("journalentries.status")}</th>
-                <th className="px-5 py-3 text-right font-medium">{t("journalentries.actions")}</th>
+                <th className="px-5 py-3 text-start font-medium">{t("journalentries.number")}</th>
+                <th className="px-5 py-3 text-start font-medium">{t("journalentries.date")}</th>
+                <th className="px-5 py-3 text-start font-medium">{t("journalentries.source")}</th>
+                <th className="px-5 py-3 text-start font-medium">{t("journalentries.memo")}</th>
+                <th className="px-5 py-3 text-end font-medium">{t("journalentries.amount")}</th>
+                <th className="px-5 py-3 text-start font-medium">{t("journalentries.status")}</th>
+                <th className="px-5 py-3 text-end font-medium">{t("journalentries.actions")}</th>
               </tr>
             </thead>
             <tbody>
@@ -151,14 +151,14 @@ export default function JournalEntries() {
                   <td className="px-5 py-3 text-gray-400">{fmtDate(e.entry_date)}</td>
                   <td className="px-5 py-3 capitalize text-gray-300">{e.source?.replace("_", " ")}</td>
                   <td className="px-5 py-3 text-gray-400 max-w-[240px] truncate">{e.memo || "—"}</td>
-                  <td className="px-5 py-3 text-right font-mono text-gray-200">{money(e.total_cents)}</td>
+                  <td className="px-5 py-3 text-end font-mono text-gray-200">{money(e.total_cents)}</td>
                   <td className="px-5 py-3">
                     <span className={`px-2 py-0.5 rounded-full text-xs border capitalize ${STATUS_CLS[e.status] || ""}`}>{e.status}</span>
                   </td>
-                  <td className="px-5 py-3 text-right space-x-1" onClick={ev => ev.stopPropagation()}>
+                  <td className="px-5 py-3 text-end space-x-1 rtl:space-x-reverse" onClick={ev => ev.stopPropagation()}>
                     {canPost && e.status === "draft" && <Button size="sm" data-testid="btn-post-entry" className="h-7 bg-emerald-600 hover:bg-emerald-500 text-black" onClick={() => postDraft(e.id)}>{t("journalentries.post")}</Button>}
                     {canPost && e.status === "posted" && <Button size="sm" variant="ghost" data-testid="btn-reverse-entry" className="h-7 text-amber-400 hover:bg-amber-500/10" onClick={() => reverse(e.id)}>
-                        <RefreshCw size={13} className="mr-1" />{t("journalentries.reverse")}</Button>}
+                        <RefreshCw size={13} className="me-1" />{t("journalentries.reverse")}</Button>}
                   </td>
                 </tr>)}
               {rows.length === 0 && <tr><td colSpan={7} className="px-5 py-12 text-center text-gray-500">{t("journalentries.noEntries")}</td></tr>}
@@ -178,11 +178,11 @@ export default function JournalEntries() {
               <Input data-testid="input-entry-description" value={memo} onChange={e => setMemo(e.target.value)} placeholder={t("journalentries.memo")} className="bg-[#0F1218] border-[#222838]" /></div>
           </div>
 
-          <div className="mt-2 space-y-2 max-h-[320px] overflow-y-auto pr-1">
+          <div className="mt-2 space-y-2 max-h-[320px] overflow-y-auto pe-1">
             <div className="grid grid-cols-12 gap-2 text-[10px] uppercase tracking-wider text-gray-500 px-1">
               <span className="col-span-6">{t("journalentries.account")}</span>
-              <span className="col-span-3 text-right">{t("journalentries.debit")}</span>
-              <span className="col-span-3 text-right">{t("journalentries.credit")}</span>
+              <span className="col-span-3 text-end">{t("journalentries.debit")}</span>
+              <span className="col-span-3 text-end">{t("journalentries.credit")}</span>
             </div>
             {lines.map((l, i) => <div key={i} className="grid grid-cols-12 gap-2 items-center">
                 <div className="col-span-6">
@@ -193,9 +193,9 @@ export default function JournalEntries() {
                     </SelectContent>
                   </Select>
                 </div>
-                <Input data-testid={i === 0 ? "input-entry-debit-amount" : `je-line-debit-${i}`} className="col-span-3 bg-[#0F1218] border-[#222838] h-9 text-right font-mono text-xs" placeholder="0.00" value={l.debit} onChange={e => updateLine(i, "debit", e.target.value)} />
+                <Input data-testid={i === 0 ? "input-entry-debit-amount" : `je-line-debit-${i}`} className="col-span-3 bg-[#0F1218] border-[#222838] h-9 text-end font-mono text-xs" placeholder="0.00" value={l.debit} onChange={e => updateLine(i, "debit", e.target.value)} />
                 <div className="col-span-3 flex items-center gap-1">
-                  <Input data-testid={i === 1 ? "input-entry-credit-amount" : `je-line-credit-${i}`} className="bg-[#0F1218] border-[#222838] h-9 text-right font-mono text-xs" placeholder="0.00" value={l.credit} onChange={e => updateLine(i, "credit", e.target.value)} />
+                  <Input data-testid={i === 1 ? "input-entry-credit-amount" : `je-line-credit-${i}`} className="bg-[#0F1218] border-[#222838] h-9 text-end font-mono text-xs" placeholder="0.00" value={l.credit} onChange={e => updateLine(i, "credit", e.target.value)} />
                   {lines.length > 2 && <button onClick={() => setLines(lines.filter((_, x) => x !== i))} className="text-gray-600 hover:text-rose-400"><Trash2 size={14} /></button>}
                 </div>
               </div>)}
@@ -203,12 +203,12 @@ export default function JournalEntries() {
             account_code: "",
             debit: "",
             credit: ""
-          }])} className="text-amber-400 hover:bg-amber-500/10"><FilePlus size={14} className="mr-1" /> {t("journalentries.addLine")}</Button>
+          }])} className="text-amber-400 hover:bg-amber-500/10"><FilePlus size={14} className="me-1" /> {t("journalentries.addLine")}</Button>
           </div>
 
           <div className="flex items-center justify-between py-2 px-3 rounded-lg bg-[#0F1218] border border-[#222838] text-sm font-mono">
-            <span className="text-gray-400">{t("journalentries.debits")} <span className="text-emerald-400 ml-1">{totals.d.toFixed(2)}</span></span>
-            <span className="text-gray-400">{t("journalentries.credits")} <span className="text-rose-400 ml-1">{totals.c.toFixed(2)}</span></span>
+            <span className="text-gray-400">{t("journalentries.debits")} <span className="text-emerald-400 ms-1">{totals.d.toFixed(2)}</span></span>
+            <span className="text-gray-400">{t("journalentries.credits")} <span className="text-rose-400 ms-1">{totals.c.toFixed(2)}</span></span>
             <span data-testid="je-balance-status" className={`inline-flex items-center gap-1 ${totals.balanced ? "text-emerald-400" : "text-amber-400"}`}>
               {totals.balanced && <CheckCircle2 size={14} />}{totals.balanced ? "Balanced" : "Unbalanced"}
             </span>
@@ -229,12 +229,12 @@ export default function JournalEntries() {
               <div className="text-sm text-gray-400 mb-2">{fmtDate(detail.entry_date)} • {detail.memo || "—"}</div>
               <table className="w-full text-sm">
                 <thead><tr className="text-xs uppercase text-gray-500 border-b border-[#222838]">
-                  <th className="py-2 text-left">{t("journalentries.account")}</th><th className="py-2 text-right">{t("journalentries.debit")}</th><th className="py-2 text-right">{t("journalentries.credit")}</th></tr></thead>
+                  <th className="py-2 text-start">{t("journalentries.account")}</th><th className="py-2 text-end">{t("journalentries.debit")}</th><th className="py-2 text-end">{t("journalentries.credit")}</th></tr></thead>
                 <tbody>
                   {detail.lines?.map(l => <tr key={l.id} className="border-b border-[#171c26]">
                       <td className="py-2 font-mono text-gray-300">{l.account_code}</td>
-                      <td className="py-2 text-right font-mono text-emerald-400">{l.debit ? money(l.debit) : ""}</td>
-                      <td className="py-2 text-right font-mono text-rose-400">{l.credit ? money(l.credit) : ""}</td>
+                      <td className="py-2 text-end font-mono text-emerald-400">{l.debit ? money(l.debit) : ""}</td>
+                      <td className="py-2 text-end font-mono text-rose-400">{l.credit ? money(l.credit) : ""}</td>
                     </tr>)}
                 </tbody>
               </table>

@@ -297,38 +297,38 @@ export default function Budget() {
       <Card className="p-0 overflow-hidden mb-6" data-testid="budget-table">
         <div className="px-5 py-4 flex items-center justify-between border-b border-[#222838]">
           <h3 className="text-sm font-semibold text-gray-200">{t("budget.budgets")} {period}</h3>
-          {canWrite && <Button size="sm" variant="outline" className="border-[#222838] h-7" onClick={copy}><Copy size={14} className="mr-1" /> {t("budget.copyLastMonth")}</Button>}
+          {canWrite && <Button size="sm" variant="outline" className="border-[#222838] h-7" onClick={copy}><Copy size={14} className="me-1" /> {t("budget.copyLastMonth")}</Button>}
         </div>
         <table className="w-full text-sm">
           <thead><tr className="text-xs uppercase tracking-wider text-gray-500 border-b border-[#222838]">
-            <th className="px-5 py-3 text-left font-medium">{t("budget.category")}</th>
-            <th className="px-5 py-3 text-right font-medium">{t("budget.budgeted")}</th>
-            <th className="px-5 py-3 text-right font-medium">{t("budget.actual")}</th>
-            <th className="px-5 py-3 text-right font-medium">{t("budget.remaining")}</th>
-            <th className="px-5 py-3 text-right font-medium">Variance</th>
-            <th className="px-5 py-3 text-left font-medium">{t("budget.used")}</th><th /></tr></thead>
+            <th className="px-5 py-3 text-start font-medium">{t("budget.category")}</th>
+            <th className="px-5 py-3 text-end font-medium">{t("budget.budgeted")}</th>
+            <th className="px-5 py-3 text-end font-medium">{t("budget.actual")}</th>
+            <th className="px-5 py-3 text-end font-medium">{t("budget.remaining")}</th>
+            <th className="px-5 py-3 text-end font-medium">Variance</th>
+            <th className="px-5 py-3 text-start font-medium">{t("budget.used")}</th><th /></tr></thead>
           <tbody>
             {rows.map(r => <tr key={r.category} className="border-b border-[#171c26]" data-testid={`budget-row-${r.category}`}>
-                <td className="px-5 py-3 text-gray-100">{r.category}{!r.budgeted_cents && r.actual_cents > 0 && <span className="ml-1 text-xs text-amber-500">{t("budget.noBudget")}</span>}</td>
-                <td className="px-5 py-3 text-right font-mono text-gray-300">{money(r.budgeted_cents)}</td>
-                <td className={`px-5 py-3 text-right font-mono ${r.pct_used > 100 ? "text-red-400 font-medium" : "text-gray-200"}`}>{money(r.actual_cents)}</td>
-                <td className={`px-5 py-3 text-right font-mono ${r.remaining_cents < 0 ? "text-red-400" : "text-gray-300"}`}>{money(r.remaining_cents)}</td>
-                <td className={`px-5 py-3 text-right font-mono ${r.variance_cents == null || r.variance_cents >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                <td className="px-5 py-3 text-gray-100">{r.category}{!r.budgeted_cents && r.actual_cents > 0 && <span className="ms-1 text-xs text-amber-500">{t("budget.noBudget")}</span>}</td>
+                <td className="px-5 py-3 text-end font-mono text-gray-300">{money(r.budgeted_cents)}</td>
+                <td className={`px-5 py-3 text-end font-mono ${r.pct_used > 100 ? "text-red-400 font-medium" : "text-gray-200"}`}>{money(r.actual_cents)}</td>
+                <td className={`px-5 py-3 text-end font-mono ${r.remaining_cents < 0 ? "text-red-400" : "text-gray-300"}`}>{money(r.remaining_cents)}</td>
+                <td className={`px-5 py-3 text-end font-mono ${r.variance_cents == null || r.variance_cents >= 0 ? "text-emerald-400" : "text-red-400"}`}>
                   {money(r.variance_cents)}
                   {r.variance_pct != null && <span className="text-xs text-gray-500"> ({r.variance_pct}%)</span>}
                   {r.variance_pct == null && <span className="text-xs text-gray-500"> —</span>}
                 </td>
                 <td className="px-5 py-3"><div className="flex items-center gap-2"><VarianceBar pct={r.pct_used} /><span className="text-xs text-gray-500 font-mono">{r.pct_used}%</span></div></td>
-                <td className="px-5 py-3 text-right">{canWrite && r.id && <button onClick={() => del(r.id)} className="text-gray-600 hover:text-rose-400"><Trash2 size={14} /></button>}</td>
+                <td className="px-5 py-3 text-end">{canWrite && r.id && <button onClick={() => del(r.id)} className="text-gray-600 hover:text-rose-400"><Trash2 size={14} /></button>}</td>
               </tr>)}
             {rows.length === 0 && <tr><td colSpan={7} className="px-5 py-12 text-center text-gray-500">{t("budget.noBudgetsOrSpendingForThis")}</td></tr>}
           </tbody>
           {rows.length > 0 && <tfoot><tr className="font-semibold text-gray-100">
               <td className="px-5 py-3">{t("budget.total")}</td>
-              <td className="px-5 py-3 text-right font-mono">{money(t.budgeted_cents)}</td>
-              <td className="px-5 py-3 text-right font-mono">{money(t.actual_cents)}</td>
-              <td className="px-5 py-3 text-right font-mono">{money(t.remaining_cents)}</td>
-              <td className="px-5 py-3 text-right font-mono">{t.variance_pct != null ? <span className={t.variance_cents < 0 ? "text-red-400" : "text-emerald-400"}>{t.variance_pct}%</span> : "—"}</td>
+              <td className="px-5 py-3 text-end font-mono">{money(t.budgeted_cents)}</td>
+              <td className="px-5 py-3 text-end font-mono">{money(t.actual_cents)}</td>
+              <td className="px-5 py-3 text-end font-mono">{money(t.remaining_cents)}</td>
+              <td className="px-5 py-3 text-end font-mono">{t.variance_pct != null ? <span className={t.variance_cents < 0 ? "text-red-400" : "text-emerald-400"}>{t.variance_pct}%</span> : "—"}</td>
               <td colSpan={2} />
             </tr></tfoot>}
         </table>
@@ -343,7 +343,7 @@ export default function Budget() {
             ...form,
             amount: e.target.value
           })} className="bg-[#0F1218] border-[#222838] w-32 font-mono" required /></div>
-            <Button size="sm" type="submit" className="bg-amber-600 hover:bg-amber-500 text-black"><Plus size={14} className="mr-1" /> {t("budget.setBudget")}</Button>
+            <Button size="sm" type="submit" className="bg-amber-600 hover:bg-amber-500 text-black"><Plus size={14} className="me-1" /> {t("budget.setBudget")}</Button>
           </form>}
       </Card>
 
@@ -399,11 +399,11 @@ export default function Budget() {
             </div>
             {fc.notes?.length > 0 && <div className="mt-4 rounded-lg border border-amber-500/30 bg-amber-500/5 px-3 py-2 text-xs text-amber-200/90" data-testid="fc-notes">
               <div className="font-medium mb-1">Coverage notes</div>
-              <ul className="list-disc pl-4 space-y-0.5">{fc.notes.map((n, i) => <li key={i}>{n}</li>)}</ul>
+              <ul className="list-disc ps-4 space-y-0.5">{fc.notes.map((n, i) => <li key={i}>{n}</li>)}</ul>
             </div>}
             <div className="mt-4 text-xs text-gray-500">
               <div className="font-medium text-gray-300 mb-1">{t("budget.assumptions")}</div>
-              <ul className="list-disc pl-4 space-y-0.5">{fc.assumptions.map((a, i) => <li key={i}>{a}</li>)}</ul>
+              <ul className="list-disc ps-4 space-y-0.5">{fc.assumptions.map((a, i) => <li key={i}>{a}</li>)}</ul>
               <p className="mt-2">Run-rate band: {money(fc.avg_daily_inflow_cents)}/day in, {money(fc.avg_daily_outflow_cents)}/day out (trailing 90d cash, excluding scheduled categories) — {fc.layers?.run_rate?.enabled ? "included in the curve above" : "not included; tick the band to layer it on"}.</p>
               {fc.layers?.expected_pay_dates?.adjustments?.length > 0 && <p className="mt-1">{fc.layers.expected_pay_dates.adjustments.map(a => `${a.customer} usually pays ~${a.avg_days_late} days ${a.avg_days_late >= 0 ? "late" : "early"} (${a.samples} invoices)`).join("; ")}</p>}
             </div>
@@ -413,18 +413,18 @@ export default function Budget() {
               <div className="overflow-x-auto">
                 <table className="w-full text-xs" data-testid="fc-weekly">
                   <thead><tr className="text-gray-500 border-b border-[#222838]">
-                    <th className="py-2 text-left font-medium">Week</th>
-                    <th className="py-2 text-right font-medium">In</th>
-                    <th className="py-2 text-right font-medium">Out</th>
-                    <th className="py-2 text-right font-medium">Net</th>
-                    <th className="py-2 text-right font-medium">End cash</th></tr></thead>
+                    <th className="py-2 text-start font-medium">Week</th>
+                    <th className="py-2 text-end font-medium">In</th>
+                    <th className="py-2 text-end font-medium">Out</th>
+                    <th className="py-2 text-end font-medium">Net</th>
+                    <th className="py-2 text-end font-medium">End cash</th></tr></thead>
                   <tbody>
                     {(fc.weekly || []).map(w => <tr key={w.week} className="border-b border-[#171c26]">
                       <td className="py-1.5 text-gray-300">{w.start_date} → {w.end_date}</td>
-                      <td className="py-1.5 text-right font-mono text-emerald-400">{money(w.inflow_cents)}</td>
-                      <td className="py-1.5 text-right font-mono text-red-400">{money(w.outflow_cents)}</td>
-                      <td className={`py-1.5 text-right font-mono ${w.net_cents < 0 ? "text-red-400" : "text-gray-200"}`}>{money(w.net_cents)}</td>
-                      <td className={`py-1.5 text-right font-mono ${w.end_cash_cents < 0 ? "text-red-400" : "text-gray-100"}`}>{money(w.end_cash_cents)}</td></tr>)}
+                      <td className="py-1.5 text-end font-mono text-emerald-400">{money(w.inflow_cents)}</td>
+                      <td className="py-1.5 text-end font-mono text-red-400">{money(w.outflow_cents)}</td>
+                      <td className={`py-1.5 text-end font-mono ${w.net_cents < 0 ? "text-red-400" : "text-gray-200"}`}>{money(w.net_cents)}</td>
+                      <td className={`py-1.5 text-end font-mono ${w.end_cash_cents < 0 ? "text-red-400" : "text-gray-100"}`}>{money(w.end_cash_cents)}</td></tr>)}
                   </tbody>
                 </table>
               </div>
@@ -441,8 +441,8 @@ export default function Budget() {
                       <td className="py-1.5 text-gray-400 font-mono">{i.date}</td>
                       <td className="py-1.5 text-gray-300">{i.label}</td>
                       <td className="py-1.5 text-gray-500">{i.kind.replace("_", " ")}</td>
-                      <td className={`py-1.5 text-right font-mono ${i.direction === "in" ? "text-emerald-400" : "text-red-400"}`}>{i.direction === "in" ? "+" : "−"}{money(i.amount_cents)}</td>
-                      <td className="py-1.5 text-right">{canWrite && <button className="text-gray-600 hover:text-amber-400" title="Exclude this item in the selected scenario" onClick={() => excludeItem(i.key)}>exclude</button>}</td></tr>)}
+                      <td className={`py-1.5 text-end font-mono ${i.direction === "in" ? "text-emerald-400" : "text-red-400"}`}>{i.direction === "in" ? "+" : "−"}{money(i.amount_cents)}</td>
+                      <td className="py-1.5 text-end">{canWrite && <button className="text-gray-600 hover:text-amber-400" title="Exclude this item in the selected scenario" onClick={() => excludeItem(i.key)}>exclude</button>}</td></tr>)}
                   </tbody>
                 </table>
               </div>}
@@ -483,7 +483,7 @@ export default function Budget() {
                     <option value="monthly">Monthly</option>
                     <option value="quarterly">Quarterly</option>
                   </select></div>}
-                <Button size="sm" type="submit" className="bg-amber-600 hover:bg-amber-500 text-black"><Plus size={14} className="mr-1" /> Add event</Button>
+                <Button size="sm" type="submit" className="bg-amber-600 hover:bg-amber-500 text-black"><Plus size={14} className="me-1" /> Add event</Button>
               </form>}
               {canWrite && <form className="mt-3 flex flex-wrap items-end gap-2" onSubmit={saveScenario}>
                 <div><Label className="text-xs">Save current toggles + sliders as a scenario</Label><Input value={scenName} onChange={e => setScenName(e.target.value)} className="bg-[#0F1218] border-[#222838] w-52" placeholder="e.g. Slow-paying winter" required /></div>

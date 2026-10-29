@@ -131,9 +131,9 @@ export default function Mileage() {
       <PageHeader title={t("mileage.mileageLog")} subtitle="IRS-ready trip tracking — the right standard rate is applied automatically by date." actions={<>
           <Select value={year} onValueChange={setYear}><SelectTrigger className="w-28 bg-[#0F1218] border-[#222838]"><SelectValue /></SelectTrigger>
             <SelectContent>{["2024", "2025", "2026", "2027"].map(y => <SelectItem key={y} value={y}>{y}</SelectItem>)}</SelectContent></Select>
-          <Button variant="outline" onClick={() => downloadCsv(`/mileage/export.csv?year=${year}`, `mileage-log-${year}.csv`)}><Download size={14} className="mr-1" />{t("mileage.irsLogCSV")}</Button>
-          {canManage && <><Button variant="outline" onClick={() => setVehOpen(true)}><Car size={14} className="mr-1" />{t("mileage.vehicle")}</Button>
-          <Button onClick={() => setTripOpen(true)} data-testid="trip-add"><Plus size={14} className="mr-1" />{t("mileage.logTrip")}</Button></>}
+          <Button variant="outline" onClick={() => downloadCsv(`/mileage/export.csv?year=${year}`, `mileage-log-${year}.csv`)}><Download size={14} className="me-1" />{t("mileage.irsLogCSV")}</Button>
+          {canManage && <><Button variant="outline" onClick={() => setVehOpen(true)}><Car size={14} className="me-1" />{t("mileage.vehicle")}</Button>
+          <Button onClick={() => setTripOpen(true)} data-testid="trip-add"><Plus size={14} className="me-1" />{t("mileage.logTrip")}</Button></>}
         </>} />
       {summary && <div className="grid grid-cols-3 gap-4">
           <Card className="p-4"><div className="text-xs text-gray-500">{t("mileage.businessMiles")}{year})</div><div className="text-2xl font-semibold">{summary.total_miles.toLocaleString()}</div></Card>
@@ -142,19 +142,19 @@ export default function Mileage() {
         </div>}
       <Card className="p-0 overflow-hidden">
         <table className="w-full text-sm">
-          <thead><tr className="text-left text-gray-500 border-b border-[#222838]">
+          <thead><tr className="text-start text-gray-500 border-b border-[#222838]">
             <th className="px-4 py-3 font-medium">{t("mileage.date")}</th><th className="px-4 py-3 font-medium">{t("mileage.route")}</th>
-            <th className="px-4 py-3 font-medium">{t("mileage.purpose")}</th><th className="px-4 py-3 font-medium text-right">{t("mileage.miles")}</th>
-            <th className="px-4 py-3 font-medium text-right">{t("mileage.deductible")}</th><th className="px-4 py-3"></th>
+            <th className="px-4 py-3 font-medium">{t("mileage.purpose")}</th><th className="px-4 py-3 font-medium text-end">{t("mileage.miles")}</th>
+            <th className="px-4 py-3 font-medium text-end">{t("mileage.deductible")}</th><th className="px-4 py-3"></th>
           </tr></thead>
           <tbody>
             {trips.map(t => <tr key={t.id} className="border-b border-[#1a2030] hover:bg-[#141926]">
                 <td className="px-4 py-3 text-xs text-gray-400">{fmtDate(t.trip_date)}</td>
                 <td className="px-4 py-3">{t.origin ? `${t.origin} → ${t.destination}` : <span className="text-gray-600">—</span>}</td>
                 <td className="px-4 py-3 text-gray-400 text-xs">{t.purpose}</td>
-                <td className="px-4 py-3 text-right font-mono">{t.miles}</td>
-                <td className="px-4 py-3 text-right font-mono text-emerald-400">{money(t.deductible * 100)}</td>
-                <td className="px-4 py-3 text-right whitespace-nowrap">
+                <td className="px-4 py-3 text-end font-mono">{t.miles}</td>
+                <td className="px-4 py-3 text-end font-mono text-emerald-400">{money(t.deductible * 100)}</td>
+                <td className="px-4 py-3 text-end whitespace-nowrap">
                   {canManage && <><Button size="sm" variant="ghost" title={t("mileage.logAgain")} onClick={() => dupTrip(t)}><Repeat size={13} /></Button>
                   <Button size="sm" variant="ghost" onClick={() => delTrip(t.id)}><Trash2 size={13} /></Button></>}
                 </td>

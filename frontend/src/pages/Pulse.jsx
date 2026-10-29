@@ -23,7 +23,7 @@ function PulseInner() {
   const t = data?.today_pnl || {};
   const d = data?.deltas || {};
   return <div className="space-y-6">
-      <PageHeader title={t("pulse.profitPulse")} subtitle={`Live margins and today's story — ${data?.weekday || ""}.`} actions={<Button variant="outline" onClick={reload}><RefreshCw size={14} className="mr-1" />{t("pulse.refresh")}</Button>} />
+      <PageHeader title={t("pulse.profitPulse")} subtitle={`Live margins and today's story — ${data?.weekday || ""}.`} actions={<Button variant="outline" onClick={reload}><RefreshCw size={14} className="me-1" />{t("pulse.refresh")}</Button>} />
       {data?.narration && <Card className="p-5">
           <div className="flex items-start gap-3">
             <Activity size={20} className="text-emerald-400 mt-0.5 shrink-0" />
@@ -53,17 +53,17 @@ function PulseInner() {
       <Card className="p-0 overflow-hidden">
         <div className="px-4 py-3 text-sm font-medium border-b border-[#222838]">{t("pulse.liveJobMargins")}</div>
         <table className="w-full text-sm">
-          <thead><tr className="text-left text-gray-500 border-b border-[#222838]">
-            <th className="px-4 py-2 font-medium">{t("pulse.job")}</th><th className="px-4 py-2 font-medium text-right">{t("pulse.revenue")}</th>
-            <th className="px-4 py-2 font-medium text-right">{t("pulse.cost")}</th><th className="px-4 py-2 font-medium text-right">{t("pulse.margin")}</th>
+          <thead><tr className="text-start text-gray-500 border-b border-[#222838]">
+            <th className="px-4 py-2 font-medium">{t("pulse.job")}</th><th className="px-4 py-2 font-medium text-end">{t("pulse.revenue")}</th>
+            <th className="px-4 py-2 font-medium text-end">{t("pulse.cost")}</th><th className="px-4 py-2 font-medium text-end">{t("pulse.margin")}</th>
             <th className="px-4 py-2 font-medium"></th>
           </tr></thead>
           <tbody>
             {(data?.tickers || []).map(j => <tr key={j.job_id} className="border-b border-[#1a2030] hover:bg-[#141926]">
                 <td className="px-4 py-2.5">{j.job_number} <span className="text-gray-500 text-xs">· {j.client}</span></td>
-                <td className="px-4 py-2.5 text-right font-mono">{money(j.revenue_cents)}</td>
-                <td className="px-4 py-2.5 text-right font-mono">{money(j.cost_cents)}</td>
-                <td className={`px-4 py-2.5 text-right font-mono ${j.margin_pct < 0 ? "text-red-400" : j.margin_pct < 20 ? "text-amber-400" : "text-emerald-400"}`}>{j.margin_pct}%</td>
+                <td className="px-4 py-2.5 text-end font-mono">{money(j.revenue_cents)}</td>
+                <td className="px-4 py-2.5 text-end font-mono">{money(j.cost_cents)}</td>
+                <td className={`px-4 py-2.5 text-end font-mono ${j.margin_pct < 0 ? "text-red-400" : j.margin_pct < 20 ? "text-amber-400" : "text-emerald-400"}`}>{j.margin_pct}%</td>
                 <td className="px-4 py-2.5"><div className="w-24 h-1.5 bg-[#1a2030] rounded-full overflow-hidden">
                   <div className={`h-full rounded-full ${j.margin_pct < 0 ? "bg-red-500" : j.margin_pct < 20 ? "bg-amber-500" : "bg-emerald-500"}`} style={{
                   width: `${Math.min(100, Math.max(0, j.margin_pct))}%`

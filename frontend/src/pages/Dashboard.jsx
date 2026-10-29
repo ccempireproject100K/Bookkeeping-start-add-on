@@ -112,12 +112,12 @@ export default function Dashboard() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm" data-testid="dashboard-recent-entries">
             <thead>
-              <tr className="text-left text-xs uppercase tracking-wider text-gray-500 border-b border-[#222838]">
+              <tr className="text-start text-xs uppercase tracking-wider text-gray-500 border-b border-[#222838]">
                 <th className="px-5 py-3 font-medium">{t("dashboard.number")}</th>
                 <th className="px-5 py-3 font-medium">{t("dashboard.date")}</th>
                 <th className="px-5 py-3 font-medium">{t("dashboard.source")}</th>
                 <th className="px-5 py-3 font-medium">{t("dashboard.memo")}</th>
-                <th className="px-5 py-3 font-medium text-right">{t("dashboard.amount")}</th>
+                <th className="px-5 py-3 font-medium text-end">{t("dashboard.amount")}</th>
               </tr>
             </thead>
             <tbody>
@@ -130,7 +130,7 @@ export default function Dashboard() {
                     </span>
                   </td>
                   <td className="px-5 py-3 text-gray-400 max-w-[280px] truncate">{e.memo || "—"}</td>
-                  <td className="px-5 py-3 text-right font-mono text-gray-200">{money(e.total_cents)}</td>
+                  <td className="px-5 py-3 text-end font-mono text-gray-200">{money(e.total_cents)}</td>
                 </tr>)}
               {(!data.recent_entries || data.recent_entries.length === 0) && <tr><td colSpan={5} className="px-5 py-12 text-center text-gray-500">{t("dashboard.noEntriesYet")}</td></tr>}
             </tbody>

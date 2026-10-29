@@ -93,7 +93,7 @@ function BenchmarksInner() {
                     <span>{t("benchmarks.top25")} {fmt(c.p75, c.unit)}</span>
                   </div>
                   <div className="relative h-2 rounded-full bg-[#222838]">
-                    <div className="absolute inset-y-0 left-1/4 right-1/4 rounded-full bg-blue-500/40" />
+                    <div className="absolute inset-y-0 start-1/4 end-1/4 rounded-full bg-blue-500/40" />
                     {c.mine != null && (() => {
                 const lo = Math.min(c.p25, c.mine),
                   hi = Math.max(c.p75, c.mine);

@@ -166,7 +166,7 @@ export default function Combo() {
   };
   if (!loaded) return <Loading />;
   return <div className="space-y-6">
-      <PageHeader title={t("combo.empireCombo")} subtitle="Receptionist books the job · Books do the books · Lead-gen on top." actions={canManage && <Button onClick={() => setLeadOpen(true)} data-testid="lead-add"><Plus size={14} className="mr-1" />{t("combo.captureLead")}</Button>} />
+      <PageHeader title={t("combo.empireCombo")} subtitle="Receptionist books the job · Books do the books · Lead-gen on top." actions={canManage && <Button onClick={() => setLeadOpen(true)} data-testid="lead-add"><Plus size={14} className="me-1" />{t("combo.captureLead")}</Button>} />
       {funnel && <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
           {funnel.stages.map(s => <Card key={s} className="p-3"><div className={`text-xs capitalize font-medium ${STAGE_CLS[s]?.split(" ")[1] || ""}`}>{s}</div>
               <div className="text-2xl font-semibold">{funnel.by_stage[s] || 0}</div></Card>)}
@@ -180,7 +180,7 @@ export default function Combo() {
       <div className="grid lg:grid-cols-[1fr_420px] gap-6">
         <Card className="p-0 overflow-hidden h-fit">
           <table className="w-full text-sm">
-            <thead><tr className="text-left text-gray-500 border-b border-[#222838]">
+            <thead><tr className="text-start text-gray-500 border-b border-[#222838]">
               <th className="px-4 py-3 font-medium">{t("combo.lead")}</th><th className="px-4 py-3 font-medium">{t("combo.source")}</th>
               <th className="px-4 py-3 font-medium">{t("combo.stage")}</th><th className="px-4 py-3"></th>
             </tr></thead>
@@ -189,7 +189,7 @@ export default function Combo() {
                   <td className="px-4 py-3"><div className="font-medium">{l.name}</div><div className="text-xs text-gray-500">{l.service_needed}</div></td>
                   <td className="px-4 py-3 text-xs text-gray-400 capitalize">{l.source}</td>
                   <td className="px-4 py-3"><span className={`text-xs px-2 py-0.5 rounded-full capitalize ${STAGE_CLS[l.stage]}`}>{l.stage}</span></td>
-                  <td className="px-4 py-3 text-right"><ArrowRight size={14} className="inline text-gray-600" /></td>
+                  <td className="px-4 py-3 text-end"><ArrowRight size={14} className="inline text-gray-600 rtl:-scale-x-100" /></td>
                 </tr>)}
               {!leads.length && <tr><td colSpan={4} className="px-4 py-8 text-center text-gray-500 text-sm">{t("combo.noLeadsYetCaptureTheFirst")}</td></tr>}
             </tbody>
@@ -233,7 +233,7 @@ export default function Combo() {
               </div>
               {canManage && <div>
                   <Button size="sm" variant="outline" onClick={getDraft} className="mb-2">
-                    <Sparkles size={13} className="mr-1" /> {t("combo.draftFollowUp")}</Button>
+                    <Sparkles size={13} className="me-1" /> {t("combo.draftFollowUp")}</Button>
                   {draft?.loading && <p className="text-xs text-gray-500">{t("combo.writing")}</p>}
                   {draft?.draft && <p className="text-xs bg-[#0F1218] border border-[#222838] rounded p-2.5 text-gray-300">{draft.draft}
                     {!draft.ai && <span className="text-gray-600"> {t("combo.templateAddAIKeyFor")}</span>}</p>}

@@ -95,7 +95,7 @@ export default function Backup() {
           <h3 className="text-sm font-semibold text-gray-100">{t("backup.exportBackup")}</h3>
           <p className="mt-1 text-xs text-gray-500">{t("backup.downloadsAJSONSnapshotOfInvoices")}</p>
           <Button data-testid="backup-export" onClick={doExport} disabled={busy} className="mt-4 bg-amber-600 hover:bg-amber-500 text-black font-semibold">
-            <Download size={15} className="mr-1" /> {busy ? "Working…" : "Export backup"}
+            <Download size={15} className="me-1" /> {busy ? "Working…" : "Export backup"}
           </Button>
         </Card>
 
@@ -110,7 +110,7 @@ export default function Backup() {
               <span>{t("backup.iUnderstandThis")} <span className="text-rose-400 font-medium">{t("backup.replacesAllCurrentBusinessData")}</span> {t("backup.withTheBackupContents")}</span>
             </label>
             <Button data-testid="backup-import" onClick={doImport} disabled={busy || !file} variant="destructive">
-              <Upload size={15} className="mr-1" /> {t("backup.restoreBackup")}</Button>
+              <Upload size={15} className="me-1" /> {t("backup.restoreBackup")}</Button>
           </div>
         </Card>
       </div>

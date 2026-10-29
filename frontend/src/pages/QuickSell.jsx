@@ -129,7 +129,7 @@ export default function QuickSell() {
           <Card>
             <h3 className="font-display font-semibold mb-3 flex items-center gap-2"><Scissors size={16} className="text-amber-400" /> {t("quicksell.services")}</h3>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              {SERVICES.map((s, i) => <button key={i} onClick={() => addService(s)} data-testid={`pos-service-${i}`} className="p-3 rounded-lg bg-[#0F1218] border border-[#222838] hover:border-amber-500/40 text-left transition-colors">
+              {SERVICES.map((s, i) => <button key={i} onClick={() => addService(s)} data-testid={`pos-service-${i}`} className="p-3 rounded-lg bg-[#0F1218] border border-[#222838] hover:border-amber-500/40 text-start transition-colors">
                   <div className="text-sm text-gray-100">{s.name}</div>
                   <div className="font-mono text-amber-400 text-sm mt-1">{dollars(s.price)}</div>
                 </button>)}
@@ -138,7 +138,7 @@ export default function QuickSell() {
           <Card>
             <h3 className="font-display font-semibold mb-3 flex items-center gap-2"><ShoppingBag size={16} className="text-amber-400" /> {t("quicksell.retailProducts")}</h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              {products.map(p => <button key={p.id} onClick={() => addProduct(p)} data-testid="pos-product-card" className="p-3 rounded-lg bg-[#0F1218] border border-[#222838] hover:border-amber-500/40 text-left transition-colors disabled:opacity-40" disabled={p.quantity_on_hand <= 0}>
+              {products.map(p => <button key={p.id} onClick={() => addProduct(p)} data-testid="pos-product-card" className="p-3 rounded-lg bg-[#0F1218] border border-[#222838] hover:border-amber-500/40 text-start transition-colors disabled:opacity-40" disabled={p.quantity_on_hand <= 0}>
                   <div className="text-sm text-gray-100 truncate">{p.name}</div>
                   <div className="flex items-center justify-between mt-1">
                     <span className="font-mono text-amber-400 text-sm">{money(p.price_cents)}</span>
@@ -173,7 +173,7 @@ export default function QuickSell() {
                     <button onClick={() => changeQty(idx, -1)} className="w-6 h-6 grid place-items-center rounded bg-[#1b2230] text-gray-300"><Minus size={12} /></button>
                     <span className="w-6 text-center text-sm font-mono">{i.qty}</span>
                     <button onClick={() => changeQty(idx, 1)} className="w-6 h-6 grid place-items-center rounded bg-[#1b2230] text-gray-300"><Plus size={12} /></button>
-                    <button onClick={() => removeItem(idx)} className="ml-1 text-gray-600 hover:text-rose-400"><Trash2 size={14} /></button>
+                    <button onClick={() => removeItem(idx)} className="ms-1 text-gray-600 hover:text-rose-400"><Trash2 size={14} /></button>
                   </div>
                 </div>)}
             </div>
@@ -212,17 +212,17 @@ export default function QuickSell() {
         <div className="px-5 py-3 text-sm font-semibold text-gray-100 border-b border-[#222838]">{t("quicksell.recentSales")}</div>
         <table className="w-full text-sm" data-testid="pos-history">
           <thead><tr className="text-xs uppercase tracking-wider text-gray-500 border-b border-[#222838]">
-            <th className="px-5 py-2 text-left font-medium">{t("quicksell.when")}</th>
-            <th className="px-5 py-2 text-left font-medium">{t("quicksell.items")}</th>
-            <th className="px-5 py-2 text-left font-medium">{t("quicksell.method")}</th>
-            <th className="px-5 py-2 text-right font-medium">{t("quicksell.total")}</th>
+            <th className="px-5 py-2 text-start font-medium">{t("quicksell.when")}</th>
+            <th className="px-5 py-2 text-start font-medium">{t("quicksell.items")}</th>
+            <th className="px-5 py-2 text-start font-medium">{t("quicksell.method")}</th>
+            <th className="px-5 py-2 text-end font-medium">{t("quicksell.total")}</th>
           </tr></thead>
           <tbody>
             {history.slice(0, 20).map(s => <tr key={s.id} className="border-b border-[#171c26]">
                 <td className="px-5 py-2 text-gray-400 text-xs">{s.created_at ? fmtDate(s.created_at.slice(0, 10)) : "—"}</td>
                 <td className="px-5 py-2 text-gray-300 text-xs">{(s.cart || []).map(i => `${i.qty > 1 ? `${i.qty}× ` : ""}${i.name}`).slice(0, 3).join(", ") || "—"}</td>
                 <td className="px-5 py-2 text-gray-400 text-xs capitalize">{s.payment_method || "—"}</td>
-                <td className="px-5 py-2 text-right font-mono text-gray-100">{money(s.total_cents)}</td>
+                <td className="px-5 py-2 text-end font-mono text-gray-100">{money(s.total_cents)}</td>
               </tr>)}
             {history.length === 0 && <tr><td colSpan={4} className="px-5 py-8 text-center text-gray-500 text-sm">{t("quicksell.noSalesYetToday")}</td></tr>}
           </tbody>

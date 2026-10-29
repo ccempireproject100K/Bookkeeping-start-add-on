@@ -340,7 +340,7 @@ export default function Payroll() {
   if (!schedules || !team || !runs) return <Loading />;
   return <div className="animate-rise">
       <PageHeader title={t("payroll.payroll")} subtitle="Pay schedules, gross-to-net runs, printable stubs" testid="payroll-page">
-        {canWrite && <Button data-testid="payroll-new-run" onClick={() => setShowNew(s => !s)} className="bg-amber-600 hover:bg-amber-500 text-black font-semibold"><Plus size={16} className="mr-1" /> {t("payroll.newPayRun")}</Button>}
+        {canWrite && <Button data-testid="payroll-new-run" onClick={() => setShowNew(s => !s)} className="bg-amber-600 hover:bg-amber-500 text-black font-semibold"><Plus size={16} className="me-1" /> {t("payroll.newPayRun")}</Button>}
       </PageHeader>
 
       <div className="flex gap-3 rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-sm mb-6" data-testid="payroll-disclaimer">
@@ -370,9 +370,9 @@ export default function Payroll() {
           </div>
           <table className="w-full text-sm mb-4">
             <thead><tr className="text-xs uppercase tracking-wider text-gray-500 border-b border-[#222838]">
-              <th className="py-2 text-left font-medium">{t("payroll.include")}</th><th className="py-2 text-left font-medium">{t("payroll.name")}</th>
-              <th className="py-2 text-left font-medium">{t("payroll.type")}</th><th className="py-2 text-right font-medium">{t("payroll.hours")}</th>
-              <th className="py-2 text-right font-medium">{t("payroll.rateHr")}</th><th className="py-2 text-right font-medium">{t("payroll.commission")}</th><th className="py-2 text-right font-medium">Tips $</th></tr></thead>
+              <th className="py-2 text-start font-medium">{t("payroll.include")}</th><th className="py-2 text-start font-medium">{t("payroll.name")}</th>
+              <th className="py-2 text-start font-medium">{t("payroll.type")}</th><th className="py-2 text-end font-medium">{t("payroll.hours")}</th>
+              <th className="py-2 text-end font-medium">{t("payroll.rateHr")}</th><th className="py-2 text-end font-medium">{t("payroll.commission")}</th><th className="py-2 text-end font-medium">Tips $</th></tr></thead>
             <tbody>
               {team.map(m => {
             const r = rows[m.id] || {};
@@ -383,18 +383,18 @@ export default function Payroll() {
                 })} /></td>
                     <td className="py-2 text-gray-100">{m.name} <span className="text-xs text-gray-500">· {roleLabel(m.role)}</span></td>
                     <td className="py-2 text-gray-400 text-xs">{isSalary ? "Salary" : "Hourly"}</td>
-                    <td className="py-2 text-right">{!isSalary && <Input type="number" step="0.25" min={0} value={r.hours || ""} onChange={e => setRow(m.id, {
+                    <td className="py-2 text-end">{!isSalary && <Input type="number" step="0.25" min={0} value={r.hours || ""} onChange={e => setRow(m.id, {
                   hours: e.target.value
-                })} className="bg-[#0F1218] border-[#222838] w-24 font-mono text-right ml-auto" placeholder="auto" title="Leave blank to pull approved time entries; type a number to override" />}</td>
-                    <td className="py-2 text-right">{!isSalary && <Input type="number" step="0.01" min={0} value={r.rate || ""} onChange={e => setRow(m.id, {
+                })} className="bg-[#0F1218] border-[#222838] w-24 font-mono text-end ms-auto" placeholder="auto" title="Leave blank to pull approved time entries; type a number to override" />}</td>
+                    <td className="py-2 text-end">{!isSalary && <Input type="number" step="0.01" min={0} value={r.rate || ""} onChange={e => setRow(m.id, {
                   rate: e.target.value
-                })} className="bg-[#0F1218] border-[#222838] w-24 font-mono text-right ml-auto" placeholder={centsToDollars(m.hourly_rate_cents)} />}</td>
-                    <td className="py-2 text-right"><Input type="number" step="0.01" min={0} value={r.commission || ""} onChange={e => setRow(m.id, {
+                })} className="bg-[#0F1218] border-[#222838] w-24 font-mono text-end ms-auto" placeholder={centsToDollars(m.hourly_rate_cents)} />}</td>
+                    <td className="py-2 text-end"><Input type="number" step="0.01" min={0} value={r.commission || ""} onChange={e => setRow(m.id, {
                   commission: e.target.value
-                })} className="bg-[#0F1218] border-[#222838] w-24 font-mono text-right ml-auto" placeholder="0" /></td>
-                    <td className="py-2 text-right"><Input type="number" step="0.01" min={0} value={r.tips || ""} onChange={e => setRow(m.id, {
+                })} className="bg-[#0F1218] border-[#222838] w-24 font-mono text-end ms-auto" placeholder="0" /></td>
+                    <td className="py-2 text-end"><Input type="number" step="0.01" min={0} value={r.tips || ""} onChange={e => setRow(m.id, {
                   tips: e.target.value
-                })} className="bg-[#0F1218] border-[#222838] w-24 font-mono text-right ml-auto" placeholder="0" /></td>
+                })} className="bg-[#0F1218] border-[#222838] w-24 font-mono text-end ms-auto" placeholder="0" /></td>
                   </tr>;
           })}
             </tbody>
@@ -422,21 +422,21 @@ export default function Payroll() {
             </div>
             <table className="w-full text-sm">
               <thead><tr className="text-xs uppercase tracking-wider text-gray-500 border-b border-[#222838]">
-                <th className="px-5 py-3 text-left font-medium">{t("payroll.agency")}</th>
-                <th className="px-5 py-3 text-left font-medium">{t("payroll.type")}</th>
-                <th className="px-5 py-3 text-right font-medium">Amount</th>
-                <th className="px-5 py-3 text-left font-medium">{t("payroll.payDate")}</th>
-                <th className="px-5 py-3 text-left font-medium">{t("payroll.dueDate")}</th>
-                <th className="px-5 py-3 text-left font-medium">{t("payroll.status")}</th><th /></tr></thead>
+                <th className="px-5 py-3 text-start font-medium">{t("payroll.agency")}</th>
+                <th className="px-5 py-3 text-start font-medium">{t("payroll.type")}</th>
+                <th className="px-5 py-3 text-end font-medium">Amount</th>
+                <th className="px-5 py-3 text-start font-medium">{t("payroll.payDate")}</th>
+                <th className="px-5 py-3 text-start font-medium">{t("payroll.dueDate")}</th>
+                <th className="px-5 py-3 text-start font-medium">{t("payroll.status")}</th><th /></tr></thead>
               <tbody>
                 {(liabs?.liabilities || []).map(l => <tr key={l.id} className="border-b border-[#171c26]">
                     <td className="px-5 py-3 text-gray-100">{l.agency}</td>
                     <td className="px-5 py-3 text-gray-400">{l.kind.replaceAll("_", " ")}</td>
-                    <td className="px-5 py-3 text-right font-mono text-gray-200">{money(l.amount_cents)}</td>
+                    <td className="px-5 py-3 text-end font-mono text-gray-200">{money(l.amount_cents)}</td>
                     <td className="px-5 py-3 text-gray-400 font-mono text-xs">{l.pay_date}</td>
                     <td className="px-5 py-3 text-gray-200 font-mono text-xs">{l.due_date}</td>
                     <td className="px-5 py-3"><span className={`px-2 py-0.5 rounded-full text-xs border capitalize ${STATUS_CLS[l.status] || ""}`}>{l.status}{l.reference ? ` · ${l.reference}` : ""}</span></td>
-                    <td className="px-5 py-3 text-right">{canWrite && l.status === "accrued" && <Button size="sm" variant="outline" className="h-7 border-[#222838]" onClick={() => doRemit(l.id)}>{t("payroll.markRemitted")}</Button>}</td>
+                    <td className="px-5 py-3 text-end">{canWrite && l.status === "accrued" && <Button size="sm" variant="outline" className="h-7 border-[#222838]" onClick={() => doRemit(l.id)}>{t("payroll.markRemitted")}</Button>}</td>
                   </tr>)}
                 {(liabs?.liabilities || []).length === 0 && <tr><td colSpan={7} className="px-5 py-12 text-center text-gray-500">—</td></tr>}
               </tbody>
@@ -456,38 +456,38 @@ export default function Payroll() {
               </div>
               <table className="w-full text-sm mb-3">
                 <thead><tr className="text-xs uppercase tracking-wider text-gray-500 border-b border-[#222838]">
-                  <th className="py-2 text-left font-medium">{t("payroll.employee")}</th>
-                  <th className="py-2 text-right font-medium">{t("payroll.gross")}</th>
-                  <th className="py-2 text-right font-medium">{t("payroll.deductions")}</th>
-                  <th className="py-2 text-right font-medium">{t("payroll.net")}</th><th /></tr></thead>
+                  <th className="py-2 text-start font-medium">{t("payroll.employee")}</th>
+                  <th className="py-2 text-end font-medium">{t("payroll.gross")}</th>
+                  <th className="py-2 text-end font-medium">{t("payroll.deductions")}</th>
+                  <th className="py-2 text-end font-medium">{t("payroll.net")}</th><th /></tr></thead>
                 <tbody>
                   {detail.items.map(it => <tr key={it.id} className="border-b border-[#171c26]">
                       <td className="py-2 text-gray-100">{it.name}{" "}
                         <span className="text-xs text-gray-500">{it.pay_type === "hourly" ? `${it.hours}h × ${money(it.rate_cents)}/hr` : "salary"}{it.work_state ? ` · ${it.work_state}` : ""}</span>
                         <div className="text-xs text-gray-600">{it.deductions.map(d => `${d.label} ${money(d.amount_cents)}`).join(" · ")}</div>
                         {(it.warnings || []).map((w, wi) => <div key={wi} className="text-xs text-amber-500">{w}</div>)}</td>
-                      <td className="py-2 text-right font-mono text-gray-200">{money(it.gross_cents)}</td>
-                      <td className="py-2 text-right font-mono text-gray-400">{money(it.total_deductions_cents)}</td>
-                      <td className="py-2 text-right font-mono text-emerald-400 font-medium">{money(it.net_cents)}</td>
-                      <td className="py-2 text-right"><Button size="sm" variant="ghost" className="h-7 text-gray-400" onClick={() => doPrint(detail.id, it.id)}><Printer size={14} className="mr-1" />{t("payroll.stub")}</Button></td>
+                      <td className="py-2 text-end font-mono text-gray-200">{money(it.gross_cents)}</td>
+                      <td className="py-2 text-end font-mono text-gray-400">{money(it.total_deductions_cents)}</td>
+                      <td className="py-2 text-end font-mono text-emerald-400 font-medium">{money(it.net_cents)}</td>
+                      <td className="py-2 text-end"><Button size="sm" variant="ghost" className="h-7 text-gray-400" onClick={() => doPrint(detail.id, it.id)}><Printer size={14} className="me-1" />{t("payroll.stub")}</Button></td>
                     </tr>)}
                 </tbody>
                 <tfoot>
                   {((detail.totals.employer_tax_cents || 0) + (detail.totals.employer_futa_cents || 0) + (detail.totals.employer_suta_cents || 0) + (detail.totals.employer_ett_cents || 0)) > 0 && <tr className="text-xs text-gray-500">
                     <td className="py-1">{t("payroll.employerTaxEst")} <span className="text-gray-600">(FICA {money(detail.totals.employer_tax_cents)} · FUTA {money(detail.totals.employer_futa_cents || 0)} · SUTA {money(detail.totals.employer_suta_cents || 0)}{(detail.totals.employer_ett_cents || 0) > 0 ? ` · ETT ${money(detail.totals.employer_ett_cents)}` : ""})</span></td>
-                    <td className="py-1 text-right font-mono">{money((detail.totals.employer_tax_cents || 0) + (detail.totals.employer_futa_cents || 0) + (detail.totals.employer_suta_cents || 0) + (detail.totals.employer_ett_cents || 0))}</td>
+                    <td className="py-1 text-end font-mono">{money((detail.totals.employer_tax_cents || 0) + (detail.totals.employer_futa_cents || 0) + (detail.totals.employer_suta_cents || 0) + (detail.totals.employer_ett_cents || 0))}</td>
                     <td className="py-1" /><td className="py-1" /><td />
                   </tr>}
                   {(detail.totals.employer_cost_cents || 0) > 0 && <tr className="text-xs text-gray-500">
                     <td className="py-1">{t("payroll.employerCost")}</td>
-                    <td className="py-1 text-right font-mono">{money(detail.totals.employer_cost_cents)}</td>
+                    <td className="py-1 text-end font-mono">{money(detail.totals.employer_cost_cents)}</td>
                     <td className="py-1" /><td className="py-1" /><td />
                   </tr>}
                   <tr className="font-semibold text-gray-100">
                   <td className="py-2">{t("payroll.totals")}</td>
-                  <td className="py-2 text-right font-mono">{money(detail.totals.gross_cents)}</td>
-                  <td className="py-2 text-right font-mono">{money(detail.totals.tax_deductions_cents + detail.totals.booth_rent_cents + detail.totals.other_deductions_cents)}</td>
-                  <td className="py-2 text-right font-mono text-emerald-400">{money(detail.totals.net_cents)}</td><td />
+                  <td className="py-2 text-end font-mono">{money(detail.totals.gross_cents)}</td>
+                  <td className="py-2 text-end font-mono">{money(detail.totals.tax_deductions_cents + detail.totals.booth_rent_cents + detail.totals.other_deductions_cents)}</td>
+                  <td className="py-2 text-end font-mono text-emerald-400">{money(detail.totals.net_cents)}</td><td />
                 </tr></tfoot>
               </table>
               {detail.notes && <p className="text-xs text-gray-500 mb-2">{detail.notes}</p>}
@@ -514,19 +514,19 @@ export default function Payroll() {
           <Card className="p-0 overflow-hidden" data-testid="payroll-runs-table">
             <table className="w-full text-sm">
               <thead><tr className="text-xs uppercase tracking-wider text-gray-500 border-b border-[#222838]">
-                <th className="px-5 py-3 text-left font-medium">{t("payroll.period")}</th>
-                <th className="px-5 py-3 text-right font-medium">{t("payroll.gross")}</th>
-                <th className="px-5 py-3 text-right font-medium">{t("payroll.deductions")}</th>
-                <th className="px-5 py-3 text-right font-medium">{t("payroll.net")}</th>
-                <th className="px-5 py-3 text-left font-medium">{t("payroll.status")}</th><th /></tr></thead>
+                <th className="px-5 py-3 text-start font-medium">{t("payroll.period")}</th>
+                <th className="px-5 py-3 text-end font-medium">{t("payroll.gross")}</th>
+                <th className="px-5 py-3 text-end font-medium">{t("payroll.deductions")}</th>
+                <th className="px-5 py-3 text-end font-medium">{t("payroll.net")}</th>
+                <th className="px-5 py-3 text-start font-medium">{t("payroll.status")}</th><th /></tr></thead>
               <tbody>
                 {runs.map(r => <tr key={r.id} className="border-b border-[#171c26] hover:bg-[#161b25]">
                     <td className="px-5 py-3 text-gray-100">{r.period_start} → {r.period_end} <span className="text-xs text-gray-500">({r.items.length} {t("payroll.people")}</span></td>
-                    <td className="px-5 py-3 text-right font-mono text-gray-200">{money(r.totals.gross_cents)}</td>
-                    <td className="px-5 py-3 text-right font-mono text-gray-400">{money(r.totals.tax_deductions_cents + r.totals.booth_rent_cents + r.totals.other_deductions_cents)}</td>
-                    <td className="px-5 py-3 text-right font-mono text-emerald-400 font-medium">{money(r.totals.net_cents)}</td>
+                    <td className="px-5 py-3 text-end font-mono text-gray-200">{money(r.totals.gross_cents)}</td>
+                    <td className="px-5 py-3 text-end font-mono text-gray-400">{money(r.totals.tax_deductions_cents + r.totals.booth_rent_cents + r.totals.other_deductions_cents)}</td>
+                    <td className="px-5 py-3 text-end font-mono text-emerald-400 font-medium">{money(r.totals.net_cents)}</td>
                     <td className="px-5 py-3"><span className={`px-2 py-0.5 rounded-full text-xs border capitalize ${STATUS_CLS[r.status] || ""}`}>{r.status}</span></td>
-                    <td className="px-5 py-3 text-right"><Button size="sm" variant="outline" className="h-7 border-[#222838]" onClick={() => setDetail(r)}>{t("payroll.open")}</Button></td>
+                    <td className="px-5 py-3 text-end"><Button size="sm" variant="outline" className="h-7 border-[#222838]" onClick={() => setDetail(r)}>{t("payroll.open")}</Button></td>
                   </tr>)}
                 {runs.length === 0 && <tr><td colSpan={6} className="px-5 py-12 text-center text-gray-500">{t("payroll.noPayRunsYet")}</td></tr>}
               </tbody>
@@ -601,38 +601,38 @@ export default function Payroll() {
               </div>}
             <table className="w-full text-sm">
               <thead><tr className="text-xs uppercase tracking-wider text-gray-500 border-b border-[#222838]">
-                <th className="py-2 text-left font-medium">{t("payroll.member")}</th>
-                <th className="py-2 text-right font-medium">{t("payroll.hourlyHr")}</th>
-                <th className="py-2 text-right font-medium">{t("payroll.salaryMo")}</th>
-                <th className="py-2 text-right font-medium">{t("payroll.fedWH")}</th>
-                <th className="py-2 text-right font-medium">{t("payroll.boothRent")}</th>
-                <th className="py-2 text-right font-medium">{t("payroll.commRate")}</th><th /></tr></thead>
+                <th className="py-2 text-start font-medium">{t("payroll.member")}</th>
+                <th className="py-2 text-end font-medium">{t("payroll.hourlyHr")}</th>
+                <th className="py-2 text-end font-medium">{t("payroll.salaryMo")}</th>
+                <th className="py-2 text-end font-medium">{t("payroll.fedWH")}</th>
+                <th className="py-2 text-end font-medium">{t("payroll.boothRent")}</th>
+                <th className="py-2 text-end font-medium">{t("payroll.commRate")}</th><th /></tr></thead>
               <tbody>
                 {team.map(m => {
                 const f = edit[m.id] || {};
                 return <tr key={m.id} className="border-b border-[#171c26]">
                       <td className="py-2 text-gray-100">{m.name} <span className="text-xs text-gray-500">· {roleLabel(m.role)}</span></td>
                       {canWrite ? <>
-                          <td className="py-2 text-right"><Input type="number" step="0.01" min={0} value={f.hourly_rate ?? ""} onChange={e => setEditRow(m.id, {
+                          <td className="py-2 text-end"><Input type="number" step="0.01" min={0} value={f.hourly_rate ?? ""} onChange={e => setEditRow(m.id, {
                         hourly_rate: e.target.value
-                      })} className="bg-[#0F1218] border-[#222838] w-24 font-mono text-right ml-auto" placeholder="0" /></td>
-                          <td className="py-2 text-right"><Input type="number" step="0.01" min={0} value={f.salary_monthly ?? ""} onChange={e => setEditRow(m.id, {
+                      })} className="bg-[#0F1218] border-[#222838] w-24 font-mono text-end ms-auto" placeholder="0" /></td>
+                          <td className="py-2 text-end"><Input type="number" step="0.01" min={0} value={f.salary_monthly ?? ""} onChange={e => setEditRow(m.id, {
                         salary_monthly: e.target.value
-                      })} className="bg-[#0F1218] border-[#222838] w-28 font-mono text-right ml-auto" placeholder="0" /></td>
-                          <td className="py-2 text-right"><Input type="number" step="0.1" min={0} value={f.fed_withholding_pct ?? ""} onChange={e => setEditRow(m.id, {
+                      })} className="bg-[#0F1218] border-[#222838] w-28 font-mono text-end ms-auto" placeholder="0" /></td>
+                          <td className="py-2 text-end"><Input type="number" step="0.1" min={0} value={f.fed_withholding_pct ?? ""} onChange={e => setEditRow(m.id, {
                         fed_withholding_pct: e.target.value
-                      })} className="bg-[#0F1218] border-[#222838] w-20 font-mono text-right ml-auto" placeholder="0" /></td>
-                          <td className="py-2 text-right"><Input type="number" step="0.01" min={0} value={f.booth_rent ?? ""} onChange={e => setEditRow(m.id, {
+                      })} className="bg-[#0F1218] border-[#222838] w-20 font-mono text-end ms-auto" placeholder="0" /></td>
+                          <td className="py-2 text-end"><Input type="number" step="0.01" min={0} value={f.booth_rent ?? ""} onChange={e => setEditRow(m.id, {
                         booth_rent: e.target.value
-                      })} className="bg-[#0F1218] border-[#222838] w-24 font-mono text-right ml-auto" placeholder="0" /></td>
-                          <td className="py-2 text-right font-mono text-gray-400">{(m.commission_rate * 100).toFixed(1)}%</td>
-                          <td className="py-2 text-right"><Button size="sm" className="h-7 bg-amber-600 hover:bg-amber-500 text-black" onClick={() => saveSettings(m.id)}>{t("payroll.save")}</Button></td>
+                      })} className="bg-[#0F1218] border-[#222838] w-24 font-mono text-end ms-auto" placeholder="0" /></td>
+                          <td className="py-2 text-end font-mono text-gray-400">{(m.commission_rate * 100).toFixed(1)}%</td>
+                          <td className="py-2 text-end"><Button size="sm" className="h-7 bg-amber-600 hover:bg-amber-500 text-black" onClick={() => saveSettings(m.id)}>{t("payroll.save")}</Button></td>
                         </> : <>
-                          <td className="py-2 text-right font-mono text-gray-300">{money(m.hourly_rate_cents)}</td>
-                          <td className="py-2 text-right font-mono text-gray-300">{money(m.salary_monthly_cents)}</td>
-                          <td className="py-2 text-right font-mono text-gray-300">{m.fed_withholding_pct}%</td>
-                          <td className="py-2 text-right font-mono text-gray-300">{money(m.booth_rent_cents)}</td>
-                          <td className="py-2 text-right font-mono text-gray-400">{(m.commission_rate * 100).toFixed(1)}%</td><td />
+                          <td className="py-2 text-end font-mono text-gray-300">{money(m.hourly_rate_cents)}</td>
+                          <td className="py-2 text-end font-mono text-gray-300">{money(m.salary_monthly_cents)}</td>
+                          <td className="py-2 text-end font-mono text-gray-300">{m.fed_withholding_pct}%</td>
+                          <td className="py-2 text-end font-mono text-gray-300">{money(m.booth_rent_cents)}</td>
+                          <td className="py-2 text-end font-mono text-gray-400">{(m.commission_rate * 100).toFixed(1)}%</td><td />
                         </>}
                     </tr>;
               })}

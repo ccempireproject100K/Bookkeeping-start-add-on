@@ -112,22 +112,22 @@ export default function Bills() {
   const vendorCredits = payBill ? credits.filter(c => c.vendor === payBill.vendor && c.remaining_cents > 0) : [];
   return <div className="animate-rise">
       <PageHeader title={t("bills.bills")} subtitle="Accounts payable — partial payments, vendor credits & recurring" testid="bills-page">
-        {canManage && <Button data-testid="btn-new-bill" onClick={() => setOpen(true)} className="bg-amber-600 hover:bg-amber-500 text-black font-semibold"><Plus size={16} className="mr-1" />{t("bills.newBill")}</Button>}
+        {canManage && <Button data-testid="btn-new-bill" onClick={() => setOpen(true)} className="bg-amber-600 hover:bg-amber-500 text-black font-semibold"><Plus size={16} className="me-1" />{t("bills.newBill")}</Button>}
       </PageHeader>
       <Card className="p-0 overflow-hidden">
         <table className="w-full text-sm" data-testid="table-bills">
           <thead><tr className="text-xs uppercase tracking-wider text-gray-500 border-b border-[#222838]">
-            <th className="px-4 py-3 text-left font-medium">{t("bills.vendor")}</th><th className="px-4 py-3 text-left font-medium">{t("bills.due")}</th>
-            <th className="px-4 py-3 text-right font-medium">{t("bills.amount")}</th><th className="px-4 py-3 text-right font-medium">{t("bills.balance")}</th>
-            <th className="px-4 py-3 text-left font-medium">{t("bills.status")}</th>{canManage && <th className="px-4 py-3 text-right font-medium">{t("bills.actions")}</th>}</tr></thead>
+            <th className="px-4 py-3 text-start font-medium">{t("bills.vendor")}</th><th className="px-4 py-3 text-start font-medium">{t("bills.due")}</th>
+            <th className="px-4 py-3 text-end font-medium">{t("bills.amount")}</th><th className="px-4 py-3 text-end font-medium">{t("bills.balance")}</th>
+            <th className="px-4 py-3 text-start font-medium">{t("bills.status")}</th>{canManage && <th className="px-4 py-3 text-end font-medium">{t("bills.actions")}</th>}</tr></thead>
           <tbody>
             {bills.map(b => <tr key={b.id} className="border-b border-[#171c26] hover:bg-[#161b25]">
-                <td className="px-4 py-3 text-gray-100">{b.vendor}{b.recurring && <span className="ml-2 text-xs text-amber-500/70">↻ {b.frequency}</span>}</td>
+                <td className="px-4 py-3 text-gray-100">{b.vendor}{b.recurring && <span className="ms-2 text-xs text-amber-500/70">↻ {b.frequency}</span>}</td>
                 <td className="px-4 py-3 text-gray-400">{fmtDate(b.due_date)}</td>
-                <td className="px-4 py-3 text-right font-mono text-gray-300">{moneyFor(b.amount_cents, b.currency)}</td>
-                <td className="px-4 py-3 text-right font-mono text-amber-400">{moneyFor(b.balance_cents, b.currency)}</td>
+                <td className="px-4 py-3 text-end font-mono text-gray-300">{moneyFor(b.amount_cents, b.currency)}</td>
+                <td className="px-4 py-3 text-end font-mono text-amber-400">{moneyFor(b.balance_cents, b.currency)}</td>
                 <td className="px-4 py-3"><span className={`px-2 py-0.5 rounded-full text-xs border capitalize ${STATUS_CLS[b.status] || ""}`}>{b.status}</span></td>
-                {canManage && <td className="px-4 py-3 text-right space-x-2">
+                {canManage && <td className="px-4 py-3 text-end space-x-2 rtl:space-x-reverse">
                   {b.balance_cents > 0 && <Button size="sm" className="h-7 bg-emerald-600 hover:bg-emerald-500 text-black" data-testid={`pay-bill-${b.id}`} onClick={() => {
                 setPayBill(b);
                 setPay({
@@ -180,7 +180,7 @@ export default function Bills() {
             {form.recurring && <Select value={form.frequency} onValueChange={v => setForm({
             ...form,
             frequency: v
-          })}><SelectTrigger className="bg-[#0F1218] border-[#222838] w-32 h-8 ml-2"><SelectValue /></SelectTrigger><SelectContent className="bg-[#14171E] border-[#222838] text-gray-100"><SelectItem value="weekly">{t("bills.weekly")}</SelectItem><SelectItem value="monthly">{t("bills.monthly")}</SelectItem><SelectItem value="quarterly">{t("bills.quarterly")}</SelectItem></SelectContent></Select>}
+          })}><SelectTrigger className="bg-[#0F1218] border-[#222838] w-32 h-8 ms-2"><SelectValue /></SelectTrigger><SelectContent className="bg-[#14171E] border-[#222838] text-gray-100"><SelectItem value="weekly">{t("bills.weekly")}</SelectItem><SelectItem value="monthly">{t("bills.monthly")}</SelectItem><SelectItem value="quarterly">{t("bills.quarterly")}</SelectItem></SelectContent></Select>}
           </div>
           <DialogFooter><Button data-testid="bill-save" onClick={create} className="bg-amber-600 hover:bg-amber-500 text-black">{t("bills.createBill")}</Button></DialogFooter>
         </DialogContent>

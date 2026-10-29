@@ -128,7 +128,7 @@ export default function Register() {
           </div>
           <Button data-testid="register-submit-button" type="submit" disabled={busy}
             className="w-full bg-amber-600 hover:bg-amber-500 text-black font-semibold">
-            {busy ? "Creating…" : "Create workspace"} <ArrowRight size={16} className="ml-1" />
+            {busy ? "Creating…" : "Create workspace"} <ArrowRight size={16} className="ms-1 rtl:-scale-x-100" />
           </Button>
         </form>
 

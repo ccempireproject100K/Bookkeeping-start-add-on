@@ -70,11 +70,11 @@ export default function JobProfitability() {
               <h3 className="font-display font-semibold mb-3 flex items-center gap-2 text-rose-300"><AlertTriangle size={16} /> {t("jobprofitability.jobsNeedingAttention")}</h3>
               <div className="space-y-2">
                 {dash.unprofitable.map(j => <div key={j.job_number} className="flex items-center justify-between py-2 px-3 rounded-lg bg-rose-500/5 border border-rose-500/20 text-sm">
-                    <span><span className="font-mono text-amber-400">{j.job_number}</span> <span className="text-gray-300">{j.customer}</span> <span className="text-rose-400 text-xs ml-1">{t("jobprofitability.loss")}</span></span>
+                    <span><span className="font-mono text-amber-400">{j.job_number}</span> <span className="text-gray-300">{j.customer}</span> <span className="text-rose-400 text-xs ms-1">{t("jobprofitability.loss")}</span></span>
                     <span className="font-mono text-rose-400">{dollars(j.gross_profit)} · {j.margin}%</span>
                   </div>)}
                 {dash.at_risk.map(j => <div key={j.job_number} className="flex items-center justify-between py-2 px-3 rounded-lg bg-amber-500/5 border border-amber-500/20 text-sm">
-                    <span><span className="font-mono text-amber-400">{j.job_number}</span> <span className="text-gray-300">{j.customer}</span> <span className="text-amber-400 text-xs ml-1">{t("jobprofitability.lowMARGIN")}</span></span>
+                    <span><span className="font-mono text-amber-400">{j.job_number}</span> <span className="text-gray-300">{j.customer}</span> <span className="text-amber-400 text-xs ms-1">{t("jobprofitability.lowMARGIN")}</span></span>
                     <span className="font-mono text-amber-400">{dollars(j.gross_profit)} · {j.margin}%</span>
                   </div>)}
               </div>
@@ -92,16 +92,16 @@ export default function JobProfitability() {
             <table className="w-full text-sm" data-testid="table-profitability">
               <thead>
                 <tr className="text-xs uppercase tracking-wider text-gray-500 border-b border-[#222838]">
-                  <th className="px-5 py-3 text-left font-medium">{tab === "technician" ? "Technician" : "Name"}</th>
+                  <th className="px-5 py-3 text-start font-medium">{tab === "technician" ? "Technician" : "Name"}</th>
                   {tab === "technician" ? <>
-                      <th className="px-5 py-3 text-right font-medium">{t("jobprofitability.hours")}</th>
-                      <th className="px-5 py-3 text-right font-medium">{t("jobprofitability.jobs")}</th>
-                      <th className="px-5 py-3 text-right font-medium">{t("jobprofitability.laborCost")}</th>
+                      <th className="px-5 py-3 text-end font-medium">{t("jobprofitability.hours")}</th>
+                      <th className="px-5 py-3 text-end font-medium">{t("jobprofitability.jobs")}</th>
+                      <th className="px-5 py-3 text-end font-medium">{t("jobprofitability.laborCost")}</th>
                     </> : <>
-                      <th className="px-5 py-3 text-right font-medium">{t("jobprofitability.revenue")}</th>
-                      <th className="px-5 py-3 text-right font-medium">{t("jobprofitability.cost")}</th>
-                      <th className="px-5 py-3 text-right font-medium">{t("jobprofitability.grossProfit")}</th>
-                      <th className="px-5 py-3 text-right font-medium">{t("jobprofitability.margin")}</th>
+                      <th className="px-5 py-3 text-end font-medium">{t("jobprofitability.revenue")}</th>
+                      <th className="px-5 py-3 text-end font-medium">{t("jobprofitability.cost")}</th>
+                      <th className="px-5 py-3 text-end font-medium">{t("jobprofitability.grossProfit")}</th>
+                      <th className="px-5 py-3 text-end font-medium">{t("jobprofitability.margin")}</th>
                     </>}
                 </tr>
               </thead>
@@ -111,14 +111,14 @@ export default function JobProfitability() {
                       {it.unprofitable && <AlertTriangle size={14} className="text-rose-400" />}{it.label}
                     </td>
                     {tab === "technician" ? <>
-                        <td className="px-5 py-3 text-right font-mono text-gray-400">{it.hours}</td>
-                        <td className="px-5 py-3 text-right font-mono text-gray-300">{it.jobs}</td>
-                        <td className="px-5 py-3 text-right font-mono text-gray-200">{dollars(it.labor_cost)}</td>
+                        <td className="px-5 py-3 text-end font-mono text-gray-400">{it.hours}</td>
+                        <td className="px-5 py-3 text-end font-mono text-gray-300">{it.jobs}</td>
+                        <td className="px-5 py-3 text-end font-mono text-gray-200">{dollars(it.labor_cost)}</td>
                       </> : <>
-                        <td className="px-5 py-3 text-right font-mono text-gray-300">{dollars(it.revenue)}</td>
-                        <td className="px-5 py-3 text-right font-mono text-gray-400">{dollars(it.cost)}</td>
-                        <td className={`px-5 py-3 text-right font-mono ${it.gross_profit < 0 ? "text-rose-400" : "text-emerald-400"}`}>{dollars(it.gross_profit)}</td>
-                        <td className={`px-5 py-3 text-right font-mono ${marginCls(it.margin)}`}>{it.margin}%</td>
+                        <td className="px-5 py-3 text-end font-mono text-gray-300">{dollars(it.revenue)}</td>
+                        <td className="px-5 py-3 text-end font-mono text-gray-400">{dollars(it.cost)}</td>
+                        <td className={`px-5 py-3 text-end font-mono ${it.gross_profit < 0 ? "text-rose-400" : "text-emerald-400"}`}>{dollars(it.gross_profit)}</td>
+                        <td className={`px-5 py-3 text-end font-mono ${marginCls(it.margin)}`}>{it.margin}%</td>
                       </>}
                   </tr>)}
                 {data.items.length === 0 && <tr><td colSpan={5} className="px-5 py-12 text-center text-gray-500">{t("jobprofitability.noJobDataYet")}</td></tr>}

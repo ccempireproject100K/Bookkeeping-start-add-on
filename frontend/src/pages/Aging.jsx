@@ -93,18 +93,18 @@ export default function Aging() {
         <Card data-testid="ar-aging">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-display font-semibold">{t("aging.accountsReceivable")}</h3>
-            <Button size="sm" variant="outline" className="h-8 border-[#2a3140]" data-testid="ar-csv" onClick={() => downloadCsv("/aging/ar.csv", "ar_aging.csv")}><Download size={14} className="mr-1" />{t("aging.csv")}</Button>
+            <Button size="sm" variant="outline" className="h-8 border-[#2a3140]" data-testid="ar-csv" onClick={() => downloadCsv("/aging/ar.csv", "ar_aging.csv")}><Download size={14} className="me-1" />{t("aging.csv")}</Button>
           </div>
           <BucketStrip buckets={ar.buckets} />
           <table className="w-full text-sm">
             <thead><tr className="text-xs uppercase text-gray-500 border-b border-[#222838]">
-              <th className="py-2 text-left">{t("aging.client")}</th><th className="py-2 text-left">{t("aging.due")}</th><th className="py-2 text-right">{t("aging.bucket")}</th><th className="py-2 text-right">{t("aging.amount")}</th></tr></thead>
+              <th className="py-2 text-start">{t("aging.client")}</th><th className="py-2 text-start">{t("aging.due")}</th><th className="py-2 text-end">{t("aging.bucket")}</th><th className="py-2 text-end">{t("aging.amount")}</th></tr></thead>
             <tbody>
               {ar.items.map((it, i) => <tr key={i} className="border-b border-[#171c26]">
                   <td className="py-2 text-gray-200">{it.name}</td>
                   <td className="py-2 text-gray-400">{fmtDate(it.due_date)}</td>
-                  <td className={`py-2 text-right ${BUCKET_CLS[it.bucket]}`}>{it.bucket}</td>
-                  <td className="py-2 text-right font-mono text-gray-200">{dollars(it.amount)}</td>
+                  <td className={`py-2 text-end ${BUCKET_CLS[it.bucket]}`}>{it.bucket}</td>
+                  <td className="py-2 text-end font-mono text-gray-200">{dollars(it.amount)}</td>
                 </tr>)}
               {ar.items.length === 0 && <tr><td colSpan={4} className="py-6 text-center text-gray-600">{t("aging.noOpenReceivables")}</td></tr>}
             </tbody>
@@ -119,14 +119,14 @@ export default function Aging() {
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-display font-semibold">{t("aging.accountsPayable")}</h3>
             <div className="flex gap-2">
-              {isOwner && <Button size="sm" className="h-8 bg-amber-600 hover:bg-amber-500 text-black" data-testid="btn-add-bill" onClick={() => setOpen(true)}><Plus size={14} className="mr-1" />{t("aging.bill")}</Button>}
-              <Button size="sm" variant="outline" className="h-8 border-[#2a3140]" data-testid="ap-csv" onClick={() => downloadCsv("/aging/ap.csv", "ap_aging.csv")}><Download size={14} className="mr-1" />{t("aging.csv")}</Button>
+              {isOwner && <Button size="sm" className="h-8 bg-amber-600 hover:bg-amber-500 text-black" data-testid="btn-add-bill" onClick={() => setOpen(true)}><Plus size={14} className="me-1" />{t("aging.bill")}</Button>}
+              <Button size="sm" variant="outline" className="h-8 border-[#2a3140]" data-testid="ap-csv" onClick={() => downloadCsv("/aging/ap.csv", "ap_aging.csv")}><Download size={14} className="me-1" />{t("aging.csv")}</Button>
             </div>
           </div>
           <BucketStrip buckets={ap.buckets} />
           <table className="w-full text-sm">
             <thead><tr className="text-xs uppercase text-gray-500 border-b border-[#222838]">
-              <th className="py-2 text-left">{t("aging.vendor")}</th><th className="py-2 text-left">{t("aging.due")}</th><th className="py-2 text-right">{t("aging.bucket")}</th><th className="py-2 text-right">{t("aging.amount")}</th>{isOwner && <th className="py-2"></th>}</tr></thead>
+              <th className="py-2 text-start">{t("aging.vendor")}</th><th className="py-2 text-start">{t("aging.due")}</th><th className="py-2 text-end">{t("aging.bucket")}</th><th className="py-2 text-end">{t("aging.amount")}</th>{isOwner && <th className="py-2"></th>}</tr></thead>
             <tbody>
               {bills.filter(b => b.status === "open").map(b => {
               const it = ap.items.find(x => x.name === b.vendor && x.amount_cents === b.amount_cents) || {
@@ -135,9 +135,9 @@ export default function Aging() {
               return <tr key={b.id} className="border-b border-[#171c26]">
                     <td className="py-2 text-gray-200">{b.vendor}</td>
                     <td className="py-2 text-gray-400">{fmtDate(b.due_date)}</td>
-                    <td className={`py-2 text-right ${BUCKET_CLS[it.bucket]}`}>{it.bucket}</td>
-                    <td className="py-2 text-right font-mono text-gray-200">{dollars(b.amount_cents / 100)}</td>
-                    {isOwner && <td className="py-2 text-right"><Button size="sm" className="h-7 bg-emerald-600 hover:bg-emerald-500 text-black" onClick={() => payBill(b.id)} data-testid={`pay-bill-${b.id}`}>{t("aging.pay")}</Button></td>}
+                    <td className={`py-2 text-end ${BUCKET_CLS[it.bucket]}`}>{it.bucket}</td>
+                    <td className="py-2 text-end font-mono text-gray-200">{dollars(b.amount_cents / 100)}</td>
+                    {isOwner && <td className="py-2 text-end"><Button size="sm" className="h-7 bg-emerald-600 hover:bg-emerald-500 text-black" onClick={() => payBill(b.id)} data-testid={`pay-bill-${b.id}`}>{t("aging.pay")}</Button></td>}
                   </tr>;
             })}
               {bills.filter(b => b.status === "open").length === 0 && <tr><td colSpan={isOwner ? 5 : 4} className="py-6 text-center text-gray-600">{t("aging.noOpenPayables")}</td></tr>}

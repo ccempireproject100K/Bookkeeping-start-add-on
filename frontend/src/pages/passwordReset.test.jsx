@@ -27,9 +27,9 @@ beforeEach(() => {
 });
 
 const switcherPresent = () => {
-  // The compact switcher is a select with the empire's four options.
+  // The compact switcher is a select with the empire's six options.
   const el = screen.getByTestId("language-switcher");
-  return el && el.querySelectorAll("option").length === 4;
+  return el && el.querySelectorAll("option").length === 6;
 };
 
 test("forgot-password: form + switcher render; submit shows the sent state", async () => {

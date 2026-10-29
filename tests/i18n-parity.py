@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 i18n key parity test.
-Fails (exit 1) if any key in en/translation.json is missing from es, fr, or zh-CN,
+Fails (exit 1) if any key in en/translation.json is missing from es, fr, zh-CN, hi or ar,
 or if any language has keys not present in en (orphans).
 Also validates that all files are well-formed JSON.
 
@@ -13,7 +13,7 @@ from pathlib import Path
 
 def main():
     locales_dir = Path(sys.argv[sys.argv.index("--locales-dir") + 1]) if "--locales-dir" in sys.argv else Path(__file__).resolve().parents[1] / "frontend" / "src" / "locales"
-    langs = ["en", "es", "fr", "zh-CN"]
+    langs = ["en", "es", "fr", "zh-CN", "hi", "ar"]
     data = {}
     errors = []
 
@@ -45,7 +45,7 @@ def main():
         if not isinstance(v, str) or not v.strip():
             errors.append(f"en key '{k}' has empty/non-string value")
 
-    for lang in ("es", "fr", "zh-CN"):
+    for lang in ("es", "fr", "zh-CN", "hi", "ar"):
         if lang not in data:
             continue
         keys = set(data[lang].keys())
@@ -65,7 +65,7 @@ def main():
         en_ph = set(ph.findall(str(data["en"][k])))
         if not en_ph:
             continue
-        for lang in ("es", "fr", "zh-CN"):
+        for lang in ("es", "fr", "zh-CN", "hi", "ar"):
             if lang not in data or k not in data[lang]:
                 continue
             tr_ph = set(ph.findall(str(data[lang][k])))
@@ -73,7 +73,7 @@ def main():
                 errors.append(f"PLACEHOLDER MISMATCH in {lang} key '{k}': en={sorted(en_ph)} vs {lang}={sorted(tr_ph)}")
 
     print(f"en keys: {len(en_keys)}")
-    for lang in ("es", "fr", "zh-CN"):
+    for lang in ("es", "fr", "zh-CN", "hi", "ar"):
         if lang in data:
             print(f"{lang} keys: {len(data[lang])}")
 

@@ -445,7 +445,7 @@ export default function Layout() {
   };
   return <div className="min-h-screen flex">
       {/* Sidebar */}
-      <aside className="w-64 shrink-0 border-r border-[#1b2230] bg-[#0D0F14] hidden lg:flex flex-col">
+      <aside className="w-64 shrink-0 border-e border-[#1b2230] bg-[#0D0F14] hidden lg:flex flex-col">
         <div className="h-16 flex items-center gap-3 px-5 border-b border-[#1b2230]">
           {brand.logo_url ? <img src={brand.logo_url} alt={brandName} className="w-9 h-9 rounded-lg object-contain bg-white/5" /> : <div className="w-9 h-9 rounded-lg brand-mark shadow-inner" />}
           <div>

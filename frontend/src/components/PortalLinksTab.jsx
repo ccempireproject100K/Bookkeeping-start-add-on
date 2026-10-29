@@ -141,7 +141,7 @@ export default function PortalLinksTab({
               <div className="text-sm text-gray-100 font-mono truncate">{fresh.url}</div>
             </div>
             <Button size="sm" variant="outline" className="border-[#222838] shrink-0" onClick={() => copyText(fresh.url, "Payment link")} data-testid="plink-copy-fresh">
-              <Copy size={14} className="mr-1" /> {t("portallinkstab.copy")}</Button>
+              <Copy size={14} className="me-1" /> {t("portallinkstab.copy")}</Button>
           </div>}
       </Card>
 
@@ -152,24 +152,24 @@ export default function PortalLinksTab({
         </div>
         <table className="w-full text-sm" data-testid="table-portal-payment-reports">
           <thead><tr className="text-xs uppercase tracking-wider text-gray-500 border-b border-[#222838]">
-            <th className="px-5 py-3 text-left font-medium">Client</th>
-            <th className="px-5 py-3 text-left font-medium">Invoice</th>
-            <th className="px-5 py-3 text-left font-medium">Reported</th>
-            <th className="px-5 py-3 text-right font-medium">Amount</th>
-            <th className="px-5 py-3 text-right font-medium">Actions</th>
+            <th className="px-5 py-3 text-start font-medium">Client</th>
+            <th className="px-5 py-3 text-start font-medium">Invoice</th>
+            <th className="px-5 py-3 text-start font-medium">Reported</th>
+            <th className="px-5 py-3 text-end font-medium">Amount</th>
+            <th className="px-5 py-3 text-end font-medium">Actions</th>
           </tr></thead>
           <tbody>
             {reports.map(r => <tr key={r.id} className="border-b border-[#171c26] hover:bg-[#161b25]">
                 <td className="px-5 py-3 text-gray-100">{r.client_name || "—"}</td>
                 <td className="px-5 py-3 text-gray-400">{r.invoice_ref}</td>
                 <td className="px-5 py-3 text-gray-400 text-xs whitespace-nowrap">{fmtDate(r.date)} · {r.method}{r.reference ? ` · ${r.reference}` : ""}</td>
-                <td className="px-5 py-3 text-right font-mono text-gray-100">{money(r.amount_cents)}</td>
-                <td className="px-5 py-3 text-right">
+                <td className="px-5 py-3 text-end font-mono text-gray-100">{money(r.amount_cents)}</td>
+                <td className="px-5 py-3 text-end">
                   <div className="flex justify-end gap-1">
                     <Button size="sm" variant="ghost" className="text-emerald-400 hover:text-emerald-300" onClick={() => decideReport(r.id, "confirm")} data-testid={`plink-confirm-${r.id}`}>
-                      <CheckCircle2 size={14} className="mr-1" /> Confirm</Button>
+                      <CheckCircle2 size={14} className="me-1" /> Confirm</Button>
                     <Button size="sm" variant="ghost" className="text-rose-400 hover:text-rose-300" onClick={() => decideReport(r.id, "reject")} data-testid={`plink-reject-${r.id}`}>
-                      <Ban size={14} className="mr-1" /> Reject</Button>
+                      <Ban size={14} className="me-1" /> Reject</Button>
                   </div>
                 </td>
               </tr>)}
@@ -180,11 +180,11 @@ export default function PortalLinksTab({
       <Card className="p-0 overflow-hidden">
         <table className="w-full text-sm" data-testid="table-portal-links">
           <thead><tr className="text-xs uppercase tracking-wider text-gray-500 border-b border-[#222838]">
-            <th className="px-5 py-3 text-left font-medium">{t("portallinkstab.client")}</th>
-            <th className="px-5 py-3 text-left font-medium">{t("portallinkstab.created")}</th>
-            <th className="px-5 py-3 text-left font-medium">{t("portallinkstab.expires2")}</th>
-            <th className="px-5 py-3 text-left font-medium">{t("portallinkstab.status")}</th>
-            <th className="px-5 py-3 text-right font-medium">{t("portallinkstab.actions")}</th>
+            <th className="px-5 py-3 text-start font-medium">{t("portallinkstab.client")}</th>
+            <th className="px-5 py-3 text-start font-medium">{t("portallinkstab.created")}</th>
+            <th className="px-5 py-3 text-start font-medium">{t("portallinkstab.expires2")}</th>
+            <th className="px-5 py-3 text-start font-medium">{t("portallinkstab.status")}</th>
+            <th className="px-5 py-3 text-end font-medium">{t("portallinkstab.actions")}</th>
           </tr></thead>
           <tbody>
             {links.map(l => <tr key={l.id} className="border-b border-[#171c26] hover:bg-[#161b25]">
@@ -192,13 +192,13 @@ export default function PortalLinksTab({
                 <td className="px-5 py-3 text-gray-400 text-xs whitespace-nowrap">{fmtDate(l.created_at?.slice(0, 10))} · {l.created_by || "—"}</td>
                 <td className="px-5 py-3 text-gray-400 text-xs whitespace-nowrap">{fmtDate(l.expires_at?.slice(0, 10))}</td>
                 <td className="px-5 py-3"><span className={`px-2 py-0.5 rounded-full text-xs border capitalize ${STATUS_CLS[l.status] || ""}`}>{l.status}</span></td>
-                <td className="px-5 py-3 text-right">
+                <td className="px-5 py-3 text-end">
                   <div className="flex justify-end gap-1">
                     {l.status === "active" && <>
                         <Button size="sm" variant="ghost" title={t("portallinkstab.generateAFreshLinkForThis")} onClick={() => generate(l.invoice_id)} data-testid={`plink-regen-${l.id}`}>
-                          <RefreshCw size={14} className="mr-1" /> {t("portallinkstab.newLink")}</Button>
+                          <RefreshCw size={14} className="me-1" /> {t("portallinkstab.newLink")}</Button>
                         <Button size="sm" variant="ghost" className="text-rose-400 hover:text-rose-300" title={t("portallinkstab.revokeThisLink")} onClick={() => revoke(l.id)} data-testid={`plink-revoke-${l.id}`}>
-                          <Ban size={14} className="mr-1" /> {t("portallinkstab.revoke")}</Button>
+                          <Ban size={14} className="me-1" /> {t("portallinkstab.revoke")}</Button>
                       </>}
                   </div>
                 </td>

@@ -125,7 +125,7 @@ export default function PortalLinks() {
         title={t("portal.title")}
         subtitle={t("portal.subtitle")}
         testid="portal-links-page"
-        action={<Button onClick={() => { setResult(null); setOpen(true); }} data-testid="portal-new-link"><Plus size={16} className="mr-1" />{t("portal.newLink")}</Button>}
+        action={<Button onClick={() => { setResult(null); setOpen(true); }} data-testid="portal-new-link"><Plus size={16} className="me-1" />{t("portal.newLink")}</Button>}
       />
 
       {result?.portal_url && (
@@ -139,8 +139,8 @@ export default function PortalLinks() {
           </div>
           <div className="mt-2 text-xs text-gray-400">
             {t("portal.emailStatus")}: <span className={`px-2 py-0.5 rounded-full ${EMAIL_TONE[result.email_status] || EMAIL_TONE.not_sent}`}>{result.email_status}</span>
-            {result.email_to && <span className="ml-2">{result.email_to}</span>}
-            {result.email_error && result.email_status !== "sent" && <span className="ml-2 text-amber-400/80">{result.email_error}</span>}
+            {result.email_to && <span className="ms-2">{result.email_to}</span>}
+            {result.email_error && result.email_status !== "sent" && <span className="ms-2 text-amber-400/80">{result.email_error}</span>}
           </div>
           <div className="mt-1 text-[11px] text-gray-500">{t("portal.sendRotatesNote")}</div>
         </Card>
@@ -150,14 +150,14 @@ export default function PortalLinks() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm" data-testid="portal-links-table">
             <thead>
-              <tr className="text-left text-xs uppercase tracking-wider text-gray-500 border-b border-[#222838]">
+              <tr className="text-start text-xs uppercase tracking-wider text-gray-500 border-b border-[#222838]">
                 <th className="px-5 py-3 font-medium">{t("portal.client")}</th>
                 <th className="px-5 py-3 font-medium">{t("portal.invoice")}</th>
                 <th className="px-5 py-3 font-medium">{t("portal.created")}</th>
                 <th className="px-5 py-3 font-medium">{t("portal.expires")}</th>
                 <th className="px-5 py-3 font-medium">{t("portal.status")}</th>
                 <th className="px-5 py-3 font-medium">{t("portal.email")}</th>
-                <th className="px-5 py-3 font-medium text-right">{t("portal.actions")}</th>
+                <th className="px-5 py-3 font-medium text-end">{t("portal.actions")}</th>
               </tr>
             </thead>
             <tbody>
@@ -174,7 +174,7 @@ export default function PortalLinks() {
                     <span className={`px-2 py-0.5 rounded-full text-xs ${EMAIL_TONE[l.email_status] || EMAIL_TONE.not_sent}`}>{l.email_status || "not_sent"}</span>
                     {l.email_to && <div className="text-[11px] text-gray-500 mt-0.5">{l.email_to}</div>}
                   </td>
-                  <td className="px-5 py-3 text-right whitespace-nowrap">
+                  <td className="px-5 py-3 text-end whitespace-nowrap">
                     {l.status === "active" && (
                       <>
                         <Button variant="ghost" size="sm" title={t("portal.sendEmail")} onClick={() => { setSendOpen(l); setSendEmail(l.email_to || ""); }} data-testid={`portal-send-${l.id}`}>
@@ -229,7 +229,7 @@ export default function PortalLinks() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setOpen(false)}>{t("portal.cancel")}</Button>
             <Button onClick={doCreate} disabled={creating} data-testid="portal-create">
-              <Link2 size={14} className="mr-1" />{t("portal.createLink")}
+              <Link2 size={14} className="me-1" />{t("portal.createLink")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -250,7 +250,7 @@ export default function PortalLinks() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setSendOpen(null)}>{t("portal.cancel")}</Button>
             <Button onClick={doSend} disabled={sending} data-testid="portal-send-confirm">
-              <Mail size={14} className="mr-1" />{t("portal.sendNow")}
+              <Mail size={14} className="me-1" />{t("portal.sendNow")}
             </Button>
           </DialogFooter>
         </DialogContent>

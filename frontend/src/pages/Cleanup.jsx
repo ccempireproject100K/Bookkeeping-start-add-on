@@ -49,7 +49,7 @@ export default function Cleanup() {
       <PageHeader title={t("cleanup.booksCleanup")} subtitle="Point it at a messy import — it fixes what's safe and flags the rest." actions={<div className="flex gap-2">
             <Button variant="outline" onClick={run}>{t("cleanup.reScan")}</Button>
             {canManage && (scan?.safe_count || 0) > 0 && <Button onClick={apply} disabled={working} data-testid="cleanup-apply">
-                {working ? <Loader2 size={14} className="mr-1 animate-spin" /> : <Sparkles size={14} className="mr-1" />}{t("cleanup.fix")} {scan.safe_count} {t("cleanup.safe")} {scan.safe_count === 1 ? "issue" : "issues"}
+                {working ? <Loader2 size={14} className="me-1 animate-spin" /> : <Sparkles size={14} className="me-1" />}{t("cleanup.fix")} {scan.safe_count} {t("cleanup.safe")} {scan.safe_count === 1 ? "issue" : "issues"}
               </Button>}
           </div>} />
       {scan && <div className="grid grid-cols-3 gap-3">

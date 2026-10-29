@@ -61,7 +61,7 @@ export default function Industries() {
           <div className="flex items-center gap-4">
             <LanguageSwitcher compact />
             <Link to="/login" className="text-sm hover:opacity-80" style={{ color: accent }}>
-              Sign in <ArrowRight size={14} className="inline ml-1" />
+              Sign in <ArrowRight size={14} className="inline ms-1 rtl:-scale-x-100" />
             </Link>
           </div>
         </div>

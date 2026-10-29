@@ -54,8 +54,8 @@ export default function BudgetVsActual() {
   if (!data) return <Loading />;
   return <div className="animate-rise">
       <PageHeader title={t("budgetvsactual.budgetVsActual")} subtitle="Plan against real ledger performance" testid="bva-page">
-        {canManage && <Button data-testid="btn-set-budget" onClick={() => setOpen(true)} className="bg-amber-600 hover:bg-amber-500 text-black font-semibold"><Plus size={16} className="mr-1" />{t("budgetvsactual.setBudget")}</Button>}
-        <Button data-testid="btn-bva-csv" variant="outline" onClick={() => downloadCsv(`/reports/budget-vs-actual.csv?year=${year}`, `budget_${year}.csv`)} className="border-[#222838]"><Download size={15} className="mr-1" />{t("budgetvsactual.csv")}</Button>
+        {canManage && <Button data-testid="btn-set-budget" onClick={() => setOpen(true)} className="bg-amber-600 hover:bg-amber-500 text-black font-semibold"><Plus size={16} className="me-1" />{t("budgetvsactual.setBudget")}</Button>}
+        <Button data-testid="btn-bva-csv" variant="outline" onClick={() => downloadCsv(`/reports/budget-vs-actual.csv?year=${year}`, `budget_${year}.csv`)} className="border-[#222838]"><Download size={15} className="me-1" />{t("budgetvsactual.csv")}</Button>
       </PageHeader>
       <div className="flex items-end gap-3 mb-5">
         <div><Label className="text-xs">{t("budgetvsactual.year")}</Label><Input data-testid="bva-year" value={year} onChange={e => setYear(e.target.value)} className="bg-[#0F1218] border-[#222838] w-28" /></div>
@@ -64,18 +64,18 @@ export default function BudgetVsActual() {
       <Card className="p-0 overflow-hidden">
         <table className="w-full text-sm" data-testid="table-bva">
           <thead><tr className="text-xs uppercase tracking-wider text-gray-500 border-b border-[#222838]">
-            <th className="px-4 py-3 text-left font-medium">{t("budgetvsactual.account")}</th><th className="px-4 py-3 text-left font-medium">{t("budgetvsactual.type")}</th>
-            <th className="px-4 py-3 text-right font-medium">{t("budgetvsactual.budget")}</th><th className="px-4 py-3 text-right font-medium">{t("budgetvsactual.actual")}</th>
-            <th className="px-4 py-3 text-right font-medium">{t("budgetvsactual.variance")}</th>
-            <th className="px-4 py-3 text-right font-medium">Var %</th></tr></thead>
+            <th className="px-4 py-3 text-start font-medium">{t("budgetvsactual.account")}</th><th className="px-4 py-3 text-start font-medium">{t("budgetvsactual.type")}</th>
+            <th className="px-4 py-3 text-end font-medium">{t("budgetvsactual.budget")}</th><th className="px-4 py-3 text-end font-medium">{t("budgetvsactual.actual")}</th>
+            <th className="px-4 py-3 text-end font-medium">{t("budgetvsactual.variance")}</th>
+            <th className="px-4 py-3 text-end font-medium">Var %</th></tr></thead>
           <tbody>
             {data.rows.map(r => <tr key={r.code} className="border-b border-[#171c26] hover:bg-[#161b25]">
                 <td className="px-4 py-3 text-gray-100">{r.code} · {r.name}</td>
                 <td className="px-4 py-3 text-gray-500 capitalize">{r.type}</td>
-                <td className="px-4 py-3 text-right font-mono text-gray-400">{dollars(r.budget)}</td>
-                <td className="px-4 py-3 text-right font-mono text-gray-200">{dollars(r.actual)}</td>
-                <td className={`px-4 py-3 text-right font-mono ${r.variance_cents < 0 ? "text-rose-400" : "text-emerald-400"}`}>{dollars(r.variance)}</td>
-                <td className={`px-4 py-3 text-right font-mono ${r.variance_pct == null ? "text-gray-600" : r.variance_cents < 0 ? "text-rose-400" : "text-emerald-400"}`}>{r.variance_pct == null ? "—" : `${r.variance_pct}%`}</td>
+                <td className="px-4 py-3 text-end font-mono text-gray-400">{dollars(r.budget)}</td>
+                <td className="px-4 py-3 text-end font-mono text-gray-200">{dollars(r.actual)}</td>
+                <td className={`px-4 py-3 text-end font-mono ${r.variance_cents < 0 ? "text-rose-400" : "text-emerald-400"}`}>{dollars(r.variance)}</td>
+                <td className={`px-4 py-3 text-end font-mono ${r.variance_pct == null ? "text-gray-600" : r.variance_cents < 0 ? "text-rose-400" : "text-emerald-400"}`}>{r.variance_pct == null ? "—" : `${r.variance_pct}%`}</td>
               </tr>)}
             {data.rows.length === 0 && <tr><td colSpan={6} className="px-5 py-12 text-center text-gray-500">{t("budgetvsactual.noRevenueExpenseActivityOrBudgets")} {year}.</td></tr>}
           </tbody>

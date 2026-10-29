@@ -60,7 +60,7 @@ function TaxForecastInner() {
   if (!loaded) return <Loading />;
   const full = fc?.full_year_estimate || {};
   return <div className="space-y-6">
-      <PageHeader title={t("taxforecast.taxForecast")} subtitle="Your estimated bill, alive — recalculated with every transaction." actions={<Button variant="outline" onClick={() => setPayOpen(true)}><Plus size={14} className="mr-1" />{t("taxforecast.recordEstimatedPayment")}</Button>} />
+      <PageHeader title={t("taxforecast.taxForecast")} subtitle="Your estimated bill, alive — recalculated with every transaction." actions={<Button variant="outline" onClick={() => setPayOpen(true)}><Plus size={14} className="me-1" />{t("taxforecast.recordEstimatedPayment")}</Button>} />
       {fc?.pace_note && <Card className="p-5 bg-blue-500/5">
           <div className="flex items-start gap-3">
             <Landmark size={20} className="text-blue-400 mt-0.5 shrink-0" />
@@ -124,18 +124,18 @@ function TaxForecastInner() {
       <Card className="p-0 overflow-hidden">
         <div className="px-4 py-3 text-sm font-medium border-b border-[#222838]">{t("taxforecast.quarterlyBreakdown")}</div>
         <table className="w-full text-sm">
-          <thead><tr className="text-left text-gray-500 border-b border-[#222838]">
+          <thead><tr className="text-start text-gray-500 border-b border-[#222838]">
             <th className="px-4 py-2 font-medium">{t("taxforecast.quarter")}</th><th className="px-4 py-2 font-medium">{t("taxforecast.due2")}</th>
-            <th className="px-4 py-2 font-medium text-right">{t("taxforecast.owed")}</th><th className="px-4 py-2 font-medium text-right">{t("taxforecast.paid")}</th>
-            <th className="px-4 py-2 font-medium text-right">{t("taxforecast.remaining")}</th>
+            <th className="px-4 py-2 font-medium text-end">{t("taxforecast.owed")}</th><th className="px-4 py-2 font-medium text-end">{t("taxforecast.paid")}</th>
+            <th className="px-4 py-2 font-medium text-end">{t("taxforecast.remaining")}</th>
           </tr></thead>
           <tbody>
             {(fc?.quarters || []).map(q => <tr key={q.quarter} className="border-b border-[#1a2030]">
                 <td className="px-4 py-2.5 font-medium">{q.quarter}</td>
                 <td className="px-4 py-2.5 text-xs text-gray-400">{q.due}</td>
-                <td className="px-4 py-2.5 text-right font-mono">{money(q.owed_cents)}</td>
-                <td className="px-4 py-2.5 text-right font-mono text-emerald-400">{money(q.paid_cents)}</td>
-                <td className={`px-4 py-2.5 text-right font-mono ${q.remaining_cents > 0 ? "text-amber-400" : "text-gray-500"}`}>{money(q.remaining_cents)}</td>
+                <td className="px-4 py-2.5 text-end font-mono">{money(q.owed_cents)}</td>
+                <td className="px-4 py-2.5 text-end font-mono text-emerald-400">{money(q.paid_cents)}</td>
+                <td className={`px-4 py-2.5 text-end font-mono ${q.remaining_cents > 0 ? "text-amber-400" : "text-gray-500"}`}>{money(q.remaining_cents)}</td>
               </tr>)}
           </tbody>
         </table>

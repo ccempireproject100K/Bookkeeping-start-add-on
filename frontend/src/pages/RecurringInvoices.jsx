@@ -129,24 +129,24 @@ export default function RecurringInvoices() {
   return <div className="animate-rise">
       <PageHeader title={t("recurringinvoices.recurringInvoices")} subtitle="Templates that generate real invoices on schedule" testid="recurring-invoices-page">
         {isOwner && <div className="flex gap-2">
-            <Button variant="outline" data-testid="btn-run-due" onClick={runDue} className="border-[#222838]"><Play size={15} className="mr-1" /> {t("recurringinvoices.generateDue")}</Button>
+            <Button variant="outline" data-testid="btn-run-due" onClick={runDue} className="border-[#222838]"><Play size={15} className="me-1" /> {t("recurringinvoices.generateDue")}</Button>
             <Button data-testid="btn-new-template" onClick={() => {
           resetForm();
           setOpen(true);
-        }} className="bg-amber-600 hover:bg-amber-500 text-black font-semibold"><Plus size={16} className="mr-1" /> {t("recurringinvoices.newTemplate")}</Button>
+        }} className="bg-amber-600 hover:bg-amber-500 text-black font-semibold"><Plus size={16} className="me-1" /> {t("recurringinvoices.newTemplate")}</Button>
           </div>}
       </PageHeader>
 
       <Card className="p-0 overflow-hidden">
         <table className="w-full text-sm" data-testid="table-recurring">
           <thead><tr className="text-xs uppercase tracking-wider text-gray-500 border-b border-[#222838]">
-            <th className="px-5 py-3 text-left font-medium">{t("recurringinvoices.template")}</th>
-            <th className="px-5 py-3 text-left font-medium">{t("recurringinvoices.client")}</th>
-            <th className="px-5 py-3 text-left font-medium">{t("recurringinvoices.frequency")}</th>
-            <th className="px-5 py-3 text-left font-medium">{t("recurringinvoices.nextRun")}</th>
-            <th className="px-5 py-3 text-left font-medium">{t("recurringinvoices.status")}</th>
-            <th className="px-5 py-3 text-right font-medium">{t("recurringinvoices.estTotal")}</th>
-            {isOwner && <th className="px-5 py-3 text-right font-medium">{t("recurringinvoices.actions")}</th>}</tr></thead>
+            <th className="px-5 py-3 text-start font-medium">{t("recurringinvoices.template")}</th>
+            <th className="px-5 py-3 text-start font-medium">{t("recurringinvoices.client")}</th>
+            <th className="px-5 py-3 text-start font-medium">{t("recurringinvoices.frequency")}</th>
+            <th className="px-5 py-3 text-start font-medium">{t("recurringinvoices.nextRun")}</th>
+            <th className="px-5 py-3 text-start font-medium">{t("recurringinvoices.status")}</th>
+            <th className="px-5 py-3 text-end font-medium">{t("recurringinvoices.estTotal")}</th>
+            {isOwner && <th className="px-5 py-3 text-end font-medium">{t("recurringinvoices.actions")}</th>}</tr></thead>
           <tbody>
             {tpls.map(t => {
             const est = (t.lines || []).reduce((s, l) => s + (parseFloat(l.amount) || 0), 0) + (parseFloat(t.tax) || 0);
@@ -156,8 +156,8 @@ export default function RecurringInvoices() {
                   <td className="px-5 py-3 text-gray-400 capitalize">{FREQ_LABEL[t.frequency] || t.frequency}</td>
                   <td className="px-5 py-3 text-gray-400 font-mono text-xs">{t.next_run || "—"}</td>
                   <td className="px-5 py-3">{t.active ? <span className="px-2 py-0.5 rounded-full text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">{t("recurringinvoices.active")}</span> : <span className="px-2 py-0.5 rounded-full text-xs bg-gray-500/10 text-gray-400 border border-gray-500/20">{t("recurringinvoices.paused")}</span>}</td>
-                  <td className="px-5 py-3 text-right font-mono text-gray-300">${est.toFixed(2)}</td>
-                  {isOwner && <td className="px-5 py-3 text-right">
+                  <td className="px-5 py-3 text-end font-mono text-gray-300">${est.toFixed(2)}</td>
+                  {isOwner && <td className="px-5 py-3 text-end">
                       <div className="flex justify-end gap-1">
                         <button onClick={() => openEdit(t)} aria-label={`Edit ${t.name}`} data-testid={`template-edit-${t.id}`} className="inline-flex items-center justify-center w-8 h-8 rounded text-gray-500 hover:text-amber-400 hover:bg-amber-500/10"><Pencil size={15} /></button>
                         <button onClick={() => del(t)} aria-label={`Delete ${t.name}`} data-testid={`template-delete-${t.id}`} className="inline-flex items-center justify-center w-8 h-8 rounded text-gray-500 hover:text-rose-400 hover:bg-rose-500/10"><Trash2 size={15} /></button>
@@ -198,14 +198,14 @@ export default function RecurringInvoices() {
               const c = [...lines];
               c[i].amount = e.target.value;
               setLines(c);
-            }} className="bg-[#0F1218] border-[#222838] w-28 font-mono text-right" data-testid={`tpl-line-amount-${i}`} />
+            }} className="bg-[#0F1218] border-[#222838] w-28 font-mono text-end" data-testid={`tpl-line-amount-${i}`} />
                 {lines.length > 1 && <button onClick={() => setLines(lines.filter((_, x) => x !== i))} className="text-gray-600 hover:text-rose-400"><Trash2 size={14} /></button>}
               </div>)}
             <Button variant="ghost" size="sm" onClick={() => setLines([...lines, {
             name: "",
             revenue_code: "4020",
             amount: ""
-          }])} className="text-amber-400 hover:bg-amber-500/10"><FilePlus size={14} className="mr-1" />{t("recurringinvoices.addLine")}</Button>
+          }])} className="text-amber-400 hover:bg-amber-500/10"><FilePlus size={14} className="me-1" />{t("recurringinvoices.addLine")}</Button>
           </div>
           <div className="grid grid-cols-3 gap-3">
             <div><Label className="text-xs">{t("recurringinvoices.tax")}</Label><Input data-testid="tpl-tax" value={form.tax} onChange={e => setForm({

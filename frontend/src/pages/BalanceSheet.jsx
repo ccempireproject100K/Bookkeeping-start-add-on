@@ -23,7 +23,7 @@ function Section({
           {rows.map(r => <tr key={r.code} className="border-b border-[#171c26]">
               <td className="px-5 py-2 font-mono text-amber-400 w-24">{r.code}</td>
               <td className="px-5 py-2 text-gray-300">{r.name}</td>
-              <td className="px-5 py-2 text-right font-mono text-gray-200">{money(r.amount)}</td>
+              <td className="px-5 py-2 text-end font-mono text-gray-200">{money(r.amount)}</td>
             </tr>)}
           {rows.length === 0 && <tr><td colSpan={3} className="px-5 py-4 text-gray-600 text-center">{t("balancesheet.none")}</td></tr>}
         </tbody>

@@ -115,19 +115,19 @@ export default function PurchaseOrders() {
   };
   if (!loaded) return <Loading />;
   return <div className="space-y-6">
-      <PageHeader title={t("purchaseorders.purchaseOrders")} subtitle="Order stock, receive it, pay the bill — the full procurement loop." actions={canManage && <Button onClick={() => setCreateOpen(true)} data-testid="po-add"><Plus size={14} className="mr-1" />{t("purchaseorders.newPO")}</Button>} />
+      <PageHeader title={t("purchaseorders.purchaseOrders")} subtitle="Order stock, receive it, pay the bill — the full procurement loop." actions={canManage && <Button onClick={() => setCreateOpen(true)} data-testid="po-add"><Plus size={14} className="me-1" />{t("purchaseorders.newPO")}</Button>} />
       <div className="grid lg:grid-cols-[1fr_440px] gap-6">
         <Card className="p-0 overflow-hidden h-fit">
           <table className="w-full text-sm">
-            <thead><tr className="text-left text-gray-500 border-b border-[#222838]">
+            <thead><tr className="text-start text-gray-500 border-b border-[#222838]">
               <th className="px-4 py-3 font-medium">{t("purchaseorders.po")}</th><th className="px-4 py-3 font-medium">{t("purchaseorders.vendor")}</th>
-              <th className="px-4 py-3 font-medium text-right">{t("purchaseorders.total")}</th><th className="px-4 py-3 font-medium">{t("purchaseorders.status")}</th>
+              <th className="px-4 py-3 font-medium text-end">{t("purchaseorders.total")}</th><th className="px-4 py-3 font-medium">{t("purchaseorders.status")}</th>
             </tr></thead>
             <tbody>
               {pos.map(p => <tr key={p.id} className={`border-b border-[#1a2030] hover:bg-[#141926] cursor-pointer ${detail?.id === p.id ? "bg-[#141926]" : ""}`} onClick={() => openDetail(p)}>
                   <td className="px-4 py-3 font-medium">{p.number}</td>
                   <td className="px-4 py-3 text-gray-400">{p.vendor}</td>
-                  <td className="px-4 py-3 text-right font-mono">{money(p.total_cents)}</td>
+                  <td className="px-4 py-3 text-end font-mono">{money(p.total_cents)}</td>
                   <td className="px-4 py-3"><span className={`text-xs px-2 py-0.5 rounded-full capitalize ${ST_CLS[p.status]}`}>{p.status.replace("_", " ")}</span></td>
                 </tr>)}
               {!pos.length && <tr><td colSpan={4} className="px-4 py-8 text-center text-gray-500 text-sm">{t("purchaseorders.noPurchaseOrdersYet")}</td></tr>}
@@ -153,16 +153,16 @@ export default function PurchaseOrders() {
                 </div>
               </div>
               {canManage && <div className="flex gap-2 flex-wrap">
-                  {detail.status === "draft" && <Button size="sm" onClick={() => act(detail.id, "approve")}><Check size={13} className="mr-1" />{t("purchaseorders.approve")}</Button>}
-                  {["approved", "partially_received"].includes(detail.status) && <Button size="sm" onClick={() => receiveAll(detail)}><PackageCheck size={13} className="mr-1" />{t("purchaseorders.receiveAll")}</Button>}
+                  {detail.status === "draft" && <Button size="sm" onClick={() => act(detail.id, "approve")}><Check size={13} className="me-1" />{t("purchaseorders.approve")}</Button>}
+                  {["approved", "partially_received"].includes(detail.status) && <Button size="sm" onClick={() => receiveAll(detail)}><PackageCheck size={13} className="me-1" />{t("purchaseorders.receiveAll")}</Button>}
                   {["received", "partially_received"].includes(detail.status) && !detail.bill_id && <Button size="sm" variant="outline" onClick={() => {
               if (confirm("Create vendor bill from received goods?")) act(detail.id, "convert-to-bill", {});
             }}>
-                      <FileText size={13} className="mr-1" />{t("purchaseorders.convertToBill")}</Button>}
+                      <FileText size={13} className="me-1" />{t("purchaseorders.convertToBill")}</Button>}
                   {["draft", "approved"].includes(detail.status) && <Button size="sm" variant="ghost" onClick={() => {
               if (confirm("Cancel this PO?")) act(detail.id, "cancel", {});
             }}>
-                      <X size={13} className="mr-1" />{t("purchaseorders.cancel")}</Button>}
+                      <X size={13} className="me-1" />{t("purchaseorders.cancel")}</Button>}
                 </div>}
               {detail.bill_id && <p className="text-xs text-emerald-400">{t("purchaseorders.billedSeeBills")}</p>}
               {detail.notes && <p className="text-xs text-gray-600">{detail.notes}</p>}

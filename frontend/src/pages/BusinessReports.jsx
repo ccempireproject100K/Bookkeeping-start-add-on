@@ -38,40 +38,40 @@ export default function BusinessReports() {
         </TabsList>
 
         <TabsContent value="income" className="mt-4">
-          <div className="mb-3 flex justify-end"><Button data-testid="btn-ibc-csv" variant="outline" onClick={() => downloadCsv("/reports/income-by-customer.csv", "income_by_customer.csv")} className="border-[#222838]"><Download size={15} className="mr-1" />{t("businessreports.csv")}</Button></div>
+          <div className="mb-3 flex justify-end"><Button data-testid="btn-ibc-csv" variant="outline" onClick={() => downloadCsv("/reports/income-by-customer.csv", "income_by_customer.csv")} className="border-[#222838]"><Download size={15} className="me-1" />{t("businessreports.csv")}</Button></div>
           <Card className="p-0 overflow-hidden">
             <table className="w-full text-sm" data-testid="table-ibc">
               <thead><tr className="text-xs uppercase tracking-wider text-gray-500 border-b border-[#222838]">
-                <th className="px-4 py-3 text-left font-medium">{t("businessreports.customer")}</th><th className="px-4 py-3 text-right font-medium">{t("businessreports.invoices")}</th>
-                <th className="px-4 py-3 text-right font-medium">{t("businessreports.paid")}</th><th className="px-4 py-3 text-right font-medium">{t("businessreports.income")}</th></tr></thead>
+                <th className="px-4 py-3 text-start font-medium">{t("businessreports.customer")}</th><th className="px-4 py-3 text-end font-medium">{t("businessreports.invoices")}</th>
+                <th className="px-4 py-3 text-end font-medium">{t("businessreports.paid")}</th><th className="px-4 py-3 text-end font-medium">{t("businessreports.income")}</th></tr></thead>
               <tbody>
                 {ibc.rows.map(r => <tr key={r.customer} className="border-b border-[#171c26] hover:bg-[#161b25]">
-                    <td className="px-4 py-3 text-gray-100">{r.customer}</td><td className="px-4 py-3 text-right text-gray-400">{r.invoices}</td>
-                    <td className="px-4 py-3 text-right font-mono text-gray-400">{dollars(r.paid)}</td>
-                    <td className="px-4 py-3 text-right font-mono text-emerald-400">{dollars(r.income)}</td>
+                    <td className="px-4 py-3 text-gray-100">{r.customer}</td><td className="px-4 py-3 text-end text-gray-400">{r.invoices}</td>
+                    <td className="px-4 py-3 text-end font-mono text-gray-400">{dollars(r.paid)}</td>
+                    <td className="px-4 py-3 text-end font-mono text-emerald-400">{dollars(r.income)}</td>
                   </tr>)}
                 {ibc.rows.length === 0 && <tr><td colSpan={4} className="px-5 py-12 text-center text-gray-500">{t("businessreports.noCustomerIncomeYet")}</td></tr>}
               </tbody>
-              {ibc.rows.length > 0 && <tfoot><tr className="font-semibold"><td className="px-4 py-3 text-gray-300">{t("businessreports.total")}</td><td /><td /><td className="px-4 py-3 text-right font-mono text-amber-400">{dollars(ibc.total)}</td></tr></tfoot>}
+              {ibc.rows.length > 0 && <tfoot><tr className="font-semibold"><td className="px-4 py-3 text-gray-300">{t("businessreports.total")}</td><td /><td /><td className="px-4 py-3 text-end font-mono text-amber-400">{dollars(ibc.total)}</td></tr></tfoot>}
             </table>
           </Card>
         </TabsContent>
 
         <TabsContent value="expense" className="mt-4">
-          <div className="mb-3 flex justify-end"><Button data-testid="btn-ebv-csv" variant="outline" onClick={() => downloadCsv("/reports/expenses-by-vendor.csv", "expenses_by_vendor.csv")} className="border-[#222838]"><Download size={15} className="mr-1" />{t("businessreports.csv")}</Button></div>
+          <div className="mb-3 flex justify-end"><Button data-testid="btn-ebv-csv" variant="outline" onClick={() => downloadCsv("/reports/expenses-by-vendor.csv", "expenses_by_vendor.csv")} className="border-[#222838]"><Download size={15} className="me-1" />{t("businessreports.csv")}</Button></div>
           <Card className="p-0 overflow-hidden">
             <table className="w-full text-sm" data-testid="table-ebv">
               <thead><tr className="text-xs uppercase tracking-wider text-gray-500 border-b border-[#222838]">
-                <th className="px-4 py-3 text-left font-medium">{t("businessreports.vendor")}</th><th className="px-4 py-3 text-right font-medium">{t("businessreports.transactions")}</th>
-                <th className="px-4 py-3 text-right font-medium">{t("businessreports.spend")}</th></tr></thead>
+                <th className="px-4 py-3 text-start font-medium">{t("businessreports.vendor")}</th><th className="px-4 py-3 text-end font-medium">{t("businessreports.transactions")}</th>
+                <th className="px-4 py-3 text-end font-medium">{t("businessreports.spend")}</th></tr></thead>
               <tbody>
                 {ebv.rows.map(r => <tr key={r.vendor} className="border-b border-[#171c26] hover:bg-[#161b25]">
-                    <td className="px-4 py-3 text-gray-100">{r.vendor}</td><td className="px-4 py-3 text-right text-gray-400">{r.count}</td>
-                    <td className="px-4 py-3 text-right font-mono text-rose-400">{dollars(r.spend)}</td>
+                    <td className="px-4 py-3 text-gray-100">{r.vendor}</td><td className="px-4 py-3 text-end text-gray-400">{r.count}</td>
+                    <td className="px-4 py-3 text-end font-mono text-rose-400">{dollars(r.spend)}</td>
                   </tr>)}
                 {ebv.rows.length === 0 && <tr><td colSpan={3} className="px-5 py-12 text-center text-gray-500">{t("businessreports.noVendorExpensesYet")}</td></tr>}
               </tbody>
-              {ebv.rows.length > 0 && <tfoot><tr className="font-semibold"><td className="px-4 py-3 text-gray-300">{t("businessreports.total")}</td><td /><td className="px-4 py-3 text-right font-mono text-amber-400">{dollars(ebv.total)}</td></tr></tfoot>}
+              {ebv.rows.length > 0 && <tfoot><tr className="font-semibold"><td className="px-4 py-3 text-gray-300">{t("businessreports.total")}</td><td /><td className="px-4 py-3 text-end font-mono text-amber-400">{dollars(ebv.total)}</td></tr></tfoot>}
             </table>
           </Card>
         </TabsContent>
@@ -138,27 +138,27 @@ function BoothRentTab() {
       <Card className="p-0 overflow-hidden">
         <table className="w-full text-sm" data-testid="table-booth-rent">
           <thead><tr className="text-xs uppercase tracking-wider text-gray-500 border-b border-[#222838]">
-            <th className="px-4 py-3 text-left font-medium">{t("businessreports.teamMember")}</th>
-            <th className="px-4 py-3 text-right font-medium">{t("businessreports.monthlyRent")}</th>
-            <th className="px-4 py-3 text-right font-medium">{t("businessreports.expected")}{data.months} {t("businessreports.mo")}</th>
-            <th className="px-4 py-3 text-right font-medium">{t("businessreports.collected")}</th>
-            <th className="px-4 py-3 text-right font-medium">{t("businessreports.balanceDue")}</th></tr></thead>
+            <th className="px-4 py-3 text-start font-medium">{t("businessreports.teamMember")}</th>
+            <th className="px-4 py-3 text-end font-medium">{t("businessreports.monthlyRent")}</th>
+            <th className="px-4 py-3 text-end font-medium">{t("businessreports.expected")}{data.months} {t("businessreports.mo")}</th>
+            <th className="px-4 py-3 text-end font-medium">{t("businessreports.collected")}</th>
+            <th className="px-4 py-3 text-end font-medium">{t("businessreports.balanceDue")}</th></tr></thead>
           <tbody>
             {data.rows.map(r => <tr key={r.barber_id} className="border-b border-[#171c26] hover:bg-[#161b25]">
                 <td className="px-4 py-3 text-gray-100">{r.name}</td>
-                <td className="px-4 py-3 text-right font-mono text-gray-400">{dollars(r.monthly_rent)}</td>
-                <td className="px-4 py-3 text-right font-mono text-gray-300">{dollars(r.expected)}</td>
-                <td className="px-4 py-3 text-right font-mono text-emerald-400">{dollars(r.collected)}</td>
-                <td className="px-4 py-3 text-right font-mono text-amber-400">{dollars(r.balance)}</td>
+                <td className="px-4 py-3 text-end font-mono text-gray-400">{dollars(r.monthly_rent)}</td>
+                <td className="px-4 py-3 text-end font-mono text-gray-300">{dollars(r.expected)}</td>
+                <td className="px-4 py-3 text-end font-mono text-emerald-400">{dollars(r.collected)}</td>
+                <td className="px-4 py-3 text-end font-mono text-amber-400">{dollars(r.balance)}</td>
               </tr>)}
             {data.rows.length === 0 && <tr><td colSpan={5} className="px-5 py-12 text-center text-gray-500">{t("businessreports.noTeamMembersWithBoothRent")}</td></tr>}
           </tbody>
           {data.rows.length > 0 && <tfoot><tr className="font-semibold border-t border-[#222838]">
               <td className="px-4 py-3 text-gray-300">{t("businessreports.total")}</td>
               <td />
-              <td className="px-4 py-3 text-right font-mono text-gray-300">{dollars(data.total_expected)}</td>
-              <td className="px-4 py-3 text-right font-mono text-emerald-400">{dollars(data.total_collected)}</td>
-              <td className="px-4 py-3 text-right font-mono text-amber-400">{dollars(data.total_balance)}</td>
+              <td className="px-4 py-3 text-end font-mono text-gray-300">{dollars(data.total_expected)}</td>
+              <td className="px-4 py-3 text-end font-mono text-emerald-400">{dollars(data.total_collected)}</td>
+              <td className="px-4 py-3 text-end font-mono text-amber-400">{dollars(data.total_balance)}</td>
             </tr></tfoot>}
         </table>
       </Card>

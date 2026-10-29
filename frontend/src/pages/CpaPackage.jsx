@@ -30,7 +30,7 @@ export default function CpaPackage() {
       <PageHeader title={t("cpapackage.cpaPackage")} subtitle="One click — everything your tax preparer needs, organized." actions={<>
           <Select value={year} onValueChange={setYear}><SelectTrigger className="w-28 bg-[#0F1218] border-[#222838]"><SelectValue /></SelectTrigger>
             <SelectContent>{["2024", "2025", "2026"].map(y => <SelectItem key={y} value={y}>{y}</SelectItem>)}</SelectContent></Select>
-          <Button onClick={download} data-testid="cpa-download"><Download size={14} className="mr-1" />{t("cpapackage.downloadPackage")}</Button>
+          <Button onClick={download} data-testid="cpa-download"><Download size={14} className="me-1" />{t("cpapackage.downloadPackage")}</Button>
         </>} />
       <Card className="p-5">
         <div className="flex items-center gap-2 mb-3">

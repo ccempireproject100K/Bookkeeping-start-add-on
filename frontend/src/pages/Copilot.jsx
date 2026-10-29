@@ -112,7 +112,7 @@ export default function Copilot() {
           <div className="flex-1 min-h-64 max-h-96 overflow-y-auto p-4 space-y-3">
             {msgs.length === 0 && <div className="text-sm text-gray-500">{t("copilot.tryHowMuchIsOverdueOr")}{!snap.overdue_invoices?.length && !snap.low_stock?.length && " Your books look quiet — nice work."}
               </div>}
-            {msgs.map((m, i) => <div key={i} className={`text-sm rounded-lg px-3 py-2 whitespace-pre-wrap max-w-full ${m.role === "user" ? "bg-amber-600/10 border border-amber-500/20 text-gray-100 ml-8" : m.role === "error" ? "bg-rose-600/10 border border-rose-500/20 text-rose-300" : "bg-[#0F1218] border border-[#222838] text-gray-200 mr-8"}`}>
+            {msgs.map((m, i) => <div key={i} className={`text-sm rounded-lg px-3 py-2 whitespace-pre-wrap max-w-full ${m.role === "user" ? "bg-amber-600/10 border border-amber-500/20 text-gray-100 ms-8" : m.role === "error" ? "bg-rose-600/10 border border-rose-500/20 text-rose-300" : "bg-[#0F1218] border border-[#222838] text-gray-200 me-8"}`}>
                 {m.role === "pending" ? <Loader2 size={14} className="animate-spin text-gray-500" /> : m.text}
               </div>)}
             <div ref={end} />
@@ -130,7 +130,7 @@ export default function Copilot() {
           <div className="px-4 py-3 border-b border-[#222838] flex items-center justify-between gap-2">
             <div className="text-xs uppercase tracking-wider text-gray-500">{t("copilot.proposedActions")}</div>
             {canManage && <Button data-testid="copilot-propose" size="sm" variant="outline" disabled={proposing} onClick={propose} className="border-[#222838]">
-                {proposing ? <Loader2 size={14} className="mr-1 animate-spin" /> : <Wand2 size={14} className="mr-1" />} {t("copilot.suggestActions")}</Button>}
+                {proposing ? <Loader2 size={14} className="me-1 animate-spin" /> : <Wand2 size={14} className="me-1" />} {t("copilot.suggestActions")}</Button>}
           </div>
           <div className="p-4 space-y-3 max-h-[28rem] overflow-y-auto">
             <p className="text-xs text-gray-500">{t("copilot.theCopilotProposesActionsNothingRuns")}</p>
@@ -154,9 +154,9 @@ export default function Copilot() {
                 {a.decided_by && <p className="mt-1 text-[10px] text-gray-600">{t("copilot.by")} {a.decided_by}{a.decided_at ? ` · ${fmtDate(a.decided_at.slice(0, 10))}` : ""}</p>}
                 {a.status === "pending" && canManage && <div className="mt-2 flex gap-2">
                     <Button data-testid={`copilot-approve-${a.id}`} size="sm" onClick={() => decide(a, true)} className="bg-amber-600 hover:bg-amber-500 text-black h-7">
-                      <Check size={13} className="mr-1" /> {t("copilot.approveRun")}</Button>
+                      <Check size={13} className="me-1" /> {t("copilot.approveRun")}</Button>
                     <Button data-testid={`copilot-reject-${a.id}`} size="sm" variant="outline" onClick={() => decide(a, false)} className="border-[#222838] h-7">
-                      <X size={13} className="mr-1" /> {t("copilot.dismiss")}</Button>
+                      <X size={13} className="me-1" /> {t("copilot.dismiss")}</Button>
                   </div>}
               </div>)}
           </div>

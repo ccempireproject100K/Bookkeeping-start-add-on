@@ -137,7 +137,7 @@ export default function Login() {
 
       {/* Form side */}
       <div className="relative flex items-center justify-center p-6 sm:p-10">
-        <div className="absolute top-4 right-4">
+        <div className="absolute top-4 end-4">
           <LanguageSwitcher compact />
         </div>
         <div className="w-full max-w-sm animate-rise">
@@ -156,7 +156,7 @@ export default function Login() {
             <div>
               <Label className="text-xs text-gray-400">{t("login.password")}</Label>
               <Input data-testid="login-password" type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" className="mt-1 bg-[#14171E] border-[#222838]" />
-              <div className="mt-1.5 text-right">
+              <div className="mt-1.5 text-end">
                 <Link to="/forgot-password" data-testid={LOGIN.forgotPasswordLink} className="text-xs text-gray-500 hover:text-amber-400">{t("login.forgotPassword")}</Link>
               </div>
             </div>
@@ -165,18 +165,18 @@ export default function Login() {
                 <Input data-testid="login-totp" inputMode="numeric" value={totpCode} onChange={e => setTotpCode(e.target.value)} placeholder="123456" maxLength={8} autoFocus className="mt-1 bg-[#14171E] border-[#222838] font-mono tracking-widest" />
               </div>}
             <Button data-testid="login-submit" type="submit" disabled={busy} className="w-full bg-amber-600 hover:bg-amber-500 text-black font-semibold">
-              {busy ? "Signing in…" : "Sign in"} <ArrowRight size={16} className="ml-1" />
+              {busy ? "Signing in…" : "Sign in"} <ArrowRight size={16} className="ms-1 rtl:-scale-x-100" />
             </Button>
           </form>
 
           {passkeysSupported() && <Button data-testid="login-passkey" onClick={passkeyLogin} disabled={busy} variant="outline" className="w-full mt-3 border-[#222838]">
-              <Fingerprint size={16} className="mr-2" /> {t("login.signInWithPasskey")}</Button>}
+              <Fingerprint size={16} className="me-2" /> {t("login.signInWithPasskey")}</Button>}
 
           <div className="mt-8">
             <div className="text-[10px] uppercase tracking-widest text-gray-500 mb-3 flex items-center gap-2">
               <KeyRound size={12} /> {t("login.demoLogins")}</div>
             <div className="grid grid-cols-2 gap-2">
-              {DEMOS.map(d => <button key={d.role} data-testid={`demo-login-${d.role.toLowerCase()}`} onClick={e => submit(e, d)} disabled={busy} className="text-left px-3 py-2 rounded-lg bg-[#14171E] border border-[#222838] hover:border-amber-500/40 transition-colors">
+              {DEMOS.map(d => <button key={d.role} data-testid={`demo-login-${d.role.toLowerCase()}`} onClick={e => submit(e, d)} disabled={busy} className="text-start px-3 py-2 rounded-lg bg-[#14171E] border border-[#222838] hover:border-amber-500/40 transition-colors">
                   <div className="text-sm font-medium text-gray-100">{d.role}</div>
                   <div className="text-[10px] text-gray-500 truncate">{d.email}</div>
                 </button>)}

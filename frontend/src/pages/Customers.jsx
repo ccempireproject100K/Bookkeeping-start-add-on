@@ -96,7 +96,7 @@ export default function Customers() {
   if (!rows) return <Loading />;
   return <div className="animate-rise">
       <PageHeader title={t("customers.customers")} subtitle={`${rows.length} customers & service locations`} testid="customers-page">
-        {isOwner && <Button data-testid="btn-add-customer" onClick={openCreate} className="bg-amber-600 hover:bg-amber-500 text-black font-semibold"><Plus size={16} className="mr-1" />{t("customers.addCustomer")}</Button>}
+        {isOwner && <Button data-testid="btn-add-customer" onClick={openCreate} className="bg-amber-600 hover:bg-amber-500 text-black font-semibold"><Plus size={16} className="me-1" />{t("customers.addCustomer")}</Button>}
       </PageHeader>
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -108,9 +108,9 @@ export default function Customers() {
               {c.email && <div className="flex items-center gap-2"><Mail size={14} className="text-gray-500" />{c.email}</div>}
             </div>
             <div className="mt-4 flex flex-wrap gap-2">
-              <Button size="sm" variant="outline" data-testid={`statement-${c.id}`} onClick={() => openStatement(c.id)} className="border-[#222838] h-8"><FileText size={13} className="mr-1" />{t("customers.statement")}</Button>
-              {isOwner && <Button size="sm" variant="outline" data-testid={`edit-customer-${c.id}`} onClick={() => openEdit(c)} className="border-[#222838] h-8"><Pencil size={13} className="mr-1" />{t("customers.edit")}</Button>}
-              {isOwner && <Button size="sm" variant="outline" data-testid={`delete-customer-${c.id}`} onClick={() => remove(c)} className="border-[#222838] h-8 text-rose-400 hover:text-rose-300"><Trash2 size={13} className="mr-1" />{t("customers.delete")}</Button>}
+              <Button size="sm" variant="outline" data-testid={`statement-${c.id}`} onClick={() => openStatement(c.id)} className="border-[#222838] h-8"><FileText size={13} className="me-1" />{t("customers.statement")}</Button>
+              {isOwner && <Button size="sm" variant="outline" data-testid={`edit-customer-${c.id}`} onClick={() => openEdit(c)} className="border-[#222838] h-8"><Pencil size={13} className="me-1" />{t("customers.edit")}</Button>}
+              {isOwner && <Button size="sm" variant="outline" data-testid={`delete-customer-${c.id}`} onClick={() => remove(c)} className="border-[#222838] h-8 text-rose-400 hover:text-rose-300"><Trash2 size={13} className="me-1" />{t("customers.delete")}</Button>}
             </div>
           </Card>)}
         {rows.length === 0 && <Card><div className="text-gray-500 text-sm text-center py-6">{t("customers.noCustomersYet")}</div></Card>}
@@ -150,15 +150,15 @@ export default function Customers() {
           <div className="max-h-96 overflow-y-auto">
             <table className="w-full text-sm" data-testid="table-statement">
               <thead><tr className="text-xs uppercase tracking-wider text-gray-500 border-b border-[#222838]">
-                <th className="px-3 py-2 text-left font-medium">{t("customers.date")}</th><th className="px-3 py-2 text-left font-medium">{t("customers.type")}</th>
-                <th className="px-3 py-2 text-right font-medium">{t("customers.charge")}</th><th className="px-3 py-2 text-right font-medium">{t("customers.payment")}</th>
-                <th className="px-3 py-2 text-right font-medium">{t("customers.balance")}</th></tr></thead>
+                <th className="px-3 py-2 text-start font-medium">{t("customers.date")}</th><th className="px-3 py-2 text-start font-medium">{t("customers.type")}</th>
+                <th className="px-3 py-2 text-end font-medium">{t("customers.charge")}</th><th className="px-3 py-2 text-end font-medium">{t("customers.payment")}</th>
+                <th className="px-3 py-2 text-end font-medium">{t("customers.balance")}</th></tr></thead>
               <tbody>
                 {stmt?.events?.map((e, i) => <tr key={i} className="border-b border-[#171c26]">
                     <td className="px-3 py-2 text-gray-400">{fmtDate(e.date)}</td><td className="px-3 py-2 text-gray-200">{e.type}</td>
-                    <td className="px-3 py-2 text-right font-mono text-gray-300">{e.charge_cents ? dollars(e.charge) : "—"}</td>
-                    <td className="px-3 py-2 text-right font-mono text-emerald-400">{e.payment_cents ? dollars(e.payment) : "—"}</td>
-                    <td className="px-3 py-2 text-right font-mono text-gray-100">{dollars(e.balance)}</td>
+                    <td className="px-3 py-2 text-end font-mono text-gray-300">{e.charge_cents ? dollars(e.charge) : "—"}</td>
+                    <td className="px-3 py-2 text-end font-mono text-emerald-400">{e.payment_cents ? dollars(e.payment) : "—"}</td>
+                    <td className="px-3 py-2 text-end font-mono text-gray-100">{dollars(e.balance)}</td>
                   </tr>)}
                 {stmt?.events?.length === 0 && <tr><td colSpan={5} className="px-3 py-8 text-center text-gray-500">{t("customers.noActivity")}</td></tr>}
               </tbody>

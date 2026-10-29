@@ -80,31 +80,31 @@ export default function AuditLog() {
           </div>
           <div className="flex items-end">
             <Button onClick={load} className="w-full" data-testid="audit-search">
-              <Search className="w-4 h-4 mr-2" /> {t("auditlog.search")}</Button>
+              <Search className="w-4 h-4 me-2" /> {t("auditlog.search")}</Button>
           </div>
         </div>
         {loading ? <Loading /> : rows.length === 0 ? <p className="text-sm text-gray-500 py-8 text-center">{t("auditlog.noAuditEntriesMatch")}</p> : <div className="overflow-x-auto">
             <table className="w-full text-sm" data-testid="audit-table">
               <thead>
-                <tr className="text-left text-gray-500 border-b border-[#1b2230]">
-                  <th className="py-2 pr-4 font-medium">{t("auditlog.when")}</th>
-                  <th className="py-2 pr-4 font-medium">{t("auditlog.actor")}</th>
-                  <th className="py-2 pr-4 font-medium">{t("auditlog.action")}</th>
-                  <th className="py-2 pr-4 font-medium">{t("auditlog.entity")}</th>
+                <tr className="text-start text-gray-500 border-b border-[#1b2230]">
+                  <th className="py-2 pe-4 font-medium">{t("auditlog.when")}</th>
+                  <th className="py-2 pe-4 font-medium">{t("auditlog.actor")}</th>
+                  <th className="py-2 pe-4 font-medium">{t("auditlog.action")}</th>
+                  <th className="py-2 pe-4 font-medium">{t("auditlog.entity")}</th>
                   <th className="py-2 font-medium">{t("auditlog.details")}</th>
                 </tr>
               </thead>
               <tbody>
                 {rows.map(r => <tr key={r.id} className="border-b border-[#141821] text-gray-300">
-                    <td className="py-2 pr-4 whitespace-nowrap text-gray-500">
+                    <td className="py-2 pe-4 whitespace-nowrap text-gray-500">
                       {fmtDate(r.created_at)}
                     </td>
-                    <td className="py-2 pr-4">
+                    <td className="py-2 pe-4">
                       {r.actor_name || "—"}
                       <span className="text-gray-600 text-xs"> · {r.actor_role || ""}</span>
                     </td>
-                    <td className="py-2 pr-4 font-mono text-xs text-sky-300">{r.action}</td>
-                    <td className="py-2 pr-4 text-gray-400">{r.entity}{r.entity_id ? ` · ${String(r.entity_id).slice(0, 8)}` : ""}</td>
+                    <td className="py-2 pe-4 font-mono text-xs text-sky-300">{r.action}</td>
+                    <td className="py-2 pe-4 text-gray-400">{r.entity}{r.entity_id ? ` · ${String(r.entity_id).slice(0, 8)}` : ""}</td>
                     <td className="py-2 font-mono text-xs text-gray-500 max-w-[280px] truncate" title={JSON.stringify(r.details || {})}>
                       {JSON.stringify(r.details || {})}
                     </td>
