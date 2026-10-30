@@ -109,6 +109,10 @@ class ImportBody(BaseModel):
     bank_account_id: str
     rows: Optional[List[ImportRow]] = None
     csv_text: Optional[str] = None
+    # Bake-off #11: saved import profiles + dedupe choices
+    profile_id: Optional[str] = None
+    dedupe_mode: Optional[str] = None     # "hash" (default) | "external_id"
+    allow_duplicates: bool = False        # deliberate import-anyway choice
 
 
 def _parse_csv(text):
@@ -142,22 +146,130 @@ def _parse_csv(text):
 async def _apply_rules(user, description):
     desc = (description or "").lower()
     for r in await rules(user).find_list():
-        if r["contains"].lower() in desc:
+        if r.get("version") == 2:
+            continue
+        if (r.get("contains") or "").lower() in desc:
             return r
     return None
 
 
-async def _insert_txn(user, bank_account_id, txn_date, description, amount, batch):
+# ---------------- Bank rules engine v2 (bake-off #1) ----------------
+# Multi-condition rules, implemented independently in our stack (behavior
+# study: Firefly III docs — rules with combined triggers, ordered groups,
+# stop-processing; see bookkeeping-cleanroom-bakeoff-2026-10-30.md).
+# A v2 rule doc: {version: 2, name, priority, match_mode: all|any,
+# conditions: [{field, op, value, negate}], actions: {category_code,
+# vendor, tags}, stop_processing, active}. Legacy single-"contains" rules
+# keep working and are evaluated after v2 rules.
+
+def _eval_condition(cond, txn):
+    field = cond.get("field")
+    op = cond.get("op")
+    val = cond.get("value")
+    try:
+        if field == "description":
+            d = (txn.get("description") or "").lower()
+            v = str(val or "").lower()
+            res = {
+                "contains": v in d,
+                "starts_with": d.startswith(v),
+                "ends_with": d.endswith(v),
+                "exact": d == v,
+            }.get(op, False)
+        elif field in ("amount", "signed_amount"):
+            cents = int(txn.get("amount_cents") or 0)
+            if field == "amount":
+                cents = abs(cents)
+            if op == "between":
+                lo, hi = (list(val) + [0, 0])[:2] if isinstance(val, (list, tuple)) else (0, 0)
+                res = to_cents(lo) <= cents <= to_cents(hi)
+            else:
+                target = to_cents(val or 0)
+                if field == "amount":
+                    target = abs(target)
+                res = {
+                    "gt": cents > target, "gte": cents >= target,
+                    "lt": cents < target, "lte": cents <= target,
+                    "exact": cents == target,
+                }.get(op, False)
+        elif field == "bank_account":
+            res = str(txn.get("bank_account_id") or "") == str(val or "") if op == "exact" \
+                else str(txn.get("bank_account_id") or "") in [str(x) for x in (val or [])]
+        elif field == "category":
+            code = txn.get("category_code")
+            res = {"is_set": bool(code), "is_unset": not code,
+                   "exact": code == val}.get(op, False)
+        elif field == "tag":
+            res = str(val or "") in list(txn.get("tags") or [])
+        else:
+            res = False
+    except Exception:
+        res = False
+    return (not res) if cond.get("negate") else res
+
+
+def rule_matches(rule, txn):
+    """Pure matcher: does a v2 rule fire for this transaction dict?"""
+    if not rule.get("active", True):
+        return False
+    conds = rule.get("conditions") or []
+    if not conds:
+        return False
+    results = [_eval_condition(c, txn) for c in conds]
+    return any(results) if rule.get("match_mode") == "any" else all(results)
+
+
+def _merge_actions(into, rule):
+    acts = rule.get("actions") or {}
+    if acts.get("category_code") and not into.get("category_code"):
+        into["category_code"] = acts["category_code"]
+    if acts.get("vendor") and not into.get("vendor"):
+        into["vendor"] = acts["vendor"]
+    for t in acts.get("tags") or []:
+        if t not in into.setdefault("tags", []):
+            into["tags"].append(t)
+    return into
+
+
+async def _match_v2_rules(user, txn):
+    """Evaluate the tenant's v2 rules in (priority, created_at) order.
+    Returns (actions_dict, [matched_rule_ids]) — empty actions when none fire."""
+    v2 = [r for r in await rules(user).find_list() if r.get("version") == 2]
+    v2.sort(key=lambda r: (r.get("priority", 100), r.get("created_at", "")))
+    actions, matched = {}, []
+    for r in v2:
+        if rule_matches(r, txn):
+            matched.append(r["id"])
+            _merge_actions(actions, r)
+            if r.get("stop_processing", True):
+                break
+    return actions, matched
+
+
+async def _insert_txn(user, bank_account_id, txn_date, description, amount, batch,
+                      dedupe_mode="hash", external_ref=None, allow_duplicates=False):
     amount_cents = to_cents(amount)
-    h = _dedupe(bank_account_id, txn_date, amount_cents, description)
-    if await txns(user).find_one({"dedupe_hash": h}):
+    if dedupe_mode == "external_id" and external_ref:
+        h = hashlib.sha1(f"ext|{bank_account_id}|{external_ref}".encode()).hexdigest()
+    else:
+        h = _dedupe(bank_account_id, txn_date, amount_cents, description)
+    if not allow_duplicates and await txns(user).find_one({"dedupe_hash": h}):
         return None
-    rule = await _apply_rules(user, description)
+    probe = {"description": description, "amount_cents": amount_cents,
+             "bank_account_id": bank_account_id, "category_code": None, "tags": []}
+    actions, matched_ids = await _match_v2_rules(user, probe)
+    rule = None
+    if not actions.get("category_code"):
+        rule = await _apply_rules(user, description)
+    category = actions.get("category_code") or (rule["category_code"] if rule else None)
     doc = {
         "id": new_id(), "bank_account_id": bank_account_id, "txn_date": txn_date,
         "description": description, "amount_cents": amount_cents, "dedupe_hash": h,
-        "status": "unmatched", "category_code": rule["category_code"] if rule else None,
-        "suggested_code": rule["category_code"] if rule else None,
+        "status": "unmatched", "category_code": category,
+        "suggested_code": category,
+        "vendor": actions.get("vendor"), "tags": actions.get("tags", []),
+        "external_ref": external_ref,
+        "rule_ids": matched_ids,
         "entry_id": None, "matched_entry_id": None, "reconciled": False,
         "import_batch": batch, "created_at": now_iso(),
     }
@@ -188,13 +300,71 @@ async def add_txn(body: ManualTxn, user: dict = Depends(require("ops:manage"))):
     return doc
 
 
+def _parse_csv_with_profile(text, profile):
+    """Parse CSV using a saved profile's column map + vendor-name value maps.
+    Returns rows shaped like _parse_csv rows, plus external_ref when the
+    profile designates an identifier column."""
+    cmap = profile.get("column_map") or {}
+    vmaps = profile.get("value_maps") or {}
+    reader = csv.DictReader(io.StringIO(text))
+    fields = {(f or "").strip().lower(): f for f in (reader.fieldnames or [])}
+
+    def pick(role, fallbacks):
+        want = (cmap.get(role) or "").strip().lower()
+        if want and want in fields:
+            return fields[want]
+        return next((fields[k] for k in fallbacks if k in fields), None)
+
+    date_key = pick("date", ("date", "txn_date", "transaction date", "posted date"))
+    desc_key = pick("description", ("description", "memo", "name", "payee", "details"))
+    amt_key = pick("amount", ("amount", "value"))
+    debit_key = pick("debit", ("debit", "withdrawal", "withdrawals"))
+    credit_key = pick("credit", ("credit", "deposit", "deposits"))
+    ext_key = None
+    ext_col = (profile.get("external_id_column") or "").strip().lower()
+    if ext_col and ext_col in fields:
+        ext_key = fields[ext_col]
+    rows = []
+    for r in reader:
+        d = (r.get(date_key) or "").strip() if date_key else ""
+        desc = (r.get(desc_key) or "").strip() if desc_key else ""
+        for raw_frag, clean in vmaps.items():
+            if raw_frag and raw_frag.lower() in desc.lower():
+                desc = clean
+                break
+        if amt_key:
+            raw = (r.get(amt_key) or "0").replace("$", "").replace(",", "").strip()
+            try:
+                amt = float(raw or 0)
+            except ValueError:
+                amt = 0
+        else:
+            dv = float((r.get(debit_key) or "0").replace("$", "").replace(",", "") or 0) if debit_key else 0
+            cv = float((r.get(credit_key) or "0").replace("$", "").replace(",", "") or 0) if credit_key else 0
+            amt = cv - dv
+        if not d and not desc:
+            continue
+        rows.append({"txn_date": d or today_str(), "description": desc or "Imported",
+                     "amount": amt,
+                     "external_ref": (r.get(ext_key) or "").strip() if ext_key else None})
+    return rows
+
+
 @router.post("/import")
 async def import_txns(body: ImportBody, user: dict = Depends(require("ops:manage"))):
     acc = await accounts(user).find_one({"id": body.bank_account_id})
     if not acc:
         raise HTTPException(status_code=404, detail="Bank account not found")
+    profile = None
+    if body.profile_id:
+        profile = await profiles(user).find_one({"id": body.profile_id})
+        if not profile:
+            raise HTTPException(status_code=404, detail="Import profile not found")
+    dedupe_mode = body.dedupe_mode or (profile or {}).get("dedupe_mode") or "hash"
+    if dedupe_mode not in ("hash", "external_id"):
+        raise HTTPException(status_code=422, detail="dedupe_mode must be hash or external_id")
     if body.csv_text:
-        rows = _parse_csv(body.csv_text)
+        rows = _parse_csv_with_profile(body.csv_text, profile) if profile else _parse_csv(body.csv_text)
     elif body.rows:
         rows = [r.model_dump() for r in body.rows]
     else:
@@ -203,12 +373,17 @@ async def import_txns(body: ImportBody, user: dict = Depends(require("ops:manage
     imported = 0
     duplicates = 0
     for r in rows:
-        doc = await _insert_txn(user, body.bank_account_id, r["txn_date"], r["description"], r["amount"], batch)
+        doc = await _insert_txn(user, body.bank_account_id, r["txn_date"], r["description"],
+                                r["amount"], batch, dedupe_mode=dedupe_mode,
+                                external_ref=r.get("external_ref"),
+                                allow_duplicates=body.allow_duplicates)
         if doc:
             imported += 1
         else:
             duplicates += 1
-    return {"imported": imported, "duplicates": duplicates, "total": len(rows), "batch": batch}
+    return {"imported": imported, "duplicates": duplicates, "total": len(rows),
+            "batch": batch, "dedupe_mode": dedupe_mode,
+            "profile_id": body.profile_id}
 
 
 # ---------------- Categorize (post to GL) ----------------
@@ -299,6 +474,138 @@ async def delete_rule(rule_id: str, user: dict = Depends(require("ops:manage")))
     return {"deleted": True}
 
 
+class RuleV2Body(BaseModel):
+    name: str
+    conditions: List[dict]
+    match_mode: str = "all"               # all | any
+    actions: dict = {}                    # {category_code, vendor, tags}
+    priority: int = 100
+    stop_processing: bool = True
+    active: bool = True
+
+
+def _validate_v2(body: RuleV2Body):
+    if body.match_mode not in ("all", "any"):
+        raise HTTPException(status_code=422, detail="match_mode must be all or any")
+    if not body.conditions:
+        raise HTTPException(status_code=422, detail="A rule needs at least one condition")
+    fields = {"description", "amount", "signed_amount", "bank_account", "category", "tag"}
+    for c in body.conditions:
+        if c.get("field") not in fields:
+            raise HTTPException(status_code=422, detail=f"Unknown condition field: {c.get('field')}")
+    code = (body.actions or {}).get("category_code")
+    if code and code not in ACCOUNT_TYPE_OF:
+        raise HTTPException(status_code=422, detail="Unknown category account in actions")
+
+
+@router.post("/rules/v2")
+async def create_rule_v2(body: RuleV2Body, user: dict = Depends(require("ops:manage"))):
+    _validate_v2(body)
+    doc = {"id": new_id(), "version": 2, **body.model_dump(), "created_at": now_iso()}
+    await rules(user).insert_one(doc)
+    doc.pop("_id", None)
+    return doc
+
+
+@router.patch("/rules/{rule_id}")
+async def update_rule_v2(rule_id: str, body: RuleV2Body, user: dict = Depends(require("ops:manage"))):
+    existing = await rules(user).find_one({"id": rule_id})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Rule not found")
+    _validate_v2(body)
+    await rules(user).update_one({"id": rule_id},
+                                 {"$set": {**body.model_dump(), "version": 2}})
+    return {"id": rule_id, "version": 2, **body.model_dump()}
+
+
+class RulePreviewBody(BaseModel):
+    rule: Optional[dict] = None           # inline v2 rule draft
+    rule_id: Optional[str] = None         # or an existing rule
+    samples: List[dict]                   # txn-shaped dicts to test against
+
+
+@router.post("/rules/preview")
+async def preview_rule(body: RulePreviewBody, user: dict = Depends(require("ledger:read"))):
+    """Preview matches before saving: run one rule against sample transactions."""
+    rule = body.rule
+    if body.rule_id:
+        rule = await rules(user).find_one({"id": body.rule_id})
+        if not rule:
+            raise HTTPException(status_code=404, detail="Rule not found")
+    if not rule:
+        raise HTTPException(status_code=422, detail="Provide rule or rule_id")
+    out = []
+    for sample in body.samples:
+        hit = rule_matches(rule, sample) if rule.get("version") == 2 else \
+            (str(rule.get("contains") or "").lower() in (sample.get("description") or "").lower())
+        out.append({"sample": sample, "matches": bool(hit),
+                    "actions": (rule.get("actions") or {"category_code": rule.get("category_code")}) if hit else {}})
+    return {"results": out, "matched": sum(1 for r in out if r["matches"])}
+
+
+class ApplyRulesBody(BaseModel):
+    rule_id: Optional[str] = None         # None = all v2 rules
+
+
+@router.post("/rules/apply-existing")
+async def apply_rules_existing(body: ApplyRulesBody, user: dict = Depends(require("ops:manage"))):
+    """Re-run rules over unmatched transactions (suggestions only — nothing posts).
+    Sets category suggestion, vendor and tags where a rule fires."""
+    only = None
+    if body.rule_id:
+        only = await rules(user).find_one({"id": body.rule_id})
+        if not only:
+            raise HTTPException(status_code=404, detail="Rule not found")
+    updated = 0
+    pending = await txns(user).find_list({"status": "unmatched"}, limit=5000)
+    for t in pending:
+        if only is not None:
+            if only.get("version") == 2:
+                if not rule_matches(only, t):
+                    continue
+                actions = dict(only.get("actions") or {})
+            else:
+                if (only.get("contains") or "").lower() not in (t.get("description") or "").lower():
+                    continue
+                actions = {"category_code": only.get("category_code")}
+        else:
+            actions, _ids = await _match_v2_rules(user, t)
+            if not actions:
+                legacy = await _apply_rules(user, t.get("description") or "")
+                if legacy:
+                    actions = {"category_code": legacy["category_code"]}
+        if not actions:
+            continue
+        upd = {}
+        if actions.get("category_code"):
+            upd["category_code"] = actions["category_code"]
+            upd["suggested_code"] = actions["category_code"]
+        if actions.get("vendor"):
+            upd["vendor"] = actions["vendor"]
+        if actions.get("tags"):
+            upd["tags"] = sorted(set(list(t.get("tags") or []) + list(actions["tags"])))
+        if upd:
+            await txns(user).update_one({"id": t["id"]}, {"$set": upd})
+            updated += 1
+    return {"examined": len(pending), "updated": updated}
+
+
+class TagsBody(BaseModel):
+    tags: List[str]
+
+
+@router.patch("/transactions/{txn_id}/tags")
+async def set_txn_tags(txn_id: str, body: TagsBody, user: dict = Depends(require("ops:manage"))):
+    """Job tags on a bank transaction (bake-off #7: category says what kind of
+    cost, tag says which job)."""
+    t = await txns(user).find_one({"id": txn_id})
+    if not t:
+        raise HTTPException(status_code=404, detail="Transaction not found")
+    tags = sorted({str(x).strip() for x in body.tags if str(x).strip()})
+    await txns(user).update_one({"id": txn_id}, {"$set": {"tags": tags}})
+    return {"id": txn_id, "tags": tags}
+
+
 # ---------------- Transfers ----------------
 class TransferBody(BaseModel):
     from_account_id: str
@@ -369,3 +676,116 @@ async def reconcile(body: ReconBody, user: dict = Depends(require("ledger:admin"
         }})
     doc.pop("_id", None)
     return doc
+
+
+# ---------------- Split transactions (bake-off #6) ----------------
+class SplitPart(BaseModel):
+    amount: float                    # dollars; same sign as the original
+    category_code: Optional[str] = None
+    memo: Optional[str] = None
+    tags: List[str] = []
+
+
+class SplitBody(BaseModel):
+    parts: List[SplitPart]
+
+
+@router.post("/transactions/{txn_id}/split")
+async def split_txn(txn_id: str, body: SplitBody, user: dict = Depends(require("ops:manage"))):
+    """Break one bank line into coded parts summing EXACTLY to the original.
+    The original is parked as status "split" (never posts); each part is a
+    normal transaction that categorizes/posts through the existing flow."""
+    t = await txns(user).find_one({"id": txn_id})
+    if not t:
+        raise HTTPException(status_code=404, detail="Transaction not found")
+    if t["status"] in ("cleared", "matched", "split"):
+        raise HTTPException(status_code=409, detail=f"Transaction is {t['status']} and cannot be split")
+    if len(body.parts) < 2:
+        raise HTTPException(status_code=422, detail="A split needs at least two parts")
+    total = 0
+    for part in body.parts:
+        cents = to_cents(part.amount)
+        if cents == 0:
+            raise HTTPException(status_code=422, detail="Split parts cannot be zero")
+        if (cents > 0) != (t["amount_cents"] > 0):
+            raise HTTPException(status_code=422, detail="Split parts must keep the original's direction")
+        if part.category_code and part.category_code not in ACCOUNT_TYPE_OF:
+            raise HTTPException(status_code=422, detail="Unknown category account")
+        total += cents
+    if total != t["amount_cents"]:
+        raise HTTPException(status_code=422,
+                            detail=f"Parts sum to {total} cents, original is {t['amount_cents']} cents")
+    parts = []
+    for i, part in enumerate(body.parts):
+        cents = to_cents(part.amount)
+        doc = {
+            "id": new_id(), "bank_account_id": t["bank_account_id"],
+            "txn_date": t["txn_date"],
+            "description": part.memo or t["description"],
+            "amount_cents": cents,
+            "dedupe_hash": _dedupe(t["id"], str(i), cents, part.memo or t["description"]),
+            "status": "unmatched",
+            "category_code": part.category_code, "suggested_code": part.category_code,
+            "vendor": t.get("vendor"), "tags": sorted({x.strip() for x in part.tags if x.strip()}),
+            "split_parent_id": txn_id,
+            "entry_id": None, "matched_entry_id": None, "reconciled": False,
+            "import_batch": t.get("import_batch"), "created_at": now_iso(),
+        }
+        await txns(user).insert_one(doc)
+        doc.pop("_id", None)
+        parts.append(doc)
+    await txns(user).update_one({"id": txn_id}, {"$set": {"status": "split"}})
+    return {"original_id": txn_id, "parts": parts}
+
+
+@router.post("/transactions/{txn_id}/unsplit")
+async def unsplit_txn(txn_id: str, user: dict = Depends(require("ops:manage"))):
+    """Reverse a split (only while no part has posted)."""
+    t = await txns(user).find_one({"id": txn_id})
+    if not t:
+        raise HTTPException(status_code=404, detail="Transaction not found")
+    if t["status"] != "split":
+        raise HTTPException(status_code=409, detail="Transaction is not split")
+    parts = await txns(user).find_list({"split_parent_id": txn_id})
+    if any(p["status"] in ("cleared", "matched") for p in parts):
+        raise HTTPException(status_code=409, detail="A split part has already posted; reverse it first")
+    for p in parts:
+        await txns(user).c.delete_one({"tenant_id": user["tenant_id"], "id": p["id"]})
+    await txns(user).update_one({"id": txn_id}, {"$set": {"status": "unmatched"}})
+    return {"id": txn_id, "status": "unmatched", "parts_removed": len(parts)}
+
+
+# ---------------- Saved import profiles (bake-off #11) ----------------
+def profiles(user):
+    return Scoped(db.import_profiles, user["tenant_id"])
+
+
+class ImportProfileBody(BaseModel):
+    name: str
+    column_map: dict = {}          # role -> csv header (date/description/amount/debit/credit)
+    value_maps: dict = {}          # raw description fragment -> clean name
+    dedupe_mode: str = "hash"      # hash | external_id
+    external_id_column: Optional[str] = None
+
+
+@router.get("/import-profiles")
+async def list_import_profiles(user: dict = Depends(require("ledger:read"))):
+    return await profiles(user).find_list(sort=[("name", 1)], limit=200)
+
+
+@router.post("/import-profiles")
+async def create_import_profile(body: ImportProfileBody, user: dict = Depends(require("ops:manage"))):
+    if body.dedupe_mode not in ("hash", "external_id"):
+        raise HTTPException(status_code=422, detail="dedupe_mode must be hash or external_id")
+    if body.dedupe_mode == "external_id" and not body.external_id_column:
+        raise HTTPException(status_code=422, detail="external_id_column is required for external_id dedupe")
+    doc = {"id": new_id(), **body.model_dump(), "created_at": now_iso()}
+    await profiles(user).insert_one(doc)
+    doc.pop("_id", None)
+    return doc
+
+
+@router.delete("/import-profiles/{profile_id}")
+async def delete_import_profile(profile_id: str, user: dict = Depends(require("ops:manage"))):
+    await profiles(user).c.delete_one({"tenant_id": user["tenant_id"], "id": profile_id})
+    return {"deleted": True}

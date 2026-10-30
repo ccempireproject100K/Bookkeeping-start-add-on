@@ -228,6 +228,24 @@ async def set_period_status(key: str, body: PeriodAction, user: dict = Depends(r
         await L.ensure_period(db, user["tenant_id"], f"{key}-01")
     upd = {"status": body.status}
     if body.status == "locked":
+        # Bake-off #5: a period cannot lock over a FAILED, unwaived balance
+        # assertion whose statement date falls inside it. Waive the
+        # assertion (named + reasoned, audited) or fix the books first.
+        pdoc = await s.find_one({"key": key})
+        if pdoc:
+            failed = []
+            async for a in db.balance_assertions.find(
+                    {"tenant_id": user["tenant_id"],
+                     "statement_date": {"$gte": pdoc["start_date"], "$lte": pdoc["end_date"]}},
+                    {"_id": 0}):
+                if a.get("status") == "failed" and not a.get("waived"):
+                    failed.append({"id": a["id"], "bank_account_id": a.get("bank_account_id"),
+                                   "statement_date": a.get("statement_date"),
+                                   "difference_cents": a.get("difference_cents")})
+            if failed:
+                raise HTTPException(status_code=409, detail={
+                    "error": "Period has failed balance assertions",
+                    "failed_assertions": failed})
         upd["locked_by"] = user["email"]
         upd["locked_at"] = now_iso()
     await s.update_one({"key": key}, {"$set": upd})

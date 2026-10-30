@@ -30,3 +30,10 @@ pyyaml>=6.0.1
 apscheduler>=3.10.0
 stripe==11.3.0
 redis>=5.0.0
+# Bake-off #14 PDF utilities (licenses verified 2026-10-30: pypdf BSD-3-Clause,
+# pdfplumber MIT, pdfminer.six MIT, pypdfium2 BSD-3/Apache-2.0, reportlab BSD-style)
+pypdf>=5.0.0
+pdfplumber>=0.11.0
+reportlab>=4.0.0
+# Standout extra A: PDF invoice intake pilot (invoice2data, MIT — verified 2026-10-30)
+invoice2data>=0.4.0

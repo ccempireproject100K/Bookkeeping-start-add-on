@@ -1,5 +1,10 @@
 """Vendor bills (accounts payable sub-ledger). Supports partial payments, recurring
-bills and vendor-credit application. Each cash movement posts to the GL."""
+bills and vendor-credit application. Each cash movement posts to the GL.
+
+Bake-off #2 (recurring automation) adds recurring bill TEMPLATES below:
+schedule definitions (same frequency/end-rule model as recurring invoices)
+that materialize real bills through create_bill — run manually via
+POST /bills/templates/run-due or hourly by the scheduler."""
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from typing import Optional, List
@@ -213,3 +218,195 @@ async def generate_recurring(bill_id: str, user: dict = Depends(require("ops:man
                     amount=cents_to_dollars(bill["amount_cents"]),
                     bill_date=bdate, recurring=True, frequency=freq)
     return await create_bill(body, user)
+
+
+# ---------------- Recurring bill templates (bake-off #2) ----------------
+from lib.audit import append_audit as _append_audit  # noqa: E402
+
+
+def templates(user):
+    return Scoped(db.recurring_bills, user["tenant_id"])
+
+
+class BillTemplateBody(BaseModel):
+    name: str
+    vendor: str
+    vendor_id: Optional[str] = None
+    amount: float = 0
+    expense_code: str = "5700"
+    lines: Optional[List[BillLine]] = None
+    currency: str = "USD"
+    frequency: str = "monthly"          # daily|weekly|biweekly|monthly|quarterly|semiannual|annual|custom
+    interval_days: Optional[int] = None
+    next_run: Optional[str] = None      # YYYY-MM-DD; defaults to today
+    due_offset_days: int = 30           # bill due = run date + offset
+    active: bool = True
+    paused: bool = False
+    end_type: str = "never"             # never | after_count | on_date
+    end_count: Optional[int] = None
+    end_date: Optional[str] = None
+
+
+def _bill_template_finished(t: dict, runs_made: int, next_run: str) -> bool:
+    end_type = t.get("end_type") or "never"
+    if end_type == "after_count" and t.get("end_count"):
+        return runs_made >= int(t["end_count"])
+    if end_type == "on_date" and t.get("end_date"):
+        return next_run > t["end_date"]
+    return False
+
+
+@router.get("/templates")
+async def list_bill_templates(user: dict = Depends(get_current_user)):
+    return await templates(user).find_list(sort=[("name", 1)], limit=500)
+
+
+@router.post("/templates")
+async def create_bill_template(body: BillTemplateBody, user: dict = Depends(require("ops:manage"))):
+    from routers.recurring_invoices import FREQUENCIES
+    if body.frequency not in FREQUENCIES:
+        raise HTTPException(status_code=422, detail=f"frequency must be one of {', '.join(FREQUENCIES)}")
+    if body.frequency == "custom" and not (body.interval_days and body.interval_days >= 1):
+        raise HTTPException(status_code=422, detail="interval_days (>= 1) is required for custom frequency")
+    if body.end_type not in ("never", "after_count", "on_date"):
+        raise HTTPException(status_code=422, detail="end_type must be never, after_count or on_date")
+    if body.end_type == "after_count" and not (body.end_count and body.end_count >= 1):
+        raise HTTPException(status_code=422, detail="end_count (>= 1) is required for end_type=after_count")
+    if body.next_run:
+        try:
+            date.fromisoformat(body.next_run)
+        except ValueError:
+            raise HTTPException(status_code=422, detail="next_run must be YYYY-MM-DD")
+    doc = {"id": new_id(), **body.model_dump(), "runs_made": 0, "status": "active",
+           "next_run": body.next_run or today_str(), "created_at": now_iso()}
+    await templates(user).insert_one(doc)
+    doc.pop("_id", None)
+    return doc
+
+
+@router.patch("/templates/{tid}")
+async def update_bill_template(tid: str, body: BillTemplateBody,
+                               user: dict = Depends(require("ops:manage"))):
+    t = await templates(user).find_one({"id": tid})
+    if not t:
+        raise HTTPException(status_code=404, detail="Bill template not found")
+    await templates(user).update_one({"id": tid}, {"$set": body.model_dump()})
+    return {"id": tid, **body.model_dump()}
+
+
+@router.delete("/templates/{tid}")
+async def delete_bill_template(tid: str, user: dict = Depends(require("ops:manage"))):
+    res = await db.recurring_bills.delete_one({"id": tid, "tenant_id": user["tenant_id"]})
+    if not res.deleted_count:
+        raise HTTPException(status_code=404, detail="Bill template not found")
+    return {"ok": True}
+
+
+async def run_due_bills_for_user(user: dict) -> dict:
+    """Materialize due recurring bills for the user's tenant. Same semantics
+    as recurring invoices: paused skipped, end rules retire the template,
+    missed occurrences catch up (capped per run)."""
+    from routers.recurring_invoices import _advance
+    today = today_str()
+    made = []
+    for t in await templates(user).find_list({"active": True, "next_run": {"$lte": today}}):
+        if t.get("paused"):
+            continue
+        runs_made = int(t.get("runs_made") or 0)
+        next_run = t["next_run"]
+        if _bill_template_finished(t, runs_made, next_run):
+            await templates(user).update_one({"id": t["id"]},
+                                             {"$set": {"active": False, "status": "completed"}})
+            continue
+        made_for_template = 0
+        while next_run <= today and made_for_template < 24:
+            if _bill_template_finished(t, runs_made, next_run):
+                break
+            due = (date.fromisoformat(next_run) + timedelta(days=int(t.get("due_offset_days", 30)))).isoformat()
+            body = BillBody(
+                vendor=t["vendor"], vendor_id=t.get("vendor_id"),
+                amount=t.get("amount", 0), expense_code=t.get("expense_code", "5700"),
+                lines=[BillLine(**l) for l in t["lines"]] if t.get("lines") else None,
+                bill_date=next_run, due_date=due, currency=t.get("currency", "USD"))
+            try:
+                bill = await create_bill(body, user)
+            except Exception:
+                break
+            runs_made += 1
+            made_for_template += 1
+            made.append({"template_id": t["id"], "template": t["name"],
+                         "bill_id": bill["id"], "run_date": next_run})
+            next_run = _advance(next_run, t.get("frequency", "monthly"), t.get("interval_days"))
+        finished = _bill_template_finished(t, runs_made, next_run)
+        upd = {"next_run": next_run, "runs_made": runs_made, "last_run": today}
+        if finished:
+            upd.update({"active": False, "status": "completed"})
+        await templates(user).update_one({"id": t["id"]}, {"$set": upd})
+    return {"generated": len(made), "bills": made}
+
+
+@router.post("/templates/run-due")
+async def run_due_bills(user: dict = Depends(require("ops:manage"))):
+    return await run_due_bills_for_user(user)
+
+
+# ---------------- Expected-bills calendar (bake-off #12) ----------------
+@router.get("/expected")
+async def expected_bills(days: int = 60, user: dict = Depends(get_current_user)):
+    """Recurring obligations as EXPECTATIONS, matched against the bank feed:
+    which fixed bills are coming, which already hit the bank, and which are
+    overdue-unpaid. Feeds the same picture the cash-flow forecast draws."""
+    from routers.recurring_invoices import _advance
+    today = today_str()
+    horizon = (date.fromisoformat(today) + timedelta(days=max(1, days))).isoformat()
+    txns = await Scoped(db.bank_transactions, user["tenant_id"]).find_list(
+        {"amount_cents": {"$lt": 0}}, sort=[("txn_date", -1)], limit=5000)
+
+    def _match(vendor: str, amount_cents: int, expected_date: str):
+        token = (vendor or "").strip().lower()[:12]
+        exp = date.fromisoformat(expected_date)
+        for t in txns:
+            if abs(t["amount_cents"]) != amount_cents:
+                continue
+            try:
+                td = date.fromisoformat(t["txn_date"])
+            except (ValueError, TypeError):
+                continue
+            if abs((td - exp).days) > 5:
+                continue
+            if token and token not in (t.get("description") or "").lower():
+                continue
+            return t["id"]
+        return None
+
+    expectations = []
+    for t in await templates(user).find_list({"active": True}, limit=500):
+        if t.get("status") == "completed":
+            continue
+        amount = sum(li["amount_cents"] for li in t.get("line_items", [])) \
+            if t.get("line_items") else to_cents(t.get("amount", 0))
+        nxt = t.get("next_run")
+        guard = 0
+        while nxt and nxt <= horizon and guard < 60:
+            guard += 1
+            if nxt >= (date.fromisoformat(today) - timedelta(days=30)).isoformat():
+                mid = _match(t["vendor"], amount, nxt)
+                expectations.append({
+                    "source": "template", "template_id": t["id"],
+                    "vendor": t["vendor"], "expected_date": nxt,
+                    "amount_cents": amount,
+                    "amount_min_cents": amount, "amount_max_cents": amount,
+                    "status": "matched" if mid else ("overdue" if nxt < today else "expected"),
+                    "matched_txn_id": mid})
+            nxt = _advance(nxt, t.get("frequency", "monthly"), t.get("interval_days"))
+    expectations.sort(key=lambda e: e["expected_date"])
+    return {
+        "as_of": today, "horizon": horizon,
+        "expectations": expectations,
+        "summary": {
+            "expected": sum(1 for e in expectations if e["status"] == "expected"),
+            "matched": sum(1 for e in expectations if e["status"] == "matched"),
+            "overdue": sum(1 for e in expectations if e["status"] == "overdue"),
+            "total_cents": sum(e["amount_cents"] for e in expectations),
+        },
+    }
