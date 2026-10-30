@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """
 i18n key parity test.
-Fails (exit 1) if any key in en/translation.json is missing from es, fr, zh-CN, hi or ar,
-or if any language has keys not present in en (orphans).
+Fails (exit 1) if any key in en/translation.json is missing from any other language
+folder under locales/ (every folder is checked, so a new language is covered as soon as
+its folder exists), or if any language has keys not present in en (orphans).
 Also validates that all files are well-formed JSON.
 
 Usage: python3 tests/i18n-parity.py [--locales-dir PATH]
@@ -13,7 +14,8 @@ from pathlib import Path
 
 def main():
     locales_dir = Path(sys.argv[sys.argv.index("--locales-dir") + 1]) if "--locales-dir" in sys.argv else Path(__file__).resolve().parents[1] / "frontend" / "src" / "locales"
-    langs = ["en", "es", "fr", "zh-CN", "hi", "ar"]
+    # Every locales/<code>/ folder is a language; en first (the source of truth).
+    langs = ["en"] + sorted(p.name for p in locales_dir.iterdir() if p.is_dir() and p.name != "en")
     data = {}
     errors = []
 
