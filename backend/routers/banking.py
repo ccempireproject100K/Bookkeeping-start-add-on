@@ -15,6 +15,16 @@ from lib.coa import NAME_OF, ACCOUNT_TYPE_OF
 from lib import ledger as L
 from lib import posting as P
 from lib.currencies import normalize as normalize_currency
+from lib.dataclean.normalize import normalize_date as _dc_date
+from lib.dataclean.normalize import normalize_description as _dc_desc
+
+
+def _iso_date(d):
+    """Cleanup layer: bank CSV dates land as ISO when they parse."""
+    if not d:
+        return d
+    res = _dc_date(d)
+    return res["normalized"] if res["ok"] else d
 
 router = APIRouter(prefix="/banking", tags=["banking"])
 
@@ -139,7 +149,7 @@ def _parse_csv(text):
             amt = cv - dv
         if not d and not desc:
             continue
-        rows.append({"txn_date": d or today_str(), "description": desc or "Imported", "amount": amt})
+        rows.append({"txn_date": _iso_date(d) or today_str(), "description": desc or "Imported", "amount": amt})
     return rows
 
 
@@ -258,13 +268,32 @@ async def _insert_txn(user, bank_account_id, txn_date, description, amount, batc
     probe = {"description": description, "amount_cents": amount_cents,
              "bank_account_id": bank_account_id, "category_code": None, "tags": []}
     actions, matched_ids = await _match_v2_rules(user, probe)
+    # Cleanup layer: rules also get a chance to match on the NORMALIZED
+    # description (lowercased, punctuation collapsed, legal suffixes
+    # dropped) so "ACME  SUPPLY,  INC." can match a rule written for
+    # "acme supply". Raw-description matches always win.
+    ndesc = _dc_desc(description)
+    if not actions.get("category_code") and ndesc \
+            and ndesc != (description or "").lower():
+        a2, m2 = await _match_v2_rules(user, {**probe, "description": ndesc})
+        if a2:
+            merged = dict(a2)
+            for k, v in actions.items():
+                if v:
+                    merged[k] = v
+            actions = merged
+            matched_ids = matched_ids + [m for m in m2 if m not in matched_ids]
     rule = None
     if not actions.get("category_code"):
         rule = await _apply_rules(user, description)
+        if not rule and ndesc and ndesc != (description or ""):
+            rule = await _apply_rules(user, ndesc)
     category = actions.get("category_code") or (rule["category_code"] if rule else None)
     doc = {
         "id": new_id(), "bank_account_id": bank_account_id, "txn_date": txn_date,
-        "description": description, "amount_cents": amount_cents, "dedupe_hash": h,
+        "description": description,
+        "description_normalized": ndesc or None,
+        "amount_cents": amount_cents, "dedupe_hash": h,
         "status": "unmatched", "category_code": category,
         "suggested_code": category,
         "vendor": actions.get("vendor"), "tags": actions.get("tags", []),
@@ -344,7 +373,7 @@ def _parse_csv_with_profile(text, profile):
             amt = cv - dv
         if not d and not desc:
             continue
-        rows.append({"txn_date": d or today_str(), "description": desc or "Imported",
+        rows.append({"txn_date": _iso_date(d) or today_str(), "description": desc or "Imported",
                      "amount": amt,
                      "external_ref": (r.get(ext_key) or "").strip() if ext_key else None})
     return rows

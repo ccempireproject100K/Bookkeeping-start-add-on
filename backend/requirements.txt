@@ -37,3 +37,14 @@ pdfplumber>=0.11.0
 reportlab>=4.0.0
 # Standout extra A: PDF invoice intake pilot (invoice2data, MIT — verified 2026-10-30)
 invoice2data>=0.4.0
+# Import cleanup layer (licenses re-verified from installed package
+# metadata + LICENSE files 2026-10-30: phonenumbers Apache-2.0,
+# cleanco MIT, probablepeople MIT, usaddress MIT, rapidfuzz MIT,
+# splink MIT; splink's DuckDB backend is MIT). FORBIDDEN here:
+# soda-core (Elastic License 2.0), libpostal (ODbL model weight).
+phonenumbers>=9.0
+cleanco>=2.3
+probablepeople>=0.5.6
+usaddress>=0.5.16
+rapidfuzz>=3.14
+splink>=5.0
