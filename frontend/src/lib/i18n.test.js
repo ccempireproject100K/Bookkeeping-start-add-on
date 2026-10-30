@@ -184,3 +184,34 @@ describe("Hindi and Arabic", () => {
     expect(mod.SUPPORTED_LANGUAGES.find((l) => l.code === "ar").label).toBe("العربية");
   });
 });
+
+describe("language registry is the single source of truth", () => {
+  const fs = require("fs");
+  const path = require("path");
+  const localesDir = path.join(__dirname, "..", "locales");
+
+  it("has exactly one registry entry per locales/ folder", () => {
+    const mod = loadI18nModule();
+    const folders = fs.readdirSync(localesDir).filter((f) => fs.statSync(path.join(localesDir, f)).isDirectory()).sort();
+    expect(mod.SUPPORTED_LANGUAGES.map((l) => l.code).sort()).toEqual(folders);
+  });
+
+  it("registers a translation bundle and an Intl locale for every registry language", () => {
+    const mod = loadI18nModule();
+    for (const { code, label, intl } of mod.SUPPORTED_LANGUAGES) {
+      expect(label).toBeTruthy();
+      expect(() => new Intl.NumberFormat(intl)).not.toThrow();
+      expect(Object.keys(mod.default.getResourceBundle(code, "translation") || {}).length).toBeGreaterThan(0);
+    }
+  });
+
+  it("maps any regional browser code onto its registry language", () => {
+    const mod = loadI18nModule();
+    for (const { code } of mod.SUPPORTED_LANGUAGES) {
+      const base = code.split("-")[0];
+      expect(mod.normalizeLanguage(`${base}-XX`)).toBe(code);
+      expect(mod.normalizeLanguage(code.toUpperCase())).toBe(code);
+    }
+    expect(mod.normalizeLanguage("de-DE")).toBe("de-DE");
+  });
+});

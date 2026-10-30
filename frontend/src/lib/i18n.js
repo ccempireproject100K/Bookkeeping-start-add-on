@@ -9,14 +9,32 @@ import zhCN from "@/locales/zh-CN/translation.json";
 import hi from "@/locales/hi/translation.json";
 import ar from "@/locales/ar/translation.json";
 
+// THE language registry. Adding a language = one entry here, one import
+// + RESOURCES line below, and a locales/<code>/translation.json with every
+// en key (tests/i18n-parity.py and lib/i18n.test.js enforce both).
+//   code:  i18next code, also the locales/ folder name
+//   label: the language's own name, shown in the switcher
+//   intl:  BCP 47 locale for Intl number/date/money formatting
+// Text direction comes from i18next (i18n.dir), which already knows the
+// right-to-left languages (ar, he, fa, ur, ...).
 export const SUPPORTED_LANGUAGES = [
-  { code: "en", label: "English", flag: "🇺🇸" },
-  { code: "es", label: "Español", flag: "🇪🇸" },
-  { code: "fr", label: "Français", flag: "🇫🇷" },
-  { code: "zh-CN", label: "简体中文", flag: "🇨🇳" },
-  { code: "hi", label: "हिन्दी", flag: "🇮🇳" },
-  { code: "ar", label: "العربية", flag: "🌐" },
+  { code: "en", label: "English", flag: "🇺🇸", intl: "en-US" },
+  { code: "es", label: "Español", flag: "🇪🇸", intl: "es-ES" },
+  { code: "fr", label: "Français", flag: "🇫🇷", intl: "fr-FR" },
+  { code: "zh-CN", label: "简体中文", flag: "🇨🇳", intl: "zh-CN" },
+  { code: "hi", label: "हिन्दी", flag: "🇮🇳", intl: "hi-IN" },
+  // Arabic text, Western digits: amounts stay in the 0-9 the books use.
+  { code: "ar", label: "العربية", flag: "🌐", intl: "ar-u-nu-latn" },
 ];
+
+const RESOURCES = {
+  en,
+  es,
+  fr,
+  "zh-CN": zhCN,
+  hi,
+  ar,
+};
 
 // The one localStorage key the language choice lives under. The detector
 // reads it first on every load; setLanguage writes it on every explicit
@@ -35,27 +53,21 @@ export const LANGUAGE_STORAGE_KEY = "app-language";
 export const normalizeLanguage = (lng) => {
   if (!lng) return "en";
   const code = String(lng).toLowerCase();
-  if (code.startsWith("zh")) return "zh-CN";
-  if (code.startsWith("es")) return "es";
-  if (code.startsWith("fr")) return "fr";
-  if (code.startsWith("en")) return "en";
-  if (code.startsWith("hi")) return "hi";
-  if (code.startsWith("ar")) return "ar";
-  return lng;
+  const exact = SUPPORTED_LANGUAGES.find((l) => l.code.toLowerCase() === code);
+  if (exact) return exact.code;
+  // Same base language (es-MX -> es, zh-TW -> zh-CN, ar-SA -> ar).
+  const base = code.split("-")[0];
+  const byBase = SUPPORTED_LANGUAGES.find((l) => l.code.toLowerCase().split("-")[0] === base);
+  return byBase ? byBase.code : lng;
 };
 
 i18n
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({
-    resources: {
-      en: { translation: en },
-      es: { translation: es },
-      fr: { translation: fr },
-      "zh-CN": { translation: zhCN },
-      hi: { translation: hi },
-      ar: { translation: ar },
-    },
+    resources: Object.fromEntries(
+      SUPPORTED_LANGUAGES.map(({ code }) => [code, { translation: RESOURCES[code] }])
+    ),
     supportedLngs: SUPPORTED_LANGUAGES.map((l) => l.code),
     fallbackLng: "en",
     defaultNS: "translation",
@@ -85,15 +97,9 @@ export const setLanguage = (code) => {
 };
 
 export const getActiveLocale = () => {
-  const lng = i18n.language || "en";
-  // Map i18next codes to BCP 47 locales for Intl
-  if (lng.startsWith("zh")) return "zh-CN";
-  if (lng.startsWith("es")) return "es-ES";
-  if (lng.startsWith("fr")) return "fr-FR";
-  if (lng.startsWith("hi")) return "hi-IN";
-  // Arabic text, Western digits: amounts stay in the 0-9 the books use.
-  if (lng.startsWith("ar")) return "ar-u-nu-latn";
-  return "en-US";
+  const code = normalizeLanguage(i18n.language || "en");
+  // Map i18next codes to BCP 47 locales for Intl (from the registry).
+  return (SUPPORTED_LANGUAGES.find((l) => l.code === code) || SUPPORTED_LANGUAGES[0]).intl;
 };
 
 // Arabic reads right to left: the page direction (and lang) follow the
