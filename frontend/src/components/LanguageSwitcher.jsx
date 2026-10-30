@@ -1,12 +1,9 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 
-const LANGUAGES = [
-  { code: "en", label: "English" },
-  { code: "es", label: "Español" },
-  { code: "fr", label: "Français" },
-  { code: "zh-CN", label: "简体中文" },
-];
+import { SUPPORTED_LANGUAGES } from "@/lib/i18n";
+
+const LANGUAGES = SUPPORTED_LANGUAGES;
 
 export default function LanguageSwitcher({ compact = false }) {
   const { i18n } = useTranslation();
@@ -16,7 +13,7 @@ export default function LanguageSwitcher({ compact = false }) {
     const lng = e.target.value;
     i18n.changeLanguage(lng);
     try {
-      localStorage.setItem("i18nextLng", lng);
+      localStorage.setItem("app-language", lng);
     } catch {}
   };
 
