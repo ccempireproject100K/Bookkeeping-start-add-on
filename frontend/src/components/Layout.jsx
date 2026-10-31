@@ -292,6 +292,13 @@ const NAV = [{
   roles: ALL,
   groupKey: "navGroup.tools"
 }, {
+  to: "/dataclean-studio",
+  labelKey: "nav.datacleanStudio",
+  icon: Sparkles,
+  testid: "nav-dataclean-studio",
+  roles: ALL,
+  groupKey: "navGroup.tools"
+}, {
   to: "/purchase-orders",
   labelKey: "nav.purchaseOrders",
   icon: ClipboardList,
