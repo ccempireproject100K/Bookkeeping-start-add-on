@@ -299,6 +299,13 @@ const NAV = [{
   roles: ALL,
   groupKey: "navGroup.tools"
 }, {
+  to: "/welcome-gift",
+  labelKey: "nav.welcomeGift",
+  icon: Gift,
+  testid: "nav-welcome-gift",
+  roles: ALL,
+  groupKey: "navGroup.tools"
+}, {
   to: "/purchase-orders",
   labelKey: "nav.purchaseOrders",
   icon: ClipboardList,
