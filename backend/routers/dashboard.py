@@ -190,6 +190,78 @@ def compute_health_score(metrics: dict) -> dict:
             "flags": flags, "metrics": metrics}
 
 
+def _cleanup_active(doc: dict) -> bool:
+    """Same active-record rule the dedupe router applies: merged,
+    soft-deleted, and merged-into records are not live records."""
+    return not (doc.get("merged_into") or doc.get("deleted_at")
+                or doc.get("status") in ("merged", "deleted"))
+
+
+def _looks_normalized(doc: dict) -> bool:
+    """A record counts as cleanup-normalized when it carries a marker
+    only the dataclean stage writes (``name_key`` / ``address_parts``)
+    or a phone already in E.164 form."""
+    if doc.get("name_key") or doc.get("address_parts"):
+        return True
+    phone = str(doc.get("phone") or "")
+    return phone.startswith("+") and phone[1:].replace(" ", "").isdigit()
+
+
+@router.get("/data-quality")
+async def data_quality(user: dict = Depends(get_current_user)):
+    """Read-only aggregate for the Cleanup Console's data-quality panel.
+
+    Every number here is counted from the tenant's own stored records —
+    nothing is estimated. One metric is deliberately reported as
+    unavailable: the guided importer does not persist a per-run history,
+    so an honest count of *files* cleaned this month does not exist yet;
+    the endpoint returns the imported-*record* count it can prove and
+    flags the file count as not tracked instead of inventing it.
+    """
+    tid = user["tenant_id"]
+    month = today_str()[:7]
+
+    suggestions = await Scoped(db.dedupe_suggestions, tid).find_list(limit=5000)
+    pending = [s for s in suggestions if s.get("status") == "pending"]
+    pending_by_entity = {
+        kind: sum(1 for s in pending if s.get("entity") == kind)
+        for kind in ("customers", "vendors")}
+
+    merges = await Scoped(db.entity_merges, tid).find_list(limit=5000)
+    scan_stamps = [s.get("created_at") for s in suggestions if s.get("created_at")]
+    last_scan_at = max(scan_stamps) if scan_stamps else None
+
+    normalized = total = 0
+    for coll_name in ("customers", "vendors"):
+        rows = await Scoped(getattr(db, coll_name), tid).find_list(limit=10000)
+        live = [r for r in rows if _cleanup_active(r)]
+        total += len(live)
+        normalized += sum(1 for r in live if _looks_normalized(r))
+
+    imported_this_month = 0
+    for coll_name in ("customers", "vendors", "products"):
+        rows = await Scoped(getattr(db, coll_name), tid).find_list(limit=10000)
+        imported_this_month += sum(
+            1 for r in rows
+            if r.get("imported_via") == "guided_importer"
+            and str(r.get("created_at") or "").startswith(month))
+
+    return {
+        "as_of": today_str(),
+        "duplicates_pending": len(pending),
+        "duplicates_pending_by_entity": pending_by_entity,
+        "last_scan_at": last_scan_at,
+        "normalized_records": normalized,
+        "records_total": total,
+        "normalized_percent": round(100.0 * normalized / total, 1) if total else 0.0,
+        "records_imported_this_month": imported_this_month,
+        "files_cleaned_this_month": None,
+        "files_cleaned_available": False,
+        "merges_active": sum(1 for m in merges if m.get("status") == "active"),
+        "merges_reversed": sum(1 for m in merges if m.get("status") == "reversed"),
+    }
+
+
 @router.get("/health-score")
 async def health_score(user: dict = Depends(get_current_user)):
     from datetime import date, timedelta

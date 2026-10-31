@@ -3,6 +3,7 @@ import { api } from "@/lib/api";
 import { dollars, money, fmtDate } from "@/lib/format";
 import { PageHeader, Card, Loading } from "@/components/Page";
 import SetupChecklist from "@/components/SetupChecklist";
+import DataQualityPanel from "@/components/DataQualityPanel";
 import { Wallet, TrendingUp, TrendingDown, DollarSign, ArrowDownLeft, ArrowUpRight, Package } from "lucide-react";
 import { useTranslation } from "react-i18next";
 const TILES = [{
@@ -82,6 +83,7 @@ export default function Dashboard() {
   return <div className="animate-rise">
       <PageHeader title={t("dashboard.dashboard")} subtitle={`Ledger snapshot • as of ${fmtDate(data.as_of)}`} testid="dashboard-page" />
       <SetupChecklist />
+      <DataQualityPanel />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {TILES.map(tile => {
