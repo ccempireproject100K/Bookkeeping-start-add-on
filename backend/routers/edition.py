@@ -108,6 +108,27 @@ async def setup_checklist(request: Request, user: dict = Depends(require("dashbo
             "hint": item.get("hint", ""), "link": item.get("link", "/"),
             "done": bool(checks.get(check, False)) if check else False,
         })
+    # Welcome gift (owner-approved 2026-10-31): the two free assets
+    # every joiner keeps, appended to every pack's checklist — done is
+    # read from the gift deliveries (routers/welcome_gift.py), and the
+    # items stay re-runnable from their page after they complete.
+    try:
+        gift_clean = await db.welcome_gift_deliveries.count_documents(
+            {"tenant_id": tid, "gift": "clean"}) > 0
+        gift_estimate = await db.welcome_gift_deliveries.count_documents(
+            {"tenant_id": tid, "gift": "estimate"}) > 0
+    except Exception:
+        gift_clean = gift_estimate = False
+    items.append({
+        "id": "welcome_clean", "label": "Clean your first file — free",
+        "hint": "We clean one messy file and hand it back, yours to keep",
+        "link": "/welcome-gift", "done": gift_clean,
+    })
+    items.append({
+        "id": "welcome_estimate", "label": "Get your first tax estimate — free",
+        "hint": "Your first quarterly estimate in writing, workpapers included",
+        "link": "/welcome-gift", "done": gift_estimate,
+    })
     done = sum(1 for s in items if s["done"])
     return {"edition": pack["id"], "vertical": pack["id"],
             "shop_label": pack["terms"].get("shop", "shop"),

@@ -26,6 +26,12 @@ STEPS = [
     ("first_customer", "Add your first customer", "Someone you invoice", "auto"),
     ("first_invoice", "Send your first invoice", "Issue an invoice — deposits and portal payment links included", "auto"),
     ("review_categories", "Review your categories", "Check the chart matches how you actually spend", "manual"),
+    # Welcome gift (owner-approved 2026-10-31): two free assets the
+    # joiner keeps. "auto" — done is read from the gift deliveries
+    # (routers/welcome_gift.py), so a step completes when the asset
+    # is in the tenant's hands and stays re-runnable afterwards.
+    ("welcome_clean", "Clean your first file — free", "Upload a messy customer, vendor, or item file; we clean it and hand it back with a duplicate report", "auto"),
+    ("welcome_estimate", "Get your first tax estimate — free", "Your first quarterly estimate in writing, with the workpapers that produced it", "auto"),
 ]
 
 
@@ -44,12 +50,22 @@ async def _auto_state(user) -> dict:
         bank_conns = 0
     customers = await Scoped(db.customers, tid).count()
     invoices = await Scoped(db.invoices, tid).count()
+    gift_clean = gift_estimate = 0
+    try:
+        gift_clean = await Scoped(db.welcome_gift_deliveries, tid).count(
+            {"gift": "clean"})
+        gift_estimate = await Scoped(db.welcome_gift_deliveries, tid).count(
+            {"gift": "estimate"})
+    except Exception:
+        gift_clean = gift_estimate = 0
     return {
         "business_profile": bool((tenant.get("name") or "").strip()),
         "trade_pack": bool(tenant.get("niche_id")),
         "connect_bank": (bank_accounts + bank_conns) > 0,
         "first_customer": customers > 0,
         "first_invoice": invoices > 0,
+        "welcome_clean": gift_clean > 0,
+        "welcome_estimate": gift_estimate > 0,
     }
 
 
