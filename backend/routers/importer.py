@@ -165,6 +165,7 @@ class RunIn(BaseModel):
     email_summary: bool = True
     cleanup: bool = True                  # dataclean stage before insert
     override_schema: bool = False         # import despite blocking checks (audited)
+    override_reason: Optional[str] = None  # the human's stated reason; audited with the override
 
 
 @router.post("/run")
@@ -174,15 +175,20 @@ async def run_import(body: RunIn, user: dict = Depends(require("ops:manage"))):
     headers, rows = _parse(body.csv_text)
     mapping = body.mapping or auto_map(headers, body.kind)
     mapped = _apply(rows, mapping)
-    cleanup_info = {"applied": False, "changes": 0, "schema_blocking": [],
+    cleanup_info = {"applied": False, "changes": 0, "changes_by_rule": {},
+                    "schema_blocking": [],
                     "schema_override": False, "row_error_count": 0}
     if body.cleanup:
         cleaned, change_count = [], 0
+        by_rule: dict = {}
         for d in mapped:
             cd, ch = _cleaning.clean_row(d, body.kind)
             cleaned.append(cd)
             change_count += len(ch)
+            for c in ch:
+                by_rule[c["rule"]] = by_rule.get(c["rule"], 0) + 1
         mapped = cleaned
+        cleanup_info["changes_by_rule"] = by_rule
         sv = _cleanschema.validate_rows(mapped, body.kind)
         cleanup_info.update({"applied": True, "changes": change_count,
                              "schema_blocking": sv["blocking"],
@@ -201,7 +207,8 @@ async def run_import(body: RunIn, user: dict = Depends(require("ops:manage"))):
                 "user_id": user["id"], "action": "import.schema_override",
                 "entity": body.kind, "entity_id": None,
                 "details": {"blocking_errors": sv["blocking"],
-                            "rows": len(mapped)}})
+                            "rows": len(mapped),
+                            "reason": (body.override_reason or "").strip() or None}})
     coll = Scoped(getattr(db, COLLS[body.kind]), user["tenant_id"])
     existing = {(_norm(d.get("name"))) for d in await coll.find_list(limit=10000)}
     created, skipped, errors = 0, 0, []
