@@ -2,10 +2,12 @@
 
 The console's data-quality panel reads ONE new endpoint,
 GET /dashboard/data-quality. These tests pin its honesty rules: counts
-come only from the caller's tenant, normalized means "carries a marker
-the dataclean stage writes", and the files-cleaned metric reports
-itself unavailable (the importer persists no per-run history) instead
-of inventing a number.
+come only from the caller's tenant, and normalized means "carries a
+marker the dataclean stage writes". Phase 2 note: the importer now
+persists per-run history, so the files-cleaned metric is a real count
+(0 with no runs yet, tracking-since None) — the Phase 1 "unavailable"
+assertions were replaced by the Phase 2 contract in
+test_cleanup_phase2.py, which pins the metric end to end.
 """
 import asyncio
 import os
@@ -85,7 +87,9 @@ class FakeDB:
     def __init__(self):
         for name in ("customers", "vendors", "products",
                      "dedupe_suggestions", "entity_merges",
-                     "audit_log", "import_profiles"):
+                     "audit_log", "import_profiles",
+                     "import_runs", "dedupe_scan_runs",
+                     "dedupe_schedule_configs"):
             setattr(self, name, FakeColl())
 
 
@@ -158,10 +162,13 @@ def test_data_quality_counts_are_tenant_scoped_and_honest():
     assert out["normalized_records"] == 3 and out["records_total"] == 4
     assert out["normalized_percent"] == 75.0
     assert out["records_imported_this_month"] == 3
-    # The importer persists no per-run history: the file count must say
-    # so, never a fabricated number.
-    assert out["files_cleaned_this_month"] is None
-    assert out["files_cleaned_available"] is False
+    # Phase 2: import runs ARE persisted now; with none seeded the
+    # honest answer is a real 0 with no tracking history yet.
+    assert out["files_cleaned_this_month"] == 0
+    assert out["files_cleaned_available"] is True
+    assert out["files_cleaned_tracking_since"] is None
+    assert len(out["import_runs_by_week"]) == 8
+    assert all(b["files"] == 0 for b in out["import_runs_by_week"])
     assert out["last_scan_at"].endswith("-05T10:00:00+00:00")
     assert out["merges_active"] == 1 and out["merges_reversed"] == 1
     out2 = run(DASH.data_quality(USER2))

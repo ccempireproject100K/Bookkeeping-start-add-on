@@ -1,6 +1,7 @@
 import {
   gradeTone, messHealth, confidenceLabelKey, visibleSuggestions,
   recordFieldRows, previewChangeRows, countChangesByRule,
+  ruleLabelKey, ruleStateRows, heldChangeRows, hasWeeklyTrend, sparkPoints,
 } from "./cleanupConsole";
 
 describe("gradeTone bands match the books health score", () => {
@@ -93,5 +94,58 @@ describe("previewChangeRows + countChangesByRule", () => {
     expect(previewChangeRows(p)).toHaveLength(3);
     expect(countChangesByRule(p)).toEqual({ "phone:x": 2, "email:y": 1 });
     expect(previewChangeRows(null)).toEqual([]);
+  });
+});
+
+describe("Phase 2: rule states, held changes, weekly trend", () => {
+  test("ruleLabelKey maps known rules, unknown falls back to null", () => {
+    expect(ruleLabelKey("phone:libphonenumber-e164"))
+      .toBe("cleanupConsole.rulePhoneFormat");
+    expect(ruleLabelKey("some:future-rule")).toBeNull();
+  });
+
+  test("ruleStateRows orders by engine firing order and keeps source", () => {
+    const preview = { rule_states: {
+      "address:usaddress-canonical": { enabled: true, source: "default" },
+      "phone:libphonenumber-e164": { enabled: false, source: "profile" },
+      "name:whitespace": { enabled: true, source: "run" },
+    } };
+    const rows = ruleStateRows(preview);
+    expect(rows.map((r) => r.rule)).toEqual([
+      "name:whitespace", "phone:libphonenumber-e164",
+      "address:usaddress-canonical"]);
+    expect(rows[1]).toEqual({
+      rule: "phone:libphonenumber-e164", enabled: false, source: "profile" });
+    expect(ruleStateRows(null)).toEqual([]);
+  });
+
+  test("heldChangeRows flattens held buckets like applied ones", () => {
+    const preview = { held_changes: { phone: [
+      { row: 2, field: "phone", before: "(512) 555-0134",
+        after: "+15125550134", rule: "phone:libphonenumber-e164",
+        confidence: 1 },
+    ] } };
+    const rows = heldChangeRows(preview);
+    expect(rows).toHaveLength(1);
+    expect(rows[0].field).toBe("phone");
+    expect(heldChangeRows(null)).toEqual([]);
+  });
+
+  test("trend needs real runs in at least two weeks", () => {
+    const wk = (files) => ({ week: "2026-W40", week_start: "2026-10-05", files });
+    expect(hasWeeklyTrend(null)).toBe(false);
+    expect(hasWeeklyTrend([wk(0), wk(0)])).toBe(false);
+    expect(hasWeeklyTrend([wk(0), wk(3)])).toBe(false);
+    expect(hasWeeklyTrend([wk(1), wk(0), wk(2)])).toBe(true);
+  });
+
+  test("sparkPoints scales to the max and refuses a fake trend", () => {
+    const wk = (files) => ({ week: "2026-W40", week_start: "2026-10-05", files });
+    expect(sparkPoints([wk(0), wk(2)])).toBeNull();
+    const pts = sparkPoints([wk(1), wk(3), wk(2)], 100, 20, 2);
+    const pairs = pts.split(" ").map((p) => p.split(",").map(Number));
+    expect(pairs).toHaveLength(3);
+    expect(pairs[1][1]).toBe(2);            // max value touches the top pad
+    expect(pairs[0][1]).toBeGreaterThan(pairs[1][1]);
   });
 });

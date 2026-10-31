@@ -100,3 +100,67 @@ export function countChangesByRule(preview) {
   }
   return counts;
 }
+
+/* ------------------------- Phase 2 additions ------------------------- */
+
+/** Plain-language label key per cleanup rule. Unknown rules fall back
+ * to showing the raw rule name (backend prose stays English). */
+export const RULE_LABEL_KEYS = {
+  "name:whitespace": "cleanupConsole.ruleNameWhitespace",
+  "email:trim-and-lowercase": "cleanupConsole.ruleEmailTrim",
+  "phone:libphonenumber-e164": "cleanupConsole.rulePhoneFormat",
+  "address:usaddress-canonical": "cleanupConsole.ruleAddressFormat",
+};
+
+export function ruleLabelKey(rule) {
+  return RULE_LABEL_KEYS[rule] || null;
+}
+
+/** The stable order rules are shown in (matches the engine's firing
+ * order); unknown rules sort after, alphabetically. */
+const RULE_ORDER = Object.keys(RULE_LABEL_KEYS);
+
+/** Effective rule states from a cleanup preview, as display rows:
+ * [{rule, enabled, source}] — source is "profile" | "run" | "default",
+ * the layer that decided the rule (shown honestly in the UI). */
+export function ruleStateRows(preview) {
+  const states = preview?.rule_states || {};
+  return Object.keys(states)
+    .map((rule) => ({ rule, enabled: !!states[rule]?.enabled, source: states[rule]?.source || "default" }))
+    .sort((a, b) => {
+      const ia = RULE_ORDER.indexOf(a.rule), ib = RULE_ORDER.indexOf(b.rule);
+      return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib) || a.rule.localeCompare(b.rule);
+    });
+}
+
+/** Flatten the preview's HELD change buckets — changes a profile/run
+ * rule toggle suppressed. Same row shape as previewChangeRows. */
+export function heldChangeRows(preview, limit = 12) {
+  const buckets = preview?.held_changes || {};
+  const rows = [];
+  for (const field of Object.keys(buckets)) {
+    for (const ch of buckets[field]) rows.push({ field, ...ch });
+  }
+  return rows.slice(0, limit);
+}
+
+/** A weekly trend is only shown when real persisted runs exist in at
+ * least two different weeks — otherwise the tile shows the count alone
+ * and never draws a one-point "trend". */
+export function hasWeeklyTrend(series) {
+  return (series || []).filter((b) => (b?.files || 0) > 0).length >= 2;
+}
+
+/** SVG polyline points for the files-per-week sparkline, scaled to the
+ * series max. Returns null when there is no honest trend to draw. */
+export function sparkPoints(series, width = 96, height = 24, pad = 2) {
+  if (!hasWeeklyTrend(series)) return null;
+  const vals = series.map((b) => b?.files || 0);
+  const max = Math.max(...vals, 1);
+  const stepX = (width - pad * 2) / Math.max(vals.length - 1, 1);
+  return vals.map((v, i) => {
+    const x = pad + i * stepX;
+    const y = height - pad - (v / max) * (height - pad * 2);
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  }).join(" ");
+}

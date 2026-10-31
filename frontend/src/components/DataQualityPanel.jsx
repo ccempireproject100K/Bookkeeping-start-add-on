@@ -4,8 +4,8 @@ import { useTranslation } from "react-i18next";
 import { ArrowRight, Gauge, Copy, FileCheck2, Sparkles, ScanSearch } from "lucide-react";
 import { api } from "@/lib/api";
 import { Card } from "@/components/Page";
-import { fmtDateTime, num } from "@/lib/format";
-import { gradeTone, TONE_CLASSES } from "@/lib/cleanupConsole";
+import { fmtDate, fmtDateTime, num } from "@/lib/format";
+import { gradeTone, TONE_CLASSES, sparkPoints } from "@/lib/cleanupConsole";
 
 function Meter({ value, tone }) {
   return <div className="h-2 rounded-full bg-[#222838] overflow-hidden" role="progressbar"
@@ -28,9 +28,12 @@ function Skeleton() {
 
 /** Data-quality panel: books health score beside the cleanup metrics.
  * Every figure comes from /dashboard/health-score and the read-only
- * /dashboard/data-quality aggregate. When the aggregate says a metric
- * is not tracked (files cleaned — the importer keeps no run history),
- * the tile says exactly that instead of showing an invented number. */
+ * /dashboard/data-quality aggregate. Phase 2: import runs are persisted
+ * now, so "files cleaned" is a real count from when tracking began
+ * (the tile says since when), with a weekly sparkline drawn ONLY when
+ * real runs exist in at least two different weeks. The not-tracked
+ * rendering remains for older backends that still report the metric
+ * as unavailable. */
 export default function DataQualityPanel() {
   const { t } = useTranslation();
   const [health, setHealth] = useState(null);
@@ -66,7 +69,12 @@ export default function DataQualityPanel() {
       value: quality ? num(quality.duplicates_pending) : "—", testid: "dq-duplicates-pending" },
     { key: "files", icon: FileCheck2, label: t("cleanupConsole.filesCleaned"),
       value: quality?.files_cleaned_available ? num(quality.files_cleaned_this_month) : t("cleanupConsole.filesNotTracked"),
-      hint: quality && !quality.files_cleaned_available ? t("cleanupConsole.filesNotTrackedHint") : null,
+      hint: !quality ? null
+        : !quality.files_cleaned_available ? t("cleanupConsole.filesNotTrackedHint")
+        : quality.files_cleaned_tracking_since
+          ? t("cleanupConsole.filesTrackedSince", { date: fmtDate(quality.files_cleaned_tracking_since) })
+          : null,
+      spark: quality ? sparkPoints(quality.import_runs_by_week) : null,
       testid: "dq-files-cleaned" },
     { key: "normalized", icon: Sparkles, label: t("cleanupConsole.recordsNormalized"),
       value: quality ? `${num(quality.normalized_records)} / ${num(quality.records_total)} · ${quality.normalized_percent}%` : "—",
@@ -106,6 +114,11 @@ export default function DataQualityPanel() {
             <tile.icon size={15} className="text-gray-500 shrink-0" />
           </div>
           <div className="mt-2 text-lg font-semibold text-gray-100 break-words">{tile.value}</div>
+          {tile.spark && <svg className="mt-2" width="96" height="24" viewBox="0 0 96 24"
+            role="img" aria-label={t("cleanupConsole.filesTrendLabel")} data-testid="dq-files-spark">
+            <polyline points={tile.spark} fill="none" stroke="#f59e0b" strokeWidth="1.5"
+              strokeLinejoin="round" strokeLinecap="round" />
+          </svg>}
           {tile.hint && <p className="mt-1 text-[11px] leading-relaxed text-gray-600">{tile.hint}</p>}
         </div>)}
       </div>

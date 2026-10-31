@@ -288,6 +288,7 @@ class FakeDB:
         self.recurring_bills = FakeColl()
         self.bank_rules = FakeColl()
         self.import_profiles = FakeColl()
+        self.import_runs = FakeColl()
         self.onboarding_progress = FakeColl()
 
     async def seed(self, coll, doc):
