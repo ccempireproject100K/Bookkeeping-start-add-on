@@ -61,7 +61,7 @@ export const SAMPLE_CSV = [
   "Client,E-mail,Phone,Address",
   "Acme  Supply Inc,OPS@ACME.EXAMPLE,(512) 555-0134,\"9 Oak Ave, Dallas, TX 75001\"",
   "Lone Star Plumbing,,512.555.0142,\"77 Ranch Rd, Austin, TX 78701\"",
-  "ACME SUPPLY, INC.,ops@acme.example,512-555-0134,\"9 Oak Ave, Dallas, TX 75001\"",
+  "\"ACME SUPPLY, INC.\",ops@acme.example,512-555-0134,\"9 Oak Ave, Dallas, TX 75001\"",
   "Bluebonnet Bakery,hello@bluebonnet.example, (512) 555-0177 ,\"1200 S Lamar Blvd, Austin, TX 78704\"",
 ].join("\n");
 
