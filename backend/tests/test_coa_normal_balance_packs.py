@@ -168,10 +168,10 @@ def test_pack_revenue_and_expense_codes_resolve_normal_balance():
 
 
 def test_every_pack_code_resolves_a_normal_balance():
-    """Full sweep: no code from any of the 33 packs may fall through
+    """Full sweep: no code from any of the 36 packs may fall through
     to _net_balance's debit default."""
     packs = niches.all_packs()
-    assert len(packs) == 33
+    assert len(packs) == 36
     for p in packs:
         for a in p.get("revenue_accounts", []):
             assert NORMAL_BALANCE_OF.get(a["code"]) == "credit", (p["id"], a["code"])

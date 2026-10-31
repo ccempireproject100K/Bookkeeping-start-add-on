@@ -15,7 +15,7 @@ from lib import niches
 from lib.coa import full_coa
 from routers.edition import resolve_niche
 
-TRADE_COUNT = 33
+TRADE_COUNT = 36
 
 
 def test_all_trade_packs_have_icons():

@@ -3,7 +3,7 @@
 The frontend's /industries index and /industries/:nicheId pages are
 rendered entirely from GET /niches: the index maps the array, the
 detail page does `packs.find(p => p.id === slug)` — the exact lookup
-simulated here for every one of the 33 packs. The landing pages also
+simulated here for every one of the 36 packs. The landing pages also
 render each pack's icon through the FaceIcon component, whose registry
 is a fixed set of Lucide names in the frontend; a pack icon outside
 that registry silently degrades to the generic fallback icon, so the
@@ -28,7 +28,7 @@ from routers.edition import list_niches, resolve_niche
 REPO_ROOT = Path(__file__).resolve().parents[2]
 FACE_ICON = REPO_ROOT / "frontend" / "src" / "components" / "FaceIcon.jsx"
 
-TRADE_COUNT = 33
+TRADE_COUNT = 36
 # Fields the SPA actually reads (pages/Industries.jsx + TradeLanding.jsx).
 REQUIRED_TERMS = ["worker", "worker_plural", "shop", "job", "customer"]
 
