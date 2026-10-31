@@ -190,6 +190,120 @@ def compute_health_score(metrics: dict) -> dict:
             "flags": flags, "metrics": metrics}
 
 
+def _cleanup_active(doc: dict) -> bool:
+    """Same active-record rule the dedupe router applies: merged,
+    soft-deleted, and merged-into records are not live records."""
+    return not (doc.get("merged_into") or doc.get("deleted_at")
+                or doc.get("status") in ("merged", "deleted"))
+
+
+def _looks_normalized(doc: dict) -> bool:
+    """A record counts as cleanup-normalized when it carries a marker
+    only the dataclean stage writes (``name_key`` / ``address_parts``)
+    or a phone already in E.164 form."""
+    if doc.get("name_key") or doc.get("address_parts"):
+        return True
+    phone = str(doc.get("phone") or "")
+    return phone.startswith("+") and phone[1:].replace(" ", "").isdigit()
+
+
+def _weekly_run_series(runs, weeks=8):
+    """Files cleaned per ISO week, oldest → newest, ending this week.
+    Built ONLY from persisted import runs — weeks before tracking began
+    are simply zero/absent history, never backfilled."""
+    from datetime import date, timedelta
+    today = date.fromisoformat(today_str())
+    monday = today - timedelta(days=today.weekday())
+    buckets = []
+    for back in range(weeks - 1, -1, -1):
+        start = monday - timedelta(weeks=back)
+        iso = start.isocalendar()
+        buckets.append({"week": f"{iso.year}-W{iso.week:02d}",
+                        "week_start": start.isoformat(), "files": 0})
+    by_week = {b["week"]: b for b in buckets}
+    for r in runs:
+        stamp = str(r.get("created_at") or "")[:10]
+        try:
+            d = date.fromisoformat(stamp)
+        except ValueError:
+            continue
+        iso = d.isocalendar()
+        key = f"{iso.year}-W{iso.week:02d}"
+        if key in by_week:
+            by_week[key]["files"] += 1
+    return buckets
+
+
+@router.get("/data-quality")
+async def data_quality(user: dict = Depends(get_current_user)):
+    """Read-only aggregate for the Cleanup Console's data-quality panel.
+
+    Every number here is counted from the tenant's own stored records —
+    nothing is estimated. Phase 2: the guided importer now persists one
+    row per run (``import_runs``), so "files cleaned this month" is a
+    real count — of completed runs that went through the cleanup stage,
+    from the day tracking began (``files_cleaned_tracking_since``). No
+    history is backfilled. "Last scan" is exact the same way: dedupe
+    scan runs are persisted (including zero-result scans); suggestion
+    timestamps remain as a continuity fallback for pre-Phase-2 data.
+    """
+    tid = user["tenant_id"]
+    month = today_str()[:7]
+
+    suggestions = await Scoped(db.dedupe_suggestions, tid).find_list(limit=5000)
+    pending = [s for s in suggestions if s.get("status") == "pending"]
+    pending_by_entity = {
+        kind: sum(1 for s in pending if s.get("entity") == kind)
+        for kind in ("customers", "vendors")}
+
+    merges = await Scoped(db.entity_merges, tid).find_list(limit=5000)
+    scan_runs = await Scoped(db.dedupe_scan_runs, tid).find_list(limit=5000)
+    scan_stamps = [s.get("created_at") for s in suggestions if s.get("created_at")]
+    scan_stamps += [r.get("finished_at") for r in scan_runs if r.get("finished_at")]
+    last_scan_at = max(scan_stamps) if scan_stamps else None
+
+    normalized = total = 0
+    for coll_name in ("customers", "vendors"):
+        rows = await Scoped(getattr(db, coll_name), tid).find_list(limit=10000)
+        live = [r for r in rows if _cleanup_active(r)]
+        total += len(live)
+        normalized += sum(1 for r in live if _looks_normalized(r))
+
+    imported_this_month = 0
+    for coll_name in ("customers", "vendors", "products"):
+        rows = await Scoped(getattr(db, coll_name), tid).find_list(limit=10000)
+        imported_this_month += sum(
+            1 for r in rows
+            if r.get("imported_via") == "guided_importer"
+            and str(r.get("created_at") or "").startswith(month))
+
+    import_runs = await Scoped(db.import_runs, tid).find_list(limit=10000)
+    cleaned_runs = [r for r in import_runs
+                    if r.get("status") == "completed"
+                    and r.get("cleanup_applied")]
+    files_cleaned = sum(1 for r in cleaned_runs
+                        if str(r.get("created_at") or "").startswith(month))
+    tracking_since = min((str(r.get("created_at")) for r in import_runs
+                          if r.get("created_at")), default=None)
+
+    return {
+        "as_of": today_str(),
+        "duplicates_pending": len(pending),
+        "duplicates_pending_by_entity": pending_by_entity,
+        "last_scan_at": last_scan_at,
+        "normalized_records": normalized,
+        "records_total": total,
+        "normalized_percent": round(100.0 * normalized / total, 1) if total else 0.0,
+        "records_imported_this_month": imported_this_month,
+        "files_cleaned_this_month": files_cleaned,
+        "files_cleaned_available": True,
+        "files_cleaned_tracking_since": tracking_since,
+        "import_runs_by_week": _weekly_run_series(cleaned_runs),
+        "merges_active": sum(1 for m in merges if m.get("status") == "active"),
+        "merges_reversed": sum(1 for m in merges if m.get("status") == "reversed"),
+    }
+
+
 @router.get("/health-score")
 async def health_score(user: dict = Depends(get_current_user)):
     from datetime import date, timedelta

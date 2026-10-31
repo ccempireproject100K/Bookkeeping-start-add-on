@@ -122,7 +122,9 @@ class FakeDB:
     def __init__(self):
         for name in ("customers", "vendors", "products", "import_profiles",
                      "dedupe_suggestions", "entity_merges", "audit_log",
-                     "bank_transactions", "bank_rules", "bank_accounts"):
+                     "bank_transactions", "bank_rules", "bank_accounts",
+                     "import_runs", "dedupe_scan_runs",
+                     "dedupe_schedule_configs"):
             setattr(self, name, FakeColl())
 
 
