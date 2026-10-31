@@ -308,6 +308,35 @@ def test_dedupe_scan_evidence_shape_and_cap():
     assert e.detail["code"] == "payload_too_large"
 
 
+def test_dedupe_scan_accepts_clean_output_verbatim():
+    """Regression: clean's records carry an address_parts DICT; the scan
+    handler stringifies values, and linkage.features() used to call
+    .get() on that string — posting clean's output verbatim into
+    dedupe/scan was an HTTP 500 for every consumer except the Studio
+    (which projected client-side). The verbatim composition must scan
+    cleanly and answer in the standard shape."""
+    fake = FakeDB()
+    DCA, API, ADM = _patch_all(fake)
+    actor = _actor(DCA, _issue(ADM, USER1)["key"])
+    cleaned = run(API.cleanup_clean(API.CleanupIn(kind="customers", rows=[
+        {"name": "Acme  Supply Inc", "email": "OPS@ACME.EXAMPLE",
+         "phone": "(512) 555-0134", "address": "9 Oak Ave, Dallas, TX 75001"},
+        {"name": "ACME SUPPLY, INC.", "email": "ops@acme.example",
+         "phone": "512.555.0134", "address": "9 Oak Ave, Dallas, TX 75001"},
+    ]), actor))
+    records = cleaned["records"]
+    assert all(isinstance(r.get("address_parts"), dict) for r in records)
+    out = run(API.dedupe_scan(API.DedupeIn(records=records), actor))
+    assert out["shape"] == "dataclean.result/1"
+    assert out["records"] == 2
+    assert len(out["pairs"]) == 1
+    pair = out["pairs"][0]
+    assert {pair["a_id"], pair["b_id"]} == {"row-1", "row-2"}
+    assert set(pair["evidence"]) == {"name_similarity", "email_match",
+                                     "phone_match", "address_similarity",
+                                     "why"}
+
+
 # ---------------------------------------------------------------- metering
 def test_every_compute_call_is_metered_and_counted():
     fake = FakeDB()
