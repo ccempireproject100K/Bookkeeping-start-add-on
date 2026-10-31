@@ -28,7 +28,8 @@ class RegisterBody(BaseModel):
     shop_name: str = "My Shop"
     niche_id: Optional[str] = None
     market_code: Optional[str] = None  # one of the 46 market packs; validated in create_workspace
-    plan: Optional[str] = None  # light | medium | heavy; default light + 30-day trial
+    plan: Optional[str] = None  # light | medium | heavy; default light + 14-day trial
+    trial_door: Optional[str] = None  # nocard | card — the two trial doors (lib/trial.py)
     ref: Optional[str] = None  # empire referral code; stored on the tenant, first-touch only
 
     @field_validator("password")
@@ -79,7 +80,7 @@ async def _audit(user, action, entity, entity_id, details=None):
     })
 
 
-async def create_workspace(email, password, name, shop_name, role="owner", tenant_id=None, commission_rate=0, niche_id=None, plan=None, market_code=None, ref=None):
+async def create_workspace(email, password, name, shop_name, role="owner", tenant_id=None, commission_rate=0, niche_id=None, plan=None, market_code=None, ref=None, trial_door=None):
     from lib.niches import get_pack, DEFAULT_NICHE
     from lib.markets import get_market
     from lib.currencies import is_supported
@@ -112,7 +113,8 @@ async def create_workspace(email, password, name, shop_name, role="owner", tenan
                          "double_entry_mode": "primary", "base_currency": base_currency},
             "created_at": now_iso(),
         }
-        tenant.update(new_trial_fields())       # Light + 30-day Medium trial
+        door = trial_door if trial_door in ("nocard", "card") else "nocard"
+        tenant.update(new_trial_fields(door))   # Light + 14-day Medium trial, chosen door
         tenant["plan"] = stored_plan            # explicit signup choice wins on expiry
         # Referral attribution (empire program): first-touch wins — the
         # code is stamped once, here at tenant creation, and no later
@@ -138,9 +140,13 @@ async def register(body: RegisterBody, response: Response):
         raise HTTPException(
             400, "This password has appeared in a data breach. "
                  "Please choose a different one.")
+    if body.trial_door is not None and body.trial_door not in ("nocard", "card"):
+        raise HTTPException(
+            400, "trial_door must be 'nocard' or 'card' — the two trial doors.")
     user = await create_workspace(body.email, body.password, body.name, body.shop_name,
                                   niche_id=body.niche_id, plan=body.plan,
-                                  market_code=body.market_code, ref=body.ref)
+                                  market_code=body.market_code, ref=body.ref,
+                                  trial_door=body.trial_door)
     await _issue(response, user)
     return _public(user)
 
