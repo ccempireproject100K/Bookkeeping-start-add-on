@@ -4,7 +4,7 @@ No live MongoDB needed (db handles are mocked). Run from the backend dir:
     MONGO_URL=mongodb://localhost:27017 DB_NAME=test python -m pytest tests/test_plans.py
 
 Covers:
-  - plan defaults at signup + 30-day Medium trial fields
+  - plan defaults at signup + 14-day Medium trial fields (owner ruling 2026-10-31)
   - effective plan (trial active -> medium; expired -> stored plan)
   - legacy tenants (no plan key) grandfathered at medium
   - per-feature gating: 402 + upgrade payload when plan is too low
@@ -90,12 +90,29 @@ class TestPlanPrimitives:
         assert trial_active(_tenant(trial="expired")) is False
         assert trial_active({}) is False
 
-    def test_trial_fields_30_days(self):
+    def test_trial_fields_14_days(self):
+        # Owner ruling 2026-10-31: the trial term is 14 days (the
+        # scaffolding's unruled 30 is superseded), through a door.
         f = new_trial_fields()
+        assert TRIAL_DAYS == 14
         assert f["plan"] == "light"
         end = datetime.fromisoformat(f["trial_ends_at"])
         days = (end - datetime.now(timezone.utc)).days
         assert TRIAL_DAYS - 1 <= days <= TRIAL_DAYS
+        # Default door is the no-card door: no opt-in stamps at all.
+        assert f["trial_door"] == "nocard"
+        assert f["card_opt_in_at"] is None
+        assert f["referral_active"] is False
+        assert f["first_month_discount_percent"] is None
+
+    def test_trial_fields_card_door_stamps_opt_in(self):
+        f = new_trial_fields("card")
+        assert f["trial_door"] == "card"
+        assert f["card_opt_in_at"] is not None
+        assert f["referral_active"] is True
+        assert f["referral_active_source"] == "trial_card_opt_in"
+        assert f["first_month_discount_percent"] == 50
+        assert f["first_month_discount_applied"] is False
 
     def test_effective_plan_trial_overrides(self):
         assert effective_plan(_tenant("light", "active")) == "medium"

@@ -192,6 +192,15 @@ def _patch(fake, monkeypatch, engine=None):
     return WG, OB, ED
 
 
+def _seed_opted_in_tenant(fake, **extra):
+    """A tenant on the card trial door (the estimate gift's gate)."""
+    doc = {"id": "t1", "name": "Maple HVAC", "niche_id": "hvac",
+           "trial_door": "card",
+           "card_opt_in_at": "2026-10-31T12:00:00+00:00", **extra}
+    run(fake.seed("tenants", doc))
+    return doc
+
+
 def _expect_http(status, coro_fn):
     try:
         run(coro_fn())
@@ -271,8 +280,7 @@ def test_gift_clean_row_cap(monkeypatch):
 
 def test_gift_estimate_ok_and_packet(monkeypatch):
     fake = FakeDB()
-    run(fake.seed("tenants", {"id": "t1", "name": "Maple HVAC",
-                              "niche_id": "hvac"}))
+    _seed_opted_in_tenant(fake)
     calls = []
 
     async def fake_engine(net_cents, jurisdiction, profile):
@@ -314,6 +322,7 @@ def test_gift_estimate_ok_and_packet(monkeypatch):
 
 def test_gift_estimate_stub_state_stays_not_implemented(monkeypatch):
     fake = FakeDB()
+    _seed_opted_in_tenant(fake)
 
     async def fake_engine(net_cents, jurisdiction, profile):
         assert jurisdiction == "US-PA"
@@ -336,6 +345,7 @@ def test_gift_estimate_stub_state_stays_not_implemented(monkeypatch):
 def test_gift_estimate_unregistered_state_is_federal_only_labelled(
         monkeypatch):
     fake = FakeDB()
+    _seed_opted_in_tenant(fake)
     calls = []
 
     async def fake_engine(net_cents, jurisdiction, profile):
@@ -357,6 +367,7 @@ def test_gift_estimate_unregistered_state_is_federal_only_labelled(
 
 def test_gift_estimate_engine_not_built_is_honest_503(monkeypatch):
     fake = FakeDB()
+    _seed_opted_in_tenant(fake)
 
     async def broken_engine(net_cents, jurisdiction, profile):
         from lib.taxengine import TaxEngineUnavailable
@@ -375,8 +386,53 @@ def test_gift_estimate_engine_not_built_is_honest_503(monkeypatch):
     assert not by_key["welcome_estimate"]
 
 
+def test_gift_estimate_locked_until_card_opt_in(monkeypatch):
+    """The trial-doors split (owner ruling 2026-10-31): the clean is
+    ungated, the estimate packet rides the card opt-in. Locked before,
+    unlocked the moment the opt-in is on record."""
+    fake = FakeDB()
+    run(fake.seed("tenants", {"id": "t1", "name": "Maple HVAC",
+                              "niche_id": "hvac", "trial_door": "nocard",
+                              "card_opt_in_at": None}))
+    calls = []
+
+    async def fake_engine(net_cents, jurisdiction, profile):
+        calls.append(jurisdiction)
+        return _result()
+
+    WG, _OB, _ED = _patch(fake, monkeypatch, engine=fake_engine)
+
+    # The clean runs with no trial/card state at all.
+    out = run(WG.gift_clean(WG.GiftCleanIn(kind="customers",
+                                           csv_text=CSV_DUPES), USER))
+    assert out["rows"] == 3
+
+    # The estimate is locked: 403 with the plain reason, engine never
+    # called, nothing delivered.
+    meta = run(WG.get_welcome_gift(USER))
+    assert meta["estimate_unlocked"] is False
+    e = _expect_http(403, lambda: WG.gift_estimate(WG.GiftEstimateIn(
+        net_profit=50000, filing_status="single", state="CA"), USER))
+    assert e.detail["code"] == "card_opt_in_required"
+    assert calls == []
+    assert [d for d in fake.welcome_gift_deliveries.docs.values()
+            if d["gift"] == "estimate"] == []
+
+    # The opt-in lands (door upgrade) -> the same call succeeds.
+    coll = fake.tenants
+    doc = next(iter(coll.docs.values()))
+    doc["card_opt_in_at"] = "2026-10-31T13:00:00+00:00"
+    doc["trial_door"] = "card"
+    meta = run(WG.get_welcome_gift(USER))
+    assert meta["estimate_unlocked"] is True
+    out = run(WG.gift_estimate(WG.GiftEstimateIn(
+        net_profit=80000, filing_status="single", state="CA"), USER))
+    assert out["status"] == "OK" and calls == ["US-CA"]
+
+
 def test_gift_estimate_validation(monkeypatch):
     fake = FakeDB()
+    _seed_opted_in_tenant(fake)
 
     async def fake_engine(net_cents, jurisdiction, profile):  # pragma: no cover
         return _result()
