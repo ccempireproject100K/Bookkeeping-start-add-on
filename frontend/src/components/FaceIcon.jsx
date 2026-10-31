@@ -1,9 +1,9 @@
 import {
   AppWindow, Bath, BatteryCharging, Briefcase, Bug, Building, Building2,
-  Calculator, Car, ClipboardCheck, Cpu, DoorOpen, Droplet, Droplets, Fence,
-  Hammer, Home, Key, Laptop, Layers, Leaf, LifeBuoy, Paintbrush, Plug, Ruler,
-  Scissors, Snowflake, Sparkles, Sun, Trash2, TreeDeciduous, TreePine, Waves,
-  Wrench, Zap,
+  Calculator, Car, ClipboardCheck, Cpu, CreditCard, DoorOpen, Droplet,
+  Droplets, Fence, Hammer, Home, Key, Laptop, Layers, Leaf, LifeBuoy,
+  Paintbrush, Plug, Ruler, Scissors, Smartphone, Snowflake, Sparkles, Store,
+  Sun, Trash2, TreeDeciduous, TreePine, Waves, Wrench, Zap,
 } from "lucide-react";
 
 /** Per-trade visual identity. The icon name comes from the niche pack
@@ -11,10 +11,10 @@ import {
  *  neutral Briefcase — never another trade's imagery. */
 const ICONS = {
   AppWindow, Bath, BatteryCharging, Bug, Building, Building2, Calculator,
-  Car, ClipboardCheck, Cpu, DoorOpen, Droplet, Droplets, Fence, Hammer,
-  Home, Key, Laptop, Layers, Leaf, LifeBuoy, Paintbrush, Plug, Ruler,
-  Scissors, Snowflake, Sparkles, Sun, Trash2, TreeDeciduous, TreePine,
-  Waves, Wrench, Zap,
+  Car, ClipboardCheck, Cpu, CreditCard, DoorOpen, Droplet, Droplets, Fence,
+  Hammer, Home, Key, Laptop, Layers, Leaf, LifeBuoy, Paintbrush, Plug,
+  Ruler, Scissors, Smartphone, Snowflake, Sparkles, Store, Sun, Trash2,
+  TreeDeciduous, TreePine, Waves, Wrench, Zap,
 };
 
 export default function FaceIcon({ name, ...props }) {

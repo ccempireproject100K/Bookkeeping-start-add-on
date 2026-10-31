@@ -20,3 +20,12 @@ export function findPack(data, id) {
 export function asFace(data) {
   return data && typeof data === "object" && !Array.isArray(data) ? data : null;
 }
+
+// The niche id a /niches/resolve face represents, for preselecting the
+// signup trade. The generic trade-neutral face (apex, www, unknown
+// subdomain) yields "" — no preselection, the picker stays untouched.
+export function nicheIdFromFace(face) {
+  const f = asFace(face);
+  if (!f || !f.niche_id || f.niche_id === "generic") return "";
+  return f.niche_id;
+}

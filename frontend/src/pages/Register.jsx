@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { api, errMsg } from "@/lib/api";
-import { asPackList } from "@/lib/packs";
+import { asFace, asPackList, nicheIdFromFace } from "@/lib/packs";
 import { asMarketList, readMarketChoice, writeMarketChoice } from "@/lib/markets";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { ArrowRight } from "lucide-react";
@@ -20,7 +20,9 @@ const selectCls =
  *  stores market_code, /edition composes the two, and the books' base
  *  currency is seeded from the market's currency at creation. The form
  *  preselects the US market (or the visitor's earlier public-pages
- *  choice); what is submitted is what gets stored. */
+ *  choice); what is submitted is what gets stored. Arriving on a niche
+ *  subdomain (<niche>.bookkeeping.<domain>) also preselects that trade
+ *  via GET /niches/resolve — the same host face the login page shows. */
 export default function Register() {
   const { user, register } = useAuth();
   const navigate = useNavigate();
@@ -40,6 +42,18 @@ export default function Register() {
   useEffect(() => {
     api.get("/niches").then((d) => setNiches(asPackList(d) || [])).catch(() => {});
     api.get("/market-packs").then((d) => setMarkets(asMarketList(d) || [])).catch(() => {});
+  }, []);
+
+  // Host face preselect: a niche subdomain starts the picker on that
+  // trade. The generic face (apex / www / unknown label) changes
+  // nothing, and a trade picked by hand is never overridden.
+  useEffect(() => {
+    api.get("/niches/resolve", { params: { host: window.location.hostname } })
+      .then((d) => {
+        const nid = nicheIdFromFace(asFace(d));
+        if (nid) setNicheId((cur) => cur || nid);
+      })
+      .catch(() => {});
   }, []);
 
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
