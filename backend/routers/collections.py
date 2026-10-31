@@ -52,6 +52,12 @@ DEFAULT_CONFIG = {
     "late_fee_min_cents": 2500,   # $25 minimum
     "late_fee_max_cents": 25000,  # $250 cap
     "pause_service_days": 35,
+    # Bake-off #3 additions (all opt-in; defaults preserve existing behavior):
+    "late_fee_flat_cents": 0,     # >0: flat fee instead of the percent formula
+    "repeat_final_days": 0,       # >0: the final step re-fires every N days
+    "bill_reminders_enabled": False,   # remind about OUR bills before they are due
+    "bill_reminder_days": [7, 1],      # days before the bill due date
+    "bill_reminder_template": "Bill from {vendor} for {balance} is due on {due_date} ({days} days).",
 }
 
 
@@ -157,11 +163,20 @@ async def _ensure_fee_account(user):
                                "created_at": now_iso()})
 
 
+def fee_amount(cfg: dict, balance_cents: int) -> int:
+    """Pure late-fee math: a configured flat fee wins outright; otherwise the
+    percent formula clamped to [min, max]."""
+    flat = int(cfg.get("late_fee_flat_cents") or 0)
+    if flat > 0:
+        return flat
+    fee = int(round(balance_cents * cfg["late_fee_percent"] / 100))
+    return max(cfg["late_fee_min_cents"], min(cfg["late_fee_max_cents"], fee))
+
+
 async def _apply_late_fee(user, inv: dict, cfg: dict) -> dict:
     """Post DR 1200 / CR 4090 and grow the invoice balance. Idempotent per run."""
     balance = inv["total_cents"] - inv.get("paid_cents", 0)
-    fee = int(round(balance * cfg["late_fee_percent"] / 100))
-    fee = max(cfg["late_fee_min_cents"], min(cfg["late_fee_max_cents"], fee))
+    fee = fee_amount(cfg, balance)
     # don't stack fees more than once per calendar month
     last = max([f.get("applied_at", "") for f in inv.get("late_fees", [])] or [""])
     if last and last[:7] == today_str()[:7]:
@@ -264,8 +279,25 @@ async def _flush_queued_reminders(user) -> dict:
 
 
 def _due_steps(cfg: dict, days: int, done: list) -> list:
-    return [s for s in sorted(cfg["steps"], key=lambda s: s["days"])
-            if s["days"] <= days and s["action"] not in done]
+    due = [dict(s) for s in sorted(cfg["steps"], key=lambda s: s["days"])
+           if s["days"] <= days and s["action"] not in done]
+    # Bake-off #3: repeating final notice. Stage keys final_r1, final_r2, ...
+    # fire every repeat_final_days after the fee day, until paid. The late
+    # fee itself stays capped at one per month inside _apply_late_fee.
+    repeat = int(cfg.get("repeat_final_days") or 0)
+    finals = [s for s in cfg["steps"] if s["action"] == "final"]
+    if repeat > 0 and finals and "final" in done:
+        base = max(int(cfg.get("late_fee_days") or 21), finals[0]["days"])
+        k = 1
+        while base + k * repeat <= days:
+            stage = f"final_r{k}"
+            if stage not in done:
+                step = dict(finals[0])
+                step["stage"] = stage
+                due.append(step)
+                break
+            k += 1
+    return due
 
 
 # ---------------- Config ----------------
@@ -288,6 +320,11 @@ class ConfigBody(BaseModel):
     late_fee_min_cents: int = 2500
     late_fee_max_cents: int = 25000
     pause_service_days: int = 35
+    late_fee_flat_cents: int = 0
+    repeat_final_days: int = 0
+    bill_reminders_enabled: bool = False
+    bill_reminder_days: list = [7, 1]
+    bill_reminder_template: str = ""
 
 
 @router.put("/config")
@@ -297,6 +334,10 @@ async def write_config(body: ConfigBody, user: dict = Depends(require("ops:manag
             raise HTTPException(422, f"Bad step action: {s.get('action')}")
         if int(s.get("days", 0)) < 0:
             raise HTTPException(422, "Step days must be >= 0")
+    if body.late_fee_flat_cents < 0 or body.repeat_final_days < 0:
+        raise HTTPException(422, "Fee/repeat values cannot be negative")
+    if any(int(d) < 0 for d in (body.bill_reminder_days or [])):
+        raise HTTPException(422, "Bill reminder days must be >= 0")
     doc = {"id": "autopilot", **body.model_dump(), "updated_at": now_iso()}
     await _cfg(user).update_one({"id": "autopilot"}, {"$set": doc}, upsert=True)
     await audit(user, "collections.config", "config", "autopilot",
@@ -359,12 +400,85 @@ async def autopilot_preview(user: dict = Depends(require("ops:manage"))):
         for s in _due_steps(cfg, days, inv.get("autopilot_stages", [])):
             plan.append({"invoice_id": inv["id"], "client_name": inv.get("client_name"),
                          "days_overdue": days, "action": s["action"],
+                         "stage": s.get("stage", s["action"]),
                          "balance_cents": r["balance"]})
         if days >= cfg["pause_service_days"] and not inv.get("customer_hold"):
             plan.append({"invoice_id": inv["id"], "client_name": inv.get("client_name"),
                          "days_overdue": days, "action": "pause_service",
                          "balance_cents": r["balance"]})
     return {"actions": plan, "count": len(plan)}
+
+
+# ---------------- Bill-side reminders (bake-off #3) ----------------
+async def _vendor_email(user, bill: dict) -> Optional[str]:
+    vid = bill.get("vendor_id")
+    if vid:
+        try:
+            v = await Scoped(db.vendors, user["tenant_id"]).find_one({"id": vid})
+        except Exception:
+            v = None
+        if v and (v.get("email") or "").strip():
+            return v["email"].strip()
+    return None
+
+
+async def run_bill_reminders(user, cfg: dict = None) -> dict:
+    """Remind the shop about its OWN open bills before they fall due
+    (money-out side of the ladder). Records into the same reminder store
+    with kind="bill"; emails the vendor only when an address is on file
+    AND the shop enabled vendor copies — by default the record is the
+    shop's own reminder, visible in history. Idempotent per (bill, offset)."""
+    cfg = cfg or await get_config(user)
+    if not cfg.get("bill_reminders_enabled"):
+        return {"sent": 0, "skipped": "disabled"}
+    from datetime import timedelta as _td
+    today = date.fromisoformat(today_str())
+    offsets = [int(d) for d in (cfg.get("bill_reminder_days") or [])]
+    sent = 0
+    bills = await Scoped(db.bills, user["tenant_id"]).find_list(
+        {"status": {"$in": ["open", "partial"]}}, limit=2000)
+    for bill in bills:
+        due_raw = (bill.get("due_date") or "")[:10]
+        if not due_raw:
+            continue
+        try:
+            due = date.fromisoformat(due_raw)
+        except ValueError:
+            continue
+        days_until = (due - today).days
+        if days_until not in offsets:
+            continue
+        stage = f"bill_due_{days_until}"
+        if stage in (bill.get("reminder_stages") or []):
+            continue
+        balance = bill["amount_cents"] - bill.get("paid_cents", 0)
+        if balance <= 0:
+            continue
+        template = cfg.get("bill_reminder_template") or DEFAULT_CONFIG["bill_reminder_template"]
+        message = (template.replace("{vendor}", bill.get("vendor", ""))
+                   .replace("{balance}", _fmt_money(balance))
+                   .replace("{due_date}", due_raw)
+                   .replace("{days}", str(days_until)))
+        rec = {"id": new_id(), "kind": "bill", "bill_id": bill["id"],
+               "client_name": bill.get("vendor"), "message": message,
+               "stage": stage, "via": "bill_reminder",
+               "days_overdue": 0, "created_at": now_iso(),
+               "email_status": "not_sent"}
+        await Scoped(db.payment_reminders, user["tenant_id"]).insert_one(rec)
+        await Scoped(db.bills, user["tenant_id"]).update_one(
+            {"id": bill["id"]}, {"$push": {"reminder_stages": stage}})
+        await audit(user, "collections.bill_reminder", "bill", bill["id"],
+                    {"stage": stage, "reminder_id": rec["id"]})
+        sent += 1
+    return {"sent": sent}
+
+
+@router.post("/bill-reminders/run", dependencies=[Depends(require_feature("collections_automation"))])
+async def bill_reminders_run(user: dict = Depends(require("ops:manage"))):
+    cfg = await get_config(user)
+    if not cfg.get("bill_reminders_enabled"):
+        raise HTTPException(409, "Bill reminders are off — enable them in the config first")
+    return await run_bill_reminders(user, cfg)
 
 
 @router.post("/autopilot/run", dependencies=[Depends(require_feature("collections_automation"))])
@@ -385,8 +499,9 @@ async def autopilot_run(user: dict = Depends(require("ops:manage"))):
                 action = s["action"]
                 if action in ("nudge", "firm", "final"):
                     msg = _render(s.get("template") or "", inv, days)
-                    await _record_reminder(user, inv, msg, action, days)
-                    done.append({"invoice_id": inv["id"], "action": action})
+                    await _record_reminder(user, inv, msg, s.get("stage", action), days)
+                    done.append({"invoice_id": inv["id"], "action": action,
+                                 "stage": s.get("stage", action)})
                 if action == "final" and days >= cfg["late_fee_days"]:
                     res = await _apply_late_fee(user, inv, cfg)
                     if res["applied"]:
@@ -405,7 +520,14 @@ async def autopilot_run(user: dict = Depends(require("ops:manage"))):
                         done.append({"invoice_id": inv["id"], "action": "pause_service"})
         except Exception as exc:
             errors.append({"invoice_id": inv["id"], "error": str(exc)[:200]})
+    bill_reminders = {"sent": 0}
+    if cfg.get("bill_reminders_enabled"):
+        try:
+            bill_reminders = await run_bill_reminders(user, cfg)
+        except Exception as exc:
+            errors.append({"bill_reminders": str(exc)[:200]})
     await audit(user, "collections.run", "autopilot", "run",
                 {"actions": len(done), "errors": len(errors),
-                 "emails_flushed": flushed})
-    return {"actions": done, "errors": errors, "emails_flushed": flushed}
+                 "emails_flushed": flushed, "bill_reminders": bill_reminders})
+    return {"actions": done, "errors": errors, "emails_flushed": flushed,
+            "bill_reminders": bill_reminders}

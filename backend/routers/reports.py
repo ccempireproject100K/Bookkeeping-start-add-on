@@ -354,3 +354,149 @@ async def record_booth_rent(body: BoothRentPaymentBody,
     await Scoped(db.booth_rent_payments, user["tenant_id"]).insert_one(doc)
     doc.pop("_id", None)
     return doc
+
+
+# ---------------- Balance assertions + ledger health (bake-off #5) ----------------
+# A balance assertion is a PERSISTENT record — "on this date, this account
+# held exactly this amount" — re-verified on read, not a one-off reconcile
+# screen. Implemented independently (concept study: Beancount docs).
+
+def assertions_coll(user):
+    return Scoped(db.balance_assertions, user["tenant_id"])
+
+
+async def _gl_balance_for_account(user, gl_code: str, as_of: str) -> int:
+    bals = await L._balances(db, user["tenant_id"], as_of=as_of)
+    v = bals.get(gl_code, {"debit": 0, "credit": 0})
+    return L._net_balance(gl_code, v["debit"], v["credit"])
+
+
+async def _evaluate_assertion(user, a: dict) -> dict:
+    computed = await _gl_balance_for_account(user, a["gl_code"], a["statement_date"])
+    diff = a["statement_cents"] - computed
+    out = dict(a)
+    out["computed_cents"] = computed
+    out["difference_cents"] = diff
+    out["status"] = "passed" if diff == 0 else "failed"
+    return out
+
+
+class AssertionBody(BaseModel):
+    bank_account_id: str
+    statement_date: str        # YYYY-MM-DD
+    statement_balance: float   # dollars, in the account's normal direction
+
+
+@router.post("/balance-assertions")
+async def create_assertion(body: AssertionBody, user: dict = Depends(require("ledger:admin"))):
+    acc = await Scoped(db.bank_accounts, user["tenant_id"]).find_one({"id": body.bank_account_id})
+    if not acc:
+        raise HTTPException(status_code=404, detail="Bank account not found")
+    doc = {"id": new_id(), "bank_account_id": body.bank_account_id,
+           "account_name": acc.get("name"), "gl_code": acc["gl_code"],
+           "statement_date": body.statement_date,
+           "statement_cents": to_cents(body.statement_balance),
+           "waived": False, "waived_by": None, "waived_at": None, "waive_reason": None,
+           "created_by": user["email"], "created_at": now_iso()}
+    evaluated = await _evaluate_assertion(user, doc)
+    doc["computed_cents"] = evaluated["computed_cents"]
+    doc["difference_cents"] = evaluated["difference_cents"]
+    doc["status"] = evaluated["status"]
+    await assertions_coll(user).insert_one(doc)
+    doc.pop("_id", None)
+    return doc
+
+
+@router.get("/balance-assertions")
+async def list_assertions(user: dict = Depends(require("ledger:read"))):
+    rows = await assertions_coll(user).find_list(sort=[("statement_date", -1)], limit=500)
+    out = []
+    for a in rows:
+        ev = await _evaluate_assertion(user, a)   # re-verify on read: standing proof
+        ev["waived"] = a.get("waived", False)
+        ev["waived_by"] = a.get("waived_by")
+        ev["waive_reason"] = a.get("waive_reason")
+        out.append(ev)
+    return out
+
+
+class WaiveBody(BaseModel):
+    reason: str
+
+
+@router.post("/balance-assertions/{assertion_id}/waive")
+async def waive_assertion(assertion_id: str, body: WaiveBody,
+                          user: dict = Depends(require("ledger:admin"))):
+    """Named, reasoned, audited waiver — the ONLY way a period may lock over
+    a failed assertion. The assertion record itself is never edited away."""
+    if not body.reason.strip():
+        raise HTTPException(status_code=422, detail="A waiver needs a reason")
+    a = await assertions_coll(user).find_one({"id": assertion_id})
+    if not a:
+        raise HTTPException(status_code=404, detail="Assertion not found")
+    await assertions_coll(user).update_one({"id": assertion_id}, {"$set": {
+        "waived": True, "waived_by": user["email"], "waived_at": now_iso(),
+        "waive_reason": body.reason.strip()}})
+    from lib.audit import append_audit
+    await append_audit(db, {
+        "id": new_id(), "tenant_id": user["tenant_id"], "actor_id": user["id"],
+        "actor_name": user.get("name"), "actor_role": user.get("role"),
+        "action": "balance_assertion.waive", "entity": "balance_assertion",
+        "entity_id": assertion_id, "details": {"reason": body.reason.strip()},
+        "created_at": now_iso()})
+    return {"id": assertion_id, "waived": True, "waived_by": user["email"]}
+
+
+@router.get("/ledger-health")
+async def ledger_health(user: dict = Depends(require("ledger:read"))):
+    """One pass/fail gate over the whole book (bake-off #5) plus the current
+    state of every balance assertion."""
+    result = await L.run_health_check(db, user["tenant_id"])
+    assertion_failures = []
+    for a in await assertions_coll(user).find_list(limit=500):
+        ev = await _evaluate_assertion(user, a)
+        if ev["status"] == "failed" and not a.get("waived"):
+            assertion_failures.append({"kind": "failed_assertion", "assertion_id": a["id"],
+                                       "bank_account_id": a.get("bank_account_id"),
+                                       "statement_date": a.get("statement_date"),
+                                       "difference_cents": ev["difference_cents"]})
+    violations = result["violations"] + assertion_failures
+    return {"ok": not violations, "violations": violations,
+            "counts": {**result["counts"], "assertion_failures": len(assertion_failures)}}
+
+
+# ---------------- Per-tag (per-job) report (bake-off #7) ----------------
+@router.get("/by-tag")
+async def by_tag(date_from: Optional[str] = None, date_to: Optional[str] = None,
+                 user: dict = Depends(require("ledger:read"))):
+    """Money in/out per job tag, from posted bank transactions. Category says
+    what kind of cost; tag says which job."""
+    q = {"status": {"$in": ["cleared", "matched"]}}
+    if date_from:
+        q.setdefault("txn_date", {})["$gte"] = date_from
+    if date_to:
+        q.setdefault("txn_date", {})["$lte"] = date_to
+    rows = await Scoped(db.bank_transactions, user["tenant_id"]).find_list(q, limit=10000)
+    agg = {}
+    for t in rows:
+        for tag in (t.get("tags") or []):
+            a = agg.setdefault(tag, {"tag": tag, "count": 0, "in_cents": 0, "out_cents": 0})
+            a["count"] += 1
+            if t["amount_cents"] > 0:
+                a["in_cents"] += t["amount_cents"]
+            else:
+                a["out_cents"] += -t["amount_cents"]
+    out = sorted(agg.values(), key=lambda a: a["tag"])
+    for a in out:
+        a["net_cents"] = a["in_cents"] - a["out_cents"]
+    return {"tags": out, "transactions": len(rows)}
+
+
+# ---------------- Plain-text full-ledger export (bake-off #9) ----------------
+@router.get("/ledger-export")
+async def ledger_export(user: dict = Depends(require("ledger:read"))):
+    tenant = await db.tenants.find_one({"id": user["tenant_id"]}, {"_id": 0, "name": 1})
+    text = await L.export_ledger_text(db, user["tenant_id"],
+                                      tenant_name=(tenant or {}).get("name", ""))
+    return Response(content=text, media_type="text/plain",
+                    headers={"Content-Disposition": "attachment; filename=ledger-export.txt"})

@@ -14,6 +14,7 @@ from routers import plans
 from routers import referrals
 from routers import password_reset
 from routers import (auth, ledger, products, pos, invoices, cashclose, dashboard,
+                     pdftools, onboarding, importer, autopay, taxpacket, dedupe,
                      bills, billing, aging, giftcards, commissions, customers, jobs,
                      banking, vendors, reports, estimates,
                      recurring_invoices, reminders, backup, bankfeed, copilot,
@@ -65,7 +66,9 @@ for r in (auth.router, password_reset.router, ledger.router, products.router, po
           whitelabel.router, entities.router, cleanup.router,
           purchase_orders.router, fx.router, fx.currencies_router,
           market_packs.router, cfdi.router, integrations.router,
-          marketplace.router, developers.router, invoice_payments.router):
+          marketplace.router, developers.router, invoice_payments.router,
+          pdftools.router, onboarding.router, importer.router, autopay.router,
+          taxpacket.router, dedupe.router):
     api_router.include_router(r)
 api_router.include_router(plans.router)
 

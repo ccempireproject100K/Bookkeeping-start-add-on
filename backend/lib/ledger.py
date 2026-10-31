@@ -478,3 +478,128 @@ def _prev_day(d):
     from datetime import date, timedelta
     y, m, day = map(int, d.split("-"))
     return (date(y, m, day) - timedelta(days=1)).isoformat()
+
+
+# ---------------- Ledger health check (bake-off #5) ----------------
+# Implemented independently in our stack (concept study: Beancount docs —
+# a whole-book checker returning a located violation list). Posting-time
+# validation stays as-is; this re-audits the book after imports, merges,
+# reversals and edits.
+
+async def run_health_check(db, tenant_id):
+    """Re-validate the whole book. Returns {"ok": bool, "violations": [...],
+    "counts": {...}} — each violation is located by entry id/number."""
+    import hashlib
+    import json as _json
+    s = _scoped(db, tenant_id)
+    violations = []
+
+    # (a) unbalanced posted entries
+    rows = await s["lines"].aggregate([
+        {"$match": {"status": "posted"}},
+        {"$group": {"_id": "$entry_id",
+                    "debit": {"$sum": "$debit"}, "credit": {"$sum": "$credit"},
+                    "number": {"$first": "$entry_number"}}},
+    ])
+    for r in rows:
+        if r["debit"] != r["credit"]:
+            violations.append({"kind": "unbalanced_entry", "entry_id": r["_id"],
+                               "entry_number": r.get("number"),
+                               "debit_cents": r["debit"], "credit_cents": r["credit"]})
+
+    # (b) posted lines on accounts outside the tenant chart / COA
+    chart = {a["code"] for a in await s["accounts"].find_list(limit=10000)}
+    known = chart | set(ACCOUNT_TYPE_OF.keys())
+    lines = await s["lines"].find_list({"status": "posted"}, limit=100000)
+    by_entry = {}
+    for ln in lines:
+        if ln["account_code"] not in known:
+            violations.append({"kind": "unknown_account", "entry_id": ln["entry_id"],
+                               "entry_number": ln.get("entry_number"),
+                               "account_code": ln["account_code"]})
+        by_entry.setdefault(ln["entry_id"], []).append(ln)
+
+    # (c) duplicate entries by content hash (metadata ignored; reversals
+    # excluded — a reversal legitimately mirrors its original)
+    entries = await s["entries"].find_list({"status": "posted"}, limit=10000)
+    seen = {}
+    for e in entries:
+        if e.get("source") == "reversal" or e.get("reverses_entry_id"):
+            continue
+        sig_lines = sorted(
+            (ln["account_code"], int(ln.get("debit") or 0), int(ln.get("credit") or 0))
+            for ln in by_entry.get(e["id"], []))
+        sig = hashlib.sha1(_json.dumps(
+            [e.get("entry_date"), e.get("total_cents"), sig_lines]).encode()).hexdigest()
+        if sig in seen:
+            violations.append({"kind": "duplicate_entry", "entry_id": e["id"],
+                               "entry_number": e.get("number"),
+                               "duplicates_entry_id": seen[sig]})
+        else:
+            seen[sig] = e["id"]
+
+    counts = {"entries_checked": len(entries), "lines_checked": len(lines),
+              "violations": len(violations)}
+    return {"ok": not violations, "violations": violations, "counts": counts}
+
+
+# ---------------- Plain-text full-ledger export (bake-off #9) ----------------
+# One deterministic, human-readable file per entity that IS the book:
+# an independent parser can re-read it and re-derive the trial balance.
+# Format is ours (concept study: Beancount docs — round-tripping). Money
+# renders as decimal dollars derived from integer cents, exactly.
+
+def _fmt_cents(cents: int) -> str:
+    sign = "-" if cents < 0 else ""
+    cents = abs(int(cents))
+    return f"{sign}{cents // 100}.{cents % 100:02d}"
+
+
+async def export_ledger_text(db, tenant_id, tenant_name=""):
+    import hashlib
+    s = _scoped(db, tenant_id)
+    accounts = await s["accounts"].find_list(limit=10000)
+    entries = await s["entries"].find_list({"status": "posted"}, limit=100000)
+    entries.sort(key=lambda e: (e.get("entry_date", ""), e.get("number") or ""))
+    lines = await s["lines"].find_list({"status": "posted"}, limit=1000000)
+    by_entry = {}
+    for ln in lines:
+        by_entry.setdefault(ln["entry_id"], []).append(ln)
+    assertions = []
+    try:
+        assertions = await Scoped(db.balance_assertions, tenant_id).find_list(limit=1000)
+    except Exception:
+        assertions = []
+
+    out = []
+    out.append("# Mind at Ease Solutions — full ledger export")
+    out.append(f"# entity: {tenant_name or tenant_id}")
+    out.append(f"# exported_at: {now_iso()}")
+    out.append("")
+    for a in sorted(accounts, key=lambda x: x["code"]):
+        out.append(f"ACCOUNT {a['code']} | {a.get('name') or NAME_OF.get(a['code'], a['code'])} | "
+                   f"{a.get('type') or ACCOUNT_TYPE_OF.get(a['code'], '')}")
+    out.append("")
+    n_lines = 0
+    for e in entries:
+        out.append(f"ENTRY {e.get('number')} | {e.get('entry_date')} | posted | "
+                   f"source={e.get('source')} ref={e.get('source_ref')} | {e.get('memo') or ''}")
+        if e.get("reverses_entry_id"):
+            out.append(f"  REVERSES {e['reverses_entry_id']}")
+        for ln in sorted(by_entry.get(e["id"], []),
+                         key=lambda x: (x["account_code"], -(x.get("debit") or 0))):
+            side = "debit" if (ln.get("debit") or 0) else "credit"
+            amt = ln.get("debit") or ln.get("credit") or 0
+            out.append(f"  LINE {ln['account_code']} | {side} {_fmt_cents(amt)} | {ln.get('memo') or ''}")
+            n_lines += 1
+    out.append("")
+    for a in assertions:
+        out.append(f"ASSERTION {a.get('statement_date')} | {a.get('gl_code')} | "
+                   f"{_fmt_cents(a.get('statement_cents') or 0)} | {a.get('account_name') or ''}")
+    tb = await trial_balance(db, tenant_id, today_str())
+    out.append(f"# counts: entries={len(entries)} lines={n_lines} assertions={len(assertions)}")
+    out.append(f"# trial_balance: debit={_fmt_cents(tb['total_debit'])} "
+               f"credit={_fmt_cents(tb['total_credit'])} balanced={str(tb['balanced']).lower()}")
+    body = "\n".join(out) + "\n"
+    digest = hashlib.sha256(body.encode()).hexdigest()
+    return body + f"# content_hash: sha256:{digest}\n"

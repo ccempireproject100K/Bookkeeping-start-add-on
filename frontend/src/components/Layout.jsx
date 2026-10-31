@@ -278,6 +278,13 @@ const NAV = [{
   roles: ALL,
   groupKey: "navGroup.tools"
 }, {
+  to: "/cleanup-console",
+  labelKey: "nav.cleanupConsole",
+  icon: DatabaseBackup,
+  testid: "nav-cleanup-console",
+  roles: ALL,
+  groupKey: "navGroup.tools"
+}, {
   to: "/purchase-orders",
   labelKey: "nav.purchaseOrders",
   icon: ClipboardList,
