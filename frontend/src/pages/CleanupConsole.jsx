@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import {
   UploadCloud, FileUp, ShieldCheck, ShieldAlert, CheckCircle2, Copy, X,
   History, ScanSearch, Loader2, Undo2, Merge as MergeIcon, Sparkles,
+  CalendarClock, SlidersHorizontal,
 } from "lucide-react";
 import { api, errMsg } from "@/lib/api";
 import { PageHeader, Card } from "@/components/Page";
@@ -16,6 +17,7 @@ import { fmtDateTime, num } from "@/lib/format";
 import {
   gradeTone, TONE_CLASSES, messHealth, confidenceLabelKey,
   visibleSuggestions, recordFieldRows, previewChangeRows,
+  heldChangeRows, ruleStateRows, ruleLabelKey,
 } from "@/lib/cleanupConsole";
 
 const KINDS = ["customers", "vendors", "items"];
@@ -48,6 +50,12 @@ const selectCls = "h-9 rounded-md border border-[#222838] bg-[#14171E] px-2.5 te
 
 /* ============================ IMPORT TAB ============================ */
 
+const RULE_SOURCE_KEY = {
+  profile: "cleanupConsole.ruleSourceProfile",
+  run: "cleanupConsole.ruleSourceRun",
+  default: "cleanupConsole.ruleSourceDefault",
+};
+
 function ImportTab() {
   const { t } = useTranslation();
   const [kind, setKind] = useState("customers");
@@ -61,7 +69,30 @@ function ImportTab() {
   const [overrideOpen, setOverrideOpen] = useState(false);
   const [overrideReason, setOverrideReason] = useState("");
   const [result, setResult] = useState(null);
+  const [profiles, setProfiles] = useState([]);
+  const [profileId, setProfileId] = useState("");
+  const [ruleOverrides, setRuleOverrides] = useState({});
+  const [learnRules, setLearnRules] = useState(false);
   const fileRef = useRef(null);
+
+  const labelFor = useCallback((rule) => {
+    const k = ruleLabelKey(rule);
+    return k ? t(k) : rule;
+  }, [t]);
+
+  const loadProfiles = useCallback(async () => {
+    try {
+      const r = await api.get("/import/profiles");
+      setProfiles(r.profiles || []);
+    } catch { setProfiles([]); }
+  }, []);
+  useEffect(() => { loadProfiles(); }, [loadProfiles]);
+
+  const kindProfiles = useMemo(
+    () => profiles.filter((p) => p.kind === kind), [profiles, kind]);
+  const activeProfile = useMemo(
+    () => kindProfiles.find((p) => p.id === profileId) || null,
+    [kindProfiles, profileId]);
 
   const readFile = async (file) => {
     if (!file) return;
@@ -70,13 +101,23 @@ function ImportTab() {
     setPreview(null); setResult(null); setGateError("");
   };
 
-  const doPreview = async () => {
+  const doPreview = async (overrides = ruleOverrides) => {
     if (!csvText) return;
     setPreviewBusy(true); setGateError(""); setResult(null);
     try {
-      setPreview(await api.post("/import/cleanup-preview", { kind, csv_text: csvText }));
+      setPreview(await api.post("/import/cleanup-preview", {
+        kind, csv_text: csvText,
+        profile_id: profileId || undefined,
+        rule_overrides: Object.keys(overrides).length ? overrides : undefined,
+      }));
     } catch (e) { toast.error(errMsg(e)); }
     finally { setPreviewBusy(false); }
+  };
+
+  const toggleRule = (rule, enabled) => {
+    const next = { ...ruleOverrides, [rule]: enabled };
+    setRuleOverrides(next);
+    doPreview(next);
   };
 
   const doImport = async (override = false) => {
@@ -84,11 +125,16 @@ function ImportTab() {
     try {
       const r = await api.post("/import/run", {
         kind, csv_text: csvText, email_summary: false,
+        file_name: fileName || undefined,
+        profile_id: profileId || undefined,
+        rule_overrides: Object.keys(ruleOverrides).length ? ruleOverrides : undefined,
+        learn_rules: !!(learnRules && profileId),
         override_schema: override,
         override_reason: override ? overrideReason.trim() : undefined,
       });
       setResult(r); setOverrideOpen(false); setGateError("");
       toast.success(t("cleanupConsole.importedTitle"));
+      if (learnRules && profileId) loadProfiles();
     } catch (e) {
       if (!override && e?.response?.status === 422) {
         // The schema gate refused: show its plain-language reasons and
@@ -103,6 +149,8 @@ function ImportTab() {
   const health = messHealth(preview);
   const healthTone = health == null ? "gray" : gradeTone(health);
   const changes = useMemo(() => previewChangeRows(preview), [preview]);
+  const heldRows = useMemo(() => heldChangeRows(preview), [preview]);
+  const ruleRows = useMemo(() => ruleStateRows(preview), [preview]);
   const fixes = useMemo(() => {
     const out = [];
     for (const c of preview?.mess_report?.columns || []) {
@@ -120,10 +168,23 @@ function ImportTab() {
       <div className="flex flex-wrap items-center gap-3 mb-4">
         <label className="text-sm text-gray-400" htmlFor="cc-kind">{t("cleanupConsole.kind")}</label>
         <select id="cc-kind" data-testid="cleanup-kind" className={selectCls} value={kind}
-          onChange={(e) => { setKind(e.target.value); setPreview(null); setResult(null); }}>
+          onChange={(e) => { setKind(e.target.value); setProfileId(""); setRuleOverrides({}); setLearnRules(false); setPreview(null); setResult(null); }}>
           {KINDS.map((k) => <option key={k} value={k}>{t(`cleanupConsole.${k}`)}</option>)}
         </select>
+        <label className="text-sm text-gray-400" htmlFor="cc-profile">{t("cleanupConsole.profile")}</label>
+        <select id="cc-profile" data-testid="cleanup-profile" className={selectCls} value={profileId}
+          onChange={(e) => { setProfileId(e.target.value); setRuleOverrides({}); setLearnRules(false); setPreview(null); setResult(null); }}>
+          <option value="">{t("cleanupConsole.profileNone")}</option>
+          {kindProfiles.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+        </select>
       </div>
+      {activeProfile && Object.keys(activeProfile.cleanup_rules || {}).length > 0 && (
+        <p className="mb-4 text-xs text-gray-500" data-testid="cleanup-profile-autoapplies">
+          <span className="text-gray-400">{t("cleanupConsole.profileAutoApplies")}</span>{" "}
+          {Object.entries(activeProfile.cleanup_rules)
+            .map(([rule, on]) => `${labelFor(rule)}: ${on ? t("cleanupConsole.ruleOn") : t("cleanupConsole.ruleOff")}`)
+            .join(" · ")}
+        </p>)}
       <div
         data-testid="cleanup-dropzone"
         role="button" tabIndex={0} aria-label={t("cleanupConsole.dropTitle")}
@@ -144,7 +205,7 @@ function ImportTab() {
           onChange={(e) => readFile(e.target.files?.[0])} />
       </div>
       <div className="mt-4 flex flex-wrap items-center gap-3">
-        <Button data-testid="cleanup-preview-btn" onClick={doPreview} disabled={!csvText || previewBusy}>
+        <Button data-testid="cleanup-preview-btn" onClick={() => doPreview()} disabled={!csvText || previewBusy}>
           {previewBusy ? <Loader2 size={15} className="animate-spin motion-reduce:animate-none" /> : <Sparkles size={15} />}
           {previewBusy ? t("cleanupConsole.previewing") : t("cleanupConsole.preview")}
         </Button>
@@ -246,6 +307,66 @@ function ImportTab() {
             </div>}
       </Card>
 
+      {ruleRows.length > 0 && <Card data-testid="cleanup-rules-card">
+        <div className="flex items-center gap-2">
+          <SlidersHorizontal size={16} className="text-amber-400" />
+          <h3 className="font-display font-semibold">{t("cleanupConsole.profileRulesTitle")}</h3>
+        </div>
+        <p className="mt-1 text-xs text-gray-500">{t("cleanupConsole.profileRulesHint")}</p>
+        <ul className="mt-2 divide-y divide-[#171c26]">
+          {ruleRows.map((rs) => <li key={rs.rule} className="flex items-center gap-3 py-2.5">
+            <div className="flex-1 min-w-0">
+              <div className="text-sm text-gray-200">{labelFor(rs.rule)}</div>
+              <div className="text-[11px] text-gray-500">
+                <span className="font-mono">{rs.rule}</span> · {t(RULE_SOURCE_KEY[rs.source] || RULE_SOURCE_KEY.default)}
+              </div>
+            </div>
+            <input type="checkbox" className="accent-amber-500 h-4 w-4 shrink-0 cursor-pointer"
+              aria-label={labelFor(rs.rule)}
+              data-testid={`cleanup-rule-${rs.rule}`}
+              checked={rs.enabled} disabled={previewBusy}
+              onChange={(e) => toggleRule(rs.rule, e.target.checked)} />
+          </li>)}
+        </ul>
+        {activeProfile && Object.keys(ruleOverrides).length > 0 && (
+          <label className="mt-3 flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
+            <input type="checkbox" className="accent-amber-500 h-4 w-4"
+              data-testid="cleanup-learn-rules"
+              checked={learnRules} onChange={(e) => setLearnRules(e.target.checked)} />
+            {t("cleanupConsole.learnRules")}
+          </label>)}
+      </Card>}
+
+      {(preview.held_in_first_50_rows || 0) > 0 && <Card className="p-0 overflow-hidden border-amber-500/40" data-testid="cleanup-held-card">
+        <div className="px-5 py-4 border-b border-[#222838]">
+          <h3 className="font-display font-semibold">{t("cleanupConsole.heldTitle")}</h3>
+          <p className="text-xs text-gray-500 mt-1">{t("cleanupConsole.heldSubtitle")}</p>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm" data-testid="cleanup-held-table">
+            <thead><tr className="text-start text-xs uppercase tracking-wider text-gray-500 border-b border-[#222838]">
+              <th className="px-5 py-3 font-medium">{t("cleanupConsole.row")}</th>
+              <th className="px-5 py-3 font-medium">{t("cleanupConsole.field")}</th>
+              <th className="px-5 py-3 font-medium">{t("cleanupConsole.before")}</th>
+              <th className="px-5 py-3 font-medium">{t("cleanupConsole.after")}</th>
+              <th className="px-5 py-3 font-medium">{t("cleanupConsole.rule")}</th>
+            </tr></thead>
+            <tbody>
+              {heldRows.map((ch, i) => <tr key={i} className="border-b border-[#171c26]">
+                <td className="px-5 py-3 text-gray-500">{ch.row}</td>
+                <td className="px-5 py-3 text-gray-300">{t(FIELD_LABEL[ch.field] || "cleanupConsole.field")}</td>
+                <td className="px-5 py-3 font-mono text-xs break-all text-gray-300">{String(ch.before ?? "")}</td>
+                <td className="px-5 py-3 font-mono text-xs break-all text-gray-500">{String(ch.after ?? "")}</td>
+                <td className="px-5 py-3">
+                  <span className="font-mono text-xs text-gray-400">{ch.rule}</span>{" "}
+                  <span className="px-1.5 py-0.5 rounded-full bg-amber-500/10 text-amber-300 text-[10px] uppercase tracking-wide">{t("cleanupConsole.heldBadge")}</span>
+                </td>
+              </tr>)}
+            </tbody>
+          </table>
+        </div>
+      </Card>}
+
       {gateError && <Card className="border-rose-500/40">
         <p className="text-sm text-rose-300">{gateError}</p>
       </Card>}
@@ -280,6 +401,8 @@ function ImportTab() {
             <li key={rule} className="flex justify-between gap-4"><span className="font-mono text-xs">{rule}</span><span>{num(count)}</span></li>)}
         </ul>
       </div>}
+      {(result.cleanup?.held_changes || 0) > 0 &&
+        <p className="mt-3 text-sm text-amber-300/90">{t("cleanupConsole.cleanupHeld", { count: result.cleanup.held_changes })}</p>}
       <Button className="mt-5" variant="outline" onClick={() => { setResult(null); setPreview(null); setCsvText(""); setFileName(""); }}>
         {t("cleanupConsole.importAnother")}
       </Button>
@@ -367,12 +490,37 @@ function PairCard({ s, recA, recB, busy, onMerge, onDismiss, t }) {
   </article>;
 }
 
+function DismissedCard({ s, busy, onRestore, t }) {
+  const scorePct = Math.round((s.score || 0) * 100);
+  return <article data-testid={`dedupe-dismissed-${s.id}`}
+    className={`card-surface p-5 ${busy ? "opacity-50" : "animate-rise motion-reduce:animate-none"}`}>
+    <div className="flex flex-wrap items-start justify-between gap-3">
+      <div className="min-w-0">
+        <h3 className="font-display font-semibold truncate">{s.a_name || s.a_id} <span className="text-gray-600">/</span> {s.b_name || s.b_id}</h3>
+        <p className="text-xs text-gray-500 mt-0.5">
+          {t(`cleanupConsole.${s.entity}`)} · {t("cleanupConsole.score")}: {scorePct}%
+          {s.dismissed_at && <> · {t("cleanupConsole.dismissedAt")}: {fmtDateTime(s.dismissed_at)}</>}
+        </p>
+      </div>
+      <Button size="sm" variant="outline" data-testid={`dedupe-restore-${s.id}`}
+        onClick={() => onRestore(s)} disabled={busy}>
+        <Undo2 size={14} />{t("cleanupConsole.restore")}
+      </Button>
+    </div>
+    {s.evidence?.why && <p className="mt-2 text-sm text-gray-400"><span className="text-gray-500">{t("cleanupConsole.why")}: </span>{s.evidence.why}</p>}
+  </article>;
+}
+
 function DuplicatesTab() {
   const { t } = useTranslation();
   const [entity, setEntity] = useState("all");
   const [sort, setSort] = useState("score");
   const [threshold, setThreshold] = useState(85);
   const [suggestions, setSuggestions] = useState([]);
+  const [dismissed, setDismissed] = useState([]);
+  const [view, setView] = useState("pending");
+  const [schedule, setSchedule] = useState(null);
+  const [scanRuns, setScanRuns] = useState([]);
   const [records, setRecords] = useState({ customers: {}, vendors: {} });
   const [merges, setMerges] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -384,25 +532,50 @@ function DuplicatesTab() {
   const [reverseTarget, setReverseTarget] = useState(null);
   const [bulkBusy, setBulkBusy] = useState(false);
 
+  const loadSchedule = useCallback(async () => {
+    try {
+      const [cfg, runs] = await Promise.all([
+        api.get("/dedupe/schedule"), api.get("/dedupe/scan-runs")]);
+      setSchedule(cfg);
+      setScanRuns(runs.scan_runs || []);
+    } catch { /* schedule card simply stays hidden on failure */ }
+  }, []);
+
   const load = useCallback(async () => {
     setLoading(true); setLoadFailed(false);
     try {
-      const [sc, sv, mc, mv, cust, vend] = await Promise.all([
+      const [sc, sv, dc, dv, mc, mv, cust, vend] = await Promise.all([
         api.get("/dedupe/suggestions", { params: { entity: "customers", status: "pending" } }),
         api.get("/dedupe/suggestions", { params: { entity: "vendors", status: "pending" } }),
+        api.get("/dedupe/suggestions", { params: { entity: "customers", status: "dismissed" } }),
+        api.get("/dedupe/suggestions", { params: { entity: "vendors", status: "dismissed" } }),
         api.get("/dedupe/merges", { params: { entity: "customers" } }),
         api.get("/dedupe/merges", { params: { entity: "vendors" } }),
         api.get("/customers"), api.get("/vendors"),
       ]);
       setSuggestions([...(sc.suggestions || []), ...(sv.suggestions || [])]);
+      setDismissed([...(dc.suggestions || []), ...(dv.suggestions || [])]);
       setMerges([...(mc.merges || []), ...(mv.merges || [])]);
       const index = (rows) => Object.fromEntries((rows || []).map((r) => [r.id, r]));
       setRecords({ customers: index(cust), vendors: index(vend) });
     } catch (e) {
       setLoadFailed(true);
     } finally { setLoading(false); }
-  }, []);
+    loadSchedule();
+  }, [loadSchedule]);
   useEffect(() => { load(); }, [load]);
+
+  const saveSchedule = async (patch) => {
+    if (!schedule) return;
+    const next = {
+      enabled: schedule.enabled, frequency: schedule.frequency,
+      entities: schedule.entities, ...patch,
+    };
+    try {
+      setSchedule(await api.put("/dedupe/schedule", next));
+      toast.success(t("cleanupConsole.scheduleSaved"));
+    } catch (e) { toast.error(errMsg(e)); }
+  };
 
   const visible = useMemo(
     () => visibleSuggestions(suggestions, { entity, minScore: threshold / 100, sort }),
@@ -440,12 +613,25 @@ function DuplicatesTab() {
     finally { setBusyId(null); }
   };
 
+  const restorePair = async (s, quiet = false) => {
+    setBusyId(s.id);
+    try {
+      await api.post(`/dedupe/suggestions/${s.id}/restore`);
+      if (!quiet) toast.success(t("cleanupConsole.restoredToast"));
+      await load();
+    } catch (e) { toast.error(errMsg(e)); }
+    finally { setBusyId(null); }
+  };
+
   const doDismiss = async (s) => {
     setBusyId(s.id);
     try {
       await api.post(`/dedupe/suggestions/${s.id}/dismiss`);
-      toast.success(t("cleanupConsole.dismissedToast"));
+      toast.success(t("cleanupConsole.dismissedToast"), {
+        action: { label: t("cleanupConsole.undo"), onClick: () => restorePair(s, true) },
+      });
       setSuggestions((cur) => cur.filter((x) => x.id !== s.id));
+      setDismissed((cur) => [{ ...s, status: "dismissed" }, ...cur]);
     } catch (e) { toast.error(errMsg(e)); }
     finally { setBusyId(null); }
   };
@@ -474,7 +660,63 @@ function DuplicatesTab() {
     } catch (e) { toast.error(errMsg(e)); }
   };
 
+  const visibleDismissed = useMemo(
+    () => dismissed.filter((s) => entity === "all" || s.entity === entity),
+    [dismissed, entity]);
+
   return <div className="space-y-5">
+    {schedule && <Card data-testid="dedupe-schedule-card">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0">
+          <h3 className="font-display font-semibold flex items-center gap-2">
+            <CalendarClock size={16} className="text-amber-400" />{t("cleanupConsole.scheduleTitle")}
+          </h3>
+          <p className="mt-1 text-xs text-gray-500 max-w-xl">{t("cleanupConsole.scheduleHint")}</p>
+        </div>
+        <label className="flex items-center gap-2 text-sm text-gray-200 cursor-pointer shrink-0">
+          <input type="checkbox" className="accent-amber-500 h-4 w-4"
+            data-testid="dedupe-schedule-enabled"
+            checked={!!schedule.enabled}
+            onChange={(e) => saveSchedule({ enabled: e.target.checked })} />
+          {t("cleanupConsole.scheduleEnable")}
+        </label>
+      </div>
+      <div className="mt-3 flex flex-wrap items-end gap-4">
+        <div>
+          <label className="block text-xs text-gray-500 mb-1.5" htmlFor="cc-frequency">{t("cleanupConsole.scheduleFrequency")}</label>
+          <select id="cc-frequency" data-testid="dedupe-schedule-frequency" className={selectCls}
+            value={schedule.frequency} disabled={!schedule.enabled}
+            onChange={(e) => saveSchedule({ frequency: e.target.value })}>
+            <option value="daily">{t("cleanupConsole.freqDaily")}</option>
+            <option value="weekly">{t("cleanupConsole.freqWeekly")}</option>
+          </select>
+        </div>
+        <div className="text-sm">
+          <div className="text-[11px] uppercase tracking-wider text-gray-500">{t("cleanupConsole.lastScan")}</div>
+          <div className="text-gray-200 mt-0.5">{schedule.last_scan_at ? fmtDateTime(schedule.last_scan_at) : t("cleanupConsole.neverScanned")}</div>
+        </div>
+        <div className="text-sm">
+          <div className="text-[11px] uppercase tracking-wider text-gray-500">{t("cleanupConsole.nextScan")}</div>
+          <div className="text-gray-200 mt-0.5">
+            {!schedule.enabled ? t("cleanupConsole.scheduleOff")
+              : schedule.next_scan_at ? fmtDateTime(schedule.next_scan_at)
+              : t("cleanupConsole.scheduleAwaiting")}
+          </div>
+        </div>
+      </div>
+      {scanRuns.length > 0 && <div className="mt-4 border-t border-[#222838] pt-3">
+        <div className="text-[11px] uppercase tracking-wider text-gray-500 mb-2">{t("cleanupConsole.scanRunsTitle")}</div>
+        <ul className="space-y-1 text-sm text-gray-400">
+          {scanRuns.slice(0, 5).map((r) => <li key={r.id} className="flex flex-wrap gap-x-3 gap-y-0.5">
+            <span className="text-gray-300">{t(`cleanupConsole.${r.entity}`)}</span>
+            <span>{r.trigger === "scheduled" ? t("cleanupConsole.triggerScheduled") : t("cleanupConsole.triggerManual")}</span>
+            <span>{r.finished_at ? fmtDateTime(r.finished_at) : "—"}</span>
+            <span className="text-gray-500">{t("cleanupConsole.scanRunFound", { count: r.suggestions_new || 0 })}</span>
+          </li>)}
+        </ul>
+      </div>}
+    </Card>}
+
     <Card>
       <div className="flex flex-wrap items-end gap-3">
         <div>
@@ -515,23 +757,42 @@ function DuplicatesTab() {
       </div>
     </Card>
 
+    <div className="flex gap-2" role="tablist" aria-label={t("cleanupConsole.tabDuplicates")}>
+      {[["pending", t("cleanupConsole.viewQueue")],
+        ["dismissed", `${t("cleanupConsole.viewDismissed")} (${dismissed.length})`]].map(([key, label]) => (
+        <button key={key} role="tab" aria-selected={view === key} data-testid={`dedupe-view-${key}`}
+          onClick={() => setView(key)}
+          className={`px-3.5 py-1.5 rounded-lg text-sm transition-colors motion-reduce:transition-none ${view === key ? "bg-amber-500/15 text-amber-300 border border-amber-500/40" : "text-gray-400 border border-transparent hover:text-gray-100"}`}>
+          {label}
+        </button>))}
+    </div>
+
     {loading && <SkeletonCards count={3} />}
     {!loading && loadFailed && <Card className="flex items-center justify-between gap-4">
       <p className="text-sm text-gray-400">{t("cleanupConsole.loadError")}</p>
       <Button variant="outline" size="sm" onClick={load}>{t("cleanupConsole.retry")}</Button>
     </Card>}
-    {!loading && !loadFailed && visible.length === 0 &&
+    {!loading && !loadFailed && view === "pending" && visible.length === 0 &&
       <Card className="p-10 text-center" data-testid="dedupe-empty">
         <Copy size={22} className="mx-auto text-gray-600" />
         <p className="mt-3 text-sm text-gray-500">{t("cleanupConsole.emptyQueue")}</p>
       </Card>}
-    <div className="space-y-4">
+    {view === "pending" && <div className="space-y-4">
       {visible.map((s) => <PairCard key={s.id} s={s} t={t}
         recA={records[s.entity]?.[s.a_id]} recB={records[s.entity]?.[s.b_id]}
         busy={busyId === s.id}
         onMerge={(x) => { setMergeTarget(x); setKeepId(x.a_id); }}
         onDismiss={doDismiss} />)}
-    </div>
+    </div>}
+    {!loading && !loadFailed && view === "dismissed" && visibleDismissed.length === 0 &&
+      <Card className="p-10 text-center" data-testid="dedupe-dismissed-empty">
+        <Undo2 size={22} className="mx-auto text-gray-600" />
+        <p className="mt-3 text-sm text-gray-500">{t("cleanupConsole.dismissedEmpty")}</p>
+      </Card>}
+    {view === "dismissed" && <div className="space-y-4">
+      {visibleDismissed.map((s) => <DismissedCard key={s.id} s={s} t={t}
+        busy={busyId === s.id} onRestore={(x) => restorePair(x)} />)}
+    </div>}
 
     <Card className="p-0 overflow-hidden">
       <div className="px-5 py-4 border-b border-[#222838] flex items-center gap-2">
