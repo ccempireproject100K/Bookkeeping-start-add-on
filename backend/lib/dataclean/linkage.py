@@ -37,7 +37,14 @@ def features(entity):
     ck = company_key(name)
     phone = normalize_phone(entity.get("phone") or "")
     address = entity.get("address") or ""
-    parts = entity.get("address_parts") or {}
+    parts = entity.get("address_parts")
+    if not isinstance(parts, dict):
+        # The external dedupe surface stringifies record values, so a
+        # dict address_parts (e.g. cleanup/clean's output posted
+        # verbatim) arrives as text. An unusable value counts as
+        # absent — the ZIP then falls back to the address regex —
+        # rather than crashing on .get() or inventing parsed data.
+        parts = {}
     return {
         "id": entity.get("id"),
         "name_key": entity.get("name_key") or entity_key(name) or ck["normalized"],
