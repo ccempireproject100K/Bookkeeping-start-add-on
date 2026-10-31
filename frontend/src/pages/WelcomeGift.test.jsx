@@ -111,6 +111,18 @@ test('estimate gift: a stub state warns before the run and the NOTE shows verbat
   expect(screen.getByTestId('gift-est-download-pdf')).toBeTruthy();
 });
 
+test('estimate gift: locked on the no-card door, with the door switch offered', async () => {
+  api.get.mockResolvedValue({ ...META, estimate_unlocked: false });
+  api.post.mockResolvedValue({});
+  renderPage();
+  await screen.findByTestId('gift-est-locked');
+  // The form is not shown; the clean card is untouched (ungated).
+  expect(screen.queryByTestId('gift-est-run')).toBeNull();
+  expect(screen.getByTestId('gift-clean-run')).toBeTruthy();
+  fireEvent.click(screen.getByTestId('gift-est-switch-door'));
+  await waitFor(() => expect(api.post).toHaveBeenCalledWith('/trial/door', { door: 'card' }));
+});
+
 test('estimate gift: engine_not_built renders the unavailable panel, never a number', async () => {
   api.post.mockRejectedValue({
     response: {

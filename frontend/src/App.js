@@ -54,6 +54,7 @@ import CleanupConsole from "@/pages/CleanupConsole";
 import DataCleanApi from "@/pages/DataCleanApi";
 import DataCleanStudio from "@/pages/DataCleanStudio";
 import WelcomeGift from "@/pages/WelcomeGift";
+import SetupGuide from "@/pages/SetupGuide";
 import DataCleanDemo from "@/pages/DataCleanDemo";
 import DataCleanLanding from "@/pages/DataCleanLanding";
 import PurchaseOrders from "@/pages/PurchaseOrders";
@@ -150,6 +151,7 @@ function App() {
               <Route path="dataclean-api" element={<DataCleanApi />} />
               <Route path="dataclean-studio" element={<DataCleanStudio />} />
             <Route path="welcome-gift" element={<WelcomeGift />} />
+            <Route path="setup-guide" element={<SetupGuide />} />
               <Route path="purchase-orders" element={<PurchaseOrders />} />
               <Route path="aging" element={<Aging />} />
               <Route path="gift-cards" element={<GiftCards />} />

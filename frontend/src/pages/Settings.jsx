@@ -10,6 +10,7 @@ import TotpSettings from "@/components/TotpSettings";
 import PasskeySettings from "@/components/PasskeySettings";
 import SecurityAlerts from "@/components/SecurityAlerts";
 import TeamInvites from "@/components/TeamInvites";
+import TrialCard from "@/components/TrialCard";
 import NicheSwitcher from "@/components/NicheSwitcher";
 import MarketSwitcher from "@/components/MarketSwitcher";
 import OpeningBalances from "@/components/OpeningBalances";
@@ -298,8 +299,7 @@ export default function Settings() {
   return <div className="animate-rise">
       <PageHeader title={t("settings.settings")} subtitle="Workspace security and preferences" testid="settings-page" />
       <div className="space-y-4">
-        <PlanCard />
-        <BillingCard />
+        <PlanCard /> <TrialCard /> <BillingCard />
         <SecurityAlerts />
         <TotpSettings />
         <PasskeySettings />
