@@ -1,0 +1,53 @@
+id: gig_work
+icon: Smartphone
+trade: Gig Work
+product_name: "The Gig Ledger"
+tagline: "Bookkeeping built for gig workers"
+terms:
+  worker: Gig worker
+  worker_plural: Gig workers
+  shop: business
+  job: gig
+  job_plural: gigs
+  customer: platform
+  customer_plural: platforms
+colors:
+  accent: "#4ade80"
+subdomains: [gig-work, gigwork, gig]
+revenue_accounts:
+  - {code: "4000", name: "Platform Earnings — Rideshare"}
+  - {code: "4010", name: "Platform Earnings — Delivery"}
+  - {code: "4020", name: "Platform Earnings — Tasks & Other Apps"}
+  - {code: "4030", name: "Tips, Bonuses & Incentives"}
+trade_expense_accounts:
+  - {code: "5030", name: "Platform Service Fees"}
+  - {code: "5110", name: "Fuel & Charging"}
+  - {code: "5040", name: "Phone & Data"}
+services:
+  - {name: "Rideshare Shift", kind: service}
+  - {name: "Delivery Run", kind: service}
+  - {name: "Task Booking", kind: service}
+checklist:
+  - {id: team, label: "Invite your bookkeeper", hint: "A second login for your tax pro or partner keeps payouts reviewable", link: "/team", check: team}
+  - {id: services, label: "Add your platforms", hint: "One service line per app you run — rideshare, delivery, tasks", link: "/inventory", check: services}
+  - {id: bank, label: "Add a bank account", hint: "One account every platform pays into — payouts reconcile in Banking", link: "/banking", check: bank}
+  - {id: tax, label: "Set up quarterly tax tracking", hint: "No employer withholds for you: quarterly estimates on every platform's 1099 income", link: "/tax", check: tax}
+  - {id: sale, label: "Log your first payout", hint: "Record a platform payout to see the full flow", link: "/invoices", check: sale}
+copilot_notes: |
+  Gig income has no withholding: every platform payout is gross until
+  you set aside the tax yourself, so quarterly estimates are the whole
+  game. Keep each platform's stream separate — rideshare, delivery, and
+  task apps issue different 1099 flavors (NEC vs K) and net their fees
+  differently, and year-end reconciliation is painless only if the
+  streams never mix. Mileage is the deduction that pays for this pack:
+  business miles from the moment the app goes on, logged daily — a
+  platform's year-end summary is never the full count. Difference from
+  the Freelancer pack: a freelancer contracts directly with clients;
+  a gig worker's work is mediated by platforms that set the price,
+  take a service fee, and pay on their own schedule.
+
+kpis:
+  - {id: avg_ticket, label: "Avg payout", hint: "Per-payout average, trailing period"}
+  - {id: repeat_rate, label: "Steady platforms", hint: "Platforms paying you month after month"}
+  - {id: close_rate, label: "Offer acceptance", hint: "Offers accepted vs offered, where tracked"}
+  - {id: revenue_trend, label: "Earnings trend", hint: "Last 30 days vs prior 30"}

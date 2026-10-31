@@ -1,0 +1,52 @@
+id: small_business_owner
+icon: Store
+trade: Small Business Owner
+product_name: "The Owner's Ledger"
+tagline: "Bookkeeping built for new business owners"
+terms:
+  worker: Employee
+  worker_plural: Employees
+  shop: business
+  job: order
+  job_plural: orders
+  customer: customer
+  customer_plural: customers
+colors:
+  accent: "#a78bfa"
+subdomains: [small-business-owner, smallbusiness, newbusiness]
+revenue_accounts:
+  - {code: "4000", name: "Sales Revenue — Products"}
+  - {code: "4010", name: "Sales Revenue — Services"}
+  - {code: "4020", name: "Sales Revenue — Online & Marketplace"}
+  - {code: "4200", name: "Other Income"}
+trade_expense_accounts:
+  - {code: "5030", name: "Startup & Formation Costs"}
+  - {code: "5100", name: "Team Wages & Contract Pay"}
+  - {code: "5040", name: "Rent & Premises Costs"}
+services:
+  - {name: "Product Sale", kind: service}
+  - {name: "Service Appointment", kind: service}
+  - {name: "Gift Card", kind: service}
+checklist:
+  - {id: team, label: "Add your team", hint: "Employees and contractors show up once they have a workspace login", link: "/team", check: team}
+  - {id: services, label: "Add products & services", hint: "What you sell, at the counter and online", link: "/inventory", check: services}
+  - {id: bank, label: "Add a business bank account", hint: "Business money in a business account from day one — never mixed with personal", link: "/banking", check: bank}
+  - {id: tax, label: "Set up sales tax & contractor tracking", hint: "Sales tax you collect is never your revenue; W-9s for every contractor", link: "/tax", check: tax}
+  - {id: sale, label: "Record your first sale", hint: "Run a sale to see the full flow", link: "/invoices", check: sale}
+copilot_notes: |
+  New owners: this pack is the starter face for a business that is not
+  one of the trade verticals — a shop, a studio, a food business, a
+  small team selling products and services. The habits that matter most
+  in year one: business and personal money never share an account,
+  startup and formation costs tracked from the first receipt (they get
+  special tax treatment), sales tax collected is a liability you hold —
+  never revenue — and owner draws are not wages. Difference from the
+  Freelancer pack: a freelancer sells their own skilled time project by
+  project; an owner-operator runs a business with premises, stock, and
+  a team, and the books should show it.
+
+kpis:
+  - {id: avg_ticket, label: "Average sale", hint: "Per-invoice average, trailing period"}
+  - {id: repeat_rate, label: "Repeat customers", hint: "Customers with 2+ orders"}
+  - {id: close_rate, label: "Quote close rate", hint: "Quotes won vs decided"}
+  - {id: revenue_trend, label: "Revenue trend", hint: "Last 30 days vs prior 30"}
