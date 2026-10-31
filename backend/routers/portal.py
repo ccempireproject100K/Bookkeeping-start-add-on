@@ -828,3 +828,118 @@ async def stripe_webhook(request: Request):
         logger.info("stripe webhook ignored event type=%s id=%s",
                     event["type"], event.get("id"))
     return {"received": True}
+
+
+# ---------------- Estimate links + portal quote acceptance (bake-off #4) ----------------
+# Implemented independently in our stack (behavior study: Invoice Ninja
+# docs — the customer approves/rejects the quote in the portal, approval
+# is timestamped, and acceptance converts to a payable invoice).
+
+class EstimateLinkIn(BaseModel):
+    estimate_id: str
+    expires_in_hours: int = Field(default=DEFAULT_TTL_HOURS, ge=1, le=24 * 90)
+
+
+@router.post("/estimate-links")
+async def create_estimate_link(body: EstimateLinkIn, user: dict = Depends(require("ops:manage"))):
+    est = await Scoped(db.estimates, user["tenant_id"]).find_one({"id": body.estimate_id})
+    if not est:
+        raise HTTPException(status_code=404, detail="Estimate not found")
+    token = secrets.token_urlsafe(32)
+    expires_at = (datetime.now(timezone.utc) + timedelta(hours=body.expires_in_hours)).isoformat()
+    link_doc = {
+        "id": new_id(), "token_hash": _digest(token), "tenant_id": user["tenant_id"],
+        "kind": "estimate", "estimate_id": est["id"], "invoice_id": None,
+        "customer_id": est.get("customer_id"),
+        "created_by": user.get("name"), "created_at": now_iso(),
+        "expires_at": expires_at, "revoked": False, "used": False,
+        "email_to": None, "email_status": "not_sent", "email_error": None,
+        "email_sent_at": None,
+    }
+    await db.portal_links.insert_one(link_doc)
+    await _audit(user, "portal.estimate_link.create", "estimate", est["id"],
+                 {"expires_at": expires_at})
+    return {"token": token, "expires_at": expires_at, "estimate_id": est["id"],
+            "link_id": link_doc["id"]}
+
+
+def _strip_estimate(est: dict) -> dict:
+    return {
+        "id": est.get("id"), "number": est.get("number"),
+        "client_name": est.get("client_name"), "status": est.get("status"),
+        "lines": [{"name": l.get("name"), "kind": l.get("kind"),
+                   "amount_cents": to_cents(l.get("amount"))} for l in est.get("lines", [])],
+        "subtotal_cents": est.get("subtotal_cents", 0),
+        "tax_cents": est.get("tax_cents", 0),
+        "total_cents": est.get("total_cents", 0),
+        "deposit_cents": est.get("deposit_cents", 0),
+        "deposit_due_date": est.get("deposit_due_date"),
+        "notes": est.get("notes", ""),
+        "portal_response": est.get("portal_response"),
+        "invoice_id": est.get("invoice_id"),
+    }
+
+
+async def _lookup_estimate_link(token: str) -> dict:
+    link = await _lookup_link(token)
+    if link.get("kind") != "estimate" or not link.get("estimate_id"):
+        raise HTTPException(status_code=404, detail="Link not found")
+    return link
+
+
+@router.get("/estimate-view/{token}")
+async def portal_estimate_view(token: str):
+    """Public: view the linked estimate/quote. No login required."""
+    link = await _lookup_estimate_link(token)
+    est = await db.estimates.find_one(
+        {"tenant_id": link["tenant_id"], "id": link["estimate_id"]}, {"_id": 0})
+    if not est:
+        raise HTTPException(status_code=404, detail="Estimate not found")
+    tenant = await db.tenants.find_one({"id": link["tenant_id"]}, {"_id": 0, "name": 1})
+    return {"business": (tenant or {}).get("name", ""), "estimate": _strip_estimate(est)}
+
+
+class EstimateRespondIn(BaseModel):
+    decision: str = Field(pattern=r"^(accept|decline)$")
+    name: str = Field(min_length=1, max_length=120)   # who is responding
+    terms_accepted: bool = False
+
+
+@router.post("/estimate/{token}/respond")
+async def portal_estimate_respond(token: str, body: EstimateRespondIn):
+    """Public: the customer accepts or declines the quote. Acceptance is
+    timestamped and recorded on the estimate, and auto-converts it to a
+    payable invoice through the existing conversion path."""
+    link = await _lookup_estimate_link(token)
+    est_coll = Scoped(db.estimates, link["tenant_id"])
+    est = await est_coll.find_one({"id": link["estimate_id"]})
+    if not est:
+        raise HTTPException(status_code=404, detail="Estimate not found")
+    if est.get("portal_response"):
+        raise HTTPException(status_code=409, detail="This quote was already answered")
+    if est.get("status") not in ("sent", "draft"):
+        raise HTTPException(status_code=409,
+                            detail=f"Quote is {est.get('status')} and cannot be answered")
+    if body.decision == "accept" and not body.terms_accepted:
+        raise HTTPException(status_code=422,
+                            detail="Terms must be accepted to approve the quote")
+    response = {"decision": body.decision, "name": body.name.strip(),
+                "terms_accepted": body.terms_accepted, "at": now_iso(),
+                "via": "portal"}
+    if body.decision == "decline":
+        await est_coll.update_one({"id": est["id"]}, {"$set": {
+            "status": "declined", "portal_response": response}})
+        return {"status": "declined", "estimate_id": est["id"]}
+    # accept: record first (the acceptance record stands even if conversion
+    # hiccups), then convert through the existing owner-side path as a
+    # portal system user of the link's tenant.
+    await est_coll.update_one({"id": est["id"]}, {"$set": {
+        "status": "accepted", "portal_response": response}})
+    from routers.estimates import convert_to_invoice
+    portal_user = {"id": "portal", "tenant_id": link["tenant_id"],
+                   "email": "portal@system", "name": "Client portal", "role": "portal"}
+    inv = await convert_to_invoice(est["id"], portal_user)
+    await db.portal_links.update_one(
+        {"id": link["id"]}, {"$set": {"used": True}})
+    return {"status": "accepted", "estimate_id": est["id"],
+            "invoice_id": inv.get("id"), "invoice": inv}

@@ -1,0 +1,16 @@
+# Our own generic invoice template for the invoice2data pilot
+# (authored in-house for this build; invoice2data itself is MIT-licensed).
+issuer: Mind at Ease Generic Invoice
+keywords:
+  - Invoice
+fields:
+  amount:
+    - 'Total[:\s]+\$?\s?([0-9][0-9,]*\.[0-9]{2})'
+    - 'Amount Due[:\s]+\$?\s?([0-9][0-9,]*\.[0-9]{2})'
+    - 'Balance Due[:\s]+\$?\s?([0-9][0-9,]*\.[0-9]{2})'
+  date:
+    - 'Date[:\s]+([0-9]{4}-[0-9]{2}-[0-9]{2})'
+    - 'Invoice Date[:\s]+([0-9]{1,2}/[0-9]{1,2}/[0-9]{4})'
+  invoice_number:
+    - 'Invoice\s*(?:#|No\.?|Number)[:\s]*([A-Za-z0-9\-]+)'
+currency: USD

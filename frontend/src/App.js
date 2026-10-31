@@ -50,6 +50,10 @@ import Voice from "@/pages/Voice";
 import FirmDashboard from "@/pages/FirmDashboard";
 import Entities from "@/pages/Entities";
 import Cleanup from "@/pages/Cleanup";
+import CleanupConsole from "@/pages/CleanupConsole";
+import DataCleanApi from "@/pages/DataCleanApi";
+import DataCleanDemo from "@/pages/DataCleanDemo";
+import DataCleanLanding from "@/pages/DataCleanLanding";
 import PurchaseOrders from "@/pages/PurchaseOrders";
 import Estimates from "@/pages/Estimates";
 import CashFlow from "@/pages/CashFlow";
@@ -96,6 +100,8 @@ function App() {
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/industries" element={<Industries />} />
             <Route path="/industries/:nicheId" element={<TradeLanding />} />
+            <Route path="/dataclean" element={<DataCleanLanding />} />
+            <Route path="/dataclean-demo" element={<DataCleanDemo />} />
             <Route path="/invite" element={<InviteAccept />} />
             <Route path="/p/:token" element={<PortalView />} />
             <Route path="/" element={<Protected><Layout /></Protected>}>
@@ -138,6 +144,8 @@ function App() {
               <Route path="firm" element={<FirmDashboard />} />
               <Route path="entities" element={<Entities />} />
               <Route path="cleanup" element={<Cleanup />} />
+          <Route path="cleanup-console" element={<CleanupConsole />} />
+              <Route path="dataclean-api" element={<DataCleanApi />} />
               <Route path="purchase-orders" element={<PurchaseOrders />} />
               <Route path="aging" element={<Aging />} />
               <Route path="gift-cards" element={<GiftCards />} />

@@ -1,8 +1,11 @@
 """In-app scheduler for background jobs (APScheduler).
 
-Runs four jobs: the daily collections autopilot, the daily FX-rate
-refresh, an hourly recurring-invoice materializer, and a periodic Plaid
-bank-transaction sync. The scheduler is guarded three ways:
+Runs five jobs: the daily collections autopilot, the daily FX-rate
+refresh, an hourly recurring-invoice materializer, a periodic Plaid
+bank-transaction sync, and an hourly sweep for per-tenant scheduled
+duplicate scans (opt-in per tenant in the Cleanup Console; scans only
+ever create suggestions — nothing merges automatically). The scheduler
+is guarded three ways:
 
 1. It only starts when ``ENABLE_SCHEDULER=true`` (default off).
 2. A MongoDB distributed lock (``scheduler_locks``) means only one app
@@ -26,6 +29,9 @@ Env vars:
                           (default "true")
     BANK_SYNC_ENABLED     "true" to run the bank sync job (default "true")
     BANK_SYNC_INTERVAL_HOURS  hours between bank sync sweeps (default 6)
+    DEDUPE_SCANS_ENABLED  "true" to run the scheduled duplicate-scan
+                          sweep (default "true"); the per-tenant opt-in
+                          lives in the tenant's dedupe schedule config
     SCHEDULER_TZ          IANA timezone for the schedule
                           (default "America/Chicago")
 """
@@ -55,6 +61,7 @@ JOB_ID = "collections-autopilot"
 FX_JOB_ID = "fx-rates-daily"
 RECURRING_JOB_ID = "recurring-invoices"
 BANK_SYNC_JOB_ID = "bank-sync"
+DEDUPE_JOB_ID = "dedupe-scans"
 
 _state = {
     "running": False,
@@ -67,6 +74,8 @@ _state = {
     "recurring_last_outcome": None,
     "bank_next_run": None,
     "bank_last_outcome": None,
+    "dedupe_next_run": None,
+    "dedupe_last_outcome": None,
 }
 
 _scheduler: AsyncIOScheduler | None = None
@@ -113,6 +122,10 @@ def recurring_invoices_enabled() -> bool:
 
 def bank_sync_enabled() -> bool:
     return os.environ.get("BANK_SYNC_ENABLED", "true").lower() == "true"
+
+
+def dedupe_scans_enabled() -> bool:
+    return os.environ.get("DEDUPE_SCANS_ENABLED", "true").lower() == "true"
 
 
 def bank_sync_interval_hours() -> int:
@@ -286,10 +299,11 @@ async def run_recurring_invoices() -> dict:
     generates when its ``next_run`` has arrived (it advances on generate,
     so a duplicate run is a no-op)."""
     from routers.recurring_invoices import run_due_for_user
+    from routers.bills import run_due_bills_for_user
 
     window = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H")
     outcome = {"window": window, "tenants": 0, "generated": 0,
-               "errors": 0, "skipped": []}
+               "bills_generated": 0, "errors": 0, "skipped": []}
     tenants = await db.tenants.find({}, {"id": 1}).to_list(1000)
     for t in tenants:
         tid = t["id"]
@@ -299,11 +313,19 @@ async def run_recurring_invoices() -> dict:
                                        "reason": "already_ran_this_hour"})
             continue
         try:
-            res = await run_due_for_user(_system_user(tid, "Recurring invoice scheduler"))
+            sys_user = _system_user(tid, "Recurring invoice scheduler")
+            res = await run_due_for_user(sys_user)
             made = int(res.get("generated", 0))
+            bills_made = 0
+            try:
+                bres = await run_due_bills_for_user(sys_user)
+                bills_made = int(bres.get("generated", 0))
+            except Exception:
+                logger.exception("Recurring bill run failed for tenant %s", tid)
             outcome["tenants"] += 1
             outcome["generated"] += made
-            await _finish_run(run_id, "done", generated=made)
+            outcome["bills_generated"] += bills_made
+            await _finish_run(run_id, "done", generated=made, bills_generated=bills_made)
             if made:
                 logger.info("Recurring invoices: tenant %s generated=%d", tid, made)
         except Exception as exc:
@@ -368,6 +390,61 @@ async def run_bank_sync() -> dict:
     return outcome
 
 
+# ---------------- the scheduled dedupe-scan sweep ----------------
+async def run_dedupe_scans() -> dict:
+    """Hourly sweep: for every tenant that OPTED IN (Cleanup Console →
+    Duplicates → scan schedule), run the dedupe scan on the tenant's
+    cadence. Daily tenants claim once per UTC date, weekly tenants once
+    per ISO week. Scans run the manual endpoint's code path
+    (``routers.dedupe._run_scan``) and only ever create SUGGESTIONS —
+    nothing here can merge, dismiss, or alter a record."""
+    from routers import dedupe as dedupe_router
+
+    now = datetime.now(timezone.utc)
+    iso = now.isocalendar()
+    outcome = {"tenants": 0, "scans": 0, "suggestions": 0,
+               "errors": 0, "skipped": []}
+    tenants = await db.tenants.find({}, {"id": 1}).to_list(1000)
+    for t in tenants:
+        tid = t["id"]
+        sys_user = _system_user(tid, "Dedupe scan scheduler")
+        try:
+            cfg = await dedupe_router.get_schedule_config(sys_user)
+        except Exception:
+            outcome["errors"] += 1
+            logger.exception("Dedupe scans: config read failed for %s", tid)
+            continue
+        if not cfg.get("enabled"):
+            continue  # opt-in only; most tenants are never touched
+        window = (today_str() if cfg.get("frequency") == "daily"
+                  else f"{iso.year}-W{iso.week:02d}")
+        run_id = await _claim_run(DEDUPE_JOB_ID, tid, window)
+        if run_id is None:
+            outcome["skipped"].append(
+                {"tenant_id": tid, "reason": "already_scanned_this_window"})
+            continue
+        try:
+            new_suggestions = 0
+            for entity in cfg.get("entities") or []:
+                _stored, run = await dedupe_router._run_scan(
+                    sys_user, entity, "scheduled")
+                new_suggestions += run["suggestions_new"]
+            outcome["tenants"] += 1
+            outcome["scans"] += len(cfg.get("entities") or [])
+            outcome["suggestions"] += new_suggestions
+            await _finish_run(run_id, "done", scans=outcome["scans"],
+                              suggestions=new_suggestions)
+            logger.info("Dedupe scans: tenant %s new suggestions=%s",
+                        tid, new_suggestions)
+        except Exception as exc:
+            await _finish_run(run_id, "failed", reason=str(exc)[:300])
+            outcome["errors"] += 1
+            logger.exception("Dedupe scans failed for tenant %s", tid)
+    _state["dedupe_last_outcome"] = outcome
+    logger.info("Dedupe scan sweep finished: %s", outcome)
+    return outcome
+
+
 # ---------------- lifecycle ----------------
 async def start() -> bool:
     """Start the scheduler if enabled and the instance lock is acquired."""
@@ -391,6 +468,21 @@ async def start() -> bool:
         coalesce=True,
         misfire_grace_time=3600,
     )
+    # Bake-off #15: autopay sweep on the same daily tick (test-mode fenced
+    # inside the module; no-ops for tenants that have not enabled it).
+    try:
+        from routers.autopay import run_autopay_all
+        _scheduler.add_job(
+            run_autopay_all,
+            CronTrigger(hour=hour, minute=minute),
+            id="autopay-sweep",
+            replace_existing=True,
+            max_instances=1,
+            coalesce=True,
+            misfire_grace_time=3600,
+        )
+    except Exception as exc:  # never let autopay break the scheduler
+        logger.warning("Scheduler: autopay job not registered: %s", exc)
     if fx_rates_enabled():
         fx_hour, fx_minute = _fx_run_time()
         _scheduler.add_job(
@@ -447,6 +539,28 @@ async def start() -> bool:
         logger.info("Scheduler: bank sync every %d hour(s)", interval)
     else:
         logger.info("Scheduler: bank sync disabled (BANK_SYNC_ENABLED != true).")
+    if dedupe_scans_enabled():
+        try:
+            _scheduler.add_job(
+                run_dedupe_scans,
+                IntervalTrigger(hours=1),
+                id=DEDUPE_JOB_ID,
+                replace_existing=True,
+                max_instances=1,
+                coalesce=True,
+                misfire_grace_time=900,
+            )
+            dedupe_job = _scheduler.get_job(DEDUPE_JOB_ID)
+            _state["dedupe_next_run"] = (
+                dedupe_job.next_run_time.isoformat()
+                if dedupe_job and dedupe_job.next_run_time else None)
+            logger.info("Scheduler: dedupe scan sweep hourly "
+                        "(per-tenant opt-in)")
+        except Exception as exc:  # never let dedupe break the scheduler
+            logger.warning("Scheduler: dedupe job not registered: %s", exc)
+    else:
+        logger.info("Scheduler: dedupe scans disabled "
+                    "(DEDUPE_SCANS_ENABLED != true).")
     _scheduler.start()
     job = _scheduler.get_job(JOB_ID)
     _state.update(
@@ -470,7 +584,8 @@ async def stop():
         _scheduler.shutdown(wait=False)
         _scheduler = None
     _state.update(running=False, instance_id=None, next_run=None,
-                  fx_next_run=None, recurring_next_run=None, bank_next_run=None)
+                  fx_next_run=None, recurring_next_run=None, bank_next_run=None,
+                  dedupe_next_run=None)
 
 
 def status() -> dict:

@@ -161,7 +161,27 @@ async def scan_receipt(rid: str, user: dict = Depends(require("ops:manage"))):
     if not doc:
         raise HTTPException(404, "Receipt not found")
     if doc["content_type"] == "application/pdf":
-        raise HTTPException(422, "AI scan needs an image (JPG/PNG/WEBP) — PDFs can be entered manually.")
+        # Standout extra A: invoice2data template extraction on the PDF
+        # text layer (MIT library, our templates). Only when no template
+        # matches do we fall back to the old manual-entry answer.
+        from lib.pdf_intake import extract_pdf_invoice
+        path = _upload_dir(user) / doc["stored"]
+        found = extract_pdf_invoice(path.read_bytes())
+        if not found:
+            raise HTTPException(422, "No invoice template matched this PDF — enter the details manually, "
+                                     "or upload a JPG/PNG photo for AI scan.")
+        extracted = {"vendor": found["vendor"], "date": found["date"],
+                     "amount": found["amount"], "tax": found["tax"],
+                     "category_code": "", "category_name": "",
+                     "description": f"PDF invoice {found['invoice_number']}".strip(),
+                     "trade": "", "extraction_source": "invoice2data",
+                     "needs_review": True}
+        await receipts(user).update_one({"id": rid},
+                                        {"$set": {"extracted": extracted, "status": "scanned"}})
+        await audit(user, "receipt.scan", "receipt", rid,
+                    {"vendor": extracted["vendor"], "amount": extracted["amount"],
+                     "source": "invoice2data"})
+        return extracted
     key = _vision_key()
     pack = await _pack_for_user(user)
     cats = _trade_categories(pack)

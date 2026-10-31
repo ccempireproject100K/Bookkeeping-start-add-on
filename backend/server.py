@@ -14,6 +14,7 @@ from routers import plans
 from routers import referrals
 from routers import password_reset
 from routers import (auth, ledger, products, pos, invoices, cashclose, dashboard,
+                     pdftools, onboarding, importer, autopay, taxpacket, dedupe,
                      bills, billing, aging, giftcards, commissions, customers, jobs,
                      banking, vendors, reports, estimates,
                      recurring_invoices, reminders, backup, bankfeed, copilot,
@@ -23,7 +24,8 @@ from routers import (auth, ledger, products, pos, invoices, cashclose, dashboard
                      playground, combo, kpis, benchmarks, voice, taxposture,
                      whitelabel, entities, cleanup, purchase_orders,
                      fx, market_packs, cfdi, integrations, marketplace,
-                     developers, invoice_payments)
+                     developers, invoice_payments,
+                     dataclean_api, dataclean_admin)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("mindatease")
@@ -65,7 +67,10 @@ for r in (auth.router, password_reset.router, ledger.router, products.router, po
           whitelabel.router, entities.router, cleanup.router,
           purchase_orders.router, fx.router, fx.currencies_router,
           market_packs.router, cfdi.router, integrations.router,
-          marketplace.router, developers.router, invoice_payments.router):
+          marketplace.router, developers.router, invoice_payments.router,
+          pdftools.router, onboarding.router, importer.router, autopay.router,
+          taxpacket.router, dedupe.router,
+          dataclean_api.router, dataclean_admin.router):
     api_router.include_router(r)
 api_router.include_router(plans.router)
 
@@ -145,6 +150,12 @@ async def startup():
         (db.webhook_subscriptions, [("tenant_id", 1), ("created_at", -1)], {}),
         (db.webhook_deliveries, [("tenant_id", 1), ("created_at", -1)], {}),
         (db.webhook_deliveries, [("status", 1), ("next_retry_at", 1)], {}),
+        # DataClean external API (Phase 3): keys are looked up by hash;
+        # usage metering rows are read per tenant and per key.
+        (db.dataclean_api_keys, "key_hash", {"unique": True}),
+        (db.dataclean_api_keys, [("tenant_id", 1), ("created_at", -1)], {}),
+        (db.dataclean_api_usage, [("tenant_id", 1), ("created_at", -1)], {}),
+        (db.dataclean_api_usage, [("key_id", 1), ("created_at", -1)], {}),
         # Subscription billing (Stripe): the billing webhook shares the
         # stripe_webhook_events unique index above; the referral outbox
         # holds exactly one record per product payment (the empire
