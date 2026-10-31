@@ -1,4 +1,8 @@
-"""Niche packs 20->33 + 46 market faces + trade x market skin resolver.
+"""Niche packs 20->33->36 + 46 market faces + trade x market skin resolver.
+
+The last three packs (credit_repair, small_business_owner, gig_work)
+are the 2026-10-30 canonical-taxonomy top-up: the 33 trades plus
+credit repair/financial services, new/small business owners, gig work.
 
 No live MongoDB / server needed: exercises the real YAML loaders, the
 pure resolver composition, and the public router on a bare FastAPI app.
@@ -26,6 +30,8 @@ EXPECTED_TRADES = {
     "flooring", "foundation_repair", "whole_home_generators",
     "smart_home", "junk_removal", "decks_outdoor", "irrigation",
     "siding_gutters", "home_inspection",
+    # the canonical-36 top-up (owner ruling 2026-10-30)
+    "credit_repair", "small_business_owner", "gig_work",
 }
 
 ORIGINAL_20 = EXPECTED_TRADES - {
@@ -53,9 +59,9 @@ def _fresh_caches():
     markets.reload()
 
 
-def test_all_33_trade_packs_load_and_validate():
+def test_all_36_trade_packs_load_and_validate():
     packs = niches.all_packs()
-    assert len(packs) == 33
+    assert len(packs) == 36
     assert {p["id"] for p in packs} == EXPECTED_TRADES
     assert ORIGINAL_20 <= {p["id"] for p in packs}  # original ids stable
     for p in packs:

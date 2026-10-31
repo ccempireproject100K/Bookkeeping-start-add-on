@@ -10,7 +10,7 @@ import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 /** Public landing page for one trade edition, rendered entirely from its
  *  niche pack (GET /niches): product name, tagline, terminology, services,
- *  checklist and visual identity. All 33 trades get this page from the one
+ *  checklist and visual identity. All 36 trades get this page from the one
  *  component — there are no hand-written per-trade pages.
  *  Choosing a market re-skins the page with the composed trade x market
  *  face from GET /market-packs/resolve (market accent wins, flag +
@@ -61,7 +61,7 @@ export default function TradeLanding() {
       <div className="min-h-screen bg-[#0B0D10] text-gray-100 flex items-center justify-center p-6">
         <div className="text-center">
           <h1 className="font-display text-3xl font-bold mb-3">That industry isn't on the list yet</h1>
-          <p className="text-gray-400 mb-6">Mind at Ease Solutions covers 33 trades — yours may be one of them.</p>
+          <p className="text-gray-400 mb-6">Mind at Ease Solutions covers 36 trades — yours may be one of them.</p>
           <Link to="/industries" className="text-amber-500 hover:text-amber-400 text-sm">
             <ArrowLeft size={14} className="inline me-1 rtl:-scale-x-100" /> See all industries
           </Link>
@@ -200,7 +200,7 @@ export default function TradeLanding() {
         )}
 
         <div className="text-xs text-gray-600">
-          One of 33 trade editions of Mind at Ease Solutions — same double-entry
+          One of 36 trade editions of Mind at Ease Solutions — same double-entry
           engine, your trade's face.{" "}
           <Link to="/industries" className="text-amber-500 hover:text-amber-400">
             Browse all industries

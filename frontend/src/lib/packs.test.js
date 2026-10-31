@@ -1,4 +1,4 @@
-import { asPackList, findPack, asFace } from "./packs";
+import { asPackList, findPack, asFace, nicheIdFromFace } from "./packs";
 
 // The payload that broke production: with a misconfigured API base the
 // SPA's own index.html came back as "data" (a string). The old code fed
@@ -58,5 +58,24 @@ describe("asFace", () => {
     expect(asFace([1, 2])).toBeNull();
     expect(asFace(null)).toBeNull();
     expect(asFace(undefined)).toBeNull();
+  });
+});
+
+describe("nicheIdFromFace", () => {
+  test("returns the trade id for a resolved niche face", () => {
+    expect(nicheIdFromFace({ niche_id: "hvac" })).toBe("hvac");
+    expect(nicheIdFromFace({ niche_id: "credit_repair" })).toBe("credit_repair");
+    expect(nicheIdFromFace({ niche_id: "gig_work" })).toBe("gig_work");
+  });
+
+  test("the generic face (apex / www / unknown subdomain) preselects nothing", () => {
+    expect(nicheIdFromFace({ niche_id: "generic" })).toBe("");
+    expect(nicheIdFromFace({})).toBe("");
+  });
+
+  test("degrades to no preselection on the incident payload", () => {
+    expect(nicheIdFromFace(HTML_PAGE)).toBe("");
+    expect(nicheIdFromFace(null)).toBe("");
+    expect(nicheIdFromFace(undefined)).toBe("");
   });
 });

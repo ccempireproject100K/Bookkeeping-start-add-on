@@ -1,0 +1,54 @@
+id: credit_repair
+icon: CreditCard
+trade: Credit Repair
+product_name: "The Credit Repair Ledger"
+tagline: "Bookkeeping built for credit repair businesses"
+terms:
+  worker: Consultant
+  worker_plural: Consultants
+  shop: business
+  job: case
+  job_plural: cases
+  customer: client
+  customer_plural: clients
+colors:
+  accent: "#2dd4bf"
+subdomains: [credit-repair, creditrepair, credit]
+revenue_accounts:
+  - {code: "4000", name: "Service Revenue — Monthly Plans"}
+  - {code: "4010", name: "Service Revenue — Setup & Audit Fees"}
+  - {code: "4020", name: "Service Revenue — Pay-Per-Delete"}
+  - {code: "4100", name: "Affiliate & Referral Income"}
+trade_expense_accounts:
+  - {code: "5100", name: "Consultant Commissions"}
+  - {code: "5030", name: "Bureau Data & Report Pulls"}
+  - {code: "5040", name: "Compliance, Bonds & Licensing"}
+services:
+  - {name: "Initial Credit Audit", kind: service}
+  - {name: "Monthly Repair Plan", kind: service}
+  - {name: "Pay-Per-Delete Round", kind: service}
+  - {name: "Business Credit Setup", kind: service}
+checklist:
+  - {id: team, label: "Add your consultants", hint: "Consultants show up once they have a workspace login; commissions split automatically", link: "/team", check: team}
+  - {id: services, label: "Add plans & price book", hint: "Audits, monthly plans, and per-delete pricing", link: "/inventory", check: services}
+  - {id: bank, label: "Add a bank account", hint: "Reconcile plan payments against active cases in Banking", link: "/banking", check: bank}
+  - {id: tax, label: "Set up contractor tracking", hint: "W-9s and 1099-NECs for contract consultants and affiliates", link: "/tax", check: tax}
+  - {id: sale, label: "Enroll your first client", hint: "Invoice an initial credit audit to see the full flow", link: "/invoices", check: sale}
+copilot_notes: |
+  Credit repair runs on monthly plan revenue: the books live and die by
+  active-client count and churn, not one-off jobs. Track setup/audit fees
+  separately from recurring plan income — they behave differently and
+  churn hits them differently. Bureau data and report pulls are a real
+  per-client cost of goods; watch them against plan price. Affiliate
+  income (credit-monitoring referrals) is high-margin but lumpy — never
+  let it mask a shrinking client base. Compliance is existential here:
+  the federal Credit Repair Organizations Act restricts when consumer
+  fees can be charged, and many states require registration and a surety
+  bond — keep bond premiums and renewal dates on the books, not in a
+  drawer.
+
+kpis:
+  - {id: active_clients, label: "Active clients", hint: "Clients on a paid plan right now"}
+  - {id: avg_ticket, label: "Avg monthly per client", hint: "Plan revenue per active client"}
+  - {id: repeat_rate, label: "Client retention", hint: "Clients active 2+ months"}
+  - {id: revenue_trend, label: "Revenue trend", hint: "Last 30 days vs prior 30"}

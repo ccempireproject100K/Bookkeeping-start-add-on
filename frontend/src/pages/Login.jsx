@@ -188,7 +188,7 @@ export default function Login() {
               <Link to="/register" data-testid="login-register-link" className="text-sm text-amber-500 hover:text-amber-400">Create your workspace</Link>
             </div>
             <div>
-              <Link to="/industries" className="text-xs text-gray-500 hover:text-amber-400">Bookkeeping for your industry — all 33 trades</Link>
+              <Link to="/industries" className="text-xs text-gray-500 hover:text-amber-400">Bookkeeping for your industry — all 36 trades</Link>
             </div>
           </div>
         </div>

@@ -131,11 +131,26 @@ def get_pack(niche_id: str | None) -> dict:
     return dict(GENERIC_PACK)
 
 
+def _slug_forms(pack: dict) -> set:
+    """The canonical slug forms of a pack's id, for hostname labels: the
+    id itself, hyphenated (the only form legal in a DNS label), and
+    squashed. Declared marketing subdomains are matched separately,
+    in the first pass of niche_from_host."""
+    pid = pack["id"].lower()
+    return {pid, pid.replace("_", "-"), pid.replace("_", "")}
+
+
 def niche_from_host(host: str | None) -> str | None:
     """Map a request Host to a niche id via pack subdomains.
 
-    hvac.example.com -> "hvac". Returns None when no pack claims the
-    subdomain (caller falls back to the workspace niche or default).
+    The niche is the first DNS label:
+      hvac.example.com                              -> "hvac"
+      hvac.bookkeeping.mindateasesolutions.com      -> "hvac"
+      pest-control.bookkeeping.mindateasesolutions.com -> "pest_control"
+    Apex / www / the bare "bookkeeping" host -> None (the generic face).
+    Returns None when no pack claims the label (caller falls back to the
+    workspace niche or default) — an unknown niche label is never an
+    error, it just gets the product's own trade-neutral face.
     """
     if not host:
         return None
@@ -143,12 +158,13 @@ def niche_from_host(host: str | None) -> str | None:
     sub = host.split(".")[0] if host.count(".") >= 2 else ""
     if not sub or sub == "www":
         return None
+    # Declared subdomains win over derived slug forms across all packs,
+    # so a marketing alias can never be shadowed by another pack's id.
     for p in all_packs():
         if sub in [s.lower() for s in p.get("subdomains", [])]:
             return p["id"]
-    # also accept "<niche-id>" directly, e.g. pestcontrol.example.com
     for p in all_packs():
-        if sub == p["id"].replace("_", ""):
+        if sub in _slug_forms(p):
             return p["id"]
     return None
 
