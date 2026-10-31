@@ -31,6 +31,10 @@ export default function Register() {
   // the server stamps it on the workspace at creation and never replaces it.
   const [refCode] = useState(() => new URLSearchParams(window.location.search).get("ref") || "");
   const [nicheId, setNicheId] = useState("");
+  // The two trial doors (owner ruling 2026-10-31). Default is the
+  // no-card door — the commitment-free choice is never pre-selected
+  // for the visitor.
+  const [door, setDoor] = useState("nocard");
   const [marketCode, setMarketCode] = useState(() => readMarketChoice() || "US");
   const [niches, setNiches] = useState([]);
   const [markets, setMarkets] = useState([]);
@@ -66,6 +70,7 @@ export default function Register() {
         ...form,
         niche_id: nicheId || null,
         market_code: marketCode || null,
+        trial_door: door,
         ref: refCode || null,
       });
       writeMarketChoice(marketCode);
@@ -138,6 +143,35 @@ export default function Register() {
             </select>
             <p className="text-[11px] text-gray-600 mt-1">
               Sets your edition's accent, language and home currency.
+            </p>
+          </div>
+          <div>
+            <Label className="text-xs text-gray-400">Start your 14-day free trial — pick a door</Label>
+            <div className="grid gap-2 mt-1 sm:grid-cols-2">
+              <button type="button" data-testid="register-door-nocard"
+                onClick={() => setDoor("nocard")} aria-pressed={door === "nocard"}
+                className={`text-left rounded-lg border p-3 ${door === "nocard" ? "border-amber-500 bg-[#171a21]" : "border-[#222838] bg-[#14171E]"}`}>
+                <span className="block text-sm font-semibold text-gray-100">Free trial, no card</span>
+                <span className="block text-xs text-gray-400 mt-1">
+                  14 days free with the full product, and we'll clean one of your files free
+                  during setup. No card, nothing auto-charges — the trial just ends.
+                </span>
+              </button>
+              <button type="button" data-testid="register-door-card"
+                onClick={() => setDoor("card")} aria-pressed={door === "card"}
+                className={`text-left rounded-lg border p-3 ${door === "card" ? "border-amber-500 bg-[#171a21]" : "border-[#222838] bg-[#14171E]"}`}>
+                <span className="block text-sm font-semibold text-gray-100">Free trial with card</span>
+                <span className="block text-xs text-gray-400 mt-1">
+                  Everything in the no-card trial, plus your first quarterly tax estimate in
+                  writing, half off your first paid month, and referral access from day one.
+                  Your card auto-converts when the trial ends — cancel any time before then
+                  and you're never charged.
+                </span>
+              </button>
+            </div>
+            <p className="text-[11px] text-gray-600 mt-1">
+              Everyone gets the file clean. The card door just gets the extra stuff — and you
+              can switch doors later in Settings.
             </p>
           </div>
           <Button data-testid="register-submit-button" type="submit" disabled={busy}

@@ -13,7 +13,11 @@ tangible assets, free, theirs to keep —
   (net profit so far, filing status, state, W-2 wages) runs the merged
   tax engine (lib/taxengine.py — the math is never reimplemented here)
   and stores a downloadable estimate packet: totals, per-type
-  breakdown, quarterly schedule, workpapers trace.
+  breakdown, quarterly schedule, workpapers trace. GATE (owner ruling
+  2026-10-31, the trial-doors split): the estimate gift rides the
+  CARD trial door's opt-in — "we're not going to do the tax thing
+  unless they do the opt in". Gift A stays ungated for every tenant.
+  Packets already delivered are the tenant's to keep regardless.
 
 Honesty rules (hard, mirroring the engine's own):
 * A jurisdiction the engine reports NOT_IMPLEMENTED stays visibly
@@ -88,7 +92,10 @@ async def gift_state(user) -> dict:
 @router.get("")
 async def get_welcome_gift(user: dict = Depends(get_current_user)):
     state = await gift_state(user)
+    tenant = await db.tenants.find_one({"id": user["tenant_id"]},
+                                       {"_id": 0}) or {}
     return {"gifts": state,
+            "estimate_unlocked": bool(tenant.get("card_opt_in_at")),
             "kinds": sorted(FIELDS),
             "engine_states": ENGINE_STATES,
             "stub_states": sorted(STUB_STATES),
@@ -210,7 +217,20 @@ def _resolve_jurisdiction(state: Optional[str]):
 async def gift_estimate(body: GiftEstimateIn,
                         user: dict = Depends(require("ops:manage"))):
     """Run the merged tax engine on the joiner's own figures and store
-    the packet. Estimates only — no filing, ever."""
+    the packet. Estimates only — no filing, ever.
+
+    Gated on the card trial door's opt-in (owner ruling 2026-10-31):
+    without it the step is locked — stated plainly, never faked. A
+    packet already delivered stays downloadable either way."""
+    tenant = await db.tenants.find_one({"id": user["tenant_id"]},
+                                       {"_id": 0}) or {}
+    if not tenant.get("card_opt_in_at"):
+        raise _err(403, "card_opt_in_required",
+                   "The estimate gift comes with the card trial door: "
+                   "opt in with a card (no charge during the trial) to "
+                   "unlock your first quarterly estimate in writing. "
+                   "The file-cleaning gift is free for everyone, no "
+                   "card needed.")
     if body.filing_status not in FILING_STATUSES:
         raise _err(422, "invalid_filing_status",
                    f"filing_status must be one of {FILING_STATUSES}")

@@ -16,7 +16,7 @@
  */
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Gift, Sparkles, Scale, Download, FileWarning, CheckCircle2 } from 'lucide-react';
+import { Gift, Sparkles, Scale, Download, FileWarning, CheckCircle2, Lock } from 'lucide-react';
 import { api } from '@/lib/api';
 import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -201,6 +201,27 @@ export default function WelcomeGift() {
         </CardHeader>
         <CardContent className="space-y-3">
           <p className="text-sm text-muted-foreground">{t('welcomeGift.estimateBody')}</p>
+          {meta && meta.estimate_unlocked === false ? (
+            <div className="border border-[#222838] rounded-md p-3 text-sm space-y-2"
+              data-testid="gift-est-locked">
+              <p className="font-medium flex items-center gap-1">
+                <Lock className="h-4 w-4" /> {t('welcomeGift.estimateLockedTitle')}
+              </p>
+              <p className="text-muted-foreground">{t('welcomeGift.estimateLockedBody')}</p>
+              <Button data-testid="gift-est-switch-door" onClick={async () => {
+                try {
+                  await api.post('/trial/door', { door: 'card' });
+                  toast.success(t('welcomeGift.doorSwitched'));
+                  loadMeta();
+                } catch (e) {
+                  toast.error(giftErrorMessage(e, t('welcomeGift.estimateFailed')));
+                }
+              }}>
+                {t('welcomeGift.switchDoor')}
+              </Button>
+            </div>
+          ) : (
+          <>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             <div>
               <Label>{t('welcomeGift.netProfit')}</Label>
@@ -313,6 +334,8 @@ export default function WelcomeGift() {
                 </Button>
               </div>
             </div>
+          )}
+          </>
           )}
         </CardContent>
       </Card>

@@ -8,11 +8,18 @@ may use what):
   Books Heavy   volume-based   / custom                 -> "heavy"
 
 A tenant stores its purchased ``plan`` ("light"/"medium"/"heavy"). Every new
-workspace gets a 30-day Medium trial (``trial_ends_at``); while the trial is
-active the *effective* plan is "medium" regardless of the stored plan, and it
-quietly falls back to the stored plan when the trial expires — no scheduler
-needed. Tenants created before plans existed have no ``plan`` key and are
-grandfathered at "medium".
+workspace gets a 14-day Medium trial (``trial_ends_at``; owner ruling
+2026-10-31 — the term is 14 days, replacing the unruled 30-day scaffold);
+while the trial is active the *effective* plan is "medium" regardless of
+the stored plan, and it quietly falls back to the stored plan when the
+trial expires — no scheduler needed. Tenants created before plans existed
+have no ``plan`` key and are grandfathered at "medium".
+
+The trial is offered through TWO DOORS (owner ruling 2026-10-31, see
+lib/trial.py): "nocard" — 14 days free + the DataClean welcome gift, no
+card, no auto-conversion; "card" — the same trial + gift, PLUS the
+tax-estimate welcome gift, 50% off the first paid month, and instant
+referral activation, with the card auto-converting at trial end.
 
 Enforcement: routers add ``Depends(require_feature("bank_feeds"))`` — either
 router-wide via ``APIRouter(..., dependencies=[...])`` or on individual
@@ -29,7 +36,11 @@ from lib.base import now_iso
 
 PLANS = ("light", "medium", "heavy")
 
-TRIAL_DAYS = 30
+TRIAL_DAYS = 14  # owner ruling 2026-10-31 (was an unruled 30 in scaffolding)
+
+# Trial doors (owner ruling 2026-10-31): see lib/trial.py for the machine.
+TRIAL_DOORS = ("nocard", "card")
+FIRST_MONTH_DISCOUNT_PERCENT = 50  # card door only, first paid month, whole month
 
 PLAN_INFO = {
     "light": {
@@ -195,11 +206,30 @@ def require_feature(*features: str):
     return dep
 
 
-def new_trial_fields() -> dict:
-    """Fields stamped on a freshly created tenant: Light + 30-day Medium trial."""
+def new_trial_fields(door: str = "nocard") -> dict:
+    """Fields stamped on a freshly created tenant: Light + 14-day Medium
+    trial through the chosen door. The card door stamps the opt-in at
+    once (packet unlock, first-month discount terms, instant referral
+    activation); the no-card door records none of those — they can be
+    added later by upgrading the door (routers/trial.py)."""
+    if door not in TRIAL_DOORS:
+        door = "nocard"
     now = datetime.now(timezone.utc)
-    return {
+    fields = {
         "plan": "light",
         "trial_started_at": now_iso(),
         "trial_ends_at": (now + timedelta(days=TRIAL_DAYS)).isoformat(),
+        "trial_door": door,
+        "card_opt_in_at": None,
+        "referral_active": False,
+        "referral_active_source": None,
+        "first_month_discount_percent": None,
+        "first_month_discount_applied": False,
+        "trial_canceled_at": None,
     }
+    if door == "card":
+        fields["card_opt_in_at"] = now_iso()
+        fields["referral_active"] = True
+        fields["referral_active_source"] = "trial_card_opt_in"
+        fields["first_month_discount_percent"] = FIRST_MONTH_DISCOUNT_PERCENT
+    return fields

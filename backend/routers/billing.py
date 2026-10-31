@@ -204,6 +204,32 @@ async def _set_billing(tenant, fields, plan=None):
 
 async def _on_checkout_completed(obj):
     meta = obj.get("metadata") or {}
+    if meta.get("kind") == "books_card_setup" or obj.get("mode") == "setup":
+        # Card trial door: a card was put on file (setup mode, no
+        # charge). Record its presence; the trial auto-conversion
+        # sweep (lib/trial.py) is what later charges it.
+        tenant = await _resolve_tenant(tenant_id=meta.get("tenant_id"),
+                                       customer_id=obj.get("customer"))
+        if not tenant:
+            logger.warning("billing card setup for unknown tenant=%s",
+                           meta.get("tenant_id"))
+            return
+        pm_id = ""
+        try:
+            pm_id = billing.setup_intent_payment_method(obj.get("setup_intent"))
+        except Exception:
+            logger.warning("card setup: payment method lookup failed "
+                           "tenant=%s", tenant["id"], exc_info=True)
+        await _set_billing(tenant, {
+            "provider": "stripe",
+            "stripe_customer_id": obj.get("customer"),
+            "card_on_file": True,
+            "card_payment_method_id": pm_id or None,
+            "setup_intent_id": obj.get("setup_intent"),
+        })
+        await _audit_system(tenant["id"], "billing.card_on_file",
+                            {"session_id": obj.get("id")})
+        return
     if meta.get("kind") != "books_subscription":
         return  # some other flow sharing the Stripe account
     tenant = await _resolve_tenant(tenant_id=meta.get("tenant_id"))
@@ -226,6 +252,12 @@ async def _on_checkout_completed(obj):
     # the stored entitlement moves only when money has actually landed;
     # subscription/invoice events govern from there.
     await _set_billing(tenant, fields, plan=plan if paid else None)
+    if paid and tenant.get("first_month_discount_percent"):
+        # The card-door conversion landed: the welcome coupon rode
+        # this session, so the first-month discount terms are spent.
+        await db.tenants.update_one(
+            {"id": tenant["id"]},
+            {"$set": {"first_month_discount_applied": True}})
     await _audit_system(tenant["id"], "billing.subscription_started",
                         {"plan": plan, "session_id": obj.get("id"),
                          "payment_status": obj.get("payment_status")})
@@ -312,6 +344,13 @@ async def _on_invoice_paid(obj, event):
         "last_paid_invoice_id": obj.get("id"),
         "last_payment_at": paid_at,
     }, plan=plan if plan in billing.SELF_SERVE_PLANS else None)
+    if not tenant.get("referral_active"):
+        # Conversion activates referrals for tenants who didn't get
+        # them instantly at the card opt-in (trial door 1's default).
+        await db.tenants.update_one(
+            {"id": tenant["id"]},
+            {"$set": {"referral_active": True,
+                      "referral_active_source": "conversion"}})
     await _emit_referral_payment(tenant, obj, event, paid_at)
 
 

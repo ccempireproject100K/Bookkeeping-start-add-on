@@ -164,11 +164,43 @@ def _stripe():
     return stripe
 
 
+# ---------------- the first-month welcome coupon (card trial door) --------
+# Owner ruling 2026-10-31: the card door's conversion carries 50% off
+# the FIRST paid month (the whole month, never prorated; month two at
+# list). Implemented with Stripe's own coupon mechanics — a percent_off
+# coupon with duration "once", which Stripe applies to exactly the
+# first invoice — never hand-rolled price math. The id is fixed so
+# every environment converges on one coupon.
+
+FIRST_MONTH_COUPON_ID = "books-first-month-50"
+FIRST_MONTH_COUPON_PERCENT = 50
+
+
+def ensure_first_month_coupon() -> str:
+    """Create-or-retrieve the first-month coupon; returns its id."""
+    stripe = _stripe()
+    try:
+        coupon = stripe.Coupon.retrieve(FIRST_MONTH_COUPON_ID)
+        return coupon.id
+    except Exception as e:
+        if type(e).__name__ != "InvalidRequestError" and "No such coupon" not in str(e):
+            raise
+    coupon = stripe.Coupon.create(
+        id=FIRST_MONTH_COUPON_ID,
+        percent_off=FIRST_MONTH_COUPON_PERCENT,
+        duration="once",
+        name="Welcome offer — 50% off the first month",
+    )
+    return coupon.id
+
+
 def create_checkout_session(*, tenant_id: str, plan: str, user_email: str,
-                            customer_id: str, origin: str):
+                            customer_id: str, origin: str, coupon_id: str = ""):
     """A subscription-mode Checkout Session for the tenant. Metadata
     rides on BOTH the session and the subscription it creates, so every
-    later subscription/invoice event can find its tenant."""
+    later subscription/invoice event can find its tenant. A coupon_id
+    (the first-month welcome coupon, card-door conversions only) rides
+    as a session discount — Stripe applies it to the first invoice."""
     stripe = _stripe()
     meta = {"kind": "books_subscription", "tenant_id": tenant_id, "plan": plan}
     kwargs = {
@@ -179,11 +211,72 @@ def create_checkout_session(*, tenant_id: str, plan: str, user_email: str,
         "success_url": f"{origin}/settings?billing=success&session_id={{CHECKOUT_SESSION_ID}}",
         "cancel_url": f"{origin}/settings?billing=cancelled",
     }
+    if coupon_id:
+        kwargs["discounts"] = [{"coupon": coupon_id}]
     if customer_id:
         kwargs["customer"] = customer_id
     elif user_email:
         kwargs["customer_email"] = user_email
     return stripe.checkout.Session.create(**kwargs)
+
+
+def create_card_setup_session(*, tenant_id: str, user_email: str,
+                              customer_id: str, origin: str):
+    """A setup-mode Checkout Session that puts a card on file for the
+    card trial door (no charge). The webhook records the card's
+    presence on the tenant; the auto-conversion sweep charges it
+    off-session at trial end."""
+    stripe = _stripe()
+    meta = {"kind": "books_card_setup", "tenant_id": tenant_id}
+    kwargs = {
+        "mode": "setup",
+        "payment_method_types": ["card"],
+        "metadata": meta,
+        "setup_intent_data": {"metadata": meta},
+        "success_url": f"{origin}/settings?billing=card_saved",
+        "cancel_url": f"{origin}/settings?billing=cancelled",
+    }
+    if customer_id:
+        kwargs["customer"] = customer_id
+    elif user_email:
+        kwargs["customer_email"] = user_email
+    return stripe.checkout.Session.create(**kwargs)
+
+
+def setup_intent_payment_method(setup_intent_id: str) -> str:
+    """The payment-method id a completed SetupIntent captured ("" when
+    unavailable — callers treat absence as 'no card on file')."""
+    if not setup_intent_id:
+        return ""
+    stripe = _stripe()
+    si = stripe.SetupIntent.retrieve(setup_intent_id)
+    return getattr(si, "payment_method", None) or (si.get("payment_method") if isinstance(si, dict) else "") or ""
+
+
+def create_subscription_off_session(*, customer_id: str, plan: str,
+                                    coupon_id: str, tenant_id: str,
+                                    payment_method_id: str = ""):
+    """Door 2's auto-conversion: create the subscription against the
+    card on file, first month discounted by the welcome coupon.
+    error_if_incomplete means a card that cannot be charged fails
+    loudly in Stripe instead of silently creating a free ride; the
+    webhook still drives all tenant billing state from the events
+    this produces."""
+    stripe = _stripe()
+    meta = {"kind": "books_subscription", "tenant_id": tenant_id, "plan": plan,
+            "source": "trial_auto_convert"}
+    kwargs = {
+        "customer": customer_id,
+        "items": [line_item(plan)],
+        "metadata": meta,
+        "off_session": True,
+        "payment_behavior": "error_if_incomplete",
+    }
+    if coupon_id:
+        kwargs["discounts"] = [{"coupon": coupon_id}]
+    if payment_method_id:
+        kwargs["default_payment_method"] = payment_method_id
+    return stripe.Subscription.create(**kwargs)
 
 
 def create_portal_session(*, customer_id: str, return_url: str):
