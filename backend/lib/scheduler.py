@@ -286,10 +286,11 @@ async def run_recurring_invoices() -> dict:
     generates when its ``next_run`` has arrived (it advances on generate,
     so a duplicate run is a no-op)."""
     from routers.recurring_invoices import run_due_for_user
+    from routers.bills import run_due_bills_for_user
 
     window = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H")
     outcome = {"window": window, "tenants": 0, "generated": 0,
-               "errors": 0, "skipped": []}
+               "bills_generated": 0, "errors": 0, "skipped": []}
     tenants = await db.tenants.find({}, {"id": 1}).to_list(1000)
     for t in tenants:
         tid = t["id"]
@@ -299,11 +300,19 @@ async def run_recurring_invoices() -> dict:
                                        "reason": "already_ran_this_hour"})
             continue
         try:
-            res = await run_due_for_user(_system_user(tid, "Recurring invoice scheduler"))
+            sys_user = _system_user(tid, "Recurring invoice scheduler")
+            res = await run_due_for_user(sys_user)
             made = int(res.get("generated", 0))
+            bills_made = 0
+            try:
+                bres = await run_due_bills_for_user(sys_user)
+                bills_made = int(bres.get("generated", 0))
+            except Exception:
+                logger.exception("Recurring bill run failed for tenant %s", tid)
             outcome["tenants"] += 1
             outcome["generated"] += made
-            await _finish_run(run_id, "done", generated=made)
+            outcome["bills_generated"] += bills_made
+            await _finish_run(run_id, "done", generated=made, bills_generated=bills_made)
             if made:
                 logger.info("Recurring invoices: tenant %s generated=%d", tid, made)
         except Exception as exc:
@@ -391,6 +400,21 @@ async def start() -> bool:
         coalesce=True,
         misfire_grace_time=3600,
     )
+    # Bake-off #15: autopay sweep on the same daily tick (test-mode fenced
+    # inside the module; no-ops for tenants that have not enabled it).
+    try:
+        from routers.autopay import run_autopay_all
+        _scheduler.add_job(
+            run_autopay_all,
+            CronTrigger(hour=hour, minute=minute),
+            id="autopay-sweep",
+            replace_existing=True,
+            max_instances=1,
+            coalesce=True,
+            misfire_grace_time=3600,
+        )
+    except Exception as exc:  # never let autopay break the scheduler
+        logger.warning("Scheduler: autopay job not registered: %s", exc)
     if fx_rates_enabled():
         fx_hour, fx_minute = _fx_run_time()
         _scheduler.add_job(
