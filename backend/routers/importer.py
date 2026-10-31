@@ -19,7 +19,11 @@ from pydantic import BaseModel
 
 from db import db
 from lib.base import Scoped, new_id, now_iso, to_cents
+from lib.audit import append_audit
 from lib.auth import require
+from lib.dataclean import cleaning as _cleaning
+from lib.dataclean import mess as _mess
+from lib.dataclean import schema as _cleanschema
 from lib.mailer import send_email
 
 router = APIRouter(prefix="/import", tags=["import"])
@@ -114,12 +118,53 @@ async def preview(body: PreviewIn, user: dict = Depends(require("ops:manage"))):
             "error_count": len(errors), "errors": errors[:20]}
 
 
+class CleanupPreviewIn(BaseModel):
+    kind: str
+    csv_text: str
+    mapping: Optional[list] = None        # override of the auto-map
+
+
+@router.post("/cleanup-preview")
+async def cleanup_preview(body: CleanupPreviewIn,
+                          user: dict = Depends(require("ops:manage"))):
+    """Cleanup stage preview — shown BEFORE anything imports: detected
+    column types, before/after normalization samples per field, the file
+    mess report, and the schema check. Imports nothing."""
+    if body.kind not in FIELDS:
+        raise HTTPException(status_code=422, detail=f"kind must be one of {sorted(FIELDS)}")
+    headers, rows = _parse(body.csv_text)
+    mapping = body.mapping or auto_map(headers, body.kind)
+    mapped = _apply(rows, mapping)
+    column_types = {f: _mess.detect_column_type([d.get(f) for d in mapped])
+                    for f in FIELDS[body.kind]}
+    preview_changes, change_count = {}, 0
+    for idx, d in enumerate(mapped[:50]):
+        _, changes = _cleaning.clean_row(d, body.kind)
+        for ch in changes:
+            change_count += 1
+            bucket = preview_changes.setdefault(ch["field"], [])
+            if len(bucket) < 5:
+                bucket.append({"row": idx + 2, **ch})
+    sv = _cleanschema.validate_rows(mapped, body.kind)
+    return {"kind": body.kind, "rows": len(mapped), "mapping": mapping,
+            "column_types": column_types,
+            "normalization_preview": preview_changes,
+            "changes_in_first_50_rows": change_count,
+            "mess_report": _mess.mess_report(mapped),
+            "schema": {"blocking": sv["blocking"],
+                       "row_errors": sv["row_errors"][:20],
+                       "row_error_count": len(sv["row_errors"])},
+            "can_import": not sv["blocking"]}
+
+
 class RunIn(BaseModel):
     kind: str
     csv_text: str
     mapping: Optional[list] = None        # override of the auto-map
     save_profile_name: Optional[str] = None
     email_summary: bool = True
+    cleanup: bool = True                  # dataclean stage before insert
+    override_schema: bool = False         # import despite blocking checks (audited)
 
 
 @router.post("/run")
@@ -129,6 +174,34 @@ async def run_import(body: RunIn, user: dict = Depends(require("ops:manage"))):
     headers, rows = _parse(body.csv_text)
     mapping = body.mapping or auto_map(headers, body.kind)
     mapped = _apply(rows, mapping)
+    cleanup_info = {"applied": False, "changes": 0, "schema_blocking": [],
+                    "schema_override": False, "row_error_count": 0}
+    if body.cleanup:
+        cleaned, change_count = [], 0
+        for d in mapped:
+            cd, ch = _cleaning.clean_row(d, body.kind)
+            cleaned.append(cd)
+            change_count += len(ch)
+        mapped = cleaned
+        sv = _cleanschema.validate_rows(mapped, body.kind)
+        cleanup_info.update({"applied": True, "changes": change_count,
+                             "schema_blocking": sv["blocking"],
+                             "row_error_count": len(sv["row_errors"])})
+        if sv["blocking"] and not body.override_schema:
+            raise HTTPException(
+                status_code=422,
+                detail="This file failed its pre-import checks: "
+                       + " ".join(sv["blocking"])
+                       + " Fix the file, or re-run with override_schema=true "
+                         "to import anyway (the override is recorded).")
+        if sv["blocking"] and body.override_schema:
+            cleanup_info["schema_override"] = True
+            await append_audit(db, {
+                "tenant_id": user["tenant_id"], "id": new_id(), "at": now_iso(),
+                "user_id": user["id"], "action": "import.schema_override",
+                "entity": body.kind, "entity_id": None,
+                "details": {"blocking_errors": sv["blocking"],
+                            "rows": len(mapped)}})
     coll = Scoped(getattr(db, COLLS[body.kind]), user["tenant_id"])
     existing = {(_norm(d.get("name"))) for d in await coll.find_list(limit=10000)}
     created, skipped, errors = 0, 0, []
@@ -150,6 +223,10 @@ async def run_import(body: RunIn, user: dict = Depends(require("ops:manage"))):
         else:
             doc.update({"name": d["name"], "email": d.get("email", ""),
                         "phone": d.get("phone", ""), "address": d.get("address", "")})
+        if d.get("name_key"):
+            doc["name_key"] = d["name_key"]
+        if d.get("address_parts"):
+            doc["address_parts"] = d["address_parts"]
         await coll.insert_one(doc)
         existing.add(_norm(d["name"]))
         created += 1
@@ -168,4 +245,4 @@ async def run_import(body: RunIn, user: dict = Depends(require("ops:manage"))):
         email_status = status
     return {"kind": body.kind, "created": created, "duplicates_skipped": skipped,
             "errors": errors[:50], "error_count": len(errors),
-            "email_status": email_status}
+            "email_status": email_status, "cleanup": cleanup_info}
