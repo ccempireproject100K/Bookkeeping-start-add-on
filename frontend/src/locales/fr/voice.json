@@ -12,5 +12,7 @@
   "dictation.walkDone": "C’est terminé — vérifiez chaque donnée, puis touchez le bouton ci-dessous pour finir. Rien n’a encore été envoyé.",
   "dictation.walkPrompt": "{{label}} — parlez maintenant, ou dites « suivant » pour passer ce champ.",
   "dictation.walkStopped": "La saisie vocale s’est arrêtée. Rien n’a été envoyé — vérifiez le formulaire, puis terminez en touchant le bouton vous-même.",
-  "dictation.browserNote": "La voix fonctionne dans Chrome et Edge, peut se comporter différemment dans Safari et n'est pas proposée dans Firefox — la saisie au clavier fonctionne toujours."
+  "dictation.browserNote": "La voix fonctionne dans Chrome et Edge, peut se comporter différemment dans Safari et n'est pas proposée dans Firefox — la saisie au clavier fonctionne toujours.",
+  "dictation.browserNoteService": "La voix fonctionne dans Chrome et Edge, peut se comporter différemment dans Safari et n'est pas proposée dans Firefox — la saisie au clavier fonctionne toujours.",
+  "dictation.privacyService": "Votre voix est envoyée à notre service vocal (Cloudflare) pour être transformée en texte. Ce site n’enregistre ni ne conserve rien de ce que vous dites."
 }
