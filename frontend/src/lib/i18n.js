@@ -9,6 +9,16 @@ import zhCN from "@/locales/zh-CN/translation.json";
 import hi from "@/locales/hi/translation.json";
 import ar from "@/locales/ar/translation.json";
 
+// Voice-input (dictation) strings live in their own small file per locale
+// and merge into the same flat translation namespace, so the walk's
+// language always follows the page language like everything else.
+import voiceEn from "@/locales/en/voice.json";
+import voiceEs from "@/locales/es/voice.json";
+import voiceFr from "@/locales/fr/voice.json";
+import voiceZhCN from "@/locales/zh-CN/voice.json";
+import voiceHi from "@/locales/hi/voice.json";
+import voiceAr from "@/locales/ar/voice.json";
+
 export const SUPPORTED_LANGUAGES = [
   { code: "en", label: "English", flag: "🇺🇸" },
   { code: "es", label: "Español", flag: "🇪🇸" },
@@ -49,12 +59,12 @@ i18n
   .use(initReactI18next)
   .init({
     resources: {
-      en: { translation: en },
-      es: { translation: es },
-      fr: { translation: fr },
-      "zh-CN": { translation: zhCN },
-      hi: { translation: hi },
-      ar: { translation: ar },
+      en: { translation: { ...en, ...voiceEn } },
+      es: { translation: { ...es, ...voiceEs } },
+      fr: { translation: { ...fr, ...voiceFr } },
+      "zh-CN": { translation: { ...zhCN, ...voiceZhCN } },
+      hi: { translation: { ...hi, ...voiceHi } },
+      ar: { translation: { ...ar, ...voiceAr } },
     },
     supportedLngs: SUPPORTED_LANGUAGES.map((l) => l.code),
     fallbackLng: "en",

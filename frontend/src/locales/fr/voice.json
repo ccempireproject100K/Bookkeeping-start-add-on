@@ -1,0 +1,15 @@
+{
+  "dictation.commandsHint": "Pendant que vous parlez, vous pouvez dire : suivant · passer · retour · stop.",
+  "dictation.denied": "L’accès au microphone est bloqué, vous pouvez donc saisir votre texte à la place. Pour utiliser votre voix, autorisez le microphone pour ce site dans les paramètres de votre navigateur.",
+  "dictation.error": "La saisie vocale s’est arrêtée. Vous pouvez réessayer, ou saisir votre texte à la place.",
+  "dictation.fillByTalking": "Remplir le formulaire en parlant",
+  "dictation.langError": "Votre navigateur ne peut pas écouter dans cette langue. La saisie vocale s’est arrêtée — vous pouvez changer la langue de la page ou continuer à saisir votre texte.",
+  "dictation.listening": "Écoute en cours… parlez maintenant",
+  "dictation.privacy": "Votre navigateur (Apple ou Google) transforme la parole en texte. Mind at Ease Solutions reçoit uniquement le texte que vous conservez.",
+  "dictation.stop": "Arrêter",
+  "dictation.tapToTalk": "Appuyez pour parler",
+  "dictation.unsupported": "La saisie vocale n’est pas disponible dans ce navigateur. Saisissez votre texte à la place, ou utilisez la touche microphone du clavier de votre téléphone.",
+  "dictation.walkDone": "C’est terminé — vérifiez chaque donnée, puis touchez le bouton ci-dessous pour finir. Rien n’a encore été envoyé.",
+  "dictation.walkPrompt": "{{label}} — parlez maintenant, ou dites « suivant » pour passer ce champ.",
+  "dictation.walkStopped": "La saisie vocale s’est arrêtée. Rien n’a été envoyé — vérifiez le formulaire, puis terminez en touchant le bouton vous-même."
+}

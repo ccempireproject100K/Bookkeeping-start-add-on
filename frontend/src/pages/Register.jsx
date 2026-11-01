@@ -9,6 +9,7 @@ import { api, errMsg } from "@/lib/api";
 import { asFace, asPackList, nicheIdFromFace } from "@/lib/packs";
 import { asMarketList, readMarketChoice, writeMarketChoice } from "@/lib/markets";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
+import { DictateButton, GuidedVoiceFill, normalizeEmailDictation } from "@/components/Dictation";
 import { ArrowRight } from "lucide-react";
 
 const selectCls =
@@ -61,6 +62,11 @@ export default function Register() {
   }, []);
 
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
+  // Voice fill replaces a field's value wholesale (re-speaking a field
+  // redoes it); the per-field correction mic appends instead.
+  const setValue = (k, v) => setForm((f) => ({ ...f, [k]: v }));
+  const appendText = (k) => (text) =>
+    setForm((f) => ({ ...f, [k]: f[k] ? `${f[k]} ${text}` : text }));
 
   const submit = async (e) => {
     e.preventDefault();
@@ -101,18 +107,27 @@ export default function Register() {
         <form onSubmit={submit} className="space-y-4">
           <div>
             <Label className="text-xs text-gray-400">Your name</Label>
-            <Input data-testid="register-name-input" value={form.name} onChange={set("name")} required
-              className="mt-1 bg-[#14171E] border-[#222838]" />
+            <div className="flex items-start gap-2 mt-1">
+              <Input id="register-name" data-testid="register-name-input" value={form.name} onChange={set("name")} required
+                className="bg-[#14171E] border-[#222838]" />
+              <DictateButton onText={appendText("name")} />
+            </div>
           </div>
           <div>
             <Label className="text-xs text-gray-400">Business name</Label>
-            <Input data-testid="register-shop-name-input" value={form.shop_name} onChange={set("shop_name")} required
-              className="mt-1 bg-[#14171E] border-[#222838]" />
+            <div className="flex items-start gap-2 mt-1">
+              <Input id="register-shop-name" data-testid="register-shop-name-input" value={form.shop_name} onChange={set("shop_name")} required
+                className="bg-[#14171E] border-[#222838]" />
+              <DictateButton onText={appendText("shop_name")} />
+            </div>
           </div>
           <div>
             <Label className="text-xs text-gray-400">Email</Label>
-            <Input data-testid="register-email-input" type="email" value={form.email} onChange={set("email")} required
-              className="mt-1 bg-[#14171E] border-[#222838]" />
+            <div className="flex items-start gap-2 mt-1">
+              <Input id="register-email" data-testid="register-email-input" type="email" value={form.email} onChange={set("email")} required
+                className="bg-[#14171E] border-[#222838]" />
+              <DictateButton onText={(text) => setValue("email", normalizeEmailDictation(text))} />
+            </div>
           </div>
           <div>
             <Label className="text-xs text-gray-400">Password</Label>
@@ -174,6 +189,14 @@ export default function Register() {
               can switch doors later in Settings.
             </p>
           </div>
+          <GuidedVoiceFill
+            fields={[
+              { key: "name", id: "register-name", label: "Your name" },
+              { key: "shop_name", id: "register-shop-name", label: "Business name" },
+              { key: "email", id: "register-email", label: "Email", transform: normalizeEmailDictation },
+            ]}
+            onFill={setValue}
+          />
           <Button data-testid="register-submit-button" type="submit" disabled={busy}
             className="w-full bg-amber-600 hover:bg-amber-500 text-black font-semibold">
             {busy ? "Creating…" : "Create workspace"} <ArrowRight size={16} className="ms-1 rtl:-scale-x-100" />

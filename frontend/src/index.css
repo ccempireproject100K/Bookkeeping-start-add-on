@@ -80,3 +80,10 @@ h1, h2, h3, h4, .font-display { font-family: 'Outfit', sans-serif; }
 .brand-mark {
   background: linear-gradient(135deg, #f59e0b 0%, #b45309 60%, #78350f 100%);
 }
+
+/* Guided voice fill: the field the walk is currently listening for. */
+.voice-walk-highlight {
+  outline: 2px solid #f59e0b;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.18);
+}

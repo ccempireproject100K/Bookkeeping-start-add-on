@@ -12,6 +12,7 @@ import FaceIcon from "@/components/FaceIcon";
 import { KeyRound, ArrowRight, Fingerprint } from "lucide-react";
 import { loginWithPasskey, passkeysSupported } from "@/lib/webauthn";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
+import { DictateButton, normalizeEmailDictation } from "@/components/Dictation";
 import { LOGIN } from "@/constants/testIds";
 import { useTranslation } from "react-i18next";
 const DEMOS = [{
@@ -151,7 +152,10 @@ export default function Login() {
           <form onSubmit={submit} className="space-y-4">
             <div>
               <Label className="text-xs text-gray-400">{t("login.email")}</Label>
-              <Input data-testid="login-email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder={t("login.youShopCom")} className="mt-1 bg-[#14171E] border-[#222838]" />
+              <div className="flex items-start gap-2 mt-1">
+                <Input data-testid="login-email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder={t("login.youShopCom")} className="bg-[#14171E] border-[#222838]" />
+                <DictateButton onText={text => setEmail(normalizeEmailDictation(text))} />
+              </div>
             </div>
             <div>
               <Label className="text-xs text-gray-400">{t("login.password")}</Label>
