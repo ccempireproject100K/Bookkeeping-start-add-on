@@ -120,8 +120,8 @@ def test_qualification_transition_and_no_retroactivity(monkeypatch):
         fdb = _wire(monkeypatch)
         referrer = await _referrer(fdb)
         code = referrer["code"]
-        # First three pay in the month BEFORE qualification month, so
-        # the qualification-month whole-month rule cannot touch them.
+        # First three pay before qualification: under the ruled law
+        # they never earn, whatever month they paid in.
         dec = datetime(2025, 12, 15, 12, 0, tzinfo=timezone.utc)
         for i in range(1, 4):
             e = await _pay(fdb, code, f"r{i}", f"rp{i}", 10000, dec)
@@ -292,7 +292,7 @@ def test_free_track_cash_only_in_free_month_whole_month(monkeypatch):
     run(_run())
 
 
-def test_qualification_month_counts_in_full(monkeypatch):
+def test_qualification_month_no_retroactive_conversion(monkeypatch):
     async def _run():
         fdb = _wire(monkeypatch)
         referrer = await _referrer(fdb)
@@ -301,20 +301,37 @@ def test_qualification_month_counts_in_full(monkeypatch):
         await _pay(fdb, code, "m0", "mp0", 10000, dec)  # earlier month
         jan5 = datetime(2026, 1, 5, tzinfo=timezone.utc)
         jan6 = datetime(2026, 1, 6, tzinfo=timezone.utc)
-        jan7 = datetime(2026, 1, 7, tzinfo=timezone.utc)
         jan20 = datetime(2026, 1, 20, tzinfo=timezone.utc)
         await _pay(fdb, code, "m1", "mp1", 10000, jan5)
         await _pay(fdb, code, "m2", "mp2", 10000, jan6)
-        await _pay(fdb, code, "m3", "mp3", 10000, jan7)
-        e4 = await _pay(fdb, code, "m4", "mp4", 10000, jan20)
-        assert e4["status"] == "pending"
-        # Same-month pre-qualification entries converted to month 1.
-        for pid in ("mp1", "mp2", "mp3"):
+        # The 4th distinct paying referral qualifies at Jan 20.
+        e4 = await _pay(fdb, code, "m3", "mp3", 10000, jan20)
+        assert e4["status"] == "pending" and e4["share_cents"] == 2500
+        assert e4["month_index"] == 1
+        # Ruled law: same-month pre-qualification payments stay zero
+        # after qualification — nothing is paid retroactively, in
+        # the qualification month or any earlier month.
+        for pid in ("mp0", "mp1", "mp2"):
             e = _earning(fdb, pid)
-            assert e["status"] == "pending" and e["share_cents"] == 2500
-            assert e["month_index"] == 1
-        # The December payment never converts.
-        assert _earning(fdb, "mp0")["status"] == "pre_qualification"
+            assert e["status"] == "pre_qualification", (pid, e)
+            assert e["share_cents"] == 0 and e["rate"] == 0
+            assert e["month_index"] is None
+        # Anchors still equal qualified_at for the first four: the
+        # qualification month counts in full as month 1 of their
+        # clocks (no proration from the qualification day forward).
+        person = await RL.person_by_id(referrer["id"])
+        assert RL.qualified_at_for(person, "trade_circle") == _iso(jan20)
+        atts = {a["account_id"]: a
+                for a in fdb.referral_attributions.docs}
+        for acct in ("m0", "m1", "m2", "m3"):
+            assert atts[acct]["schedule_anchor_at"] == _iso(jan20)
+        # A payment later in the qualification month, after
+        # qualified_at, earns at the month-1 band from that anchor.
+        jan25 = datetime(2026, 1, 25, tzinfo=timezone.utc)
+        late = await _pay(fdb, code, "m1", "mp1b", 10000, jan25)
+        assert late["status"] == "pending"
+        assert late["share_cents"] == 2500 and late["month_index"] == 1
+        assert late["schedule_anchor_at"] == _iso(jan20)
     run(_run())
 
 
@@ -336,11 +353,12 @@ def test_payout_gated_on_qualified_at(monkeypatch):
                                     amount=900, at=at)
         out = await RL.record_manual_payout(
             rq["id"], "trade_circle", note="x", by="op", now=now)
-        # All four first payments landed in the qualification month,
-        # which counts in full: 4 x 225 cleared and payable.
-        assert out["gross_cents"] == 900
+        # Only the 4th (qualifying) payment earns: the first three
+        # are pre-qualification payments and never convert, even
+        # though all four landed in the qualification month.
+        assert out["gross_cents"] == 225
         s = await RL.site_summary(rq["id"], "trade_circle", now=now)
-        assert s["paid"] == 900 and s["qualified"] is True
+        assert s["paid"] == 225 and s["qualified"] is True
     run(_run())
 
 
