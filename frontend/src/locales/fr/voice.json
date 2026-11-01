@@ -11,5 +11,6 @@
   "dictation.unsupported": "La saisie vocale n’est pas disponible dans ce navigateur. Saisissez votre texte à la place, ou utilisez la touche microphone du clavier de votre téléphone.",
   "dictation.walkDone": "C’est terminé — vérifiez chaque donnée, puis touchez le bouton ci-dessous pour finir. Rien n’a encore été envoyé.",
   "dictation.walkPrompt": "{{label}} — parlez maintenant, ou dites « suivant » pour passer ce champ.",
-  "dictation.walkStopped": "La saisie vocale s’est arrêtée. Rien n’a été envoyé — vérifiez le formulaire, puis terminez en touchant le bouton vous-même."
+  "dictation.walkStopped": "La saisie vocale s’est arrêtée. Rien n’a été envoyé — vérifiez le formulaire, puis terminez en touchant le bouton vous-même.",
+  "dictation.browserNote": "La voix fonctionne dans Chrome et Edge, peut se comporter différemment dans Safari et n'est pas proposée dans Firefox — la saisie au clavier fonctionne toujours."
 }

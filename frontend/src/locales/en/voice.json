@@ -11,5 +11,6 @@
   "dictation.unsupported": "Voice typing isn't available in this browser. Type instead, or use the microphone key on your phone's keyboard.",
   "dictation.walkDone": "All set — check everything, then tap the button below to finish. Nothing has been sent yet.",
   "dictation.walkPrompt": "{{label}} — speak now, or say “next” to skip.",
-  "dictation.walkStopped": "Voice fill stopped. Nothing has been sent — check the form, then finish by tapping the button yourself."
+  "dictation.walkStopped": "Voice fill stopped. Nothing has been sent — check the form, then finish by tapping the button yourself.",
+  "dictation.browserNote": "Voice works in Chrome and Edge, may behave differently in Safari, and is not offered in Firefox — typing always works."
 }

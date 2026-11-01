@@ -144,6 +144,12 @@ describe("DictateButton (per-field correction mic)", () => {
     sayFinal(rec, "Hola mundo");
     expect(onText).toHaveBeenCalledWith("Hola mundo");
   });
+
+  test("carries the small browser-variation side note", () => {
+    render(<DictateButton onText={() => {}} />);
+    expect(screen.getByText(/not offered in Firefox/i)).toBeTruthy();
+    expect(screen.getByText(/typing always works/i)).toBeTruthy();
+  });
 });
 
 describe("GuidedVoiceFill (the one-button walk)", () => {
@@ -206,6 +212,11 @@ describe("GuidedVoiceFill (the one-button walk)", () => {
     sayFinal(rec, "siguiente");
     expect(screen.getByLabelText(/your name/i).value).toBe("");
     expect(screen.getByText(/hable ahora/i)).toBeTruthy();
+  });
+
+  test("the walk control carries the browser-variation side note too", () => {
+    render(<WalkHarness onSubmit={jest.fn()} />);
+    expect(screen.getByText(/may behave differently in Safari/i)).toBeTruthy();
   });
 
   test("microphone denied ends the walk with the honest notice", () => {

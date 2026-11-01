@@ -11,5 +11,6 @@
   "dictation.unsupported": "此浏览器不支持语音输入。请改为打字，或使用手机键盘上的麦克风键。",
   "dictation.walkDone": "全部完成 — 请检查每一项，然后点击下方按钮完成。尚未发送任何内容。",
   "dictation.walkPrompt": "{{label}} — 请现在说话，或说“下一个”跳过此项。",
-  "dictation.walkStopped": "语音填写已停止。尚未发送任何内容 — 请检查表单，然后亲自点击按钮完成。"
+  "dictation.walkStopped": "语音填写已停止。尚未发送任何内容 — 请检查表单，然后亲自点击按钮完成。",
+  "dictation.browserNote": "语音功能可在 Chrome 和 Edge 中使用，在 Safari 中可能表现不同，Firefox 不提供此功能——打字输入始终可用。"
 }

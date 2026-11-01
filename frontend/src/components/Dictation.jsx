@@ -228,6 +228,7 @@ export function DictateButton({ onText }) {
       {state === "denied" && <p className={noticeCls}>{t("dictation.denied")}</p>}
       {state === "error" && <p className={noticeCls}>{t("dictation.error")}</p>}
       {state === "langError" && <p className={noticeCls}>{t("dictation.langError")}</p>}
+      <p className="text-[11px] text-gray-600 mt-1 max-w-[200px]">{t("dictation.browserNote")}</p>
     </div>
   );
 }
@@ -436,6 +437,7 @@ export function GuidedVoiceFill({ fields, onFill }) {
       {notice === "error" && <p className={noticeCls}>{t("dictation.error")}</p>}
       {notice === "langError" && <p className={noticeCls}>{t("dictation.langError")}</p>}
       <p className={hintCls}>{t("dictation.privacy")}</p>
+      <p className={hintCls}>{t("dictation.browserNote")}</p>
     </div>
   );
 }

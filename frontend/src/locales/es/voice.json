@@ -11,5 +11,6 @@
   "dictation.unsupported": "La entrada por voz no está disponible en este navegador. Escriba en su lugar, o use la tecla de micrófono en el teclado de su teléfono.",
   "dictation.walkDone": "Todo listo — revise cada dato y luego toque el botón de abajo para terminar. Todavía no se ha enviado nada.",
   "dictation.walkPrompt": "{{label}} — hable ahora, o diga «siguiente» para saltar este campo.",
-  "dictation.walkStopped": "La entrada por voz se detuvo. No se ha enviado nada — revise el formulario y termine tocando el botón usted mismo."
+  "dictation.walkStopped": "La entrada por voz se detuvo. No se ha enviado nada — revise el formulario y termine tocando el botón usted mismo.",
+  "dictation.browserNote": "La voz funciona en Chrome y Edge, puede comportarse de forma distinta en Safari y no se ofrece en Firefox; escribir siempre funciona."
 }
