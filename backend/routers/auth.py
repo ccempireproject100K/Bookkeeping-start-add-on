@@ -123,6 +123,26 @@ async def create_workspace(email, password, name, shop_name, role="owner", tenan
         code = ref.strip().upper() if isinstance(ref, str) else ""
         if code:
             tenant["referred_by_code"] = code[:64]
+            # Friend benefit (R-3): recorded at signup through the
+            # link. tier_up runs 14 days from plan start at one tier
+            # above the signup plan; a top-tier (heavy) signup gets
+            # half off its first two paid months instead. The tier_up
+            # is consumed by lib/plans.effective_plan.
+            from datetime import datetime as _dt, timedelta as _td, timezone as _tz
+            _ladder = ("light", "medium", "heavy")
+            _idx = _ladder.index(stored_plan) if stored_plan in _ladder else 0
+            _start = _dt.now(_tz.utc)
+            if _idx == len(_ladder) - 1:
+                tenant["friend_benefit"] = {
+                    "type": "half_off", "signup_plan": stored_plan,
+                    "months": 2, "percent_off": 50,
+                    "starts_at": _start.isoformat()}
+            else:
+                tenant["friend_benefit"] = {
+                    "type": "tier_up", "signup_plan": stored_plan,
+                    "tier": _ladder[_idx + 1], "days": 14,
+                    "starts_at": _start.isoformat(),
+                    "ends_at": (_start + _td(days=14)).isoformat()}
         await db.tenants.insert_one(tenant)
         await seed_coa(Scoped(db.accounts, tenant_id), niche_id)
     user = {

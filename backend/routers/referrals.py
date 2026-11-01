@@ -97,6 +97,7 @@ class AccountIn(BaseModel):
     tenant_id: Optional[str] = None
     standing: Optional[dict] = None
     at: Optional[str] = None
+    signup_plan: Optional[str] = None
 
 
 @router.post("/ingest/accounts")
@@ -109,7 +110,8 @@ async def ingest_account(body: AccountIn,
     return await R.apply_attribution(
         product=product, account_id=body.account_id, email=body.email,
         referral_code=body.referral_code, tenant_id=body.tenant_id,
-        standing=body.standing, at=body.at)
+        standing=body.standing, at=body.at,
+        signup_plan=body.signup_plan)
 
 
 class PaymentIn(BaseModel):
@@ -203,6 +205,46 @@ async def readback_summary(account_id: str = None, email: str = None,
     product's member-facing referral screen."""
     person = await _person_for_readback(actor, account_id, email)
     return await R.empire_summary(person)
+
+
+@router.get("/me")
+async def my_referral_summary(user: dict = Depends(require("ops:manage"))):
+    """The signed-in books member's own referral surface: their link
+    code, qualification progress, per-referral bands, free months and
+    the config-driven terms. Creates the member's ledger person on
+    first visit (link is live from day one — including day one of a
+    card-door trial, whose tenant carries referral_active). If this
+    workspace itself signed up through a link, its attribution (and
+    the R-3 friend benefit recorded on it) is registered here too."""
+    tenant = await db.tenants.find_one({"id": user["tenant_id"]}) or {}
+    person = await R.person_by_account("books", user["tenant_id"])
+    if person is None:
+        person = await R.person_by_email(user.get("email") or "")
+    if person is None:
+        person = await R.ensure_person(user.get("email"))
+    paying = bool(tenant.get("plan")) and not tenant.get("trial_ends_at")
+    person = await R.link_account(
+        person, product="books", account_id=user["tenant_id"],
+        tenant_id=user["tenant_id"], email=user.get("email"),
+        standing={"paying": bool(tenant.get("referral_active")
+                                 or tenant.get("subscribed_at")
+                                 or paying)})
+    if tenant.get("referred_by_code"):
+        await R.apply_attribution(
+            product="books", account_id=user["tenant_id"],
+            email=user.get("email"),
+            referral_code=tenant["referred_by_code"],
+            tenant_id=user["tenant_id"],
+            signup_plan=tenant.get("plan"))
+    summary = await R.empire_summary(await R.person_by_id(person["id"]))
+    summary["referral_active"] = bool(
+        tenant.get("referral_active")
+        or (tenant.get("trial_door") == "card"
+            and tenant.get("trial_state") == "trialing")
+        or summary["sites"])
+    summary["link"] = f"/register?ref={summary['code']}"
+    summary["friend_benefit_received"] = tenant.get("friend_benefit")
+    return summary
 
 
 @router.get("/payout-options")
@@ -422,7 +464,8 @@ async def admin_balances(user: dict = Depends(require("ledger:admin")),
                 product,
                 earn_totals.get(key, {"pending": 0, "available": 0,
                                       "paid": 0, "clawed_back": 0}),
-                adjustments.get(key, 0), frozen, paying.get(key, 0))
+                adjustments.get(key, 0), frozen, paying.get(key, 0),
+                qualified_at=R.qualified_at_for(person, product))
             sites[product] = site
             for k in totals:
                 totals[k] += site[k]
@@ -572,8 +615,8 @@ async def stripe_batch(body: BatchIn,
                 continue
             if s["locked"]:
                 skipped.append({**entry, "reason":
-                                f"locked ({s['paying_referrals']} of "
-                                f"{R.UNLOCK_REFERRALS} paying referrals "
+                                f"not qualified ({s['paying_referrals']} of "
+                                f"{R.CONFIG['qualify_at']} paying referrals "
                                 f"on {product})"})
                 continue
             if s["payable"] <= 0:

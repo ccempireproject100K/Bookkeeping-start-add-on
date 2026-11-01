@@ -75,6 +75,7 @@ import Marketplace from "@/pages/Marketplace";
 import Developers from "@/pages/Developers";
 import AuditLog from "@/pages/AuditLog";
 import ReferralPayouts from "@/pages/ReferralPayouts";
+import Referral from "@/pages/Referral";
 import InviteAccept from "@/pages/InviteAccept";
 import { useTranslation } from "react-i18next";
 function Protected({
@@ -166,6 +167,7 @@ function App() {
               <Route path="tax" element={<Tax />} />
               <Route path="audit" element={<AuditLog />} />
               <Route path="referral-payouts" element={<ReferralPayouts />} />
+              <Route path="referral" element={<Referral />} />
               <Route path="settings" element={<Settings />} />
               <Route path="marketplace" element={<Marketplace />} />
               <Route path="developers" element={<Developers />} />

@@ -404,6 +404,13 @@ const NAV = [{
   roles: ["owner", "accountant"],
   groupKey: "navGroup.operations"
 }, {
+  to: "/referral",
+  labelKey: "nav.referrals",
+  icon: FileText,
+  testid: "nav-referrals",
+  roles: ["owner", "accountant", "bookkeeper"],
+  groupKey: "navGroup.growth"
+}, {
   to: "/referral-payouts",
   labelKey: "nav.referralPayouts",
   icon: FileText,

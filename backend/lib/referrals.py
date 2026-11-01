@@ -1,36 +1,59 @@
 """Empire referral ledger — the single host implementation of the
-referral program law (owner-ruled 2026-10-24; see
-~/workspace/empire-referral-program-scope-2026-10-24.md).
+referral program law (owner build word 2026-11-01; adopted schedule
+R-1, free month R-2, friend benefit R-3).
 
-The law, ported from Trade Circle's `app/referrals.py` semantics:
+The law implemented here:
 
-* A referrer earns 25% of what each referred person actually pays,
-  per referral, for a 6-month window (183 days) anchored at the
-  referred person's first payment, net of refunds. An unpaid referral
-  earns nothing; commissions accrue from referral #1.
-* An earning becomes payable after 60 days of clearing, and only
-  while the referrer is not frozen.
-* Good standing (ONE empire rule): the referrer earns only while not
-  disabled on any linked product account, not frozen, and a paying
-  member on at least one product. Earnings recorded while ineligible
-  are stored as `not_eligible` at zero — they still prove the referred
-  member paid.
-* A chargeback (dispute opened) claws back that month's earnings for
-  the referrer across all products and freezes payouts; a won dispute
-  releases them, a lost one stands and paid-out amounts become
-  negative adjustments against the next payout. 3 disputes opened
-  within 183 days flags the person for manual review (also a freeze).
-* Payout unlock is PER SITE (owner ruling update): pots are computed
-  per (referrer, product); 3 paying referrals on a site unlock THAT
-  site's pot — the whole accrued pot, first referrals included.
-  Recorded payouts are never undone by the lock.
+* Tiered schedule per referral, by whole months from the referral's
+  schedule anchor: months 1-6 = 25%, 7-12 = 10%, 13-24 = 2%,
+  25-36 = 1% of what the referred customer actually paid. Months
+  37-48 = 1% ONLY for referrals whose `bonus_year_locked` was stamped
+  at their first payment (referrer at/above the 250 active-paying
+  threshold at that moment). Beyond the entitlement end: nothing
+  (CONFIG tail_open_ended=False).
+* Qualification: `qualified_at` is set exactly once, per site, when
+  the referrer's 4th distinct paying referred person makes their
+  first payment. Prospective only — payments before qualification are
+  stored as `pre_qualification` audit entries at zero share (the old
+  retroactive backfill is gone). First four referrals' anchors are
+  `qualified_at`; later referrals anchor at their own first payment.
+  The qualification month counts in full for the first four.
+* Free month at the 3rd paying referral (R-2): one month of the
+  referrer's current paid plan on that site (free member -> Starter
+  month), recorded as a grant; not cash, no clock effects; stacks
+  sequentially behind an already-active free month on that site.
+* Thresholds: 250 active paying referrals stamps the bonus lock
+  (active = a payment within CONFIG active_window_days, not cancelled
+  after); 100 is a milestone only. Grace (3 months on dips) does NOT
+  stamp new locks (grace_locks_bonus=False); locks are never
+  retro-fitted (bonus_retrofit=False).
+* Clocks are wall-clock continuous: cancel stops earnings, return
+  resumes at the current month index; the anchor never moves.
+* Friend benefit (R-3) is recorded on the relationship at signup
+  through a link: tier_up (one tier above the signup plan for 14 days
+  from plan start) or, for top-tier signups, half_off for the first
+  two paid months. Books ladder: light -> medium -> heavy (top).
+* Payouts trigger only on money actually arrived; 60-day clearing;
+  rails unchanged (Stripe Connect batch, Melio queue with the $2
+  paper-check fee disclosed, manual recording, pay-file export) —
+  only the gating input changed from the old unlock count to
+  `qualified_at`. Refund recompute uses the ORIGINAL payment's band
+  rate. Paid-out money is never auto-clawed-back; a refund on a
+  paid-out earning books a negative adjustment, as before.
+* Earned-free-month cash eligibility: a referrer who is not a paying
+  member earns cash only for referral payments in a calendar month
+  overlapping one of their earned free-month windows on that product
+  (standing attestations), credited at whole-month granularity.
+* Good standing (ONE empire rule) otherwise unchanged: not disabled
+  on any linked product account, not frozen. A chargeback claws back
+  that month's earnings and freezes payouts; 3 disputes opened within
+  183 days flags the person for manual review.
 
 Shape notes: books conventions (integer cents, ISO timestamps, `id`
 fields). Ingest stores raw events immutably in `referral_events`
 (deduped on a deterministic key); computation reads those events and
 the person/attribution records — never the reverse. Earnings are
-first-class documents with deterministic ids (`{product}:{payment_id}`)
-exactly as TC keys one earning per invoice.
+first-class documents with deterministic ids (`{product}:{payment_id}`).
 """
 import secrets as _secrets
 from datetime import datetime, timedelta, timezone
@@ -40,13 +63,50 @@ from pymongo.errors import DuplicateKeyError
 from db import db
 from lib.base import new_id, now_iso
 
-SHARE = 0.25
-WINDOW_DAYS = 183           # about 6 months, anchored at first payment
-CLEARING_DAYS = 60
-REVIEW_CHARGEBACKS = 3
-REVIEW_WINDOW_DAYS = 183
-UNLOCK_REFERRALS = 3        # paying referrals per site (owner ruling)
-PAPER_CHECK_FEE_CENTS = 200  # $2.00, deducted from paper-check payouts
+# ------------------------------------------------------------------ config
+# ONE config block for every program number (draft change 9). Nothing
+# below may hard-code a rate, duration, or threshold: read CONFIG.
+CONFIG = {
+    "qualify_at": 4,
+    # (last month of band, rate) — months are 1-based whole months
+    # from the referral's schedule anchor. Adopted schedule (R-1).
+    "bands": [(6, 0.25), (12, 0.10), (24, 0.02), (36, 0.01)],
+    "bonus_band": (48, 0.01),          # months 37-48, locked referrals only
+    "bonus_threshold": 250,            # active paying referrals -> lock
+    "milestone_threshold": 100,        # milestone only; confers nothing
+    "grace_months": 3,                 # dip grace under the threshold
+    "clearing_days": 60,
+    "review_chargebacks": 3,
+    "review_window_days": 183,
+    "qualification_scope": "per_site",
+    "active_window_days": 45,          # "active paying" for thresholds
+    "tail_open_ended": False,          # earnings stop at entitlement end
+    "grace_locks_bonus": False,        # grace does NOT stamp new locks
+    "bonus_retrofit": False,           # locks never applied retroactively
+    "free_track_counts_toward_qualification": True,
+    "free_month_stacking": "sequential",
+    "free_month_counts_toward_portable_gate": False,
+    "friend_benefit_requires_plan_signup": True,
+    "friend_benefit_days": 14,
+    "friend_benefit_half_off_months": 2,
+    "paper_check_fee_cents": 200,
+    # Books plan ladder for the friend benefit (R-3): light $18.99 /
+    # medium $39.99 standalone; heavy is top (volume/custom priced).
+    "books_plan_ladder": ["light", "medium", "heavy"],
+    "books_plan_prices_cents": {"light": 1899, "medium": 3999,
+                                "heavy": None},
+    # Referrer's current-plan fallback for the R-2 free month when the
+    # referrer is a free member on the site: a Starter month.
+    "free_month_free_member_plan": "starter",
+}
+
+CLEARING_DAYS = CONFIG["clearing_days"]
+REVIEW_CHARGEBACKS = CONFIG["review_chargebacks"]
+REVIEW_WINDOW_DAYS = CONFIG["review_window_days"]
+PAPER_CHECK_FEE_CENTS = CONFIG["paper_check_fee_cents"]
+# Legacy names kept as config-derived aliases for existing importers.
+SHARE = CONFIG["bands"][0][1]
+UNLOCK_REFERRALS = CONFIG["qualify_at"]
 ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"  # no 0/O or 1/I (TC's)
 PRODUCTS = ("trade_circle", "books", "momo")
 PAYOUT_PREFERENCES = ("stripe", "bank_transfer", "paper_check")
@@ -230,6 +290,250 @@ def good_standing(person: dict, frozen: bool) -> bool:
             and facts["paying_any"])
 
 
+
+# ------------------------------------------------------- schedule engine
+
+def _whole_months(anchor: datetime, at: datetime) -> int:
+    """Whole months elapsed from anchor to `at` (0 = first month)."""
+    months = (at.year - anchor.year) * 12 + (at.month - anchor.month)
+    if at.day < anchor.day:
+        months -= 1
+    return max(0, months)
+
+
+def month_index(anchor_iso, at) -> int:
+    """1-based schedule month of `at` on a clock anchored at anchor_iso."""
+    return _whole_months(_parse(anchor_iso), _parse(at)) + 1
+
+
+def band_for(month_idx: int, bonus_locked: bool):
+    """(rate, last_month) for a 1-based schedule month, or None when
+    the entitlement has ended (tail is NOT open-ended, per config)."""
+    for last, rate in CONFIG["bands"]:
+        if month_idx <= last:
+            return rate
+    last, rate = CONFIG["bonus_band"]
+    if bonus_locked and month_idx <= last:
+        return rate
+    return None
+
+
+def friend_benefit_for(signup_plan: str = None) -> dict:
+    """The R-3 friend benefit for a signup on `signup_plan` (books
+    ladder). Top tier has no tier above: half off the first two paid
+    months instead of the 14-day tier-up."""
+    ladder = CONFIG["books_plan_ladder"]
+    plan = (signup_plan or "").strip().lower() or None
+    if plan not in ladder:
+        # Unknown/no plan named: the benefit attaches at plan signup;
+        # default to a tier-up from the ladder's first rung.
+        plan = ladder[0]
+    idx = ladder.index(plan)
+    if idx == len(ladder) - 1:
+        return {"type": "half_off", "signup_plan": plan,
+                "months": CONFIG["friend_benefit_half_off_months"],
+                "percent_off": 50}
+    return {"type": "tier_up", "signup_plan": plan,
+            "tier": ladder[idx + 1],
+            "days": CONFIG["friend_benefit_days"],
+            "starts": "plan_start"}
+
+
+def qualified_at_for(person: dict, product: str):
+    """This site's qualified_at (ISO) or None. Scope is per_site per
+    config; the map lives on the person record."""
+    if CONFIG["qualification_scope"] == "per_site":
+        return (person.get("qualified_at_by_product") or {}).get(product)
+    return person.get("qualified_at")
+
+
+async def _set_qualified(person: dict, product: str, at_iso: str):
+    by = dict(person.get("qualified_at_by_product") or {})
+    if by.get(product):
+        return person  # set exactly once
+    by[product] = at_iso
+    fields = {"qualified_at_by_product": by}
+    if not person.get("qualified_at"):
+        fields["qualified_at"] = at_iso
+    await db.empire_persons.update_one(
+        {"id": person["id"]}, {"$set": fields})
+    person.update(fields)
+    return person
+
+
+async def _attributions_of_referrer(referrer_id: str, product: str):
+    return await db.referral_attributions.find(
+        {"referrer_id": referrer_id, "product": product}).to_list(10000)
+
+
+async def _distinct_paying_ids(referrer_id: str, product: str):
+    """Distinct referred persons with at least one stored earning of
+    any cash/audit status and positive net on this site."""
+    ids = set()
+    async for e in db.referral_earnings.find(
+            {"referrer_id": referrer_id, "product": product}):
+        if (e.get("revenue_cents", 0) - (e.get("refunded_cents") or 0)) > 0:
+            ids.add(e["referred_id"])
+    return ids
+
+
+async def active_paying_count(referrer_id: str, product: str,
+                              at: datetime) -> int:
+    """Active paying referrals at `at`: distinct referred persons with
+    a payment within CONFIG active_window_days before `at` whose
+    account standing is not cancelled after that payment (standing is
+    attested via link_account's disabled flag — a cancelled account is
+    attested disabled; absent an attestation the payment stands)."""
+    window_start = at - timedelta(days=CONFIG["active_window_days"])
+    ids = set()
+    async for e in db.referral_earnings.find(
+            {"referrer_id": referrer_id, "product": product}):
+        earned = e.get("earned_at")
+        if earned and _parse(earned) >= window_start and _parse(earned) <= at:
+            if (e.get("revenue_cents", 0)
+                    - (e.get("refunded_cents") or 0)) > 0:
+                ids.add(e["referred_id"])
+    # Exclude anyone whose account is attested cancelled/disabled now.
+    live = set()
+    for rid in ids:
+        person = await person_by_id(rid)
+        facts = standing_facts(person) if person else {}
+        if not facts.get("disabled_any"):
+            live.add(rid)
+    return len(live)
+
+
+async def threshold_state(referrer_id: str, product: str,
+                          at: datetime = None) -> dict:
+    """Derived threshold state for a site pot: current active count,
+    whether the bonus threshold is currently met, milestone flag, and
+    the tracked 3-month grace on dips below the bonus threshold."""
+    at = at or _now()
+    count = await active_paying_count(referrer_id, product, at)
+    person = await person_by_id(referrer_id)
+    state = ((person or {}).get("threshold_state") or {}).get(product, {})
+    above = count >= CONFIG["bonus_threshold"]
+    grace_until = state.get("grace_until")
+    in_grace = bool(grace_until and _parse(grace_until) >= at)
+    return {"active_paying_referrals": count,
+            "bonus_threshold": CONFIG["bonus_threshold"],
+            "above_bonus_threshold": above,
+            "milestone_reached":
+                count >= CONFIG["milestone_threshold"],
+            "milestone_threshold": CONFIG["milestone_threshold"],
+            "grace_until": grace_until if in_grace else None,
+            "in_grace": in_grace and not above}
+
+
+async def _track_threshold(referrer_id: str, product: str, at: datetime):
+    """Persist above_since / grace_until for the bonus threshold so a
+    dip starts the 3-month grace clock (tracked, per settled law)."""
+    person = await person_by_id(referrer_id)
+    if person is None:
+        return
+    count = await active_paying_count(referrer_id, product, at)
+    all_state = dict(person.get("threshold_state") or {})
+    st = dict(all_state.get(product) or {})
+    if count >= CONFIG["bonus_threshold"]:
+        if not st.get("above_since"):
+            st["above_since"] = _iso(at)
+        st.pop("grace_until", None)
+    elif st.get("above_since") and not st.get("grace_until"):
+        grace = at.replace()
+        # +grace_months calendar months, clamped to month end.
+        m = grace.month - 1 + CONFIG["grace_months"]
+        year, month = grace.year + m // 12, m % 12 + 1
+        day = min(grace.day, [31, 29 if year % 4 == 0 and
+                (year % 100 != 0 or year % 400 == 0) else 28,
+                31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month - 1])
+        st["grace_until"] = _iso(grace.replace(year=year, month=month,
+                                               day=day))
+    all_state[product] = st
+    await db.empire_persons.update_one(
+        {"id": referrer_id}, {"$set": {"threshold_state": all_state}})
+
+
+# ------------------------------------------------- free months (R-2 + C-7)
+
+async def record_free_month_window(referrer_id: str, product: str, *,
+                                   start: str, end: str,
+                                   source: str = "attestation",
+                                   plan: str = None) -> dict:
+    """Store an earned-free-month window (standing attestation). Used
+    by the R-2 grant at the 3rd paying referral and by products
+    reporting Cheers-bought grant months to the host."""
+    doc = {"id": new_id(), "referrer_id": referrer_id,
+           "product": product, "start": start, "end": end,
+           "source": source, "plan": plan, "created_at": now_iso()}
+    await db.referral_free_months.insert_one(doc)
+    return doc
+
+
+async def free_month_windows(referrer_id: str, product: str):
+    return await db.referral_free_months.find(
+        {"referrer_id": referrer_id, "product": product}).to_list(100)
+
+
+def _month_overlaps_window(paid_at: datetime, window: dict) -> bool:
+    """Whole-month rule: a payment counts when its calendar month
+    overlaps the window at all."""
+    start, end = _parse(window["start"]), _parse(window["end"])
+    month_start = paid_at.replace(day=1, hour=0, minute=0, second=0,
+                                  microsecond=0)
+    if paid_at.month == 12:
+        next_month = month_start.replace(year=paid_at.year + 1, month=1)
+    else:
+        next_month = month_start.replace(month=paid_at.month + 1)
+    return start < next_month and end >= month_start
+
+
+async def in_free_month(referrer_id: str, product: str,
+                        paid_at: datetime) -> bool:
+    for w in await free_month_windows(referrer_id, product):
+        if _month_overlaps_window(paid_at, w):
+            return True
+    return False
+
+
+async def _grant_referral_free_month(referrer: dict, product: str,
+                                     at: datetime):
+    """R-2: at the 3rd paying referral, grant one month of the
+    referrer's current paid plan on this site (free member -> the
+    configured Starter month). Sequential stacking: when another free
+    month is already active on the site, the grant queues behind it.
+    Idempotent per (referrer, product) via a deterministic id."""
+    gid = f"grant3:{referrer['id']}:{product}"
+    if await db.referral_free_months.find_one({"id": gid}):
+        return None
+    plan = None
+    for a in referrer.get("product_accounts", []):
+        if a.get("product") == product and a.get("paying"):
+            plan = a.get("plan") or "paid"
+    if plan is None:
+        plan = CONFIG["free_month_free_member_plan"]
+    start = at
+    for w in await free_month_windows(referrer["id"], product):
+        wend = _parse(w["end"])
+        if wend > start:
+            start = wend  # sequential: begins when the active one ends
+    # One calendar month from start.
+    m = start.month
+    year, month = (start.year + (1 if m == 12 else 0),
+                   1 if m == 12 else m + 1)
+    day = min(start.day, [31, 29 if year % 4 == 0 and
+            (year % 100 != 0 or year % 400 == 0) else 28,
+            31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month - 1])
+    end = start.replace(year=year, month=month, day=day)
+    doc = {"id": gid, "referrer_id": referrer["id"], "product": product,
+           "start": _iso(start), "end": _iso(end),
+           "source": "third_paying_referral", "plan": plan,
+           "counts_toward_portable_gate":
+               CONFIG["free_month_counts_toward_portable_gate"],
+           "created_at": now_iso()}
+    await db.referral_free_months.insert_one(doc)
+    return doc
+
+
 # ---------------------------------------------------------------- raw ingest
 
 def _dedupe_key(kind: str, payload: dict) -> str:
@@ -303,10 +607,14 @@ async def _resolve_referrer(att: dict):
 async def apply_attribution(*, product: str, account_id: str,
                             email: str = None, referral_code: str = None,
                             tenant_id: str = None, standing: dict = None,
-                            at=None) -> dict:
+                            at=None, signup_plan: str = None) -> dict:
     """Register/attest a product account: link it to its person
     (email join key) and, when a referral code is presented, record
-    the attribution — once per account; the first code wins."""
+    the attribution — once per account; the first code wins. A signup
+    through a link records the R-3 friend benefit on the relationship
+    (from `signup_plan`, or standing["signup_plan"]). Standing
+    attestations may also carry earned-free-month windows
+    (standing["free_month_windows"]: [{start, end, source?}])."""
     person = await ensure_person(email)
     person = await link_account(
         person, product=product, account_id=account_id,
@@ -314,6 +622,7 @@ async def apply_attribution(*, product: str, account_id: str,
     att_id = f"{product}:{account_id}"
     att = await db.referral_attributions.find_one({"id": att_id})
     if att is None:
+        plan = signup_plan or (standing or {}).get("signup_plan")
         att = {
             "id": att_id,
             "product": product,
@@ -325,6 +634,10 @@ async def apply_attribution(*, product: str, account_id: str,
             "referrer_id": None,
             "status": "none",
             "at": _iso(_parse(at)) if at else now_iso(),
+            "schedule_anchor_at": None,
+            "bonus_year_locked": False,
+            "friend_benefit": (friend_benefit_for(plan)
+                               if referral_code and plan else None),
         }
         try:
             await db.referral_attributions.insert_one(att)
@@ -332,28 +645,26 @@ async def apply_attribution(*, product: str, account_id: str,
             att = await db.referral_attributions.find_one({"id": att_id})
     if att.get("referral_code") and not att.get("referrer_id"):
         att = await _resolve_referrer(att)
-        if att.get("referrer_id"):
-            await _backfill_earnings(att)
+        # NOTE: no retroactive backfill. Payments reported before the
+        # referrer was resolved stay as raw events; under the new law
+        # pre-qualification payments earn nothing in any case, and any
+        # payment that should earn arrives (or is replayed) through
+        # apply_payment after the link exists.
+    if standing and standing.get("free_month_windows") \
+            and att.get("referrer_id"):
+        for w in standing["free_month_windows"]:
+            await record_free_month_window(
+                att["referrer_id"], product, start=w["start"],
+                end=w["end"], source=w.get("source", "attestation"),
+                plan=w.get("plan"))
     return {"person_id": person["id"], "attribution_status": att["status"],
-            "referrer_id": att.get("referrer_id")}
+            "referrer_id": att.get("referrer_id"),
+            "friend_benefit": att.get("friend_benefit")}
 
 
 async def _attribution_for(product: str, account_id: str):
     return await db.referral_attributions.find_one(
         {"id": f"{product}:{account_id}"})
-
-
-async def _backfill_earnings(att: dict):
-    """A referrer resolved late (code imported after payments were
-    reported): create the earnings those stored payments should have
-    produced, in paid_at order so the window anchor is exact."""
-    events = await db.referral_events.find(
-        {"product": att["product"], "kind": "payment",
-         "account_id": att["account_id"]}).sort("received_at", 1).to_list(1000)
-    payloads = sorted((e["payload"] for e in events),
-                      key=lambda p: _parse(p["paid_at"]))
-    for p in payloads:
-        await _apply_payment(att, p)
 
 
 # ---------------------------------------------------------------- payments
@@ -363,10 +674,11 @@ async def _apply_payment(att: dict, payload: dict):
     if amount <= 0:
         return None
     paid_at = _parse(payload["paid_at"])
+    product = payload["product"]
     referred = await person_by_id(att["person_id"])
     # The payer demonstrably pays: their account counts as paying.
     referred = await link_account(
-        referred, product=payload["product"],
+        referred, product=product,
         account_id=payload["account_id"], standing={"paying": True})
     first = referred.get("first_paid_at")
     first_dt = _parse(first) if first else None
@@ -376,35 +688,181 @@ async def _apply_payment(att: dict, payload: dict):
             {"id": referred["id"]},
             {"$set": {"first_paid_at": _iso(paid_at)}})
     if not att.get("referrer_id"):
-        return None  # raw event stored; no one to credit (yet)
-    if paid_at > first_dt + timedelta(days=WINDOW_DAYS):
-        return None  # the 6 months are over
+        return None  # raw event stored; no one to credit
     referrer = await person_by_id(att["referrer_id"])
-    eligible = (referrer is not None
-                and good_standing(referrer, await is_frozen(referrer["id"])))
+    if referrer is None:
+        return None
+    earning_id = f"{product}:{payload['payment_id']}"
+    if await db.referral_earnings.find_one({"id": earning_id}):
+        return await db.referral_earnings.find_one({"id": earning_id})
+
+    # Is this the referred person's first stored payment on this site?
+    prior = await db.referral_earnings.find_one(
+        {"referrer_id": referrer["id"], "product": product,
+         "referred_id": att["person_id"]})
+    is_first_for_referral = prior is None
+
+    qualified_at = qualified_at_for(referrer, product)
+
+    if is_first_for_referral:
+        # Anchor + bonus lock are stamped at the first payment.
+        if qualified_at:
+            # Referrer already qualified: this referral anchors at its
+            # own first payment (it is #5 or later in arrival order of
+            # qualification counting when qualified_at precedes it).
+            anchor = paid_at
+        else:
+            anchor = None  # first four: anchor becomes qualified_at
+        # Bonus lock: stamped iff the referrer's active-paying count
+        # (including this payer) is at/above the threshold right now.
+        # Grace does NOT stamp locks (config grace_locks_bonus=False).
+        active = await active_paying_count(referrer["id"], product,
+                                           paid_at)
+        locked = (active + 1) >= CONFIG["bonus_threshold"]
+        fields = {"bonus_year_locked": bool(locked)}
+        if anchor is not None:
+            fields["schedule_anchor_at"] = _iso(anchor)
+            att["schedule_anchor_at"] = _iso(anchor)
+        att["bonus_year_locked"] = bool(locked)
+        await db.referral_attributions.update_one(
+            {"id": att["id"]}, {"$set": fields})
+
+    # Distinct paying count including this payment (net > 0 so far is
+    # approximated by stored earnings + this one; refunds adjust the
+    # ledger, and qualification once set is never unset).
+    paying_ids = await _distinct_paying_ids(referrer["id"], product)
+    if is_first_for_referral:
+        paying_ids.add(att["person_id"])
+    paying_now = len(paying_ids)
+
+    # R-2 free month at the 3rd paying referral.
+    if is_first_for_referral and paying_now == 3:
+        await _grant_referral_free_month(referrer, product, paid_at)
+
+    # Qualification at the 4th distinct paying referred person.
+    if qualified_at is None and paying_now >= CONFIG["qualify_at"]:
+        qualified_at = _iso(paid_at)
+        referrer = await _set_qualified(referrer, product, qualified_at)
+        # First four referrals anchor at qualified_at.
+        for other in await _attributions_of_referrer(referrer["id"],
+                                                     product):
+            if not other.get("schedule_anchor_at"):
+                await db.referral_attributions.update_one(
+                    {"id": other["id"]},
+                    {"$set": {"schedule_anchor_at": qualified_at}})
+                if other["id"] == att["id"]:
+                    att["schedule_anchor_at"] = qualified_at
+        # Whole-month rule for the qualification month: same-month
+        # pre-qualification audit entries of the first four convert
+        # to real month-1 earnings (nothing earlier ever converts).
+        await _convert_qualification_month(referrer, product, paid_at)
+
+    anchor_iso = att.get("schedule_anchor_at")
+    pre_qual = qualified_at is None or (
+        anchor_iso is not None and paid_at < _parse(anchor_iso)
+        and not (anchor_iso and paid_at.strftime("%Y-%m")
+                 == _parse(anchor_iso).strftime("%Y-%m")))
+    if qualified_at is not None and anchor_iso is None:
+        anchor_iso = qualified_at  # defensive: first-four anchor
+
+    if pre_qual:
+        earning = {
+            "id": earning_id,
+            "referrer_id": referrer["id"],
+            "referred_id": att["person_id"],
+            "product": product,
+            "account_id": payload["account_id"],
+            "payment_id": payload["payment_id"],
+            "charge": payload.get("charge"),
+            "revenue_cents": amount,
+            "refunded_cents": 0,
+            "share_cents": 0,
+            "rate": 0,
+            "month_index": None,
+            "schedule_anchor_at": anchor_iso,
+            "bonus_year_locked": bool(att.get("bonus_year_locked")),
+            "status": "pre_qualification",
+            "month": paid_at.strftime("%Y-%m"),
+            "earned_at": _iso(paid_at),
+        }
+        try:
+            await db.referral_earnings.insert_one(earning)
+        except DuplicateKeyError:
+            return await db.referral_earnings.find_one({"id": earning_id})
+        await _track_threshold(referrer["id"], product, paid_at)
+        return earning
+
+    midx = month_index(anchor_iso, paid_at)
+    rate = band_for(midx, bool(att.get("bonus_year_locked")))
+    if rate is None:
+        status, share, rate_v = "beyond_entitlement", 0, 0
+    else:
+        rate_v = rate
+        # Cash eligibility: good standing, where a non-paying referrer
+        # earns cash only inside an earned free-month window.
+        facts = standing_facts(referrer)
+        frozen = await is_frozen(referrer["id"])
+        if facts["disabled_any"] or frozen:
+            status, share = "not_eligible", 0
+        elif facts["paying_any"]:
+            status, share = "pending", round(amount * rate)
+        elif await in_free_month(referrer["id"], product, paid_at):
+            status, share = "pending", round(amount * rate)
+        else:
+            status, share = "not_eligible", 0
     earning = {
-        "id": f"{payload['product']}:{payload['payment_id']}",
-        "referrer_id": att["referrer_id"],
+        "id": earning_id,
+        "referrer_id": referrer["id"],
         "referred_id": att["person_id"],
-        "product": payload["product"],
+        "product": product,
         "account_id": payload["account_id"],
         "payment_id": payload["payment_id"],
         "charge": payload.get("charge"),
         "revenue_cents": amount,
         "refunded_cents": 0,
-        "share_cents": round(amount * SHARE) if eligible else 0,
-        "status": "pending" if eligible else "not_eligible",
+        "share_cents": share,
+        "rate": rate_v,
+        "month_index": midx,
+        "schedule_anchor_at": anchor_iso,
+        "bonus_year_locked": bool(att.get("bonus_year_locked")),
+        "status": status,
         "month": paid_at.strftime("%Y-%m"),
         "earned_at": _iso(paid_at),
     }
-    existing = await db.referral_earnings.find_one({"id": earning["id"]})
-    if existing:
-        return existing
     try:
         await db.referral_earnings.insert_one(earning)
     except DuplicateKeyError:
-        return await db.referral_earnings.find_one({"id": earning["id"]})
+        return await db.referral_earnings.find_one({"id": earning_id})
+    await _track_threshold(referrer["id"], product, paid_at)
     return earning
+
+
+async def _convert_qualification_month(referrer: dict, product: str,
+                                       qualified_dt: datetime):
+    """Qualification-month whole-month rule: pre_qualification entries
+    earned in qualified_at's calendar month become month-1 earnings at
+    the first band (subject to the same standing/free-month cash
+    eligibility as a live payment). Earlier months never convert."""
+    ym = qualified_dt.strftime("%Y-%m")
+    async for e in db.referral_earnings.find(
+            {"referrer_id": referrer["id"], "product": product,
+             "status": "pre_qualification", "month": ym}):
+        facts = standing_facts(referrer)
+        frozen = await is_frozen(referrer["id"])
+        paid_dt = _parse(e["earned_at"])
+        if facts["disabled_any"] or frozen:
+            status, share = "not_eligible", 0
+        elif facts["paying_any"] or await in_free_month(
+                referrer["id"], product, paid_dt):
+            status = "pending"
+            share = round(e["revenue_cents"] * CONFIG["bands"][0][1])
+        else:
+            status, share = "not_eligible", 0
+        await db.referral_earnings.update_one(
+            {"id": e["id"]},
+            {"$set": {"status": status, "share_cents": share,
+                      "rate": CONFIG["bands"][0][1], "month_index": 1,
+                      "schedule_anchor_at": _iso(qualified_dt)}})
 
 
 async def apply_payment(*, product: str, account_id: str, payment_id: str,
@@ -438,8 +896,15 @@ async def apply_refund(*, product: str, payment_id: str,
     total = max(int(earning.get("refunded_cents") or 0),
                 int(refunded_total_cents))
     net = max(0, earning["revenue_cents"] - total)
-    share = (round(net * SHARE)
-             if earning["status"] != "not_eligible" else 0)
+    # Recompute at the ORIGINAL payment's band rate — stored on the
+    # earning at creation, never today's band.
+    rate = earning.get("rate")
+    if rate is None:  # legacy rows from before the schedule engine
+        rate = SHARE if earning.get("status") == "pending" else 0
+    share = (round(net * rate)
+             if earning["status"] not in ("not_eligible",
+                                          "pre_qualification",
+                                          "beyond_entitlement") else 0)
     await db.referral_earnings.update_one(
         {"id": earning["id"]},
         {"$set": {"refunded_cents": total, "share_cents": share}})
@@ -598,7 +1063,8 @@ async def paying_referral_count(referrer_id: str, product: str) -> int:
     counter that could drift — TC's rule, per site."""
     rows = await db.referral_earnings.aggregate(_paying_stages(
         {"referrer_id": referrer_id, "product": product,
-         "status": {"$in": ["pending", "paid", "not_eligible"]}},
+         "status": {"$in": ["pending", "paid", "not_eligible",
+                            "pre_qualification"]}},
         "$referred_id")).to_list(1)
     return int(rows[0]["n"]) if rows else 0
 
@@ -626,11 +1092,13 @@ async def _site_parts(referrer_id: str, product: str, cutoff: str):
 
 
 def _summary_dict(product: str, totals: dict, adjust: int,
-                  frozen: bool, paying: int) -> dict:
+                  frozen: bool, paying: int,
+                  qualified_at: str = None) -> dict:
     """The site-summary shape, assembled from precomputed parts.
     site_summary and the empire-wide admin read share this so the
-    two paths can never drift apart."""
-    locked = paying < UNLOCK_REFERRALS
+    two paths can never drift apart. The pot's gate is qualification
+    (qualified_at set), not the old per-site unlock count."""
+    locked = qualified_at is None
     cleared = max(0, totals["available"] + adjust)
     return {
         "product": product,
@@ -639,10 +1107,14 @@ def _summary_dict(product: str, totals: dict, adjust: int,
         "earned_cents": totals["pending"] + totals["available"]
                         + totals["paid"],
         "paying_referrals": paying,
-        "unlock_at": UNLOCK_REFERRALS,
+        "qualified": not locked,
+        "qualified_at": qualified_at,
+        "qualify_at": CONFIG["qualify_at"],
+        # Legacy aliases (same values) for older readers.
+        "unlock_at": CONFIG["qualify_at"],
         "locked": locked,
-        # What the lock itself holds: the cleared pot that would be
-        # payable today if this site were unlocked.
+        # What the gate itself holds: the cleared pot that would be
+        # payable today if this site were qualified.
         "locked_cents": cleared if locked else 0,
         "payable": 0 if (frozen or locked) else cleared,
         "frozen": frozen,
@@ -658,7 +1130,10 @@ async def site_summary(referrer_id: str, product: str,
     totals, adjust, paying = await _site_parts(referrer_id, product,
                                                cutoff)
     frozen = await is_frozen(referrer_id)
-    return _summary_dict(product, totals, adjust, frozen, paying)
+    person = await person_by_id(referrer_id)
+    return _summary_dict(product, totals, adjust, frozen, paying,
+                         qualified_at=qualified_at_for(person or {},
+                                                       product))
 
 
 async def empire_buckets(now: datetime = None):
@@ -698,7 +1173,8 @@ async def empire_buckets(now: datetime = None):
             row.get("total") or 0
     paying = {}
     stages = _paying_stages(
-        {"status": {"$in": ["pending", "paid", "not_eligible"]}},
+        {"status": {"$in": ["pending", "paid", "not_eligible",
+                            "pre_qualification"]}},
         {"r": "$referrer_id", "p": "$product", "d": "$referred_id"})
     # Replace the bare-count tail with a per-site regroup.
     stages[-1] = {"$group": {
@@ -745,23 +1221,74 @@ async def empire_summary(person: dict, now: datetime = None) -> dict:
             "net_cents": p["net_cents"], "currency": p.get("currency", "usd"),
             "reference": p.get("reference"), "at": p["at"],
         })
+    referrals = []
+    async for att in db.referral_attributions.find(
+            {"referrer_id": rid}):
+        anchor = att.get("schedule_anchor_at")
+        band = None
+        if anchor:
+            rate = band_for(month_index(anchor, now or _now()),
+                            bool(att.get("bonus_year_locked")))
+            band = rate
+        referrals.append({
+            "product": att["product"],
+            "account_id": att["account_id"],
+            "referred_id": att["person_id"],
+            "schedule_anchor_at": anchor,
+            "current_band_rate": band,
+            "bonus_year_locked": bool(att.get("bonus_year_locked")),
+            "friend_benefit": att.get("friend_benefit"),
+        })
+    free_months = []
+    async for w in db.referral_free_months.find({"referrer_id": rid}):
+        free_months.append({"product": w["product"], "start": w["start"],
+                            "end": w["end"], "source": w["source"],
+                            "plan": w.get("plan")})
     return {
         "empire_id": rid,
         "code": person.get("code"),
         "eligible": good_standing(person, frozen),
         "under_review": bool(person.get("review")),
         "frozen": frozen,
+        "qualified_at": person.get("qualified_at"),
+        "qualified_at_by_product":
+            person.get("qualified_at_by_product") or {},
         "payout_preference": preference,
         "paper_check_fee_cents": PAPER_CHECK_FEE_CENTS,
         "sites": sites,
         "totals": totals,
         "payable": totals["payable"],
         "payouts": payouts,
-        "terms": {"share_percent": int(SHARE * 100), "months": 6,
-                  "clearing_days": CLEARING_DAYS,
-                  "review_chargebacks": REVIEW_CHARGEBACKS,
-                  "unlock_referrals": UNLOCK_REFERRALS,
-                  "unlock_is_per_site": True},
+        "referrals": referrals,
+        "free_months": free_months,
+        "terms": terms_payload(),
+    }
+
+
+def terms_payload() -> dict:
+    """Everything a product screen may state about the program,
+    served from CONFIG so screens never hard-code numbers."""
+    return {
+        "bands": [{"through_month": last, "rate": rate}
+                  for last, rate in CONFIG["bands"]],
+        "bonus_band": {"through_month": CONFIG["bonus_band"][0],
+                       "rate": CONFIG["bonus_band"][1],
+                       "threshold": CONFIG["bonus_threshold"]},
+        "months": CONFIG["bands"][-1][0],
+        "qualify_at": CONFIG["qualify_at"],
+        "qualification_scope": CONFIG["qualification_scope"],
+        "bonus_threshold": CONFIG["bonus_threshold"],
+        "milestone_threshold": CONFIG["milestone_threshold"],
+        "grace_months": CONFIG["grace_months"],
+        "clearing_days": CONFIG["clearing_days"],
+        "review_chargebacks": CONFIG["review_chargebacks"],
+        "review_window_days": CONFIG["review_window_days"],
+        "paper_check_fee_cents": PAPER_CHECK_FEE_CENTS,
+        "friend_benefit": {"days": CONFIG["friend_benefit_days"],
+                           "half_off_months":
+                               CONFIG["friend_benefit_half_off_months"],
+                           "books_plan_ladder":
+                               CONFIG["books_plan_ladder"]},
     }
 
 
@@ -832,10 +1359,11 @@ async def payable_or_refuse(referrer_id: str, product: str,
             "Payouts are frozen for this member (open chargeback or review).")
     if s["locked"]:
         raise ReferralError(
-            f"Payouts are locked until a member has {UNLOCK_REFERRALS} "
-            f"paying referrals on {product} — this member has "
-            f"{s['paying_referrals']}. Their earnings keep accruing and "
-            f"unlock in full at {UNLOCK_REFERRALS}.")
+            f"Payouts wait until a member qualifies with "
+            f"{CONFIG['qualify_at']} paying referrals on {product} — "
+            f"this member has {s['paying_referrals']}. Commissions "
+            f"start on the qualification day; nothing is paid "
+            f"retroactively.")
     if s["payable"] <= 0:
         raise ReferralError("Nothing is payable yet.")
     return s
@@ -869,10 +1397,12 @@ async def drain_books_outbox(limit: int = 500) -> dict:
         if code:
             existing = await _attribution_for("books", tenant_id)
             if existing is None:
+                tenant = await db.tenants.find_one({"id": tenant_id})
                 await apply_attribution(
                     product="books", account_id=tenant_id,
                     email=row.get("referred_email"), referral_code=code,
-                    tenant_id=tenant_id)
+                    tenant_id=tenant_id,
+                    signup_plan=(tenant or {}).get("plan"))
         payload = {
             "product": "books", "account_id": tenant_id,
             "payment_id": row["payment_id"],
