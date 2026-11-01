@@ -3,9 +3,10 @@ import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, ArrowRight, CheckCircle2 } from "lucide-react";
 import { api } from "@/lib/api";
 import { findPack } from "@/lib/packs";
-import { asSkin, readMarketChoice, writeMarketChoice } from "@/lib/markets";
+import { asSkin, resolveVisitorMarket, writeMarketChoice, writeNoMarketChoice } from "@/lib/markets";
 import FaceIcon from "@/components/FaceIcon";
 import MarketSelect from "@/components/MarketSelect";
+import MarketLocationSection from "@/components/MarketLocationSection";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 /** Public landing page for one trade edition, rendered entirely from its
@@ -21,8 +22,24 @@ export default function TradeLanding() {
   const { nicheId } = useParams();
   const [pack, setPack] = useState(null);
   const [missing, setMissing] = useState(false);
-  const [marketCode, setMarketCode] = useState(() => readMarketChoice());
+  const [marketCode, setMarketCode] = useState("");
+  const [marketSource, setMarketSource] = useState("default");
   const [skin, setSkin] = useState(null);
+
+  // Market-face precedence (owner ruling 2026-11-01): the visitor's
+  // stored choice wins; else the detected country (edge CF-IPCountry
+  // via /market-packs/detect) when it has a pack; else the US market.
+  // Before this ruling the page silently re-wore whatever market a
+  // previous visit had stored, with no default and no explanation.
+  useEffect(() => {
+    let live = true;
+    resolveVisitorMarket(api).then(({ code, source }) => {
+      if (!live) return;
+      setMarketCode(code);
+      setMarketSource(source);
+    });
+    return () => { live = false; };
+  }, []);
 
   useEffect(() => {
     let live = true;
@@ -52,7 +69,15 @@ export default function TradeLanding() {
   }, [nicheId, marketCode]);
 
   const pickMarket = (code) => {
-    writeMarketChoice(code);
+    if (code) {
+      writeMarketChoice(code);
+      setMarketSource("choice");
+    } else {
+      // An explicit "no market" pick is stored as a sentinel so it
+      // sticks — the page must not re-detect over the visitor's word.
+      writeNoMarketChoice();
+      setMarketSource("none");
+    }
     setMarketCode(code);
   };
 
@@ -199,7 +224,9 @@ export default function TradeLanding() {
           </div>
         )}
 
-        <div className="text-xs text-gray-600">
+        <MarketLocationSection code={marketCode} source={marketSource} onPick={pickMarket} />
+
+        <div className="text-xs text-gray-600 mt-10">
           One of 36 trade editions of Mind at Ease Solutions — same double-entry
           engine, your trade's face.{" "}
           <Link to="/industries" className="text-amber-500 hover:text-amber-400">

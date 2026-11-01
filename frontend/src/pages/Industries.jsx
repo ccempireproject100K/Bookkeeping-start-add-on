@@ -3,9 +3,10 @@ import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { api } from "@/lib/api";
 import { asPackList } from "@/lib/packs";
-import { asMarketList, findMarket, readMarketChoice, writeMarketChoice } from "@/lib/markets";
+import { asMarketList, findMarket, resolveVisitorMarket, writeMarketChoice, writeNoMarketChoice } from "@/lib/markets";
 import FaceIcon from "@/components/FaceIcon";
 import MarketSelect from "@/components/MarketSelect";
+import MarketLocationSection from "@/components/MarketLocationSection";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 /** Public index of all trade editions. Data-driven from the niche packs
@@ -17,8 +18,22 @@ import LanguageSwitcher from "@/components/LanguageSwitcher";
 export default function Industries() {
   const [packs, setPacks] = useState(null);
   const [err, setErr] = useState("");
-  const [marketCode, setMarketCode] = useState(() => readMarketChoice());
+  const [marketCode, setMarketCode] = useState("");
+  const [marketSource, setMarketSource] = useState("default");
   const [market, setMarket] = useState(null);
+
+  // Market-face precedence (owner ruling 2026-11-01): stored choice
+  // > detected country (edge CF-IPCountry via /market-packs/detect)
+  // > US market default. Never a silent non-US face.
+  useEffect(() => {
+    let live = true;
+    resolveVisitorMarket(api).then(({ code, source }) => {
+      if (!live) return;
+      setMarketCode(code);
+      setMarketSource(source);
+    });
+    return () => { live = false; };
+  }, []);
 
   useEffect(() => {
     document.title = "Industries — Mind at Ease Solutions";
@@ -44,7 +59,13 @@ export default function Industries() {
   }, [marketCode]);
 
   const pickMarket = (code) => {
-    writeMarketChoice(code);
+    if (code) {
+      writeMarketChoice(code);
+      setMarketSource("choice");
+    } else {
+      writeNoMarketChoice();
+      setMarketSource("none");
+    }
     setMarketCode(code);
   };
 
@@ -113,6 +134,8 @@ export default function Industries() {
             </Link>
           ))}
         </div>
+
+        <MarketLocationSection code={marketCode} source={marketSource} onPick={pickMarket} />
       </div>
     </div>
   );
