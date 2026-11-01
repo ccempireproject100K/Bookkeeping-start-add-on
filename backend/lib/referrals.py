@@ -17,7 +17,11 @@ The law implemented here:
   stored as `pre_qualification` audit entries at zero share (the old
   retroactive backfill is gone). First four referrals' anchors are
   `qualified_at`; later referrals anchor at their own first payment.
-  The qualification month counts in full for the first four.
+  The qualification month counts in full as month 1 of the first
+  four's clocks (anchors at `qualified_at`, no proration of earnings
+  from the qualification day forward) — that is NOT retroactive:
+  payments made before `qualified_at` never earn, in any month, and
+  stored `pre_qualification` entries never convert.
 * Free month at the 3rd paying referral (R-2): one month of the
   referrer's current paid plan on that site (free member -> Starter
   month), recorded as a grant; not cash, no clock effects; stacks
@@ -752,18 +756,16 @@ async def _apply_payment(att: dict, payload: dict):
                     {"$set": {"schedule_anchor_at": qualified_at}})
                 if other["id"] == att["id"]:
                     att["schedule_anchor_at"] = qualified_at
-        # Whole-month rule for the qualification month: same-month
-        # pre-qualification audit entries of the first four convert
-        # to real month-1 earnings (nothing earlier ever converts).
-        await _convert_qualification_month(referrer, product, paid_at)
+        # No conversion: stored pre_qualification entries stay at
+        # zero forever, regardless of their calendar month (settled
+        # law — nothing is paid retroactively).
 
     anchor_iso = att.get("schedule_anchor_at")
-    pre_qual = qualified_at is None or (
-        anchor_iso is not None and paid_at < _parse(anchor_iso)
-        and not (anchor_iso and paid_at.strftime("%Y-%m")
-                 == _parse(anchor_iso).strftime("%Y-%m")))
     if qualified_at is not None and anchor_iso is None:
         anchor_iso = qualified_at  # defensive: first-four anchor
+    # A payment made before the qualification day never earns, in
+    # any month; payments on/after qualified_at earn normally.
+    pre_qual = qualified_at is None or paid_at < _parse(qualified_at)
 
     if pre_qual:
         earning = {
@@ -835,34 +837,6 @@ async def _apply_payment(att: dict, payload: dict):
         return await db.referral_earnings.find_one({"id": earning_id})
     await _track_threshold(referrer["id"], product, paid_at)
     return earning
-
-
-async def _convert_qualification_month(referrer: dict, product: str,
-                                       qualified_dt: datetime):
-    """Qualification-month whole-month rule: pre_qualification entries
-    earned in qualified_at's calendar month become month-1 earnings at
-    the first band (subject to the same standing/free-month cash
-    eligibility as a live payment). Earlier months never convert."""
-    ym = qualified_dt.strftime("%Y-%m")
-    async for e in db.referral_earnings.find(
-            {"referrer_id": referrer["id"], "product": product,
-             "status": "pre_qualification", "month": ym}):
-        facts = standing_facts(referrer)
-        frozen = await is_frozen(referrer["id"])
-        paid_dt = _parse(e["earned_at"])
-        if facts["disabled_any"] or frozen:
-            status, share = "not_eligible", 0
-        elif facts["paying_any"] or await in_free_month(
-                referrer["id"], product, paid_dt):
-            status = "pending"
-            share = round(e["revenue_cents"] * CONFIG["bands"][0][1])
-        else:
-            status, share = "not_eligible", 0
-        await db.referral_earnings.update_one(
-            {"id": e["id"]},
-            {"$set": {"status": status, "share_cents": share,
-                      "rate": CONFIG["bands"][0][1], "month_index": 1,
-                      "schedule_anchor_at": _iso(qualified_dt)}})
 
 
 async def apply_payment(*, product: str, account_id: str, payment_id: str,
