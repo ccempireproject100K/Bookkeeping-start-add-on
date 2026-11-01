@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import client, { api, errMsg } from "@/lib/api";
 import { PageHeader, Card, Loading } from "@/components/Page";
 import { useAuth } from "@/context/AuthContext";
+import { useNiche } from "@/context/NicheContext";
+import { moneyFor } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,8 +14,10 @@ import { toast } from "sonner";
 // Connect batch, manual recording (backup), and the Melio queue for
 // bank-transfer (ACH) and paper-check members. Paper checks carry a
 // $2.00 fee, deducted from the payout and shown on every number here.
+// Amounts are formatted in the workspace's market currency (the
+// market face composed by /edition), via the app's shared moneyFor —
+// a GB workspace's payouts read in £, not a hard-coded $.
 const INPUT_CLS = "bg-[#0F1218] border-[#222838]";
-const money = (c) => `$${((c || 0) / 100).toFixed(2)}`;
 const PRODUCTS = ["trade_circle", "books", "momo"];
 const NEXT_STATES = {
   queued: ["sent_to_melio", "failed"],
@@ -24,6 +28,9 @@ const NEXT_STATES = {
 
 export default function ReferralPayouts() {
   const { user } = useAuth();
+  const { market } = useNiche();
+  const currency = market?.currency || "USD";
+  const money = (c) => moneyFor(c, currency);
   const isOwner = user?.role === "owner";
   const [balances, setBalances] = useState([]);
   const [queue, setQueue] = useState([]);
