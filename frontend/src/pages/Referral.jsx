@@ -5,6 +5,7 @@ import { PageHeader, Card, Loading } from "@/components/Page";
 import { Button } from "@/components/ui/button";
 import { useNiche } from "@/context/NicheContext";
 import ReferralArt from "@/components/ReferralArt";
+import { moneyFor } from "@/lib/format";
 import { toast } from "sonner";
 
 // Member referral page (Empire referral program, adopted law
@@ -12,13 +13,17 @@ import { toast } from "sonner";
 // payload — this page hard-codes no rates, counts, or thresholds.
 // [Site] is the visitor's niche x market face name (product_name from
 // the app's existing face resolution), falling back to the house name.
-const money = (c) => `$${((c || 0) / 100).toFixed(2)}`;
+// Balances are formatted in the workspace's market currency (the
+// market face composed by /edition), via the app's shared moneyFor —
+// a GB workspace's earnings read in £, not a hard-coded $.
 const pct = (r) => `${Math.round((r || 0) * 1000) / 10}%`;
 
 export default function Referral() {
   const { t } = useTranslation();
   const { pack, market } = useNiche();
   const site = pack?.product_name || "Mind at Ease Solutions";
+  const currency = market?.currency || "USD";
+  const money = (c) => moneyFor(c, currency);
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");

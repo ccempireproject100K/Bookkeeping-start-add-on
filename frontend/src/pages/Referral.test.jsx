@@ -17,12 +17,19 @@ jest.mock("sonner", () => ({
   toast: { error: jest.fn(), success: jest.fn() },
 }));
 
+const mockNiche = { current: null };
 jest.mock("@/context/NicheContext", () => ({
-  useNiche: () => ({
-    pack: { product_name: "The HVAC Ledger" },
-    market: { name: "Dallas–Fort Worth" },
-  }),
+  useNiche: () => mockNiche.current,
 }));
+
+const US_FACE = {
+  pack: { product_name: "The HVAC Ledger" },
+  market: { name: "United States", currency: "USD" },
+};
+const GB_FACE = {
+  pack: { product_name: "The Plumber's Ledger" },
+  market: { name: "United Kingdom", currency: "GBP" },
+};
 
 const SUMMARY = {
   code: "SMPL1234",
@@ -54,6 +61,7 @@ const SUMMARY = {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockNiche.current = US_FACE;
   api.get.mockResolvedValue(SUMMARY);
 });
 
@@ -76,4 +84,47 @@ test("renders link, progress 3/4, adopted bands and disclosures", async () => {
   expect(screen.getByTestId("referral-free-month")).toBeTruthy();
   expect(screen.getByText(/Fourth year \(months 37–48\)/)).toBeTruthy();
   expect(screen.getByText(/250 or more active paying referrals/)).toBeTruthy();
+});
+
+test("balances are formatted in the workspace's market currency (GBP face)", async () => {
+  mockNiche.current = GB_FACE;
+  api.get.mockResolvedValue({
+    ...SUMMARY,
+    sites: {
+      books: {
+        ...SUMMARY.sites.books,
+        earned_cents: 12345, payable: 2500, paid: 100000,
+      },
+    },
+  });
+  render(
+    <MemoryRouter>
+      <Referral />
+    </MemoryRouter>
+  );
+  const balances = await screen.findByTestId("referral-balances");
+  expect(balances.textContent).toContain("£123.45");
+  expect(balances.textContent).toContain("£25.00");
+  expect(balances.textContent).toContain("£1,000.00");
+  expect(balances.textContent).not.toContain("$");
+});
+
+test("balances fall back to USD when the face carries no currency", async () => {
+  mockNiche.current = {
+    pack: { product_name: "The HVAC Ledger" },
+    market: { name: "Dallas–Fort Worth" },
+  };
+  api.get.mockResolvedValue({
+    ...SUMMARY,
+    sites: {
+      books: { ...SUMMARY.sites.books, earned_cents: 500, payable: 0, paid: 0 },
+    },
+  });
+  render(
+    <MemoryRouter>
+      <Referral />
+    </MemoryRouter>
+  );
+  const balances = await screen.findByTestId("referral-balances");
+  expect(balances.textContent).toContain("$5.00");
 });
