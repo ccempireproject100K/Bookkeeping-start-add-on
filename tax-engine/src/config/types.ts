@@ -83,6 +83,32 @@ export interface StateConfig extends ConfigMeta {
   /** e.g. California's 1% Mental Health Services Tax over $1M. */
   surtax?: { label: string; threshold: number; rate: number };
   /**
+   * Nonrefundable personal exemption credit (California). Applied in the
+   * Form 540 order: the credit reduces the regular bracket tax (line 32)
+   * BEFORE any surtax is added (the Mental/Behavioral Health Services Tax
+   * is an "other tax" added later and is never offset by exemption
+   * credits), and it can reduce the regular tax to $0 but not below.
+   */
+  exemptionCredit?: {
+    /** Credit per personal exemption, in DOLLARS ($158 CA 2026). */
+    perExemption: number;
+    /** Personal exemptions for this credit, by filing status
+     *  (married filing jointly = 2 — taxpayer + spouse; all others = 1),
+     *  so the headline amounts are $158 single/MFS/HoH and $316 joint. */
+    exemptions: Record<FilingStatus, number>;
+    /** FTB high-income phaseout (Form 540 AGI Limitation Worksheet):
+     *  for each whole `step` of federal AGI over `agiThreshold` (any
+     *  fraction of a step rounds up to a full step), EACH exemption
+     *  credit is reduced by `reductionPerStep`, never below $0. */
+    phaseout: {
+      agiThreshold: Record<FilingStatus, number>;
+      /** Step size in DOLLARS of federal AGI ($2,500; $1,250 for MFS). */
+      step: Record<FilingStatus, number>;
+      /** Reduction per step PER EXEMPTION, in DOLLARS ($6 CA). */
+      reductionPerStep: number;
+    };
+  };
+  /**
    * Known omissions/simplifications for this state, disclosed in every
    * result's workpapers and notes — the same disclosure pattern as the
    * federal QBI W-2 wage / UBIA limitation warning.

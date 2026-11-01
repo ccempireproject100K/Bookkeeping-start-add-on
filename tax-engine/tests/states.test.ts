@@ -23,9 +23,12 @@ describe('California (real implementation)', () => {
 
   it('computes a sane, hand-checked state tax on the golden profile', () => {
     // Verified 2026 table; hand-checked: taxable $68,448.18 on federal
-    // AGI $74,348.18 − $5,900 std ded → 1/2/4/6/8% lines = $2,770.97.
+    // AGI $74,348.18 − $5,900 std ded → 1/2/4/6/8% lines = $2,770.97,
+    // less the $158 personal exemption credit (modeled since config
+    // 2026.3.0) = $2,612.97. (Pre-credit golden was $2,770.97 — the
+    // credit is the ONLY change; see the exemption-credit suite below.)
     expect(r.state?.status).toBe('OK');
-    expect(r.state?.totalTaxCents).toBe(277_097);
+    expect(r.state?.totalTaxCents).toBe(261_297);
   });
 
   it('carries the QBI before/after fields on federal only, never on the state result', () => {
@@ -37,18 +40,19 @@ describe('California (real implementation)', () => {
   });
 
   it('combines federal + state in the total and breakdown', () => {
-    expect(r.totalLiabilityCents).toBe(1_664_746 + 277_097);
+    expect(r.totalLiabilityCents).toBe(1_664_746 + 261_297);
     expect(r.breakdown.some((c) => c.jurisdiction === 'US-CA' && c.type === 'state_income_tax')).toBe(true);
     expect(r.workpapers).toHaveLength(2);
   });
 
   it('uses the CA 30/40/0/30 installment pattern — Q3 combined is federal-only', () => {
-    expect(r.safeHarbor.requiredAnnualPaymentCents).toBe(1_498_271 + 249_387);
+    // CA safe harbor = 90% of the post-credit tax: 90% × $2,612.97 = $2,351.67.
+    expect(r.safeHarbor.requiredAnnualPaymentCents).toBe(1_498_271 + 235_167);
     expect(r.schedule).toHaveLength(4);
     const q3 = r.schedule[2];
     expect(q3?.parts?.find((p) => p.jurisdiction === 'US-CA')?.amountDueCents).toBe(0);
     expect(q3?.amountDueCents).toBe(374_568);
-    expect(r.schedule.reduce((a, p) => a + p.amountDueCents, 0)).toBe(1_747_658);
+    expect(r.schedule.reduce((a, p) => a + p.amountDueCents, 0)).toBe(1_733_438);
   });
 });
 
@@ -86,11 +90,12 @@ describe('California — head of household uses FTB Schedule Z', () => {
     // Federal AGI $139,402.83 (SE tax $21,194.33, half-SE $10,597.17) −
     // $11,800 HoH std ded → taxable $127,602.83. Schedule Z lines:
     // 1/2/4/6/8% = $229.27/$627.78/$628.08/$998.16/$1,256.16, plus 9.3% on
-    // $25,246.83 over $102,356 = $2,347.96 → $6,087.41. (The retired joint
-    // stand-in returned $4,798.47 — it understated HoH tax at this income.)
+    // $25,246.83 over $102,356 = $2,347.96 → $6,087.41, less the $158
+    // personal exemption credit = $5,929.41. (The retired joint stand-in
+    // returned $4,798.47 — it understated HoH tax at this income.)
     const r = calculateTax(150_000, 'US-CA', { filingStatus: 'head_of_household' });
     expect(r.state?.status).toBe('OK');
-    expect(r.state?.totalTaxCents).toBe(608_741);
+    expect(r.state?.totalTaxCents).toBe(592_941);
   });
 });
 
@@ -113,32 +118,101 @@ describe('New York — head of household uses its own threshold table', () => {
   });
 });
 
-describe('California — exemption credit omission is disclosed, not silent', () => {
+describe('California — personal exemption credit is MODELED (config 2026.3.0)', () => {
+  // Built 2026-11-01 (gap sweep S3). Before this build the credit was a
+  // documented omission and the golden CA tax on this profile was
+  // $2,770.97; the ONLY change is the credit: −$158.00 → $2,612.97.
   const r = calculateTax(80_000, 'US-CA', GOLDEN);
 
-  it('carries the omission notice in the CA workpaper steps', () => {
+  it('appears in the breakdown as a negative credit component', () => {
+    const credit = r.breakdown.find((c) => c.type === 'state_exemption_credit');
+    expect(credit?.jurisdiction).toBe('US-CA');
+    expect(credit?.amountCents).toBe(-15_800); // −$158.00 single
+    // Bracket tax component stays gross; credit + tax = the state total.
+    const tax = r.breakdown.find((c) => c.type === 'state_income_tax');
+    expect(tax?.amountCents).toBe(277_097);
+    expect((tax?.amountCents ?? 0) + (credit?.amountCents ?? 0)).toBe(r.state?.totalTaxCents);
+  });
+
+  it('is traced in the CA workpaper with its amount', () => {
     const caPaper = r.workpapers.find((w) => w.jurisdiction === 'US-CA');
-    const step = caPaper?.steps.find((s) => s.label.includes('Personal exemption credit'));
+    const step = caPaper?.steps.find((s) => s.label === 'Personal exemption credit');
     expect(step).toBeDefined();
-    expect(step?.detail).toContain('NOT modeled');
+    expect(step?.amountCents).toBe(-15_800);
     expect(step?.detail).toContain('$158');
-    expect(step?.detail).toContain('$316');
-    expect(step?.detail).toContain('overstate');
+    expect(step?.detail).toContain('no phaseout applies');
+    // Config discipline: the workpaper records the bumped config version.
+    expect(caPaper?.configVersion).toBe('2026.3.0');
   });
 
-  it('carries the omission notice in the CA result notes', () => {
-    expect(
-      r.state?.notes.some(
-        (n) => n.includes('personal exemption credit') && n.includes('NOT modeled'),
-      ),
-    ).toBe(true);
+  it('gives joint filers two exemptions — $316', () => {
+    // Hand-checked: AGI $74,348.18 − $11,800 std ded → taxable $62,548.18;
+    // Schedule Y lines 1/2/4% = $229.12/$628.04/$329.37 = $1,186.53,
+    // less $316 credit = $870.53.
+    const mfj = calculateTax(80_000, 'US-CA', { filingStatus: 'married_filing_jointly' });
+    expect(mfj.breakdown.find((c) => c.type === 'state_exemption_credit')?.amountCents).toBe(-31_600);
+    expect(mfj.state?.totalTaxCents).toBe(87_053);
   });
 
-  it('does not leak the CA omission into other states', () => {
+  it('phases out by $6 per whole $2,500 of federal AGI over $260,778 (single)', () => {
+    // $300k profit → federal AGI $284,543.77 → excess $23,765.77 →
+    // ceil(23,765.77 / 2,500) = 10 steps × $6 = $60 → credit $158 − $60 = $98.
+    const hi = calculateTax(300_000, 'US-CA', GOLDEN);
+    expect(hi.breakdown.find((c) => c.type === 'state_exemption_credit')?.amountCents).toBe(-9_800);
+    const step = hi.state?.workpaper.steps.find((s) => s.label === 'Personal exemption credit');
+    expect(step?.detail).toContain('10 whole $2,500 step(s)');
+  });
+
+  it('uses $1,250 phaseout steps for married filing separately', () => {
+    // Same AGI as the single case → ceil(23,765.77 / 1,250) = 20 steps
+    // × $6 = $120 → credit $158 − $120 = $38.
+    const mfs = calculateTax(300_000, 'US-CA', { filingStatus: 'married_filing_separately' });
+    expect(mfs.breakdown.find((c) => c.type === 'state_exemption_credit')?.amountCents).toBe(-3_800);
+  });
+
+  it('is nonrefundable — it cannot take the tax below $0', () => {
+    const tiny = calculateTax(1_000, 'US-CA', GOLDEN);
+    expect(tiny.state?.totalTaxCents).toBe(0);
+    expect(tiny.breakdown.some((c) => c.type === 'state_exemption_credit')).toBe(false);
+  });
+
+  it('never offsets the Mental Health Services Tax, and is fully phased out at $1.5M', () => {
+    // Federal AGI $1,468,474.87 → 484 phaseout steps × $6 = $2,904 > $158,
+    // so the credit is $0 and the pre-credit state total is unchanged;
+    // the 1% MHST on taxable over $1M stands in full.
+    const big = calculateTax(1_500_000, 'US-CA', GOLDEN);
+    expect(big.breakdown.some((c) => c.type === 'state_exemption_credit')).toBe(false);
+    expect(big.breakdown.find((c) => c.type === 'state_surtax')?.amountCents).toBe(462_575);
+    expect(big.state?.totalTaxCents).toBe(16_470_753);
+  });
+
+  it('does not leak the CA credit into other states', () => {
     const ny = calculateTax(80_000, 'US-NY', GOLDEN);
     expect(ny.state?.notes.some((n) => n.includes('exemption credit'))).toBe(false);
     const nyPaper = ny.workpapers.find((w) => w.jurisdiction === 'US-NY');
     expect(nyPaper?.steps.some((s) => s.label.includes('exemption credit'))).toBe(false);
+    expect(ny.breakdown.some((c) => c.type === 'state_exemption_credit')).toBe(false);
+  });
+});
+
+describe('California — dependent exemption credit omission is disclosed, not silent', () => {
+  const r = calculateTax(80_000, 'US-CA', GOLDEN);
+
+  it('carries the remaining omission notice in the CA workpaper steps', () => {
+    const caPaper = r.workpapers.find((w) => w.jurisdiction === 'US-CA');
+    const step = caPaper?.steps.find((s) => s.label.includes('Dependent exemption credit'));
+    expect(step).toBeDefined();
+    expect(step?.detail).toContain('NOT modeled');
+    expect(step?.detail).toContain('$491');
+    expect(step?.detail).toContain('overstate');
+  });
+
+  it('carries the remaining omission notice in the CA result notes', () => {
+    expect(
+      r.state?.notes.some(
+        (n) => n.includes('dependent exemption credit') && n.includes('NOT modeled'),
+      ),
+    ).toBe(true);
   });
 });
 
@@ -213,8 +287,8 @@ describe('state-namespaced profile overrides', () => {
       paymentsAlreadyMade: 10_000,
     });
     // Federal remaining: $14,982.71 − $10,000. State remaining: full
-    // $2,493.87 (state payments default to 0, separately namespaced).
-    expect(r.schedule.reduce((a, p) => a + p.amountDueCents, 0)).toBe(747_658);
+    // $2,351.67 (state payments default to 0, separately namespaced).
+    expect(r.schedule.reduce((a, p) => a + p.amountDueCents, 0)).toBe(733_438);
   });
 });
 
@@ -275,6 +349,6 @@ describe('registry hygiene', () => {
   it('is case-insensitive on jurisdiction keys', () => {
     const r = calculateTax(80_000, 'us-ca', GOLDEN);
     expect(r.jurisdiction).toBe('US-CA');
-    expect(r.state?.totalTaxCents).toBe(277_097);
+    expect(r.state?.totalTaxCents).toBe(261_297);
   });
 });

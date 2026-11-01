@@ -138,6 +138,23 @@ export function validateJurisdictions(options: ValidateOptions = {}): Jurisdicti
         if (cfg.surtax && (!(cfg.surtax.threshold > 0) || !(cfg.surtax.rate > 0 && cfg.surtax.rate < 1))) {
           issues.push(`${cfg.jurisdiction}: surtax threshold/rate out of range`);
         }
+        if (cfg.exemptionCredit) {
+          const ec = cfg.exemptionCredit;
+          if (!(ec.perExemption > 0)) {
+            issues.push(`${cfg.jurisdiction}: exemption credit perExemption must be positive`);
+          }
+          if (!(ec.phaseout.reductionPerStep > 0) || ec.phaseout.reductionPerStep > ec.perExemption) {
+            issues.push(`${cfg.jurisdiction}: exemption credit phaseout reductionPerStep out of range`);
+          }
+          for (const s of Object.keys(cfg.brackets) as FilingStatus[]) {
+            if (!Number.isInteger(ec.exemptions[s]) || ec.exemptions[s] < 1) {
+              issues.push(`${cfg.jurisdiction}: exemption credit exemptions for ${s} must be a positive integer`);
+            }
+            if (!(ec.phaseout.agiThreshold[s] > 0) || !(ec.phaseout.step[s] > 0)) {
+              issues.push(`${cfg.jurisdiction}: exemption credit phaseout threshold/step for ${s} must be positive`);
+            }
+          }
+        }
       }
     } else if (cfg.implementation === 'no-tax') {
       if (!cfg.noTaxNote) {
