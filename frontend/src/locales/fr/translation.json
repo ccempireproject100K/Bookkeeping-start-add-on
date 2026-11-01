@@ -2120,6 +2120,7 @@
 "guide.backToChecklist": "Retour à la liste du tableau de bord",
 "guide.doneNote": "Configuration guidée terminée.",
   "nav.referrals": "Parrainage",
+  "referral.artAlt": "Illustration d'un professionnel de {{trade}} au travail",
   "referral.title": "Parrainage",
   "referral.headline": "Faites venir des gens. Soyez payé pendant des années.",
   "referral.subhead": "Partagez votre lien {{site}}. Quand quelqu'un s'inscrit par ce lien et devient un client payant, c'est votre filleul — et vous gagnez un pourcentage de tout ce qu'il paie réellement, pendant jusqu'à trois ans.",

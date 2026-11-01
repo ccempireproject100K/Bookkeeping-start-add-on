@@ -4,6 +4,7 @@ import { api, errMsg } from "@/lib/api";
 import { PageHeader, Card, Loading } from "@/components/Page";
 import { Button } from "@/components/ui/button";
 import { useNiche } from "@/context/NicheContext";
+import ReferralArt from "@/components/ReferralArt";
 import { toast } from "sonner";
 
 // Member referral page (Empire referral program, adopted law
@@ -71,6 +72,8 @@ export default function Referral() {
           "Share your {{site}} link. When someone joins through it and becomes a paying customer, they're your referral — and you earn a percentage of everything they actually pay, for up to three years.",
           { site })}
       />
+
+      <ReferralArt pack={pack} />
 
       {!data?.referral_active && (
         <Card>
