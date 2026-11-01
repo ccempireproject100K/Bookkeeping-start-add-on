@@ -145,10 +145,11 @@ describe("DictateButton (per-field correction mic)", () => {
     expect(onText).toHaveBeenCalledWith("Hola mundo");
   });
 
-  test("carries the small browser-variation side note", () => {
+  test("carries the small browser-variation side note (owner's exact text)", () => {
     render(<DictateButton onText={() => {}} />);
-    expect(screen.getByText(/not offered in Firefox/i)).toBeTruthy();
-    expect(screen.getByText(/typing always works/i)).toBeTruthy();
+    expect(screen.getByText(/Voice typing is offered by your browser/i)).toBeTruthy();
+    expect(screen.getByText(/isn't available in Firefox/i)).toBeTruthy();
+    expect(screen.getByText(/Typing always works/i)).toBeTruthy();
   });
 });
 
@@ -214,9 +215,14 @@ describe("GuidedVoiceFill (the one-button walk)", () => {
     expect(screen.getByText(/hable ahora/i)).toBeTruthy();
   });
 
-  test("the walk control carries the browser-variation side note too", () => {
+  test("the note sits with the walk control, in the owner's exact words", () => {
     render(<WalkHarness onSubmit={jest.fn()} />);
-    expect(screen.getByText(/may behave differently in Safari/i)).toBeTruthy();
+    const walk = screen.getByTestId("guided-voice-fill");
+    expect(walk.textContent).toMatch(/Voice typing is offered by your browser/i);
+    expect(walk.textContent).toMatch(/works in Chrome and Edge/i);
+    expect(walk.textContent).toMatch(/may behave differently in Safari/i);
+    expect(walk.textContent).toMatch(/isn't available in Firefox/i);
+    expect(walk.textContent).toMatch(/Typing always works/i);
   });
 
   test("microphone denied ends the walk with the honest notice", () => {
