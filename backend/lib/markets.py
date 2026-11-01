@@ -74,6 +74,42 @@ def get_market(code: str | None) -> dict | None:
     return None
 
 
+DEFAULT_MARKET_CODE = "US"
+
+
+def market_for_country(country) -> str | None:
+    """Market code for a detected country (the CF-IPCountry header
+    value), or None when there is no usable signal: missing, the
+    XX/T1 sentinels Cloudflare sends for unknown / Tor exits, a
+    malformed value, or a country with no market pack. Returning
+    None (never a substitute country) is what keeps a visitor from
+    ever being silently dressed in a market that isn't theirs."""
+    if not country:
+        return None
+    code = str(country).strip().upper()
+    if len(code) != 2 or not code.isalpha() or code in ("XX", "T1"):
+        return None
+    market = get_market(code)
+    return market["code"] if market else None
+
+
+def resolve_market_code(choice, cf_country) -> tuple:
+    """The market-face precedence (owner ruling 2026-11-01):
+    (1) the visitor's own stored choice, when it names a real pack;
+    (2) the detected country, when it has a pack; (3) the US market.
+    Returns (market_code, source) with source "choice" | "detected"
+    | "default" — the source is surfaced so a non-US face is never
+    worn silently."""
+    if choice:
+        market = get_market(str(choice))
+        if market:
+            return market["code"], "choice"
+    detected = market_for_country(cf_country)
+    if detected:
+        return detected, "detected"
+    return DEFAULT_MARKET_CODE, "default"
+
+
 def public_market(market: dict) -> dict:
     """Safe subset for public endpoints."""
     return {
