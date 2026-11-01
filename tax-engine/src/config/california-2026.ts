@@ -18,13 +18,31 @@ import type { StateConfig } from './types.js';
  * safe-harbor override at prior-year AGI of $150,000 or more (no safe
  * harbor at AGI ≥ $1M — noted in results, not enforced).
  *
- * Known omission (documented, disclosed in every result via
- * `knownOmissions`): the personal exemption credit — $158 single / MFS /
- * HoH, $316 joint (2026, per FTB), plus the $491 dependent exemption
- * credit — is NOT modeled, and neither is the credit's high-income
- * phaseout. CA estimates overstate tax by up to the credit amount until
- * the credit is modeled (owner decision, 2026-10-20: document, don't
- * model yet).
+ * Personal exemption credit — MODELED (added 2026-11-01, gap sweep S3;
+ * previously a documented omission under the owner's 2026-10-20
+ * "document, don't model yet" call, superseded by the owner's
+ * 2026-11-01 order to build anything left off): $158 per personal
+ * exemption (single / MFS / HoH = 1 exemption = $158; joint = 2
+ * exemptions = $316), nonrefundable against the bracket tax only —
+ * never against the Mental Health Services Tax (Form 540 order:
+ * exemption credits line 32, MHST added later as an other tax) — with
+ * the FTB high-income phaseout: each exemption credit is reduced by $6
+ * for each whole $2,500 of federal AGI over the filing-status threshold
+ * ($1,250 steps for MFS), per the Form 540 AGI Limitation Worksheet.
+ * Credit amounts re-verified 2026-11-01 against FTB Tax News, October
+ * 2026; the 2026 phaseout thresholds ($260,778 single/MFS, $391,173 HoH,
+ * $521,561 joint) are the FTB October 2026 indexing figures as published
+ * in Spidell's California Taxletter, October 2026 (FTB's own 2026 Form
+ * 540 instructions were not yet published at check time; the thresholds
+ * are exactly the FTB 2025 thresholds × the 3.4% CCPI factor), and the
+ * phaseout mechanics were verified against FTB's Form 540 instructions
+ * AGI Limitation Worksheet.
+ *
+ * Remaining known omission (documented, disclosed in every result via
+ * `knownOmissions`): the dependent exemption credit ($491 per
+ * dependent) and the blind / age-65 exemption credits ($158 each) are
+ * NOT modeled — the tax profile carries no dependents / blind / senior
+ * inputs.
  */
 const SINGLE: StateConfig['brackets'] = {
   single: [
@@ -80,10 +98,10 @@ export const CALIFORNIA_2026: StateConfig = {
   stateCode: 'CA',
   implementation: 'full',
   taxYear: 2026,
-  version: '2026.2.0',
+  version: '2026.3.0',
   source:
-    'FTB 2026 California Tax Rate Schedules (X, Y, Z) and standard deductions, verified directly against FTB Tax News, October 2026, "2026 Indexing" (ftb.ca.gov), checked 2026-10-20. Personal exemption credit not modeled — see knownOmissions.',
-  lastVerified: '2026-10-20',
+    'FTB 2026 California Tax Rate Schedules (X, Y, Z) and standard deductions, verified directly against FTB Tax News, October 2026, "2026 Indexing" (ftb.ca.gov), checked 2026-10-20. Personal exemption credit ($158 per exemption; $316 joint) modeled since config 2026.3.0 (2026-11-01): amounts per FTB Tax News, October 2026; 2026 phaseout thresholds per FTB October 2026 indexing figures as published in Spidell California Taxletter, October 2026; phaseout mechanics per FTB Form 540 instructions, AGI Limitation Worksheet. Dependent exemption credit not modeled — see knownOmissions.',
+  lastVerified: '2026-11-01',
   provisional: false,
   standardDeduction: {
     single: 5900,
@@ -93,11 +111,38 @@ export const CALIFORNIA_2026: StateConfig = {
   },
   brackets: SINGLE,
   surtax: { label: 'Mental Health Services Tax', threshold: 1000000, rate: 0.01 },
+  exemptionCredit: {
+    // FTB 2026: $158 per personal exemption. Joint filers claim two
+    // personal exemptions (taxpayer + spouse) = $316.
+    perExemption: 158,
+    exemptions: {
+      single: 1,
+      married_filing_jointly: 2,
+      married_filing_separately: 1,
+      head_of_household: 1,
+    },
+    phaseout: {
+      // FTB October 2026 indexing (see header note for sourcing).
+      agiThreshold: {
+        single: 260778,
+        married_filing_jointly: 521561,
+        married_filing_separately: 260778,
+        head_of_household: 391173,
+      },
+      step: {
+        single: 2500,
+        married_filing_jointly: 2500,
+        married_filing_separately: 1250,
+        head_of_household: 2500,
+      },
+      reductionPerStep: 6,
+    },
+  },
   knownOmissions: [
     {
-      label: 'Personal exemption credit — NOT modeled',
+      label: 'Dependent exemption credit — NOT modeled',
       detail:
-        "California's personal exemption credit is NOT modeled (documented simplification): $158 for single / married filing separately / head of household and $316 for married filing jointly (2026, per FTB). The dependent exemption credit ($491 per dependent) and the credit's high-income phaseout are also not modeled. CA estimates therefore overstate tax by up to the credit amount until the credit is modeled — review before relying on them.",
+        "California's dependent exemption credit is NOT modeled (documented simplification): $491 per dependent (2026, per FTB), and neither are the blind / age-65 exemption credits ($158 each) — the tax profile carries no dependents, blindness, or age inputs. The PERSONAL exemption credit IS modeled, including its high-income phaseout (see the 'Personal exemption credit' workpaper step). CA estimates for filers with dependents therefore overstate tax by up to $491 per dependent — review before relying on them.",
     },
   ],
   safeHarbor: {

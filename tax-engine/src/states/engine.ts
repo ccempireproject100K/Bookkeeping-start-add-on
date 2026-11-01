@@ -110,6 +110,50 @@ export function progressiveCalculator(
     });
     let totalCents = bracketResult.totalCents;
 
+    if (cfg.exemptionCredit) {
+      // Personal exemption credit — applied AFTER the bracket tax and
+      // BEFORE any surtax, in the Form 540 order (exemption credits,
+      // line 32; the Mental/Behavioral Health Services Tax is an "other
+      // tax" added later and is never offset by exemption credits).
+      // Nonrefundable: it can take the regular tax to $0, never below.
+      const ec = cfg.exemptionCredit;
+      const exemptions = ec.exemptions[status];
+      const grossCreditCents = toCents(ec.perExemption) * exemptions;
+      // FTB AGI Limitation Worksheet: whole steps of FEDERAL AGI over the
+      // threshold (a fraction of a step counts as a full step); each
+      // step reduces EACH exemption credit by the per-step amount.
+      const excessCents = ctx.federalAgiCents - toCents(ec.phaseout.agiThreshold[status]);
+      let phaseoutCents = 0;
+      let phaseoutSteps = 0;
+      if (excessCents > 0) {
+        phaseoutSteps = Math.ceil(excessCents / toCents(ec.phaseout.step[status]));
+        phaseoutCents = Math.min(
+          grossCreditCents,
+          phaseoutSteps * toCents(ec.phaseout.reductionPerStep) * exemptions,
+        );
+      }
+      const allowedCents = grossCreditCents - phaseoutCents;
+      const appliedCents = Math.min(allowedCents, totalCents);
+      if (appliedCents > 0) {
+        components.push({
+          jurisdiction: cfg.jurisdiction,
+          type: 'state_exemption_credit',
+          label: `${cfg.stateCode} personal exemption credit`,
+          amountCents: -appliedCents,
+        });
+      }
+      totalCents -= appliedCents;
+      step(
+        'Personal exemption credit',
+        `${exemptions} personal exemption(s) × $${ec.perExemption} = $${(grossCreditCents / 100).toLocaleString()}` +
+          (phaseoutSteps > 0
+            ? `; federal AGI exceeds the $${ec.phaseout.agiThreshold[status].toLocaleString()} phaseout threshold by ${phaseoutSteps} whole $${ec.phaseout.step[status].toLocaleString()} step(s), reducing the credit by $${(phaseoutCents / 100).toLocaleString()} (FTB AGI Limitation Worksheet)`
+            : '; federal AGI is at or below the phaseout threshold, so no phaseout applies') +
+          `. Credit allowed $${(allowedCents / 100).toLocaleString()}; nonrefundable, applied against the bracket tax only (never against any surtax), $${(appliedCents / 100).toLocaleString()} applied.`,
+        -appliedCents,
+      );
+    }
+
     if (cfg.surtax) {
       const thresholdCents = toCents(cfg.surtax.threshold);
       if (taxableCents > thresholdCents) {
@@ -124,7 +168,11 @@ export function progressiveCalculator(
         step(cfg.surtax.label, `${cfg.surtax.rate * 100}% of taxable income over $${cfg.surtax.threshold.toLocaleString()}.`, surtaxCents);
       }
     }
-    step(`Total ${cfg.stateCode} tax`, 'Bracket tax plus any surtax.', totalCents);
+    step(
+      `Total ${cfg.stateCode} tax`,
+      'Bracket tax, less any personal exemption credit applied, plus any surtax.',
+      totalCents,
+    );
 
     for (const omission of cfg.knownOmissions ?? []) {
       step(omission.label, omission.detail);

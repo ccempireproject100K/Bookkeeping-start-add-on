@@ -23,7 +23,7 @@ npm run build            # emit dist/
 import { calculateTax, validateJurisdictions } from '@bookkeeping/tax-engine';
 
 const result = calculateTax(80_000, 'US-CA', { filingStatus: 'single' });
-result.totalLiabilityCents;   // 1941843  ($19,418.43, federal + CA)
+result.totalLiabilityCents;   // 1926043  ($19,260.43, federal + CA, after the $158 CA exemption credit)
 result.breakdown;             // per-type components, each jurisdiction labeled
 result.schedule;              // quarterly payments, merged by due date
 result.safeHarbor;            // federal + state comparisons + required annual payment
@@ -130,7 +130,7 @@ Adding a state never touches the core.
 
 | State | Status |
 |---|---|
-| CA | **Implemented** (progressive brackets + 1% MHSA surtax over $1M; installments 30/40/0/30) |
+| CA | **Implemented** (progressive brackets + personal exemption credit with FTB phaseout + 1% MHSA surtax over $1M; installments 30/40/0/30) |
 | NY | **Implemented** (progressive brackets; NYC reserved as a locality segment — see below) |
 | TX, FL, WA | **No-tax** — true zero with explanatory note |
 | PA, IL, NC, GA, AZ | **Stubs** — explicit `NOT_IMPLEMENTED` |
@@ -219,11 +219,17 @@ per-jurisdiction health list:
 7. **Preferential capital-gains rates are not modeled** — all income is
    taxed at ordinary rates; capital gains only reduce the QBI cap base.
 8. CA simplifications: MFJ thresholds = 2× single. The **personal
-   exemption credit is not modeled** ($158 single/MFS/HoH, $316 joint,
-   plus the $491 dependent credit and its high-income phaseout — 2026,
-   per FTB), so CA estimates overstate tax by up to the credit amount;
-   every CA result discloses this in its workpapers and notes (owner
-   decision 2026-10-20: document, don't model yet). NY simplifications:
+   exemption credit IS modeled** (since config 2026.3.0, 2026-11-01):
+   $158 per personal exemption (single/MFS/HoH $158, joint $316),
+   nonrefundable against the bracket tax only — never against the
+   Mental Health Services Tax — with the FTB high-income phaseout
+   ($6 per exemption per whole $2,500 of federal AGI over $260,778
+   single/MFS, $391,173 HoH, $521,561 joint; $1,250 steps for MFS).
+   The **dependent exemption credit ($491 per dependent) and the
+   blind / age-65 exemption credits are NOT modeled** — the profile
+   carries no dependents/blind/age inputs — so CA estimates for filers
+   with dependents overstate tax by up to $491 per dependent; every CA
+   result discloses this in its workpapers and notes. NY simplifications:
    the tax-benefit recapture above $107,650 of NY AGI is not modeled;
    MCTMT is not modeled.
 9. State due dates reuse the federal statutory dates and federal holiday
@@ -259,5 +265,5 @@ src/
   states/             one module file per state (+ engine.ts factories)
 tests/                golden, federal, safe harbor, holidays, states,
                       properties (exact-sum, monotonicity), validation,
-                      money, hash — 140 tests
+                      money, hash — 157 tests
 ```
