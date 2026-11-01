@@ -1684,6 +1684,7 @@
   "portal.status_revoked": "रद्द",
   "nav.portalLinks": "पोर्टल लिंक",
   "nav.referrals": "Referrals",
+  "referral.artAlt": "काम पर {{trade}} पेशेवर का चित्रण",
   "referral.title": "Referrals",
   "referral.headline": "Bring people in. Get paid for years.",
   "referral.subhead": "Share your {{site}} link. When someone joins through it and becomes a paying customer, they're your referral — and you earn a percentage of everything they actually pay, for up to three years.",
