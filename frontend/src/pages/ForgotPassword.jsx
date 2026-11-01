@@ -7,6 +7,7 @@ import { api, errMsg } from "@/lib/api";
 import { toast } from "sonner";
 import { MailCheck, KeyRound } from "lucide-react";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
+import { DictateButton, normalizeEmailDictation } from "@/components/Dictation";
 import { PASSWORD_RESET } from "@/constants/testIds";
 import { useTranslation } from "react-i18next";
 
@@ -62,7 +63,10 @@ export default function ForgotPassword() {
             <form onSubmit={submit} className="space-y-4">
               <div>
                 <Label className="text-xs text-gray-400">{t("passwordreset.email")}</Label>
-                <Input data-testid={PASSWORD_RESET.emailInput} type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder={t("login.youShopCom")} className="mt-1 bg-[#14171E] border-[#222838]" />
+                <div className="flex items-start gap-2 mt-1">
+                  <Input data-testid={PASSWORD_RESET.emailInput} type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder={t("login.youShopCom")} className="bg-[#14171E] border-[#222838]" />
+                  <DictateButton onText={text => setEmail(normalizeEmailDictation(text))} />
+                </div>
               </div>
               <Button data-testid={PASSWORD_RESET.submitButton} type="submit" disabled={busy} className="w-full bg-amber-600 hover:bg-amber-500 text-black font-semibold">
                 {busy ? t("passwordreset.sending") : t("passwordreset.sendLink")}

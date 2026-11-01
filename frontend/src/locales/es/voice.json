@@ -1,0 +1,16 @@
+{
+  "dictation.commandsHint": "Mientras habla, puede decir: siguiente · saltar · atrás · detener.",
+  "dictation.denied": "El acceso al micrófono está bloqueado, así que puede escribir en su lugar. Para usar su voz, permita el micrófono para este sitio en la configuración de su navegador.",
+  "dictation.error": "La entrada por voz se detuvo. Puede intentarlo de nuevo o escribir en su lugar.",
+  "dictation.fillByTalking": "Complete el formulario hablando",
+  "dictation.langError": "Su navegador no puede escuchar en este idioma. La entrada por voz se detuvo: puede cambiar el idioma de la página o seguir escribiendo.",
+  "dictation.listening": "Escuchando… hable ahora",
+  "dictation.privacy": "Su navegador (Apple o Google) convierte la voz en texto. Mind at Ease Solutions solo recibe el texto que usted conserva.",
+  "dictation.stop": "Detener",
+  "dictation.tapToTalk": "Toque para hablar",
+  "dictation.unsupported": "La entrada por voz no está disponible en este navegador. Escriba en su lugar, o use la tecla de micrófono en el teclado de su teléfono.",
+  "dictation.walkDone": "Todo listo — revise cada dato y luego toque el botón de abajo para terminar. Todavía no se ha enviado nada.",
+  "dictation.walkPrompt": "{{label}} — hable ahora, o diga «siguiente» para saltar este campo.",
+  "dictation.walkStopped": "La entrada por voz se detuvo. No se ha enviado nada — revise el formulario y termine tocando el botón usted mismo.",
+  "dictation.browserNote": "La voz funciona en Chrome y Edge, puede comportarse de forma distinta en Safari y no se ofrece en Firefox; escribir siempre funciona."
+}

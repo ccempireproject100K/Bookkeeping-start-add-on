@@ -1,0 +1,16 @@
+{
+  "dictation.commandsHint": "说话时您可以说：下一个 · 跳过 · 上一个 · 停止。",
+  "dictation.denied": "麦克风访问已被阻止，因此您可以改为打字。要使用语音，请在浏览器设置中允许此网站使用麦克风。",
+  "dictation.error": "语音输入已停止。您可以重试，或改为打字。",
+  "dictation.fillByTalking": "用说话填写表单",
+  "dictation.langError": "您的浏览器无法以这种语言聆听。语音填写已停止 — 您可以切换页面语言或继续打字。",
+  "dictation.listening": "正在聆听…请说话",
+  "dictation.privacy": "您的浏览器（Apple 或 Google）会将语音转换为文字。Mind at Ease Solutions 只会收到您保留的文字。",
+  "dictation.stop": "停止",
+  "dictation.tapToTalk": "点击开始说话",
+  "dictation.unsupported": "此浏览器不支持语音输入。请改为打字，或使用手机键盘上的麦克风键。",
+  "dictation.walkDone": "全部完成 — 请检查每一项，然后点击下方按钮完成。尚未发送任何内容。",
+  "dictation.walkPrompt": "{{label}} — 请现在说话，或说“下一个”跳过此项。",
+  "dictation.walkStopped": "语音填写已停止。尚未发送任何内容 — 请检查表单，然后亲自点击按钮完成。",
+  "dictation.browserNote": "语音功能可在 Chrome 和 Edge 中使用，在 Safari 中可能表现不同，Firefox 不提供此功能——打字输入始终可用。"
+}

@@ -1,0 +1,16 @@
+{
+  "dictation.commandsHint": "While talking you can say: next · skip · go back · stop.",
+  "dictation.denied": "Microphone access is blocked, so you can type instead. To use your voice, allow the microphone for this site in your browser settings.",
+  "dictation.error": "Voice typing stopped. You can try again, or type instead.",
+  "dictation.fillByTalking": "Fill it in by talking",
+  "dictation.langError": "Your browser can't listen in this language. Voice fill stopped — you can switch the page language or keep typing.",
+  "dictation.listening": "Listening… speak now",
+  "dictation.privacy": "Your browser (Apple or Google) turns speech into text. Mind at Ease Solutions only receives the text you keep.",
+  "dictation.stop": "Stop",
+  "dictation.tapToTalk": "Tap to talk",
+  "dictation.unsupported": "Voice typing isn't available in this browser. Type instead, or use the microphone key on your phone's keyboard.",
+  "dictation.walkDone": "All set — check everything, then tap the button below to finish. Nothing has been sent yet.",
+  "dictation.walkPrompt": "{{label}} — speak now, or say “next” to skip.",
+  "dictation.walkStopped": "Voice fill stopped. Nothing has been sent — check the form, then finish by tapping the button yourself.",
+  "dictation.browserNote": "Voice typing is offered by your browser — it works in Chrome and Edge, may behave differently in Safari, and isn't available in Firefox. Typing always works."
+}
