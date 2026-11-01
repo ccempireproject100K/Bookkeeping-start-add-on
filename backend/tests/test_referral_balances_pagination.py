@@ -34,8 +34,8 @@ async def _build(fdb):
             product="books", account_id=f"pg{i}-bk",
             email=f"pg{i}-bk@page.example", referral_code=p["code"])
     # One payable referrer whose email sorts LAST: 4 cleared paying
-    # referrals on trade_circle qualify the pot (the qualification
-    # month counts in full, so all four first payments earn 25%).
+    # referrals on trade_circle qualify the pot (only the 4th, the
+    # qualifying payment, earns 25%; the first three never convert).
     top = await _referrer(fdb, "zz_top")
     for j in range(4):
         acct = f"zz-{j}"
@@ -55,7 +55,7 @@ def test_balances_pagination(monkeypatch):
         full = await RR.admin_balances(OWNER)
         assert len(full) == 8
         assert full[0]["email"] == "zz_top@page.example"
-        assert full[0]["payable"] == 900  # 4 x round(900 * 0.25)
+        assert full[0]["payable"] == 225  # 1 x round(900 * 0.25)
         assert [r["email"] for r in full[1:]] == sorted(
             r["email"] for r in full[1:])
         pages = []
