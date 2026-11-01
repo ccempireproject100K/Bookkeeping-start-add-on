@@ -48,9 +48,10 @@ async def _mk_pot(fdb, code, tag, product="trade_circle", members=4,
                   amount=900):
     """`members` paying referrals on one site, all cleared. Two rounds
     of payments: round 1 (70 days ago) qualifies the referrer at the
-    4th referral (only that payment earns, month 1); round 2 (65 days
-    ago) earns month-1 25% for every member. Pot for the default
-    4 members x 900 = 225 + 4 x 225 = 1800."""
+    4th referral (only that payment earns, month 1; the first three
+    are pre-qualification and never convert); round 2 (65 days ago)
+    earns month-1 25% for every member. Pot for the default
+    4 members x 900 = 225 + 4 x 225 = 1125."""
     actor = _actor(product)
     for i in range(members):
         acct = f"{tag}_m{i}"
@@ -102,14 +103,14 @@ def test_manual_payout_records_and_locked_is_refused(monkeypatch):
         await _mk_pot(fdb, code, "ok")
         rows = await RR.admin_balances(OWNER)
         row = next(r for r in rows if r["empire_id"] == person["id"])
-        assert row["sites"]["trade_circle"]["payable"] == 1800
+        assert row["sites"]["trade_circle"]["payable"] == 1125
         out = await RR.manual_payout(
             RR.ManualPayoutIn(referrer_id=person["id"],
                               product="trade_circle", note="Zelle 10/24"),
             OWNER)
-        assert out["cents"] == 1800 and out["rail"] == "manual"
+        assert out["cents"] == 1125 and out["rail"] == "manual"
         s = await RL.site_summary(person["id"], "trade_circle")
-        assert s["paid"] == 1800 and s["payable"] == 0
+        assert s["paid"] == 1125 and s["payable"] == 0
         with pytest.raises(HTTPException):
             await RR.manual_payout(
                 RR.ManualPayoutIn(referrer_id=person["id"],
@@ -156,7 +157,7 @@ def test_stripe_batch_pays_skips_and_never_twice(monkeypatch):
         out = await RR.stripe_batch(RR.BatchIn(period="2026-10"), OWNER)
         assert len(out["paid"]) == 1
         assert out["paid"][0]["referrer_id"] == a["id"]
-        assert out["paid"][0]["cents"] == 1800
+        assert out["paid"][0]["cents"] == 1125
         reasons = {(s["referrer_id"], s["product"]): s["reason"]
                    for s in out["skipped"]}
         assert "no payable Stripe account" in reasons[(b["id"], "trade_circle")]
@@ -168,13 +169,13 @@ def test_stripe_batch_pays_skips_and_never_twice(monkeypatch):
         assert "Melio queue" in reasons[(d["id"], "trade_circle")]
         assert len(calls) == 1
         assert calls[0]["destination"] == "acct_A"
-        assert calls[0]["amount"] == 1800
+        assert calls[0]["amount"] == 1125
         assert "2026-10" in calls[0]["idempotency_key"]
 
         out2 = await RR.stripe_batch(RR.BatchIn(period="2026-10"), OWNER)
         assert out2["paid"] == [] and len(calls) == 1  # never twice
         s = await RL.site_summary(a["id"], "trade_circle")
-        assert s["paid"] == 1800
+        assert s["paid"] == 1125
     run(_run())
 
 
@@ -226,26 +227,26 @@ def test_melio_export_mixed_batch_and_bulk_record(monkeypatch):
         rows = {r["referrer_id"]: r for r in _rows(resp)}
         ach = rows[d["id"]]
         assert ach["method"] == "ach" and ach["fee_cents"] == "0"
-        assert ach["amount_cents"] == "1800" and ach["product"] == "books"
+        assert ach["amount_cents"] == "1125" and ach["product"] == "books"
         chk = rows[e["id"]]
         assert chk["method"] == "check" and chk["fee_cents"] == "200"
-        assert chk["gross_cents"] == "1800" and chk["amount_cents"] == "1600"
+        assert chk["gross_cents"] == "1125" and chk["amount_cents"] == "925"
 
         done = await RR.batch_done(batch_id, RR.BatchDoneIn(), OWNER)
         assert len(done["recorded"]) == 2 and done["batch_status"] == "done"
         payouts = {p["referrer_id"]: p for p in fdb.referral_payouts.docs}
         assert payouts[d["id"]]["rail"] == "melio_ach"
-        assert payouts[d["id"]]["net_cents"] == 1800
+        assert payouts[d["id"]]["net_cents"] == 1125
         assert payouts[e["id"]]["rail"] == "paper_check_melio"
-        assert payouts[e["id"]]["gross_cents"] == 1800
+        assert payouts[e["id"]]["gross_cents"] == 1125
         assert payouts[e["id"]]["fee_cents"] == 200
-        assert payouts[e["id"]]["net_cents"] == 1600  # gross - fee = net
+        assert payouts[e["id"]]["net_cents"] == 925  # gross - fee = net
 
         # Member read-back shows the deduction plainly.
         summary = await RL.empire_summary(
             await RL.person_by_id(e["id"]))
         assert summary["payouts"][0]["fee_cents"] == 200
-        assert summary["payouts"][0]["net_cents"] == 1600
+        assert summary["payouts"][0]["net_cents"] == 925
         assert summary["paper_check_fee_cents"] == 200
 
         done2 = await RR.batch_done(batch_id, RR.BatchDoneIn(), OWNER)
@@ -279,7 +280,7 @@ def test_queue_lifecycle_ach_unclaimed_stays_visible(monkeypatch):
         item = await RR.queue_create(
             RR.QueueIn(referrer_id=g["id"], product="trade_circle"), OWNER)
         assert item["status"] == "queued" and item["rail"] == "melio_ach"
-        assert item["fee_cents"] == 0 and item["net_cents"] == 1800
+        assert item["fee_cents"] == 0 and item["net_cents"] == 1125
         item = await RR.queue_advance(
             item["id"], RR.QueueAdvanceIn(status="sent_to_melio"), OWNER)
         item = await RR.queue_advance(
@@ -295,7 +296,7 @@ def test_queue_lifecycle_ach_unclaimed_stays_visible(monkeypatch):
             item["id"], RR.QueueAdvanceIn(status="completed"), OWNER)
         assert item["status"] == "completed" and item["payout_id"]
         payout = fdb.referral_payouts.docs[0]
-        assert payout["rail"] == "melio_ach" and payout["net_cents"] == 1800
+        assert payout["rail"] == "melio_ach" and payout["net_cents"] == 1125
         with pytest.raises(HTTPException):
             await RR.queue_advance(
                 item["id"], RR.QueueAdvanceIn(status="failed"), OWNER)
@@ -311,7 +312,7 @@ def test_queue_lifecycle_paper_check_records_with_fee(monkeypatch):
             RR.QueueIn(referrer_id=h["id"], product="trade_circle"), OWNER)
         # The snapshot itself shows gross - fee = net before it moves.
         assert (item["gross_cents"], item["fee_cents"],
-                item["net_cents"]) == (1800, 200, 1600)
+                item["net_cents"]) == (1125, 200, 925)
         assert item["rail"] == "paper_check_melio"
         await RR.queue_advance(
             item["id"], RR.QueueAdvanceIn(status="sent_to_melio"), OWNER)
@@ -323,7 +324,7 @@ def test_queue_lifecycle_paper_check_records_with_fee(monkeypatch):
         assert payout["rail"] == "paper_check_melio"
         assert payout["reference"] == "melio-chk-1"
         assert payout["gross_cents"] - payout["fee_cents"] \
-            == payout["net_cents"] == 1600
+            == payout["net_cents"] == 925
     run(_run())
 
 

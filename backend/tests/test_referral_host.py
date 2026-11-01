@@ -555,17 +555,18 @@ def test_chargeback_claws_back_the_month_and_freezes_until_won(monkeypatch):
             RR.DisputeIn(dispute_id="dp_1", payment_id="pay_4",
                          phase="opened"), actor)
         s = await RL.site_summary(referrer["id"], "trade_circle")
-        # The dispute claws back the whole month: all four first
-        # payments landed in the qualification month (counted in
-        # full), so the month's earnings are 4 x 225.
-        assert s["frozen"] and s["clawed_back"] == 900
+        # The dispute claws back the month's earnings: only the 4th
+        # (qualifying) payment earned — the first three are
+        # pre-qualification entries at zero and never convert — so
+        # the month's clawed-back earnings are 1 x 225.
+        assert s["frozen"] and s["clawed_back"] == 225
         assert s["payable"] == 0
         await RR.ingest_dispute(
             RR.DisputeIn(dispute_id="dp_1", phase="closed",
                          outcome="won"), actor)
         s = await RL.site_summary(referrer["id"], "trade_circle")
         assert not s["frozen"] and s["clawed_back"] == 0
-        assert s["available"] == 900 and s["qualified"] is True
+        assert s["available"] == 225 and s["qualified"] is True
     run(_run())
 
 
@@ -621,9 +622,10 @@ def test_qualification_is_per_site(monkeypatch):
                                  product_account=f"acct_bk{n}")
         s_tc = await RL.site_summary(referrer["id"], "trade_circle")
         s_bk = await RL.site_summary(referrer["id"], "books")
-        # Qualified on TC: the qualification month counts in full, so
-        # all four TC first payments earn month 1 at 25% (4 x 225).
-        assert s_tc["qualified"] is True and s_tc["payable"] == 900
+        # Qualified on TC: only the 4th (qualifying) TC payment
+        # earns month 1 at 25% (1 x 225); the first three never
+        # convert from pre_qualification.
+        assert s_tc["qualified"] is True and s_tc["payable"] == 225
         # Two paying referrals on books: not qualified there (per-site).
         assert s_bk["qualified"] is False and s_bk["payable"] == 0
         summary = await RR.readback_summary("acct_ref", None, tc)
