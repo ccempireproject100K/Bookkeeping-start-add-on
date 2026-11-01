@@ -6,16 +6,19 @@ import {
 } from "lucide-react";
 import { api } from "@/lib/api";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
-import { FALLBACK_PRICING, priceLabel } from "@/lib/datacleanApi";
+import { FALLBACK_PRICING, bundleComponentState, priceLabel } from "@/lib/datacleanApi";
 import { num as _n } from "@/lib/format";
 
 /** DataClean storefront / pricing page (Phase 3 shell). Built into the
  * app like every other page; it goes live only when the whole stack
  * is deployed on the owner's word — nothing here is published
  * anywhere else. Prices render from the backend's pricing CONFIG
- * (GET /api/v1/dataclean/pricing); until the owner sets real prices
- * the config itself flags them placeholder, and this page badges
- * them exactly that way rather than dressing them up as final. */
+ * (GET /api/v1/dataclean/pricing); the plan prices are still
+ * placeholders and this page badges them exactly that way rather
+ * than dressing them up as final. The bundle below the plans is the
+ * exception: its price is owner-set (2026-10-31), and each half is
+ * badged from the config's own flags — DataClean available now, the
+ * security half coming soon and never shown as available. */
 export default function DataCleanLanding() {
   const { t } = useTranslation();
   const [pricing, setPricing] = useState(FALLBACK_PRICING);
@@ -121,6 +124,30 @@ export default function DataCleanLanding() {
               </Link>
             </article>))}
         </div>
+        {(pricing.bundles || []).map((b) => (
+          <article key={b.id} className="card-surface p-6 mt-4" data-testid={`landing-bundle-${b.id}`}>
+            <div className="flex flex-wrap items-baseline justify-between gap-3">
+              <h3 className="font-display font-semibold">{b.name}</h3>
+              <div className="font-mono text-3xl font-semibold">
+                {priceLabel(b.monthly_price_cents)}
+                <span className="text-sm text-gray-500"> {t("datacleanLanding.perMonth")}</span>
+              </div>
+            </div>
+            <p className="mt-2 text-sm text-gray-400">{t("datacleanLanding.bundleBody")}</p>
+            <ul className="mt-4 space-y-2 text-sm">
+              {(b.components || []).map((c) => (
+                <li key={c.id} className="flex items-center justify-between gap-3">
+                  <span className="text-gray-200">{c.name}</span>
+                  {bundleComponentState(c) === "available" ? (
+                    <span className="inline-block text-xs text-emerald-300 bg-emerald-500/10 border border-emerald-500/30 rounded-full px-2.5 py-1">
+                      {t("datacleanLanding.statusAvailableNow")}
+                    </span>) : (
+                    <span className="inline-block text-xs text-amber-300 bg-amber-500/10 border border-amber-500/30 rounded-full px-2.5 py-1">
+                      {t("datacleanLanding.statusComingSoon")}
+                    </span>)}
+                </li>))}
+            </ul>
+          </article>))}
         <p className="mt-4 text-center text-xs text-gray-600">{t("datacleanLanding.testModeNote")}</p>
       </section>
 

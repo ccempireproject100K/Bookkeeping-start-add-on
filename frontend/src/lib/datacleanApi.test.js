@@ -1,6 +1,6 @@
 import {
   API_ENDPOINTS, ERROR_CODES, FALLBACK_CAPS, FALLBACK_PRICING, SAMPLE_CSV,
-  barFraction, keyStatus, priceLabel, usageSeries,
+  barFraction, bundleComponentState, keyStatus, priceLabel, usageSeries,
 } from "./datacleanApi";
 
 describe("keyStatus", () => {
@@ -77,6 +77,43 @@ describe("fallback config is honestly placeholder", () => {
     expect(priceLabel(0)).toBe("$0.00");
     expect(priceLabel(1299)).toBe("$12.99");
     expect(priceLabel(null)).toBe("$0.00");
+  });
+});
+
+describe("fallback bundle mirrors the backend bundle config", () => {
+  test("one bundle at the owner-set price, honestly flagged per half", () => {
+    expect(FALLBACK_PRICING.bundles).toHaveLength(1);
+    const b = FALLBACK_PRICING.bundles[0];
+    expect(b.id).toBe("dataclean-security");
+    expect(b.name).toBe("DataClean + Security");
+    // Real owner-set price (2026-10-31) — NOT a $0 placeholder, even
+    // though the plans above still are.
+    expect(b.monthly_price_cents).toBe(1899);
+    expect(b.placeholder).toBe(false);
+    const halves = Object.fromEntries(b.components.map((c) => [c.id, c]));
+    expect(Object.keys(halves).sort()).toEqual(["dataclean", "security"]);
+    expect(halves.dataclean.status).toBe("live");
+    expect(halves.dataclean.built).toBe(true);
+    expect(halves.dataclean.available).toBe(true);
+    // The security half is not built: coming soon, never available,
+    // and no feature claims ride along.
+    expect(halves.security.status).toBe("coming_soon");
+    expect(halves.security.built).toBe(false);
+    expect(halves.security.available).toBe(false);
+    expect(halves.security.features).toBeUndefined();
+  });
+
+  test("bundleComponentState follows the flags, not the identity", () => {
+    const b = FALLBACK_PRICING.bundles[0];
+    const halves = Object.fromEntries(b.components.map((c) => [c.id, c]));
+    expect(bundleComponentState(halves.dataclean)).toBe("available");
+    expect(bundleComponentState(halves.security)).toBe("coming_soon");
+    // Built but not yet available still reads as coming soon, and a
+    // missing half never reads as available.
+    expect(bundleComponentState({ built: true, available: false })).toBe("coming_soon");
+    expect(bundleComponentState({ built: false, available: true })).toBe("coming_soon");
+    expect(bundleComponentState(null)).toBe("coming_soon");
+    expect(bundleComponentState(undefined)).toBe("coming_soon");
   });
 });
 

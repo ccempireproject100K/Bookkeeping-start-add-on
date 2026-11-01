@@ -429,6 +429,33 @@ def test_pricing_config_is_placeholder_flagged_config_only():
     assert cfg["playground"]["max_rows"] == 200
 
 
+def test_pricing_config_carries_the_bundle_with_honest_flags():
+    fake = FakeDB()
+    _DCA, API, _ADM = _patch_all(fake)
+    cfg = run(API.pricing())
+    # The plan prices stay placeholders; the bundle rides alongside.
+    assert cfg["placeholder"] is True
+    assert len(cfg["bundles"]) == 1
+    bundle = cfg["bundles"][0]
+    assert bundle["id"] == "dataclean-security"
+    assert bundle["name"] == "DataClean + Security"
+    # The price is the owner's 2026-10-31 decision — a real price,
+    # flagged as such, not a $0 placeholder.
+    assert bundle["monthly_price_cents"] == 1899
+    assert bundle["placeholder"] is False
+    halves = {c["id"]: c for c in bundle["components"]}
+    assert set(halves) == {"dataclean", "security"}
+    assert halves["dataclean"]["status"] == "live"
+    assert halves["dataclean"]["built"] is True
+    assert halves["dataclean"]["available"] is True
+    # The security half is NOT built: honestly coming soon, never
+    # available, and carrying no feature claims of any kind.
+    assert halves["security"]["status"] == "coming_soon"
+    assert halves["security"]["built"] is False
+    assert halves["security"]["available"] is False
+    assert "features" not in halves["security"]
+
+
 # --------------------------------------------------------------- playground
 def test_playground_runs_real_engine_and_persists_nothing():
     fake = FakeDB()
