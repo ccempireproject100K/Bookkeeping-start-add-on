@@ -42,14 +42,14 @@ def set_session_cookie(response, token: str):
         value=token,
         httponly=True,
         secure=True,
-        samesite="lax",
+        samesite="none",
         max_age=604800,
         path="/",
     )
 
 
 def clear_session_cookie(response):
-    response.delete_cookie("access_token", path="/")
+    response.delete_cookie("access_token", path="/", secure=True, samesite="none")
 
 
 async def get_current_user(request: Request) -> dict:
