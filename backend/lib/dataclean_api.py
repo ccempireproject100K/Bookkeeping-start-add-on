@@ -75,6 +75,41 @@ def playground_caps() -> dict:
     }
 
 
+def bundle_config() -> list:
+    """Product bundles on the storefront, as CONFIG values only.
+
+    The DataClean + Security bundle is an OWNER DECISION (2026-10-31):
+    one product at $18.99/mo, aimed at the niche shops. Its price is a
+    real price — the bundle flags itself `placeholder: False` — unlike
+    the plan prices in pricing_config(), which stay placeholders until
+    the owner sets them. Nothing here is charged either: there is no
+    billing code path in the DataClean shell, in test mode or any
+    other mode.
+
+    Each half's availability is stated explicitly, in the status
+    vocabulary of lib/marketplace.py ("live" | "coming_soon") plus
+    built/available booleans. DataClean is live today. The security
+    half is NOT built — its build-out lives outside this product — so
+    it is honestly coming_soon / built False / available False, and
+    no security feature is named anywhere in this config: the half is
+    sold only as "included in this bundle when it ships".
+    """
+    return [{
+        "id": "dataclean-security",
+        "name": "DataClean + Security",
+        "monthly_price_cents": _env_int("DATACLEAN_PRICE_BUNDLE_CENTS",
+                                        1899),
+        "placeholder": False,
+        "components": [
+            {"id": "dataclean", "name": "DataClean",
+             "status": "live", "built": True, "available": True},
+            {"id": "security", "name": "Security",
+             "status": "coming_soon", "built": False,
+             "available": False},
+        ],
+    }]
+
+
 def pricing_config() -> dict:
     """Storefront pricing + plan quotas, as CONFIG values only.
 
@@ -82,6 +117,11 @@ def pricing_config() -> dict:
     as such by the storefront) — final prices are an owner decision.
     Nothing here is ever charged: there is no billing code path in the
     DataClean shell, in test mode or any other mode.
+
+    The one exception to the placeholder rule is `bundles` (see
+    bundle_config): the owner has set the bundle's price, so each
+    bundle carries its own `placeholder: False` while the top-level
+    flag keeps describing the plan prices.
     """
     plans = []
     for pid, label, def_rows in (("starter", "Starter", 10000),
@@ -102,6 +142,7 @@ def pricing_config() -> dict:
         "placeholder": _env_bool("DATACLEAN_PRICING_PLACEHOLDER", True),
         "billing_mode": "test",  # display only — no charging exists
         "plans": plans,
+        "bundles": bundle_config(),
         "rate_limits": rate_limit_defaults(),
         "playground": playground_caps(),
     }

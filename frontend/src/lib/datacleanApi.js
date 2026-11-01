@@ -70,7 +70,10 @@ export const SAMPLE_CSV = [
 export const FALLBACK_CAPS = { max_file_bytes: 65536, max_rows: 200, max_columns: 24 };
 
 /** Storefront pricing before the config loads — mirrors the
- * backend's placeholder defaults and carries the same flag. */
+ * backend's config and carries the same flags: the plans are the
+ * backend's placeholder defaults, and the bundle mirrors the
+ * owner-set price with its per-half honesty flags (DataClean live,
+ * Security not built — coming soon, never dressed up as available). */
 export const FALLBACK_PRICING = {
   currency: "USD",
   placeholder: true,
@@ -80,7 +83,26 @@ export const FALLBACK_PRICING = {
     { id: "growth", name: "Growth", monthly_price_cents: 0, rows_included: 50000, overage_per_1000_rows_cents: 0 },
     { id: "scale", name: "Scale", monthly_price_cents: 0, rows_included: 250000, overage_per_1000_rows_cents: 0 },
   ],
+  bundles: [
+    {
+      id: "dataclean-security",
+      name: "DataClean + Security",
+      monthly_price_cents: 1899,
+      placeholder: false,
+      components: [
+        { id: "dataclean", name: "DataClean", status: "live", built: true, available: true },
+        { id: "security", name: "Security", status: "coming_soon", built: false, available: false },
+      ],
+    },
+  ],
 };
+
+/** A bundle half's display state, derived from the config's own
+ * flags — never from the half's identity: "available" only when the
+ * backend says built AND available, otherwise "coming_soon". */
+export function bundleComponentState(component) {
+  return component?.built && component?.available ? "available" : "coming_soon";
+}
 
 /** "$12.00" from integer cents; free reads as the number, not a
  * promise — placeholder plans show 0 and the page badges them. */
