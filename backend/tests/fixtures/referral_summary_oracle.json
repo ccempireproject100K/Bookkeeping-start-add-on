@@ -14,148 +14,50 @@
      "available": 419425,
      "clawed_back": 0,
      "clearing_days": 60,
-     "earned_cents": 536350,
+     "earned_cents": 535575,
      "frozen": false,
      "locked": false,
      "locked_cents": 0,
      "paid": 0,
      "payable": 419425,
      "paying_referrals": 250,
-     "pending": 116925,
+     "pending": 116150,
      "product": "trade_circle",
-     "unlock_at": 3
+     "qualified": true,
+     "qualified_at": true,
+     "qualify_at": 4,
+     "unlock_at": 4
     }
    },
    "under_review": false
   },
   {
-   "eligible": true,
-   "email": "mixed@oracle.example",
-   "empire_id": "mixed",
+   "eligible": false,
+   "email": "notelig@oracle.example",
+   "empire_id": "notelig",
    "frozen": false,
    "name": null,
-   "payable": 8000,
+   "payable": 1350,
    "payout_preference": "stripe",
    "sites": {
-    "books": {
-     "adjustments": 0,
-     "available": 0,
-     "clawed_back": 0,
-     "clearing_days": 60,
-     "earned_cents": 8700,
-     "frozen": false,
-     "locked": false,
-     "locked_cents": 0,
-     "paid": 8225,
-     "payable": 0,
-     "paying_referrals": 7,
-     "pending": 475,
-     "product": "books",
-     "unlock_at": 3
-    },
-    "momo": {
-     "adjustments": 0,
-     "available": 8000,
-     "clawed_back": 0,
-     "clearing_days": 60,
-     "earned_cents": 8250,
-     "frozen": false,
-     "locked": false,
-     "locked_cents": 0,
-     "paid": 0,
-     "payable": 8000,
-     "paying_referrals": 3,
-     "pending": 250,
-     "product": "momo",
-     "unlock_at": 3
-    }
-   },
-   "under_review": false
-  },
-  {
-   "eligible": true,
-   "email": "boundary_b@oracle.example",
-   "empire_id": "boundary_b",
-   "frozen": false,
-   "name": null,
-   "payable": 750,
-   "payout_preference": "stripe",
-   "sites": {
-    "momo": {
-     "adjustments": 0,
-     "available": 750,
-     "clawed_back": 0,
-     "clearing_days": 60,
-     "earned_cents": 750,
-     "frozen": false,
-     "locked": false,
-     "locked_cents": 0,
-     "paid": 0,
-     "payable": 750,
-     "paying_referrals": 3,
-     "pending": 0,
-     "product": "momo",
-     "unlock_at": 3
-    },
     "trade_circle": {
      "adjustments": 0,
-     "available": 150,
+     "available": 1350,
      "clawed_back": 0,
      "clearing_days": 60,
-     "earned_cents": 150,
-     "frozen": false,
-     "locked": true,
-     "locked_cents": 150,
-     "paid": 0,
-     "payable": 0,
-     "paying_referrals": 2,
-     "pending": 0,
-     "product": "trade_circle",
-     "unlock_at": 3
-    }
-   },
-   "under_review": false
-  },
-  {
-   "eligible": true,
-   "email": "boundary_a@oracle.example",
-   "empire_id": "boundary_a",
-   "frozen": false,
-   "name": null,
-   "payable": 675,
-   "payout_preference": "paper_check",
-   "sites": {
-    "books": {
-     "adjustments": 0,
-     "available": 950,
-     "clawed_back": 0,
-     "clearing_days": 60,
-     "earned_cents": 950,
-     "frozen": false,
-     "locked": true,
-     "locked_cents": 950,
-     "paid": 0,
-     "payable": 0,
-     "paying_referrals": 2,
-     "pending": 0,
-     "product": "books",
-     "unlock_at": 3
-    },
-    "trade_circle": {
-     "adjustments": 0,
-     "available": 675,
-     "clawed_back": 0,
-     "clearing_days": 60,
-     "earned_cents": 675,
+     "earned_cents": 1350,
      "frozen": false,
      "locked": false,
      "locked_cents": 0,
      "paid": 0,
-     "payable": 675,
-     "paying_referrals": 3,
+     "payable": 1350,
+     "paying_referrals": 6,
      "pending": 0,
      "product": "trade_circle",
-     "unlock_at": 3
+     "qualified": true,
+     "qualified_at": true,
+     "qualify_at": 4,
+     "unlock_at": 4
     }
    },
    "under_review": false
@@ -183,7 +85,10 @@
      "paying_referrals": 0,
      "pending": 0,
      "product": "books",
-     "unlock_at": 3
+     "qualified": false,
+     "qualified_at": false,
+     "qualify_at": 4,
+     "unlock_at": 4
     },
     "momo": {
      "adjustments": 0,
@@ -199,7 +104,110 @@
      "paying_referrals": 0,
      "pending": 0,
      "product": "momo",
-     "unlock_at": 3
+     "qualified": false,
+     "qualified_at": false,
+     "qualify_at": 4,
+     "unlock_at": 4
+    }
+   },
+   "under_review": false
+  },
+  {
+   "eligible": true,
+   "email": "boundary_a@oracle.example",
+   "empire_id": "boundary_a",
+   "frozen": false,
+   "name": null,
+   "payable": 0,
+   "payout_preference": "paper_check",
+   "sites": {
+    "books": {
+     "adjustments": 0,
+     "available": 0,
+     "clawed_back": 0,
+     "clearing_days": 60,
+     "earned_cents": 0,
+     "frozen": false,
+     "locked": true,
+     "locked_cents": 0,
+     "paid": 0,
+     "payable": 0,
+     "paying_referrals": 2,
+     "pending": 0,
+     "product": "books",
+     "qualified": false,
+     "qualified_at": false,
+     "qualify_at": 4,
+     "unlock_at": 4
+    },
+    "trade_circle": {
+     "adjustments": 0,
+     "available": 0,
+     "clawed_back": 0,
+     "clearing_days": 60,
+     "earned_cents": 0,
+     "frozen": false,
+     "locked": true,
+     "locked_cents": 0,
+     "paid": 0,
+     "payable": 0,
+     "paying_referrals": 3,
+     "pending": 0,
+     "product": "trade_circle",
+     "qualified": false,
+     "qualified_at": false,
+     "qualify_at": 4,
+     "unlock_at": 4
+    }
+   },
+   "under_review": false
+  },
+  {
+   "eligible": true,
+   "email": "boundary_b@oracle.example",
+   "empire_id": "boundary_b",
+   "frozen": false,
+   "name": null,
+   "payable": 0,
+   "payout_preference": "stripe",
+   "sites": {
+    "momo": {
+     "adjustments": 0,
+     "available": 0,
+     "clawed_back": 0,
+     "clearing_days": 60,
+     "earned_cents": 0,
+     "frozen": false,
+     "locked": true,
+     "locked_cents": 0,
+     "paid": 0,
+     "payable": 0,
+     "paying_referrals": 3,
+     "pending": 0,
+     "product": "momo",
+     "qualified": false,
+     "qualified_at": false,
+     "qualify_at": 4,
+     "unlock_at": 4
+    },
+    "trade_circle": {
+     "adjustments": 0,
+     "available": 0,
+     "clawed_back": 0,
+     "clearing_days": 60,
+     "earned_cents": 0,
+     "frozen": false,
+     "locked": true,
+     "locked_cents": 0,
+     "paid": 0,
+     "payable": 0,
+     "paying_referrals": 2,
+     "pending": 0,
+     "product": "trade_circle",
+     "qualified": false,
+     "qualified_at": false,
+     "qualify_at": 4,
+     "unlock_at": 4
     }
    },
    "under_review": false
@@ -218,21 +226,24 @@
      "available": 0,
      "clawed_back": 0,
      "clearing_days": 60,
-     "earned_cents": 250,
+     "earned_cents": 0,
      "frozen": false,
      "locked": true,
      "locked_cents": 0,
      "paid": 0,
      "payable": 0,
      "paying_referrals": 1,
-     "pending": 250,
+     "pending": 0,
      "product": "momo",
-     "unlock_at": 3
+     "qualified": false,
+     "qualified_at": false,
+     "qualify_at": 4,
+     "unlock_at": 4
     },
     "trade_circle": {
      "adjustments": 0,
      "available": 0,
-     "clawed_back": 450,
+     "clawed_back": 0,
      "clearing_days": 60,
      "earned_cents": 0,
      "frozen": false,
@@ -240,10 +251,13 @@
      "locked_cents": 0,
      "paid": 0,
      "payable": 0,
-     "paying_referrals": 0,
+     "paying_referrals": 2,
      "pending": 0,
      "product": "trade_circle",
-     "unlock_at": 3
+     "qualified": false,
+     "qualified_at": false,
+     "qualify_at": 4,
+     "unlock_at": 4
     }
    },
    "under_review": false
@@ -260,50 +274,59 @@
     "books": {
      "adjustments": 0,
      "available": 0,
-     "clawed_back": 475,
+     "clawed_back": 0,
      "clearing_days": 60,
      "earned_cents": 0,
-     "frozen": true,
-     "locked": true,
-     "locked_cents": 0,
-     "paid": 0,
-     "payable": 0,
-     "paying_referrals": 0,
-     "pending": 0,
-     "product": "books",
-     "unlock_at": 3
-    },
-    "momo": {
-     "adjustments": 0,
-     "available": 0,
-     "clawed_back": 4000,
-     "clearing_days": 60,
-     "earned_cents": 0,
-     "frozen": true,
-     "locked": true,
-     "locked_cents": 0,
-     "paid": 0,
-     "payable": 0,
-     "paying_referrals": 0,
-     "pending": 0,
-     "product": "momo",
-     "unlock_at": 3
-    },
-    "trade_circle": {
-     "adjustments": -675,
-     "available": 0,
-     "clawed_back": 675,
-     "clearing_days": 60,
-     "earned_cents": 225,
      "frozen": true,
      "locked": true,
      "locked_cents": 0,
      "paid": 0,
      "payable": 0,
      "paying_referrals": 1,
+     "pending": 0,
+     "product": "books",
+     "qualified": false,
+     "qualified_at": false,
+     "qualify_at": 4,
+     "unlock_at": 4
+    },
+    "momo": {
+     "adjustments": 0,
+     "available": 0,
+     "clawed_back": 0,
+     "clearing_days": 60,
+     "earned_cents": 0,
+     "frozen": true,
+     "locked": true,
+     "locked_cents": 0,
+     "paid": 0,
+     "payable": 0,
+     "paying_referrals": 1,
+     "pending": 0,
+     "product": "momo",
+     "qualified": false,
+     "qualified_at": false,
+     "qualify_at": 4,
+     "unlock_at": 4
+    },
+    "trade_circle": {
+     "adjustments": -900,
+     "available": 0,
+     "clawed_back": 900,
+     "clearing_days": 60,
+     "earned_cents": 225,
+     "frozen": true,
+     "locked": false,
+     "locked_cents": 0,
+     "paid": 0,
+     "payable": 0,
+     "paying_referrals": 1,
      "pending": 225,
      "product": "trade_circle",
-     "unlock_at": 3
+     "qualified": true,
+     "qualified_at": true,
+     "qualify_at": 4,
+     "unlock_at": 4
     }
    },
    "under_review": false
@@ -322,60 +345,88 @@
      "available": 0,
      "clawed_back": 0,
      "clearing_days": 60,
-     "earned_cents": 475,
+     "earned_cents": 0,
      "frozen": false,
      "locked": true,
      "locked_cents": 0,
      "paid": 0,
      "payable": 0,
      "paying_referrals": 1,
-     "pending": 475,
+     "pending": 0,
      "product": "books",
-     "unlock_at": 3
+     "qualified": false,
+     "qualified_at": false,
+     "qualify_at": 4,
+     "unlock_at": 4
     },
     "trade_circle": {
      "adjustments": 0,
      "available": 0,
      "clawed_back": 0,
      "clearing_days": 60,
-     "earned_cents": 225,
+     "earned_cents": 300,
      "frozen": false,
      "locked": false,
      "locked_cents": 0,
-     "paid": 225,
+     "paid": 300,
      "payable": 0,
-     "paying_referrals": 3,
+     "paying_referrals": 4,
      "pending": 0,
      "product": "trade_circle",
-     "unlock_at": 3
+     "qualified": true,
+     "qualified_at": true,
+     "qualify_at": 4,
+     "unlock_at": 4
     }
    },
    "under_review": false
   },
   {
-   "eligible": false,
-   "email": "notelig@oracle.example",
-   "empire_id": "notelig",
+   "eligible": true,
+   "email": "mixed@oracle.example",
+   "empire_id": "mixed",
    "frozen": false,
    "name": null,
    "payable": 0,
    "payout_preference": "stripe",
    "sites": {
-    "trade_circle": {
+    "books": {
+     "adjustments": 0,
+     "available": 0,
+     "clawed_back": 0,
+     "clearing_days": 60,
+     "earned_cents": 8950,
+     "frozen": false,
+     "locked": false,
+     "locked_cents": 0,
+     "paid": 8475,
+     "payable": 0,
+     "paying_referrals": 8,
+     "pending": 475,
+     "product": "books",
+     "qualified": true,
+     "qualified_at": true,
+     "qualify_at": 4,
+     "unlock_at": 4
+    },
+    "momo": {
      "adjustments": 0,
      "available": 0,
      "clawed_back": 0,
      "clearing_days": 60,
      "earned_cents": 0,
      "frozen": false,
-     "locked": false,
+     "locked": true,
      "locked_cents": 0,
      "paid": 0,
      "payable": 0,
-     "paying_referrals": 6,
+     "paying_referrals": 3,
      "pending": 0,
-     "product": "trade_circle",
-     "unlock_at": 3
+     "product": "momo",
+     "qualified": false,
+     "qualified_at": false,
+     "qualify_at": 4,
+     "unlock_at": 4
     }
    },
    "under_review": false
@@ -391,19 +442,22 @@
    "sites": {
     "trade_circle": {
      "adjustments": 0,
-     "available": 675,
+     "available": 0,
      "clawed_back": 0,
      "clearing_days": 60,
-     "earned_cents": 675,
+     "earned_cents": 0,
      "frozen": true,
-     "locked": false,
+     "locked": true,
      "locked_cents": 0,
      "paid": 0,
      "payable": 0,
      "paying_referrals": 3,
      "pending": 0,
      "product": "trade_circle",
-     "unlock_at": 3
+     "qualified": false,
+     "qualified_at": false,
+     "qualify_at": 4,
+     "unlock_at": 4
     }
    },
    "under_review": true
@@ -419,19 +473,22 @@
    "sites": {
     "trade_circle": {
      "adjustments": 0,
-     "available": 150,
+     "available": 0,
      "clawed_back": 0,
      "clearing_days": 60,
-     "earned_cents": 150,
+     "earned_cents": 0,
      "frozen": false,
      "locked": true,
-     "locked_cents": 150,
+     "locked_cents": 0,
      "paid": 0,
      "payable": 0,
      "paying_referrals": 2,
      "pending": 0,
      "product": "trade_circle",
-     "unlock_at": 3
+     "qualified": false,
+     "qualified_at": false,
+     "qualify_at": 4,
+     "unlock_at": 4
     }
    },
    "under_review": false
@@ -441,11 +498,32 @@
   "att_only": {
    "eligible": true,
    "empire_id": "att_only",
+   "free_months": [],
    "frozen": false,
    "paper_check_fee_cents": 200,
    "payable": 0,
    "payout_preference": "stripe",
    "payouts": [],
+   "qualified_at": false,
+   "qualified_at_by_product": {},
+   "referrals": [
+    {
+     "account_id": "ao-bk",
+     "bonus_year_locked": false,
+     "current_band_rate": null,
+     "friend_benefit": null,
+     "product": "books",
+     "schedule_anchor_at": false
+    },
+    {
+     "account_id": "ao-mo",
+     "bonus_year_locked": false,
+     "current_band_rate": null,
+     "friend_benefit": null,
+     "product": "momo",
+     "schedule_anchor_at": false
+    }
+   ],
    "sites": {
     "books": {
      "adjustments": 0,
@@ -461,7 +539,10 @@
      "paying_referrals": 0,
      "pending": 0,
      "product": "books",
-     "unlock_at": 3
+     "qualified": false,
+     "qualified_at": false,
+     "qualify_at": 4,
+     "unlock_at": 4
     },
     "momo": {
      "adjustments": 0,
@@ -477,16 +558,55 @@
      "paying_referrals": 0,
      "pending": 0,
      "product": "momo",
-     "unlock_at": 3
+     "qualified": false,
+     "qualified_at": false,
+     "qualify_at": 4,
+     "unlock_at": 4
     }
    },
    "terms": {
+    "bands": [
+     {
+      "rate": 0.25,
+      "through_month": 6
+     },
+     {
+      "rate": 0.1,
+      "through_month": 12
+     },
+     {
+      "rate": 0.02,
+      "through_month": 24
+     },
+     {
+      "rate": 0.01,
+      "through_month": 36
+     }
+    ],
+    "bonus_band": {
+     "rate": 0.01,
+     "threshold": 250,
+     "through_month": 48
+    },
+    "bonus_threshold": 250,
     "clearing_days": 60,
-    "months": 6,
+    "friend_benefit": {
+     "books_plan_ladder": [
+      "light",
+      "medium",
+      "heavy"
+     ],
+     "days": 14,
+     "half_off_months": 2
+    },
+    "grace_months": 3,
+    "milestone_threshold": 100,
+    "months": 36,
+    "paper_check_fee_cents": 200,
+    "qualification_scope": "per_site",
+    "qualify_at": 4,
     "review_chargebacks": 3,
-    "share_percent": 25,
-    "unlock_is_per_site": true,
-    "unlock_referrals": 3
+    "review_window_days": 183
    },
    "totals": {
     "available": 0,
@@ -501,152 +621,69 @@
   "boundary_a": {
    "eligible": true,
    "empire_id": "boundary_a",
-   "frozen": false,
-   "paper_check_fee_cents": 200,
-   "payable": 675,
-   "payout_preference": "paper_check",
-   "payouts": [],
-   "sites": {
-    "books": {
-     "adjustments": 0,
-     "available": 950,
-     "clawed_back": 0,
-     "clearing_days": 60,
-     "earned_cents": 950,
-     "frozen": false,
-     "locked": true,
-     "locked_cents": 950,
-     "paid": 0,
-     "payable": 0,
-     "paying_referrals": 2,
-     "pending": 0,
-     "product": "books",
-     "unlock_at": 3
-    },
-    "trade_circle": {
-     "adjustments": 0,
-     "available": 675,
-     "clawed_back": 0,
-     "clearing_days": 60,
-     "earned_cents": 675,
-     "frozen": false,
-     "locked": false,
-     "locked_cents": 0,
-     "paid": 0,
-     "payable": 675,
-     "paying_referrals": 3,
-     "pending": 0,
+   "free_months": [
+    {
+     "end": "<window>",
+     "plan": "paid",
      "product": "trade_circle",
-     "unlock_at": 3
+     "source": "third_paying_referral",
+     "start": "<window>"
     }
-   },
-   "terms": {
-    "clearing_days": 60,
-    "months": 6,
-    "review_chargebacks": 3,
-    "share_percent": 25,
-    "unlock_is_per_site": true,
-    "unlock_referrals": 3
-   },
-   "totals": {
-    "available": 1625,
-    "clawed_back": 0,
-    "earned_cents": 1625,
-    "paid": 0,
-    "payable": 675,
-    "pending": 0
-   },
-   "under_review": false
-  },
-  "boundary_b": {
-   "eligible": true,
-   "empire_id": "boundary_b",
-   "frozen": false,
-   "paper_check_fee_cents": 200,
-   "payable": 750,
-   "payout_preference": "stripe",
-   "payouts": [],
-   "sites": {
-    "momo": {
-     "adjustments": 0,
-     "available": 750,
-     "clawed_back": 0,
-     "clearing_days": 60,
-     "earned_cents": 750,
-     "frozen": false,
-     "locked": false,
-     "locked_cents": 0,
-     "paid": 0,
-     "payable": 750,
-     "paying_referrals": 3,
-     "pending": 0,
-     "product": "momo",
-     "unlock_at": 3
-    },
-    "trade_circle": {
-     "adjustments": 0,
-     "available": 150,
-     "clawed_back": 0,
-     "clearing_days": 60,
-     "earned_cents": 150,
-     "frozen": false,
-     "locked": true,
-     "locked_cents": 150,
-     "paid": 0,
-     "payable": 0,
-     "paying_referrals": 2,
-     "pending": 0,
-     "product": "trade_circle",
-     "unlock_at": 3
-    }
-   },
-   "terms": {
-    "clearing_days": 60,
-    "months": 6,
-    "review_chargebacks": 3,
-    "share_percent": 25,
-    "unlock_is_per_site": true,
-    "unlock_referrals": 3
-   },
-   "totals": {
-    "available": 900,
-    "clawed_back": 0,
-    "earned_cents": 900,
-    "paid": 0,
-    "payable": 750,
-    "pending": 0
-   },
-   "under_review": false
-  },
-  "disp_lost": {
-   "eligible": true,
-   "empire_id": "disp_lost",
+   ],
    "frozen": false,
    "paper_check_fee_cents": 200,
    "payable": 0,
-   "payout_preference": "stripe",
+   "payout_preference": "paper_check",
    "payouts": [],
+   "qualified_at": false,
+   "qualified_at_by_product": {},
+   "referrals": [
+    {
+     "account_id": "ba-tc0",
+     "bonus_year_locked": false,
+     "current_band_rate": null,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": false
+    },
+    {
+     "account_id": "ba-tc1",
+     "bonus_year_locked": false,
+     "current_band_rate": null,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": false
+    },
+    {
+     "account_id": "ba-tc2",
+     "bonus_year_locked": false,
+     "current_band_rate": null,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": false
+    },
+    {
+     "account_id": "ba-bk0",
+     "bonus_year_locked": false,
+     "current_band_rate": null,
+     "friend_benefit": null,
+     "product": "books",
+     "schedule_anchor_at": false
+    },
+    {
+     "account_id": "ba-bk1",
+     "bonus_year_locked": false,
+     "current_band_rate": null,
+     "friend_benefit": null,
+     "product": "books",
+     "schedule_anchor_at": false
+    }
+   ],
    "sites": {
-    "momo": {
+    "books": {
      "adjustments": 0,
      "available": 0,
      "clawed_back": 0,
-     "clearing_days": 60,
-     "earned_cents": 250,
-     "frozen": false,
-     "locked": true,
-     "locked_cents": 0,
-     "paid": 0,
-     "payable": 0,
-     "paying_referrals": 1,
-     "pending": 250,
-     "product": "momo",
-     "unlock_at": 3
-    },
-    "trade_circle": {
-     "adjustments": 0,
-     "available": 0,
-     "clawed_back": 450,
      "clearing_days": 60,
      "earned_cents": 0,
      "frozen": false,
@@ -654,33 +691,386 @@
      "locked_cents": 0,
      "paid": 0,
      "payable": 0,
-     "paying_referrals": 0,
+     "paying_referrals": 2,
+     "pending": 0,
+     "product": "books",
+     "qualified": false,
+     "qualified_at": false,
+     "qualify_at": 4,
+     "unlock_at": 4
+    },
+    "trade_circle": {
+     "adjustments": 0,
+     "available": 0,
+     "clawed_back": 0,
+     "clearing_days": 60,
+     "earned_cents": 0,
+     "frozen": false,
+     "locked": true,
+     "locked_cents": 0,
+     "paid": 0,
+     "payable": 0,
+     "paying_referrals": 3,
      "pending": 0,
      "product": "trade_circle",
-     "unlock_at": 3
+     "qualified": false,
+     "qualified_at": false,
+     "qualify_at": 4,
+     "unlock_at": 4
     }
    },
    "terms": {
+    "bands": [
+     {
+      "rate": 0.25,
+      "through_month": 6
+     },
+     {
+      "rate": 0.1,
+      "through_month": 12
+     },
+     {
+      "rate": 0.02,
+      "through_month": 24
+     },
+     {
+      "rate": 0.01,
+      "through_month": 36
+     }
+    ],
+    "bonus_band": {
+     "rate": 0.01,
+     "threshold": 250,
+     "through_month": 48
+    },
+    "bonus_threshold": 250,
     "clearing_days": 60,
-    "months": 6,
+    "friend_benefit": {
+     "books_plan_ladder": [
+      "light",
+      "medium",
+      "heavy"
+     ],
+     "days": 14,
+     "half_off_months": 2
+    },
+    "grace_months": 3,
+    "milestone_threshold": 100,
+    "months": 36,
+    "paper_check_fee_cents": 200,
+    "qualification_scope": "per_site",
+    "qualify_at": 4,
     "review_chargebacks": 3,
-    "share_percent": 25,
-    "unlock_is_per_site": true,
-    "unlock_referrals": 3
+    "review_window_days": 183
    },
    "totals": {
     "available": 0,
-    "clawed_back": 450,
-    "earned_cents": 250,
+    "clawed_back": 0,
+    "earned_cents": 0,
     "paid": 0,
     "payable": 0,
-    "pending": 250
+    "pending": 0
+   },
+   "under_review": false
+  },
+  "boundary_b": {
+   "eligible": true,
+   "empire_id": "boundary_b",
+   "free_months": [
+    {
+     "end": "<window>",
+     "plan": "starter",
+     "product": "momo",
+     "source": "third_paying_referral",
+     "start": "<window>"
+    }
+   ],
+   "frozen": false,
+   "paper_check_fee_cents": 200,
+   "payable": 0,
+   "payout_preference": "stripe",
+   "payouts": [],
+   "qualified_at": false,
+   "qualified_at_by_product": {},
+   "referrals": [
+    {
+     "account_id": "bb-tc0",
+     "bonus_year_locked": false,
+     "current_band_rate": null,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": false
+    },
+    {
+     "account_id": "bb-tc1",
+     "bonus_year_locked": false,
+     "current_band_rate": null,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": false
+    },
+    {
+     "account_id": "bb-mo0",
+     "bonus_year_locked": false,
+     "current_band_rate": null,
+     "friend_benefit": null,
+     "product": "momo",
+     "schedule_anchor_at": false
+    },
+    {
+     "account_id": "bb-mo1",
+     "bonus_year_locked": false,
+     "current_band_rate": null,
+     "friend_benefit": null,
+     "product": "momo",
+     "schedule_anchor_at": false
+    },
+    {
+     "account_id": "bb-mo2",
+     "bonus_year_locked": false,
+     "current_band_rate": null,
+     "friend_benefit": null,
+     "product": "momo",
+     "schedule_anchor_at": false
+    }
+   ],
+   "sites": {
+    "momo": {
+     "adjustments": 0,
+     "available": 0,
+     "clawed_back": 0,
+     "clearing_days": 60,
+     "earned_cents": 0,
+     "frozen": false,
+     "locked": true,
+     "locked_cents": 0,
+     "paid": 0,
+     "payable": 0,
+     "paying_referrals": 3,
+     "pending": 0,
+     "product": "momo",
+     "qualified": false,
+     "qualified_at": false,
+     "qualify_at": 4,
+     "unlock_at": 4
+    },
+    "trade_circle": {
+     "adjustments": 0,
+     "available": 0,
+     "clawed_back": 0,
+     "clearing_days": 60,
+     "earned_cents": 0,
+     "frozen": false,
+     "locked": true,
+     "locked_cents": 0,
+     "paid": 0,
+     "payable": 0,
+     "paying_referrals": 2,
+     "pending": 0,
+     "product": "trade_circle",
+     "qualified": false,
+     "qualified_at": false,
+     "qualify_at": 4,
+     "unlock_at": 4
+    }
+   },
+   "terms": {
+    "bands": [
+     {
+      "rate": 0.25,
+      "through_month": 6
+     },
+     {
+      "rate": 0.1,
+      "through_month": 12
+     },
+     {
+      "rate": 0.02,
+      "through_month": 24
+     },
+     {
+      "rate": 0.01,
+      "through_month": 36
+     }
+    ],
+    "bonus_band": {
+     "rate": 0.01,
+     "threshold": 250,
+     "through_month": 48
+    },
+    "bonus_threshold": 250,
+    "clearing_days": 60,
+    "friend_benefit": {
+     "books_plan_ladder": [
+      "light",
+      "medium",
+      "heavy"
+     ],
+     "days": 14,
+     "half_off_months": 2
+    },
+    "grace_months": 3,
+    "milestone_threshold": 100,
+    "months": 36,
+    "paper_check_fee_cents": 200,
+    "qualification_scope": "per_site",
+    "qualify_at": 4,
+    "review_chargebacks": 3,
+    "review_window_days": 183
+   },
+   "totals": {
+    "available": 0,
+    "clawed_back": 0,
+    "earned_cents": 0,
+    "paid": 0,
+    "payable": 0,
+    "pending": 0
+   },
+   "under_review": false
+  },
+  "disp_lost": {
+   "eligible": true,
+   "empire_id": "disp_lost",
+   "free_months": [],
+   "frozen": false,
+   "paper_check_fee_cents": 200,
+   "payable": 0,
+   "payout_preference": "stripe",
+   "payouts": [],
+   "qualified_at": false,
+   "qualified_at_by_product": {},
+   "referrals": [
+    {
+     "account_id": "dl-0",
+     "bonus_year_locked": false,
+     "current_band_rate": null,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": false
+    },
+    {
+     "account_id": "dl-1",
+     "bonus_year_locked": false,
+     "current_band_rate": null,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": false
+    },
+    {
+     "account_id": "dl-2",
+     "bonus_year_locked": false,
+     "current_band_rate": null,
+     "friend_benefit": null,
+     "product": "momo",
+     "schedule_anchor_at": false
+    }
+   ],
+   "sites": {
+    "momo": {
+     "adjustments": 0,
+     "available": 0,
+     "clawed_back": 0,
+     "clearing_days": 60,
+     "earned_cents": 0,
+     "frozen": false,
+     "locked": true,
+     "locked_cents": 0,
+     "paid": 0,
+     "payable": 0,
+     "paying_referrals": 1,
+     "pending": 0,
+     "product": "momo",
+     "qualified": false,
+     "qualified_at": false,
+     "qualify_at": 4,
+     "unlock_at": 4
+    },
+    "trade_circle": {
+     "adjustments": 0,
+     "available": 0,
+     "clawed_back": 0,
+     "clearing_days": 60,
+     "earned_cents": 0,
+     "frozen": false,
+     "locked": true,
+     "locked_cents": 0,
+     "paid": 0,
+     "payable": 0,
+     "paying_referrals": 2,
+     "pending": 0,
+     "product": "trade_circle",
+     "qualified": false,
+     "qualified_at": false,
+     "qualify_at": 4,
+     "unlock_at": 4
+    }
+   },
+   "terms": {
+    "bands": [
+     {
+      "rate": 0.25,
+      "through_month": 6
+     },
+     {
+      "rate": 0.1,
+      "through_month": 12
+     },
+     {
+      "rate": 0.02,
+      "through_month": 24
+     },
+     {
+      "rate": 0.01,
+      "through_month": 36
+     }
+    ],
+    "bonus_band": {
+     "rate": 0.01,
+     "threshold": 250,
+     "through_month": 48
+    },
+    "bonus_threshold": 250,
+    "clearing_days": 60,
+    "friend_benefit": {
+     "books_plan_ladder": [
+      "light",
+      "medium",
+      "heavy"
+     ],
+     "days": 14,
+     "half_off_months": 2
+    },
+    "grace_months": 3,
+    "milestone_threshold": 100,
+    "months": 36,
+    "paper_check_fee_cents": 200,
+    "qualification_scope": "per_site",
+    "qualify_at": 4,
+    "review_chargebacks": 3,
+    "review_window_days": 183
+   },
+   "totals": {
+    "available": 0,
+    "clawed_back": 0,
+    "earned_cents": 0,
+    "paid": 0,
+    "payable": 0,
+    "pending": 0
    },
    "under_review": false
   },
   "disp_open": {
    "eligible": false,
    "empire_id": "disp_open",
+   "free_months": [
+    {
+     "end": "<window>",
+     "plan": "paid",
+     "product": "trade_circle",
+     "source": "third_paying_referral",
+     "start": "<window>"
+    }
+   ],
    "frozen": true,
    "paper_check_fee_cents": 200,
    "payable": 0,
@@ -689,74 +1079,181 @@
     {
      "currency": "usd",
      "fee_cents": 0,
-     "gross_cents": 675,
-     "net_cents": 675,
+     "gross_cents": 900,
+     "net_cents": 900,
      "product": "trade_circle",
      "rail": "manual",
      "reference": "oracle"
+    }
+   ],
+   "qualified_at": true,
+   "qualified_at_by_product": {
+    "trade_circle": true
+   },
+   "referrals": [
+    {
+     "account_id": "do-0",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "do-1",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "do-2",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "do-6",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "do-3",
+     "bonus_year_locked": false,
+     "current_band_rate": null,
+     "friend_benefit": null,
+     "product": "books",
+     "schedule_anchor_at": false
+    },
+    {
+     "account_id": "do-4",
+     "bonus_year_locked": false,
+     "current_band_rate": null,
+     "friend_benefit": null,
+     "product": "momo",
+     "schedule_anchor_at": false
+    },
+    {
+     "account_id": "do-5",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
     }
    ],
    "sites": {
     "books": {
      "adjustments": 0,
      "available": 0,
-     "clawed_back": 475,
+     "clawed_back": 0,
      "clearing_days": 60,
      "earned_cents": 0,
-     "frozen": true,
-     "locked": true,
-     "locked_cents": 0,
-     "paid": 0,
-     "payable": 0,
-     "paying_referrals": 0,
-     "pending": 0,
-     "product": "books",
-     "unlock_at": 3
-    },
-    "momo": {
-     "adjustments": 0,
-     "available": 0,
-     "clawed_back": 4000,
-     "clearing_days": 60,
-     "earned_cents": 0,
-     "frozen": true,
-     "locked": true,
-     "locked_cents": 0,
-     "paid": 0,
-     "payable": 0,
-     "paying_referrals": 0,
-     "pending": 0,
-     "product": "momo",
-     "unlock_at": 3
-    },
-    "trade_circle": {
-     "adjustments": -675,
-     "available": 0,
-     "clawed_back": 675,
-     "clearing_days": 60,
-     "earned_cents": 225,
      "frozen": true,
      "locked": true,
      "locked_cents": 0,
      "paid": 0,
      "payable": 0,
      "paying_referrals": 1,
+     "pending": 0,
+     "product": "books",
+     "qualified": false,
+     "qualified_at": false,
+     "qualify_at": 4,
+     "unlock_at": 4
+    },
+    "momo": {
+     "adjustments": 0,
+     "available": 0,
+     "clawed_back": 0,
+     "clearing_days": 60,
+     "earned_cents": 0,
+     "frozen": true,
+     "locked": true,
+     "locked_cents": 0,
+     "paid": 0,
+     "payable": 0,
+     "paying_referrals": 1,
+     "pending": 0,
+     "product": "momo",
+     "qualified": false,
+     "qualified_at": false,
+     "qualify_at": 4,
+     "unlock_at": 4
+    },
+    "trade_circle": {
+     "adjustments": -900,
+     "available": 0,
+     "clawed_back": 900,
+     "clearing_days": 60,
+     "earned_cents": 225,
+     "frozen": true,
+     "locked": false,
+     "locked_cents": 0,
+     "paid": 0,
+     "payable": 0,
+     "paying_referrals": 1,
      "pending": 225,
      "product": "trade_circle",
-     "unlock_at": 3
+     "qualified": true,
+     "qualified_at": true,
+     "qualify_at": 4,
+     "unlock_at": 4
     }
    },
    "terms": {
+    "bands": [
+     {
+      "rate": 0.25,
+      "through_month": 6
+     },
+     {
+      "rate": 0.1,
+      "through_month": 12
+     },
+     {
+      "rate": 0.02,
+      "through_month": 24
+     },
+     {
+      "rate": 0.01,
+      "through_month": 36
+     }
+    ],
+    "bonus_band": {
+     "rate": 0.01,
+     "threshold": 250,
+     "through_month": 48
+    },
+    "bonus_threshold": 250,
     "clearing_days": 60,
-    "months": 6,
+    "friend_benefit": {
+     "books_plan_ladder": [
+      "light",
+      "medium",
+      "heavy"
+     ],
+     "days": 14,
+     "half_off_months": 2
+    },
+    "grace_months": 3,
+    "milestone_threshold": 100,
+    "months": 36,
+    "paper_check_fee_cents": 200,
+    "qualification_scope": "per_site",
+    "qualify_at": 4,
     "review_chargebacks": 3,
-    "share_percent": 25,
-    "unlock_is_per_site": true,
-    "unlock_referrals": 3
+    "review_window_days": 183
    },
    "totals": {
     "available": 0,
-    "clawed_back": 5150,
+    "clawed_back": 900,
     "earned_cents": 225,
     "paid": 0,
     "payable": 0,
@@ -767,6 +1264,15 @@
   "disp_won": {
    "eligible": true,
    "empire_id": "disp_won",
+   "free_months": [
+    {
+     "end": "<window>",
+     "plan": "paid",
+     "product": "trade_circle",
+     "source": "third_paying_referral",
+     "start": "<window>"
+    }
+   ],
    "frozen": false,
    "paper_check_fee_cents": 200,
    "payable": 0,
@@ -775,11 +1281,57 @@
     {
      "currency": "usd",
      "fee_cents": 0,
-     "gross_cents": 225,
-     "net_cents": 225,
+     "gross_cents": 300,
+     "net_cents": 300,
      "product": "trade_circle",
      "rail": "manual",
      "reference": "oracle"
+    }
+   ],
+   "qualified_at": true,
+   "qualified_at_by_product": {
+    "trade_circle": true
+   },
+   "referrals": [
+    {
+     "account_id": "dw-0",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "dw-1",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "dw-2",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "dw-6",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "dw-3",
+     "bonus_year_locked": false,
+     "current_band_rate": null,
+     "friend_benefit": null,
+     "product": "books",
+     "schedule_anchor_at": false
     }
    ],
    "sites": {
@@ -788,65 +1340,123 @@
      "available": 0,
      "clawed_back": 0,
      "clearing_days": 60,
-     "earned_cents": 475,
+     "earned_cents": 0,
      "frozen": false,
      "locked": true,
      "locked_cents": 0,
      "paid": 0,
      "payable": 0,
      "paying_referrals": 1,
-     "pending": 475,
+     "pending": 0,
      "product": "books",
-     "unlock_at": 3
+     "qualified": false,
+     "qualified_at": false,
+     "qualify_at": 4,
+     "unlock_at": 4
     },
     "trade_circle": {
      "adjustments": 0,
      "available": 0,
      "clawed_back": 0,
      "clearing_days": 60,
-     "earned_cents": 225,
+     "earned_cents": 300,
      "frozen": false,
      "locked": false,
      "locked_cents": 0,
-     "paid": 225,
+     "paid": 300,
      "payable": 0,
-     "paying_referrals": 3,
+     "paying_referrals": 4,
      "pending": 0,
      "product": "trade_circle",
-     "unlock_at": 3
+     "qualified": true,
+     "qualified_at": true,
+     "qualify_at": 4,
+     "unlock_at": 4
     }
    },
    "terms": {
+    "bands": [
+     {
+      "rate": 0.25,
+      "through_month": 6
+     },
+     {
+      "rate": 0.1,
+      "through_month": 12
+     },
+     {
+      "rate": 0.02,
+      "through_month": 24
+     },
+     {
+      "rate": 0.01,
+      "through_month": 36
+     }
+    ],
+    "bonus_band": {
+     "rate": 0.01,
+     "threshold": 250,
+     "through_month": 48
+    },
+    "bonus_threshold": 250,
     "clearing_days": 60,
-    "months": 6,
+    "friend_benefit": {
+     "books_plan_ladder": [
+      "light",
+      "medium",
+      "heavy"
+     ],
+     "days": 14,
+     "half_off_months": 2
+    },
+    "grace_months": 3,
+    "milestone_threshold": 100,
+    "months": 36,
+    "paper_check_fee_cents": 200,
+    "qualification_scope": "per_site",
+    "qualify_at": 4,
     "review_chargebacks": 3,
-    "share_percent": 25,
-    "unlock_is_per_site": true,
-    "unlock_referrals": 3
+    "review_window_days": 183
    },
    "totals": {
     "available": 0,
     "clawed_back": 0,
-    "earned_cents": 700,
-    "paid": 225,
+    "earned_cents": 300,
+    "paid": 300,
     "payable": 0,
-    "pending": 475
+    "pending": 0
    },
    "under_review": false
   },
   "mixed": {
    "eligible": true,
    "empire_id": "mixed",
+   "free_months": [
+    {
+     "end": "<window>",
+     "plan": "starter",
+     "product": "books",
+     "source": "third_paying_referral",
+     "start": "<window>"
+    },
+    {
+     "end": "<window>",
+     "plan": "starter",
+     "product": "momo",
+     "source": "third_paying_referral",
+     "start": "<window>"
+    }
+   ],
    "frozen": false,
    "paper_check_fee_cents": 200,
-   "payable": 8000,
+   "payable": 0,
    "payout_preference": "stripe",
    "payouts": [
     {
      "currency": "usd",
      "fee_cents": 0,
-     "gross_cents": 1725,
-     "net_cents": 1725,
+     "gross_cents": 1975,
+     "net_cents": 1975,
      "product": "books",
      "rail": "manual",
      "reference": "oracle p1"
@@ -861,66 +1471,393 @@
      "reference": "oracle p2"
     }
    ],
+   "qualified_at": true,
+   "qualified_at_by_product": {
+    "books": true
+   },
+   "referrals": [
+    {
+     "account_id": "mx-a",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "books",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "mx-b",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "books",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "mx-h",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "books",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "mx-i",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "books",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "mx-c",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "books",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "mx-d",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "books",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "mx-e",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "books",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "mx-f",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "books",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "mx-g",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "books",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "mx-m0",
+     "bonus_year_locked": false,
+     "current_band_rate": null,
+     "friend_benefit": null,
+     "product": "momo",
+     "schedule_anchor_at": false
+    },
+    {
+     "account_id": "mx-m1",
+     "bonus_year_locked": false,
+     "current_band_rate": null,
+     "friend_benefit": null,
+     "product": "momo",
+     "schedule_anchor_at": false
+    },
+    {
+     "account_id": "mx-m2",
+     "bonus_year_locked": false,
+     "current_band_rate": null,
+     "friend_benefit": null,
+     "product": "momo",
+     "schedule_anchor_at": false
+    }
+   ],
    "sites": {
     "books": {
      "adjustments": 0,
      "available": 0,
      "clawed_back": 0,
      "clearing_days": 60,
-     "earned_cents": 8700,
+     "earned_cents": 8950,
      "frozen": false,
      "locked": false,
      "locked_cents": 0,
-     "paid": 8225,
+     "paid": 8475,
      "payable": 0,
-     "paying_referrals": 7,
+     "paying_referrals": 8,
      "pending": 475,
      "product": "books",
-     "unlock_at": 3
+     "qualified": true,
+     "qualified_at": true,
+     "qualify_at": 4,
+     "unlock_at": 4
     },
     "momo": {
      "adjustments": 0,
-     "available": 8000,
+     "available": 0,
      "clawed_back": 0,
      "clearing_days": 60,
-     "earned_cents": 8250,
+     "earned_cents": 0,
      "frozen": false,
-     "locked": false,
+     "locked": true,
      "locked_cents": 0,
      "paid": 0,
-     "payable": 8000,
+     "payable": 0,
      "paying_referrals": 3,
-     "pending": 250,
+     "pending": 0,
      "product": "momo",
-     "unlock_at": 3
+     "qualified": false,
+     "qualified_at": false,
+     "qualify_at": 4,
+     "unlock_at": 4
     }
    },
    "terms": {
+    "bands": [
+     {
+      "rate": 0.25,
+      "through_month": 6
+     },
+     {
+      "rate": 0.1,
+      "through_month": 12
+     },
+     {
+      "rate": 0.02,
+      "through_month": 24
+     },
+     {
+      "rate": 0.01,
+      "through_month": 36
+     }
+    ],
+    "bonus_band": {
+     "rate": 0.01,
+     "threshold": 250,
+     "through_month": 48
+    },
+    "bonus_threshold": 250,
     "clearing_days": 60,
-    "months": 6,
+    "friend_benefit": {
+     "books_plan_ladder": [
+      "light",
+      "medium",
+      "heavy"
+     ],
+     "days": 14,
+     "half_off_months": 2
+    },
+    "grace_months": 3,
+    "milestone_threshold": 100,
+    "months": 36,
+    "paper_check_fee_cents": 200,
+    "qualification_scope": "per_site",
+    "qualify_at": 4,
     "review_chargebacks": 3,
-    "share_percent": 25,
-    "unlock_is_per_site": true,
-    "unlock_referrals": 3
+    "review_window_days": 183
    },
    "totals": {
-    "available": 8000,
+    "available": 0,
     "clawed_back": 0,
-    "earned_cents": 16950,
-    "paid": 8225,
-    "payable": 8000,
-    "pending": 725
+    "earned_cents": 8950,
+    "paid": 8475,
+    "payable": 0,
+    "pending": 475
    },
    "under_review": false
   },
   "notelig": {
    "eligible": false,
    "empire_id": "notelig",
+   "free_months": [
+    {
+     "end": "<window>",
+     "plan": "starter",
+     "product": "trade_circle",
+     "source": "third_paying_referral",
+     "start": "<window>"
+    }
+   ],
    "frozen": false,
+   "paper_check_fee_cents": 200,
+   "payable": 1350,
+   "payout_preference": "stripe",
+   "payouts": [],
+   "qualified_at": true,
+   "qualified_at_by_product": {
+    "trade_circle": true
+   },
+   "referrals": [
+    {
+     "account_id": "ne-0",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "ne-1",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "ne-2",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "ne-3",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "ne-4",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "ne-5",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    }
+   ],
+   "sites": {
+    "trade_circle": {
+     "adjustments": 0,
+     "available": 1350,
+     "clawed_back": 0,
+     "clearing_days": 60,
+     "earned_cents": 1350,
+     "frozen": false,
+     "locked": false,
+     "locked_cents": 0,
+     "paid": 0,
+     "payable": 1350,
+     "paying_referrals": 6,
+     "pending": 0,
+     "product": "trade_circle",
+     "qualified": true,
+     "qualified_at": true,
+     "qualify_at": 4,
+     "unlock_at": 4
+    }
+   },
+   "terms": {
+    "bands": [
+     {
+      "rate": 0.25,
+      "through_month": 6
+     },
+     {
+      "rate": 0.1,
+      "through_month": 12
+     },
+     {
+      "rate": 0.02,
+      "through_month": 24
+     },
+     {
+      "rate": 0.01,
+      "through_month": 36
+     }
+    ],
+    "bonus_band": {
+     "rate": 0.01,
+     "threshold": 250,
+     "through_month": 48
+    },
+    "bonus_threshold": 250,
+    "clearing_days": 60,
+    "friend_benefit": {
+     "books_plan_ladder": [
+      "light",
+      "medium",
+      "heavy"
+     ],
+     "days": 14,
+     "half_off_months": 2
+    },
+    "grace_months": 3,
+    "milestone_threshold": 100,
+    "months": 36,
+    "paper_check_fee_cents": 200,
+    "qualification_scope": "per_site",
+    "qualify_at": 4,
+    "review_chargebacks": 3,
+    "review_window_days": 183
+   },
+   "totals": {
+    "available": 1350,
+    "clawed_back": 0,
+    "earned_cents": 1350,
+    "paid": 0,
+    "payable": 1350,
+    "pending": 0
+   },
+   "under_review": false
+  },
+  "review": {
+   "eligible": false,
+   "empire_id": "review",
+   "free_months": [
+    {
+     "end": "<window>",
+     "plan": "paid",
+     "product": "trade_circle",
+     "source": "third_paying_referral",
+     "start": "<window>"
+    }
+   ],
+   "frozen": true,
    "paper_check_fee_cents": 200,
    "payable": 0,
    "payout_preference": "stripe",
    "payouts": [],
+   "qualified_at": false,
+   "qualified_at_by_product": {},
+   "referrals": [
+    {
+     "account_id": "rv-0",
+     "bonus_year_locked": false,
+     "current_band_rate": null,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": false
+    },
+    {
+     "account_id": "rv-1",
+     "bonus_year_locked": false,
+     "current_band_rate": null,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": false
+    },
+    {
+     "account_id": "rv-2",
+     "bonus_year_locked": false,
+     "current_band_rate": null,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": false
+    }
+   ],
    "sites": {
     "trade_circle": {
      "adjustments": 0,
@@ -928,24 +1865,63 @@
      "clawed_back": 0,
      "clearing_days": 60,
      "earned_cents": 0,
-     "frozen": false,
-     "locked": false,
+     "frozen": true,
+     "locked": true,
      "locked_cents": 0,
      "paid": 0,
      "payable": 0,
-     "paying_referrals": 6,
+     "paying_referrals": 3,
      "pending": 0,
      "product": "trade_circle",
-     "unlock_at": 3
+     "qualified": false,
+     "qualified_at": false,
+     "qualify_at": 4,
+     "unlock_at": 4
     }
    },
    "terms": {
+    "bands": [
+     {
+      "rate": 0.25,
+      "through_month": 6
+     },
+     {
+      "rate": 0.1,
+      "through_month": 12
+     },
+     {
+      "rate": 0.02,
+      "through_month": 24
+     },
+     {
+      "rate": 0.01,
+      "through_month": 36
+     }
+    ],
+    "bonus_band": {
+     "rate": 0.01,
+     "threshold": 250,
+     "through_month": 48
+    },
+    "bonus_threshold": 250,
     "clearing_days": 60,
-    "months": 6,
+    "friend_benefit": {
+     "books_plan_ladder": [
+      "light",
+      "medium",
+      "heavy"
+     ],
+     "days": 14,
+     "half_off_months": 2
+    },
+    "grace_months": 3,
+    "milestone_threshold": 100,
+    "months": 36,
+    "paper_check_fee_cents": 200,
+    "qualification_scope": "per_site",
+    "qualify_at": 4,
     "review_chargebacks": 3,
-    "share_percent": 25,
-    "unlock_is_per_site": true,
-    "unlock_referrals": 3
+    "review_window_days": 183
    },
    "totals": {
     "available": 0,
@@ -955,134 +1931,2204 @@
     "payable": 0,
     "pending": 0
    },
-   "under_review": false
-  },
-  "review": {
-   "eligible": false,
-   "empire_id": "review",
-   "frozen": true,
-   "paper_check_fee_cents": 200,
-   "payable": 0,
-   "payout_preference": "stripe",
-   "payouts": [],
-   "sites": {
-    "trade_circle": {
-     "adjustments": 0,
-     "available": 675,
-     "clawed_back": 0,
-     "clearing_days": 60,
-     "earned_cents": 675,
-     "frozen": true,
-     "locked": false,
-     "locked_cents": 0,
-     "paid": 0,
-     "payable": 0,
-     "paying_referrals": 3,
-     "pending": 0,
-     "product": "trade_circle",
-     "unlock_at": 3
-    }
-   },
-   "terms": {
-    "clearing_days": 60,
-    "months": 6,
-    "review_chargebacks": 3,
-    "share_percent": 25,
-    "unlock_is_per_site": true,
-    "unlock_referrals": 3
-   },
-   "totals": {
-    "available": 675,
-    "clawed_back": 0,
-    "earned_cents": 675,
-    "paid": 0,
-    "payable": 0,
-    "pending": 0
-   },
    "under_review": true
   },
   "whale": {
    "eligible": true,
    "empire_id": "whale",
+   "free_months": [
+    {
+     "end": "<window>",
+     "plan": "paid",
+     "product": "trade_circle",
+     "source": "third_paying_referral",
+     "start": "<window>"
+    }
+   ],
    "frozen": false,
    "paper_check_fee_cents": 200,
    "payable": 419425,
    "payout_preference": "bank_transfer",
    "payouts": [],
+   "qualified_at": true,
+   "qualified_at_by_product": {
+    "trade_circle": true
+   },
+   "referrals": [
+    {
+     "account_id": "w0",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w1",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w2",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w3",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w4",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w5",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w6",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w7",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w8",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w9",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w10",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w11",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w12",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w13",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w14",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w15",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w16",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w17",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w18",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w19",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w20",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w21",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w22",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w23",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w24",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w25",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w26",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w27",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w28",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w29",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w30",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w31",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w32",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w33",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w34",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w35",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w36",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w37",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w38",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w39",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w40",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w41",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w42",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w43",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w44",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w45",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w46",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w47",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w48",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w49",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w50",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w51",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w52",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w53",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w54",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w55",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w56",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w57",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w58",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w59",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w60",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w61",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w62",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w63",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w64",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w65",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w66",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w67",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w68",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w69",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w70",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w71",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w72",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w73",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w74",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w75",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w76",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w77",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w78",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w79",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w80",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w81",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w82",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w83",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w84",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w85",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w86",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w87",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w88",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w89",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w90",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w91",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w92",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w93",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w94",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w95",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w96",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w97",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w98",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w99",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w100",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w101",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w102",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w103",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w104",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w105",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w106",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w107",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w108",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w109",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w110",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w111",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w112",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w113",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w114",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w115",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w116",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w117",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w118",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w119",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w120",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w121",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w122",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w123",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w124",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w125",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w126",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w127",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w128",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w129",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w130",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w131",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w132",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w133",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w134",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w135",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w136",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w137",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w138",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w139",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w140",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w141",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w142",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w143",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w144",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w145",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w146",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w147",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w148",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w149",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w150",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w151",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w152",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w153",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w154",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w155",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w156",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w157",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w158",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w159",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w160",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w161",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w162",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w163",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w164",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w165",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w166",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w167",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w168",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w169",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w170",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w171",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w172",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w173",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w174",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w175",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w176",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w177",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w178",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w179",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w180",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w181",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w182",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w183",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w184",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w185",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w186",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w187",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w188",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w189",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w190",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w191",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w192",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w193",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w194",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w195",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w196",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w197",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w198",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w199",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w200",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w201",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w202",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w203",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w204",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w205",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w206",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w207",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w208",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w209",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w210",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w211",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w212",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w213",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w214",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w215",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w216",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w217",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w218",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w219",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w220",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w221",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w222",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w223",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w224",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w225",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w226",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w227",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w228",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w229",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w230",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w231",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w232",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w233",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w234",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w235",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w236",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w237",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w238",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w239",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w240",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w241",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w242",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w243",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w244",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w245",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w246",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w247",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w248",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    },
+    {
+     "account_id": "w249",
+     "bonus_year_locked": false,
+     "current_band_rate": 0.25,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": true
+    }
+   ],
    "sites": {
     "trade_circle": {
      "adjustments": 0,
      "available": 419425,
      "clawed_back": 0,
      "clearing_days": 60,
-     "earned_cents": 536350,
+     "earned_cents": 535575,
      "frozen": false,
      "locked": false,
      "locked_cents": 0,
      "paid": 0,
      "payable": 419425,
      "paying_referrals": 250,
-     "pending": 116925,
+     "pending": 116150,
      "product": "trade_circle",
-     "unlock_at": 3
+     "qualified": true,
+     "qualified_at": true,
+     "qualify_at": 4,
+     "unlock_at": 4
     }
    },
    "terms": {
+    "bands": [
+     {
+      "rate": 0.25,
+      "through_month": 6
+     },
+     {
+      "rate": 0.1,
+      "through_month": 12
+     },
+     {
+      "rate": 0.02,
+      "through_month": 24
+     },
+     {
+      "rate": 0.01,
+      "through_month": 36
+     }
+    ],
+    "bonus_band": {
+     "rate": 0.01,
+     "threshold": 250,
+     "through_month": 48
+    },
+    "bonus_threshold": 250,
     "clearing_days": 60,
-    "months": 6,
+    "friend_benefit": {
+     "books_plan_ladder": [
+      "light",
+      "medium",
+      "heavy"
+     ],
+     "days": 14,
+     "half_off_months": 2
+    },
+    "grace_months": 3,
+    "milestone_threshold": 100,
+    "months": 36,
+    "paper_check_fee_cents": 200,
+    "qualification_scope": "per_site",
+    "qualify_at": 4,
     "review_chargebacks": 3,
-    "share_percent": 25,
-    "unlock_is_per_site": true,
-    "unlock_referrals": 3
+    "review_window_days": 183
    },
    "totals": {
     "available": 419425,
     "clawed_back": 0,
-    "earned_cents": 536350,
+    "earned_cents": 535575,
     "paid": 0,
     "payable": 419425,
-    "pending": 116925
+    "pending": 116150
    },
    "under_review": false
   },
   "window": {
    "eligible": true,
    "empire_id": "window",
+   "free_months": [],
    "frozen": false,
    "paper_check_fee_cents": 200,
    "payable": 0,
    "payout_preference": "stripe",
    "payouts": [],
+   "qualified_at": false,
+   "qualified_at_by_product": {},
+   "referrals": [
+    {
+     "account_id": "wn-0",
+     "bonus_year_locked": false,
+     "current_band_rate": null,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": false
+    },
+    {
+     "account_id": "wn-1",
+     "bonus_year_locked": false,
+     "current_band_rate": null,
+     "friend_benefit": null,
+     "product": "trade_circle",
+     "schedule_anchor_at": false
+    }
+   ],
    "sites": {
     "trade_circle": {
      "adjustments": 0,
-     "available": 150,
+     "available": 0,
      "clawed_back": 0,
      "clearing_days": 60,
-     "earned_cents": 150,
+     "earned_cents": 0,
      "frozen": false,
      "locked": true,
-     "locked_cents": 150,
+     "locked_cents": 0,
      "paid": 0,
      "payable": 0,
      "paying_referrals": 2,
      "pending": 0,
      "product": "trade_circle",
-     "unlock_at": 3
+     "qualified": false,
+     "qualified_at": false,
+     "qualify_at": 4,
+     "unlock_at": 4
     }
    },
    "terms": {
+    "bands": [
+     {
+      "rate": 0.25,
+      "through_month": 6
+     },
+     {
+      "rate": 0.1,
+      "through_month": 12
+     },
+     {
+      "rate": 0.02,
+      "through_month": 24
+     },
+     {
+      "rate": 0.01,
+      "through_month": 36
+     }
+    ],
+    "bonus_band": {
+     "rate": 0.01,
+     "threshold": 250,
+     "through_month": 48
+    },
+    "bonus_threshold": 250,
     "clearing_days": 60,
-    "months": 6,
+    "friend_benefit": {
+     "books_plan_ladder": [
+      "light",
+      "medium",
+      "heavy"
+     ],
+     "days": 14,
+     "half_off_months": 2
+    },
+    "grace_months": 3,
+    "milestone_threshold": 100,
+    "months": 36,
+    "paper_check_fee_cents": 200,
+    "qualification_scope": "per_site",
+    "qualify_at": 4,
     "review_chargebacks": 3,
-    "share_percent": 25,
-    "unlock_is_per_site": true,
-    "unlock_referrals": 3
+    "review_window_days": 183
    },
    "totals": {
-    "available": 150,
+    "available": 0,
     "clawed_back": 0,
-    "earned_cents": 150,
+    "earned_cents": 0,
     "paid": 0,
     "payable": 0,
     "pending": 0
@@ -1109,20 +4155,20 @@
   "disp_lost": {
    "books": 0,
    "momo": 1,
-   "trade_circle": 0
+   "trade_circle": 2
   },
   "disp_open": {
-   "books": 0,
-   "momo": 0,
+   "books": 1,
+   "momo": 1,
    "trade_circle": 1
   },
   "disp_won": {
    "books": 1,
    "momo": 0,
-   "trade_circle": 3
+   "trade_circle": 4
   },
   "mixed": {
-   "books": 7,
+   "books": 8,
    "momo": 3,
    "trade_circle": 0
   },
@@ -1163,7 +4209,10 @@
     "paying_referrals": 0,
     "pending": 0,
     "product": "books",
-    "unlock_at": 3
+    "qualified": false,
+    "qualified_at": false,
+    "qualify_at": 4,
+    "unlock_at": 4
    },
    "momo": {
     "adjustments": 0,
@@ -1179,7 +4228,10 @@
     "paying_referrals": 0,
     "pending": 0,
     "product": "momo",
-    "unlock_at": 3
+    "qualified": false,
+    "qualified_at": false,
+    "qualify_at": 4,
+    "unlock_at": 4
    },
    "trade_circle": {
     "adjustments": 0,
@@ -1195,25 +4247,31 @@
     "paying_referrals": 0,
     "pending": 0,
     "product": "trade_circle",
-    "unlock_at": 3
+    "qualified": false,
+    "qualified_at": false,
+    "qualify_at": 4,
+    "unlock_at": 4
    }
   },
   "boundary_a": {
    "books": {
     "adjustments": 0,
-    "available": 950,
+    "available": 0,
     "clawed_back": 0,
     "clearing_days": 60,
-    "earned_cents": 950,
+    "earned_cents": 0,
     "frozen": false,
     "locked": true,
-    "locked_cents": 950,
+    "locked_cents": 0,
     "paid": 0,
     "payable": 0,
     "paying_referrals": 2,
     "pending": 0,
     "product": "books",
-    "unlock_at": 3
+    "qualified": false,
+    "qualified_at": false,
+    "qualify_at": 4,
+    "unlock_at": 4
    },
    "momo": {
     "adjustments": 0,
@@ -1229,23 +4287,29 @@
     "paying_referrals": 0,
     "pending": 0,
     "product": "momo",
-    "unlock_at": 3
+    "qualified": false,
+    "qualified_at": false,
+    "qualify_at": 4,
+    "unlock_at": 4
    },
    "trade_circle": {
     "adjustments": 0,
-    "available": 675,
+    "available": 0,
     "clawed_back": 0,
     "clearing_days": 60,
-    "earned_cents": 675,
+    "earned_cents": 0,
     "frozen": false,
-    "locked": false,
+    "locked": true,
     "locked_cents": 0,
     "paid": 0,
-    "payable": 675,
+    "payable": 0,
     "paying_referrals": 3,
     "pending": 0,
     "product": "trade_circle",
-    "unlock_at": 3
+    "qualified": false,
+    "qualified_at": false,
+    "qualify_at": 4,
+    "unlock_at": 4
    }
   },
   "boundary_b": {
@@ -1263,39 +4327,48 @@
     "paying_referrals": 0,
     "pending": 0,
     "product": "books",
-    "unlock_at": 3
+    "qualified": false,
+    "qualified_at": false,
+    "qualify_at": 4,
+    "unlock_at": 4
    },
    "momo": {
     "adjustments": 0,
-    "available": 750,
+    "available": 0,
     "clawed_back": 0,
     "clearing_days": 60,
-    "earned_cents": 750,
+    "earned_cents": 0,
     "frozen": false,
-    "locked": false,
+    "locked": true,
     "locked_cents": 0,
     "paid": 0,
-    "payable": 750,
+    "payable": 0,
     "paying_referrals": 3,
     "pending": 0,
     "product": "momo",
-    "unlock_at": 3
+    "qualified": false,
+    "qualified_at": false,
+    "qualify_at": 4,
+    "unlock_at": 4
    },
    "trade_circle": {
     "adjustments": 0,
-    "available": 150,
+    "available": 0,
     "clawed_back": 0,
     "clearing_days": 60,
-    "earned_cents": 150,
+    "earned_cents": 0,
     "frozen": false,
     "locked": true,
-    "locked_cents": 150,
+    "locked_cents": 0,
     "paid": 0,
     "payable": 0,
     "paying_referrals": 2,
     "pending": 0,
     "product": "trade_circle",
-    "unlock_at": 3
+    "qualified": false,
+    "qualified_at": false,
+    "qualify_at": 4,
+    "unlock_at": 4
    }
   },
   "disp_lost": {
@@ -1313,28 +4386,34 @@
     "paying_referrals": 0,
     "pending": 0,
     "product": "books",
-    "unlock_at": 3
+    "qualified": false,
+    "qualified_at": false,
+    "qualify_at": 4,
+    "unlock_at": 4
    },
    "momo": {
     "adjustments": 0,
     "available": 0,
     "clawed_back": 0,
     "clearing_days": 60,
-    "earned_cents": 250,
+    "earned_cents": 0,
     "frozen": false,
     "locked": true,
     "locked_cents": 0,
     "paid": 0,
     "payable": 0,
     "paying_referrals": 1,
-    "pending": 250,
+    "pending": 0,
     "product": "momo",
-    "unlock_at": 3
+    "qualified": false,
+    "qualified_at": false,
+    "qualify_at": 4,
+    "unlock_at": 4
    },
    "trade_circle": {
     "adjustments": 0,
     "available": 0,
-    "clawed_back": 450,
+    "clawed_back": 0,
     "clearing_days": 60,
     "earned_cents": 0,
     "frozen": false,
@@ -1342,60 +4421,72 @@
     "locked_cents": 0,
     "paid": 0,
     "payable": 0,
-    "paying_referrals": 0,
+    "paying_referrals": 2,
     "pending": 0,
     "product": "trade_circle",
-    "unlock_at": 3
+    "qualified": false,
+    "qualified_at": false,
+    "qualify_at": 4,
+    "unlock_at": 4
    }
   },
   "disp_open": {
    "books": {
     "adjustments": 0,
     "available": 0,
-    "clawed_back": 475,
+    "clawed_back": 0,
     "clearing_days": 60,
     "earned_cents": 0,
-    "frozen": true,
-    "locked": true,
-    "locked_cents": 0,
-    "paid": 0,
-    "payable": 0,
-    "paying_referrals": 0,
-    "pending": 0,
-    "product": "books",
-    "unlock_at": 3
-   },
-   "momo": {
-    "adjustments": 0,
-    "available": 0,
-    "clawed_back": 4000,
-    "clearing_days": 60,
-    "earned_cents": 0,
-    "frozen": true,
-    "locked": true,
-    "locked_cents": 0,
-    "paid": 0,
-    "payable": 0,
-    "paying_referrals": 0,
-    "pending": 0,
-    "product": "momo",
-    "unlock_at": 3
-   },
-   "trade_circle": {
-    "adjustments": -675,
-    "available": 0,
-    "clawed_back": 675,
-    "clearing_days": 60,
-    "earned_cents": 225,
     "frozen": true,
     "locked": true,
     "locked_cents": 0,
     "paid": 0,
     "payable": 0,
     "paying_referrals": 1,
+    "pending": 0,
+    "product": "books",
+    "qualified": false,
+    "qualified_at": false,
+    "qualify_at": 4,
+    "unlock_at": 4
+   },
+   "momo": {
+    "adjustments": 0,
+    "available": 0,
+    "clawed_back": 0,
+    "clearing_days": 60,
+    "earned_cents": 0,
+    "frozen": true,
+    "locked": true,
+    "locked_cents": 0,
+    "paid": 0,
+    "payable": 0,
+    "paying_referrals": 1,
+    "pending": 0,
+    "product": "momo",
+    "qualified": false,
+    "qualified_at": false,
+    "qualify_at": 4,
+    "unlock_at": 4
+   },
+   "trade_circle": {
+    "adjustments": -900,
+    "available": 0,
+    "clawed_back": 900,
+    "clearing_days": 60,
+    "earned_cents": 225,
+    "frozen": true,
+    "locked": false,
+    "locked_cents": 0,
+    "paid": 0,
+    "payable": 0,
+    "paying_referrals": 1,
     "pending": 225,
     "product": "trade_circle",
-    "unlock_at": 3
+    "qualified": true,
+    "qualified_at": true,
+    "qualify_at": 4,
+    "unlock_at": 4
    }
   },
   "disp_won": {
@@ -1404,16 +4495,19 @@
     "available": 0,
     "clawed_back": 0,
     "clearing_days": 60,
-    "earned_cents": 475,
+    "earned_cents": 0,
     "frozen": false,
     "locked": true,
     "locked_cents": 0,
     "paid": 0,
     "payable": 0,
     "paying_referrals": 1,
-    "pending": 475,
+    "pending": 0,
     "product": "books",
-    "unlock_at": 3
+    "qualified": false,
+    "qualified_at": false,
+    "qualify_at": 4,
+    "unlock_at": 4
    },
    "momo": {
     "adjustments": 0,
@@ -1429,23 +4523,29 @@
     "paying_referrals": 0,
     "pending": 0,
     "product": "momo",
-    "unlock_at": 3
+    "qualified": false,
+    "qualified_at": false,
+    "qualify_at": 4,
+    "unlock_at": 4
    },
    "trade_circle": {
     "adjustments": 0,
     "available": 0,
     "clawed_back": 0,
     "clearing_days": 60,
-    "earned_cents": 225,
+    "earned_cents": 300,
     "frozen": false,
     "locked": false,
     "locked_cents": 0,
-    "paid": 225,
+    "paid": 300,
     "payable": 0,
-    "paying_referrals": 3,
+    "paying_referrals": 4,
     "pending": 0,
     "product": "trade_circle",
-    "unlock_at": 3
+    "qualified": true,
+    "qualified_at": true,
+    "qualify_at": 4,
+    "unlock_at": 4
    }
   },
   "mixed": {
@@ -1454,32 +4554,38 @@
     "available": 0,
     "clawed_back": 0,
     "clearing_days": 60,
-    "earned_cents": 8700,
+    "earned_cents": 8950,
     "frozen": false,
     "locked": false,
     "locked_cents": 0,
-    "paid": 8225,
+    "paid": 8475,
     "payable": 0,
-    "paying_referrals": 7,
+    "paying_referrals": 8,
     "pending": 475,
     "product": "books",
-    "unlock_at": 3
+    "qualified": true,
+    "qualified_at": true,
+    "qualify_at": 4,
+    "unlock_at": 4
    },
    "momo": {
     "adjustments": 0,
-    "available": 8000,
+    "available": 0,
     "clawed_back": 0,
     "clearing_days": 60,
-    "earned_cents": 8250,
+    "earned_cents": 0,
     "frozen": false,
-    "locked": false,
+    "locked": true,
     "locked_cents": 0,
     "paid": 0,
-    "payable": 8000,
+    "payable": 0,
     "paying_referrals": 3,
-    "pending": 250,
+    "pending": 0,
     "product": "momo",
-    "unlock_at": 3
+    "qualified": false,
+    "qualified_at": false,
+    "qualify_at": 4,
+    "unlock_at": 4
    },
    "trade_circle": {
     "adjustments": 0,
@@ -1495,7 +4601,10 @@
     "paying_referrals": 0,
     "pending": 0,
     "product": "trade_circle",
-    "unlock_at": 3
+    "qualified": false,
+    "qualified_at": false,
+    "qualify_at": 4,
+    "unlock_at": 4
    }
   },
   "notelig": {
@@ -1513,7 +4622,10 @@
     "paying_referrals": 0,
     "pending": 0,
     "product": "books",
-    "unlock_at": 3
+    "qualified": false,
+    "qualified_at": false,
+    "qualify_at": 4,
+    "unlock_at": 4
    },
    "momo": {
     "adjustments": 0,
@@ -1529,23 +4641,29 @@
     "paying_referrals": 0,
     "pending": 0,
     "product": "momo",
-    "unlock_at": 3
+    "qualified": false,
+    "qualified_at": false,
+    "qualify_at": 4,
+    "unlock_at": 4
    },
    "trade_circle": {
     "adjustments": 0,
-    "available": 0,
+    "available": 1350,
     "clawed_back": 0,
     "clearing_days": 60,
-    "earned_cents": 0,
+    "earned_cents": 1350,
     "frozen": false,
     "locked": false,
     "locked_cents": 0,
     "paid": 0,
-    "payable": 0,
+    "payable": 1350,
     "paying_referrals": 6,
     "pending": 0,
     "product": "trade_circle",
-    "unlock_at": 3
+    "qualified": true,
+    "qualified_at": true,
+    "qualify_at": 4,
+    "unlock_at": 4
    }
   },
   "review": {
@@ -1563,7 +4681,10 @@
     "paying_referrals": 0,
     "pending": 0,
     "product": "books",
-    "unlock_at": 3
+    "qualified": false,
+    "qualified_at": false,
+    "qualify_at": 4,
+    "unlock_at": 4
    },
    "momo": {
     "adjustments": 0,
@@ -1579,23 +4700,29 @@
     "paying_referrals": 0,
     "pending": 0,
     "product": "momo",
-    "unlock_at": 3
+    "qualified": false,
+    "qualified_at": false,
+    "qualify_at": 4,
+    "unlock_at": 4
    },
    "trade_circle": {
     "adjustments": 0,
-    "available": 675,
+    "available": 0,
     "clawed_back": 0,
     "clearing_days": 60,
-    "earned_cents": 675,
+    "earned_cents": 0,
     "frozen": true,
-    "locked": false,
+    "locked": true,
     "locked_cents": 0,
     "paid": 0,
     "payable": 0,
     "paying_referrals": 3,
     "pending": 0,
     "product": "trade_circle",
-    "unlock_at": 3
+    "qualified": false,
+    "qualified_at": false,
+    "qualify_at": 4,
+    "unlock_at": 4
    }
   },
   "whale": {
@@ -1613,7 +4740,10 @@
     "paying_referrals": 0,
     "pending": 0,
     "product": "books",
-    "unlock_at": 3
+    "qualified": false,
+    "qualified_at": false,
+    "qualify_at": 4,
+    "unlock_at": 4
    },
    "momo": {
     "adjustments": 0,
@@ -1629,23 +4759,29 @@
     "paying_referrals": 0,
     "pending": 0,
     "product": "momo",
-    "unlock_at": 3
+    "qualified": false,
+    "qualified_at": false,
+    "qualify_at": 4,
+    "unlock_at": 4
    },
    "trade_circle": {
     "adjustments": 0,
     "available": 419425,
     "clawed_back": 0,
     "clearing_days": 60,
-    "earned_cents": 536350,
+    "earned_cents": 535575,
     "frozen": false,
     "locked": false,
     "locked_cents": 0,
     "paid": 0,
     "payable": 419425,
     "paying_referrals": 250,
-    "pending": 116925,
+    "pending": 116150,
     "product": "trade_circle",
-    "unlock_at": 3
+    "qualified": true,
+    "qualified_at": true,
+    "qualify_at": 4,
+    "unlock_at": 4
    }
   },
   "window": {
@@ -1663,7 +4799,10 @@
     "paying_referrals": 0,
     "pending": 0,
     "product": "books",
-    "unlock_at": 3
+    "qualified": false,
+    "qualified_at": false,
+    "qualify_at": 4,
+    "unlock_at": 4
    },
    "momo": {
     "adjustments": 0,
@@ -1679,23 +4818,29 @@
     "paying_referrals": 0,
     "pending": 0,
     "product": "momo",
-    "unlock_at": 3
+    "qualified": false,
+    "qualified_at": false,
+    "qualify_at": 4,
+    "unlock_at": 4
    },
    "trade_circle": {
     "adjustments": 0,
-    "available": 150,
+    "available": 0,
     "clawed_back": 0,
     "clearing_days": 60,
-    "earned_cents": 150,
+    "earned_cents": 0,
     "frozen": false,
     "locked": true,
-    "locked_cents": 150,
+    "locked_cents": 0,
     "paid": 0,
     "payable": 0,
     "paying_referrals": 2,
     "pending": 0,
     "product": "trade_circle",
-    "unlock_at": 3
+    "qualified": false,
+    "qualified_at": false,
+    "qualify_at": 4,
+    "unlock_at": 4
    }
   }
  }

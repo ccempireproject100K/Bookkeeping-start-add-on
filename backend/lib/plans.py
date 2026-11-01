@@ -139,9 +139,32 @@ def trial_active(tenant: dict) -> bool:
         return False
 
 
+def friend_benefit_active(tenant: dict) -> bool:
+    """True while a referral friend benefit (R-3 tier_up) window is
+    live on this tenant: stamped at signup-through-a-link as
+    tenant["friend_benefit"] = {type: "tier_up", tier, ends_at}."""
+    fb = (tenant or {}).get("friend_benefit") or {}
+    if fb.get("type") != "tier_up" or not fb.get("ends_at"):
+        return False
+    try:
+        end = datetime.fromisoformat(fb["ends_at"])
+        if end.tzinfo is None:
+            end = end.replace(tzinfo=timezone.utc)
+        return datetime.now(timezone.utc) < end
+    except (ValueError, TypeError):
+        return False
+
+
 def effective_plan(tenant: dict) -> str:
-    """Plan that actually governs access: Medium while the trial is live."""
-    return "medium" if trial_active(tenant) else stored_plan(tenant)
+    """Plan that actually governs access: Medium while the trial is
+    live; the referral friend benefit's tier while its 14-day tier_up
+    window is live (whichever is higher)."""
+    plan = "medium" if trial_active(tenant) else stored_plan(tenant)
+    fb = (tenant or {}).get("friend_benefit") or {}
+    if friend_benefit_active(tenant) and fb.get("tier") in PLANS:
+        if _PLAN_ORDER[fb["tier"]] > _PLAN_ORDER[plan]:
+            plan = fb["tier"]
+    return plan
 
 
 def trial_days_remaining(tenant: dict) -> int:

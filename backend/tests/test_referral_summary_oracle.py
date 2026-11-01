@@ -150,6 +150,7 @@ async def build_oracle_ledger(fdb):
     await _pay(mc, "books", "mx-a", 3999, now - timedelta(days=100))
     await _pay(mc, "books", "mx-b", 1899, now - timedelta(days=95))
     await _pay(mc, "books", "mx-h", 999, now - timedelta(days=100))
+    await _pay(mc, "books", "mx-i", 999, now - timedelta(days=100))
     await RL.record_manual_payout(mx["id"], "books", note="oracle p1",
                                   by="oracle", now=now)
     # refund AFTER the payout -> negative adjustment (load probe P6)
@@ -182,6 +183,7 @@ async def build_oracle_ledger(fdb):
     await _pay(dc, "trade_circle", "do-0", 900, m_open + timedelta(days=4))
     await _pay(dc, "trade_circle", "do-1", 900, m_open + timedelta(days=9))
     await _pay(dc, "trade_circle", "do-2", 900, m_open + timedelta(days=19))
+    await _pay(dc, "trade_circle", "do-6", 900, m_open + timedelta(days=24))
     await RL.record_manual_payout(do["id"], "trade_circle",
                                   note="oracle", by="oracle", now=now)
     await _pay(dc, "books", "do-3", 1899, m_open + timedelta(days=9))
@@ -197,6 +199,7 @@ async def build_oracle_ledger(fdb):
     await _pay(wc, "trade_circle", "dw-0", 300, m_won + timedelta(days=7))
     await _pay(wc, "trade_circle", "dw-1", 300, m_won + timedelta(days=17))
     await _pay(wc, "trade_circle", "dw-2", 300, m_won + timedelta(days=2))
+    await _pay(wc, "trade_circle", "dw-6", 300, m_won + timedelta(days=22))
     await RL.record_manual_payout(dw["id"], "trade_circle",
                                   note="oracle", by="oracle", now=now)
     await _pay(wc, "books", "dw-3", 1899, now - timedelta(days=30))
@@ -235,13 +238,19 @@ async def build_oracle_ledger(fdb):
                                outcome="won")
     assert (await RL.person_by_id(rv["id"]))["review"] is True
 
-    # ------------------------------------------------- 183-day window
+    # --------------------------------------- pre-qualification audit
+    # Under the adopted law there is no 183-day window: payments from
+    # an unqualified referrer's referrals are stored as zero-share
+    # pre_qualification audit entries, whenever they land.
     wn = await ref("window")
     await _pay(wn["code"], "trade_circle", "wn-0", 300,
                now - timedelta(days=200), pid="pay-wn-old")
     late = await _pay(wn["code"], "trade_circle", "wn-0", 300,
                       now - timedelta(days=10), pid="pay-wn-late")
-    assert late is None  # past the window: no earning exists
+    assert late is not None  # audit entry exists, at zero share
+    late_doc = await fdb.referral_earnings.find_one({"id": late})
+    assert late_doc["status"] == "pre_qualification"
+    assert late_doc["share_cents"] == 0
     await _pay(wn["code"], "trade_circle", "wn-1", 300,
                now - timedelta(days=90))
 
@@ -258,13 +267,28 @@ async def collect_oracle_outputs(fdb):
         out["site"][label] = {}
         out["paying"][label] = {}
         for product in PRODUCTS:
-            out["site"][label][product] = await RL.site_summary(
-                rid, product, now=now)
+            site = await RL.site_summary(rid, product, now=now)
+            site["qualified_at"] = bool(site.get("qualified_at"))
+            out["site"][label][product] = site
             out["paying"][label][product] = \
                 await RL.paying_referral_count(rid, product)
         empire = deepcopy(await RL.empire_summary(person, now=now))
         empire["empire_id"] = label
         empire.pop("code", None)
+        # Wall-clock-derived timestamps are not semantics (they move
+        # with the run's `now`); every cent, flag and count around
+        # them is. Normalize the same way payout ids are normalized.
+        empire["qualified_at"] = bool(empire.get("qualified_at"))
+        empire["qualified_at_by_product"] = {
+            k: bool(v) for k, v in
+            (empire.get("qualified_at_by_product") or {}).items()}
+        for site in empire["sites"].values():
+            site["qualified_at"] = bool(site.get("qualified_at"))
+        for r in empire.get("referrals", []):
+            r["schedule_anchor_at"] = bool(r.get("schedule_anchor_at"))
+            r.pop("referred_id", None)  # random person UUID, not semantics
+        for w in empire.get("free_months", []):
+            w["start"] = w["end"] = "<window>"
         for payout in empire["payouts"]:
             # Random payout ids and the wall-clock `at` stamp are not
             # semantics; every cent and flag around them is.
@@ -274,6 +298,8 @@ async def collect_oracle_outputs(fdb):
     rows = await RR.admin_balances(OWNER)
     for row in rows:
         row = deepcopy(row)
+        for site in (row.get("sites") or {}).values():
+            site["qualified_at"] = bool(site.get("qualified_at"))
         row["empire_id"] = label_of.get(row["empire_id"], row["empire_id"])
         row.pop("code", None)
         out["balances"].append(row)

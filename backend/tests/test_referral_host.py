@@ -315,7 +315,7 @@ class _FakeDB:
                      "referral_earnings", "referral_disputes",
                      "referral_adjustments", "referral_payouts",
                      "referral_payout_queue", "referral_pay_batches",
-                     "referral_payment_events"):
+                     "referral_payment_events", "referral_free_months"):
             setattr(self, name, _FakeCollection(name))
 
 
@@ -432,59 +432,81 @@ def test_platform_credential_authenticates_and_is_product_bound(monkeypatch):
 
 
 # ---------------- B1/B2: ingest + computation parity ----------------
-def test_earns_a_quarter_once_per_payment_and_unlock_locks(monkeypatch):
+# ---------------- adopted law: qualification + schedule ----------------
+async def _lib_referrer(fdb, email="ref@example.com", paying=True):
+    person = await RL.ensure_person(email)
+    person = await RL.link_account(
+        person, product="trade_circle", account_id=f"own-{email}",
+        email=email, standing={"paying": paying})
+    return await RL.person_by_id(person["id"])
+
+
+async def _lib_pay(code, acct, pid, amount, paid_at, product="trade_circle",
+                   email=None, signup_plan=None):
+    await RL.apply_attribution(
+        product=product, account_id=acct,
+        email=email or f"{acct}@example.com", referral_code=code,
+        signup_plan=signup_plan)
+    return await RL.apply_payment(
+        product=product, account_id=acct, payment_id=pid,
+        amount_cents=amount, paid_at=paid_at)
+
+
+T0 = "2026-01-15T12:00:00+00:00"
+
+
+async def _qualified(fdb, email="ref@example.com", amount=900, at=T0):
+    """A referrer qualified at `at` by four paying referrals."""
+    referrer = await _lib_referrer(fdb, email)
+    code = referrer["code"]
+    for i in range(1, 5):
+        await _lib_pay(code, f"q{i}", f"qp{i}", amount, at)
+    referrer = await RL.person_by_id(referrer["id"])
+    return referrer, code
+
+
+def test_first_payments_are_pre_qualification_audit_entries(monkeypatch):
     async def _run():
         fdb = _wire(monkeypatch)
         actor = _actor()
         referrer, code = await _setup_referrer(fdb, actor)
-        acct = await _paying_member(fdb, code, 1, actor)
+        await _paying_member(fdb, code, 1, actor)
         dup = await RR.ingest_payment(
-            RR.PaymentIn(account_id=acct, payment_id="pay_1",
+            RR.PaymentIn(account_id="acct_m1", payment_id="pay_1",
                          amount_cents=900, paid_at=_iso_days_ago(70),
                          charge="ch_1"), actor)
         assert dup["duplicate"] is True
         assert len(fdb.referral_earnings.docs) == 1
+        e = fdb.referral_earnings.docs[0]
+        # Stored for audit, zero share, never payable (no retroactivity).
+        assert e["status"] == "pre_qualification" and e["share_cents"] == 0
         s = await RL.site_summary(referrer["id"], "trade_circle")
-        # Cleared (70 days) but locked: 1 of 3 paying referrals.
-        assert s["available"] == 225 and s["paying_referrals"] == 1
+        assert s["paying_referrals"] == 1 and s["qualified"] is False
+        assert s["qualified_at"] is None and s["qualify_at"] == 4
         assert s["locked"] is True and s["payable"] == 0
-        assert s["locked_cents"] == 225 and s["earned_cents"] == 225
+        assert s["earned_cents"] == 0
     run(_run())
 
 
 def test_only_referrers_in_good_standing_earn(monkeypatch):
     async def _run():
         fdb = _wire(monkeypatch)
-        actor = _actor()
-        # Referrer never attested as paying anywhere -> not eligible.
-        referrer, code = await _setup_referrer(
-            fdb, actor, email="free@example.com", standing={"paying": False})
-        await _paying_member(fdb, code, 1, actor)
-        e = fdb.referral_earnings.docs[0]
+        referrer, code = await _qualified(
+            fdb, email="free@example.com")
+        # Re-attest the referrer as non-paying AFTER qualification:
+        # later cash requires a free-month window (none here).
+        person = await RL.person_by_id(referrer["id"])
+        await RL.link_account(person, product="trade_circle",
+                              account_id="own-free@example.com",
+                              standing={"paying": False})
+        # Paid well after the R-2 free-month grant window (Jan-Feb)
+        # has passed, so no free-month cash eligibility applies.
+        await _lib_pay(code, "q5", "qp5", 900, "2026-05-15T12:00:00+00:00")
+        e = next(d for d in fdb.referral_earnings.docs
+                 if d["payment_id"] == "qp5")
         assert e["status"] == "not_eligible" and e["share_cents"] == 0
-        # ...but the payment still proves the member paid (counts).
-        s = await RL.site_summary(referrer["id"], "trade_circle")
-        assert s["paying_referrals"] == 1
-    run(_run())
-
-
-def test_six_month_window(monkeypatch):
-    async def _run():
-        fdb = _wire(monkeypatch)
-        actor = _actor()
-        referrer, code = await _setup_referrer(fdb, actor)
-        acct = "acct_w"
-        await RR.ingest_account(
-            RR.AccountIn(account_id=acct, email="w@example.com",
-                         referral_code=code), actor)
-        for pid, days in (("pay_w1", 200), ("pay_w2", 100), ("pay_w3", 10)):
-            await RR.ingest_payment(
-                RR.PaymentIn(account_id=acct, payment_id=pid,
-                             amount_cents=900,
-                             paid_at=_iso_days_ago(days)), actor)
-        # First payment 200d ago anchors the window: +100d earns,
-        # +190d is past 183 days and does not.
-        assert len(fdb.referral_earnings.docs) == 2
+        assert await RL.paying_referral_count(
+            referrer["id"], "trade_circle") == 5  # payment still proves pay
     run(_run())
 
 
@@ -493,22 +515,30 @@ def test_refunds_reduce_the_earning_and_replays_collapse(monkeypatch):
         fdb = _wire(monkeypatch)
         actor = _actor()
         referrer, code = await _setup_referrer(fdb, actor)
-        acct = await _paying_member(fdb, code, 1, actor)
-        body = RR.RefundIn(account_id=acct, payment_id="pay_1",
+        # Qualify with four members paying 70 days ago (same instant):
+        # the 4th member's payment is a live month-1 earning of 225.
+        for n in range(1, 5):
+            await _paying_member(fdb, code, n, actor,
+                                 product_account=f"acct_m{n}")
+        e = next(d for d in fdb.referral_earnings.docs
+                 if d["payment_id"] == "pay_4")
+        assert e["status"] == "pending" and e["share_cents"] == 225
+        body = RR.RefundIn(account_id="acct_m4", payment_id="pay_4",
                            refunded_delta_cents=400,
                            refunded_total_cents=400)
         await RR.ingest_refund(body, actor)
         dup = await RR.ingest_refund(body, actor)
         assert dup["duplicate"] is True
-        e = fdb.referral_earnings.docs[0]
+        e = next(d for d in fdb.referral_earnings.docs
+                 if d["payment_id"] == "pay_4")
         assert (e["revenue_cents"] - e["refunded_cents"],
-                e["share_cents"]) == (500, 125)
-        # A second, sequential partial refund under a new cumulative key.
+                e["share_cents"]) == (500, 125)  # still the 25% band
         await RR.ingest_refund(
-            RR.RefundIn(account_id=acct, payment_id="pay_1",
+            RR.RefundIn(account_id="acct_m4", payment_id="pay_4",
                         refunded_delta_cents=100,
                         refunded_total_cents=500), actor)
-        e = fdb.referral_earnings.docs[0]
+        e = next(d for d in fdb.referral_earnings.docs
+                 if d["payment_id"] == "pay_4")
         assert e["refunded_cents"] == 500 and e["share_cents"] == 100
     run(_run())
 
@@ -518,19 +548,24 @@ def test_chargeback_claws_back_the_month_and_freezes_until_won(monkeypatch):
         fdb = _wire(monkeypatch)
         actor = _actor()
         referrer, code = await _setup_referrer(fdb, actor)
-        await _paying_member(fdb, code, 1, actor)
+        for n in range(1, 5):
+            await _paying_member(fdb, code, n, actor,
+                                 product_account=f"acct_m{n}")
         await RR.ingest_dispute(
-            RR.DisputeIn(dispute_id="dp_1", payment_id="pay_1",
+            RR.DisputeIn(dispute_id="dp_1", payment_id="pay_4",
                          phase="opened"), actor)
         s = await RL.site_summary(referrer["id"], "trade_circle")
-        assert s["frozen"] and s["clawed_back"] == 225
+        # The dispute claws back the whole month: all four first
+        # payments landed in the qualification month (counted in
+        # full), so the month's earnings are 4 x 225.
+        assert s["frozen"] and s["clawed_back"] == 900
         assert s["payable"] == 0
         await RR.ingest_dispute(
             RR.DisputeIn(dispute_id="dp_1", phase="closed",
                          outcome="won"), actor)
         s = await RL.site_summary(referrer["id"], "trade_circle")
         assert not s["frozen"] and s["clawed_back"] == 0
-        assert s["available"] == 225  # released; still locked (1 payer)
+        assert s["available"] == 900 and s["qualified"] is True
     run(_run())
 
 
@@ -573,12 +608,12 @@ def test_self_referral_links_accounts_but_earns_nothing(monkeypatch):
     run(_run())
 
 
-def test_per_site_unlock_isolation(monkeypatch):
+def test_qualification_is_per_site(monkeypatch):
     async def _run():
         fdb = _wire(monkeypatch)
         tc, books = _actor("trade_circle"), _actor("books")
         referrer, code = await _setup_referrer(fdb, tc)
-        for n in range(3):
+        for n in range(4):
             await _paying_member(fdb, code, n, tc,
                                  product_account=f"acct_tc{n}")
         for n in range(2):
@@ -586,14 +621,16 @@ def test_per_site_unlock_isolation(monkeypatch):
                                  product_account=f"acct_bk{n}")
         s_tc = await RL.site_summary(referrer["id"], "trade_circle")
         s_bk = await RL.site_summary(referrer["id"], "books")
-        # 3 paying on TC unlocks the TC pot in full...
-        assert s_tc["locked"] is False and s_tc["payable"] == 675
-        # ...while 2 paying on books leaves the books pot locked.
-        assert s_bk["locked"] is True and s_bk["payable"] == 0
-        assert s_bk["locked_cents"] == 450
+        # Qualified on TC: the qualification month counts in full, so
+        # all four TC first payments earn month 1 at 25% (4 x 225).
+        assert s_tc["qualified"] is True and s_tc["payable"] == 900
+        # Two paying referrals on books: not qualified there (per-site).
+        assert s_bk["qualified"] is False and s_bk["payable"] == 0
         summary = await RR.readback_summary("acct_ref", None, tc)
-        assert summary["totals"]["payable"] == 675
-        assert summary["terms"]["unlock_is_per_site"] is True
+        assert summary["terms"]["qualify_at"] == 4
+        assert summary["terms"]["qualification_scope"] == "per_site"
+        assert summary["terms"]["bands"][0] == {
+            "through_month": 6, "rate": 0.25}
     run(_run())
 
 
@@ -615,7 +652,10 @@ def test_books_outbox_drains_into_the_ledger_once(monkeypatch):
         assert out["processed"] == 1
         assert len(fdb.referral_earnings.docs) == 1
         e = fdb.referral_earnings.docs[0]
-        assert e["product"] == "books" and e["share_cents"] == 1000
+        # A first referred payment: audit entry, zero share, until the
+        # referrer qualifies at the 4th paying referral.
+        assert e["product"] == "books" and e["share_cents"] == 0
+        assert e["status"] == "pre_qualification"
         out2 = await RR.drain_books_outbox(OWNER)
         assert out2["duplicates"] == 1
         assert len(fdb.referral_earnings.docs) == 1
