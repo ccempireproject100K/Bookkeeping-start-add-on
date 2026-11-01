@@ -106,7 +106,7 @@ class _YieldDB:
                      "referral_earnings", "referral_disputes",
                      "referral_adjustments", "referral_payouts",
                      "referral_payout_queue", "referral_pay_batches",
-                     "referral_payment_events"):
+                     "referral_payment_events", "referral_free_months"):
             setattr(self, name, _YieldCollection(name))
 
 
@@ -135,9 +135,15 @@ async def _mk_referrer(fdb, tag, pref="stripe"):
     return person, person["code"]
 
 
-async def _mk_pot(code, tag, members=3, amount=900,
-                  product="trade_circle"):
-    """`members` paying referrals on one site, all cleared (70d)."""
+async def _mk_pot(code, tag, members=4, amount=900,
+                  product="trade_circle", rounds=2):
+    """`members` paying referrals on one site, all cleared. Two rounds
+    of payments by default: round 1 (70d ago) qualifies the referrer
+    at the 4th member (the qualification month counts in full, so all
+    round-1 payments earn 25%); round 2 (65d ago) earns 25% for every
+    member. Default pot: 4 members x 2 rounds x 225c = 1800c.
+    rounds=1 seeds a single round (used for post-qualification
+    additions, where one new member's first payment earns 225c)."""
     actor = TH._actor(product)
     for i in range(members):
         acct = f"{tag}_m{i}"
@@ -149,6 +155,14 @@ async def _mk_pot(code, tag, members=3, amount=900,
             RR.PaymentIn(account_id=acct, payment_id=f"{tag}_pay{i}",
                          amount_cents=amount,
                          paid_at=TH._iso_days_ago(70)), actor)
+    if rounds >= 2:
+        for i in range(members):
+            acct = f"{tag}_m{i}"
+            await RR.ingest_payment(
+                RR.PaymentIn(account_id=acct,
+                             payment_id=f"{tag}_pay{i}b",
+                             amount_cents=amount,
+                             paid_at=TH._iso_days_ago(65)), actor)
 
 
 async def _export_one(fdb, person, product="trade_circle"):
@@ -165,7 +179,7 @@ def test_concurrent_batch_done_records_exactly_once(monkeypatch):
     async def _run():
         fdb = _wire_yielding(monkeypatch)
         person, code = await _mk_referrer(fdb, "race", "bank_transfer")
-        await _mk_pot(code, "race")  # 3 x 900c at 25% -> 675c pot
+        await _mk_pot(code, "race")  # qualified pot of 1800c (see _mk_pot)
         batch_id = await _export_one(fdb, person)
 
         r1, r2 = await asyncio.gather(
@@ -174,10 +188,10 @@ def test_concurrent_batch_done_records_exactly_once(monkeypatch):
 
         payouts = fdb.referral_payouts.docs
         assert len(payouts) == 1  # P4: pre-fix this is 2
-        assert payouts[0]["gross_cents"] == 675
+        assert payouts[0]["gross_cents"] == 1800
         assert len(r1["recorded"]) + len(r2["recorded"]) == 1
         summary = await RL.site_summary(person["id"], "trade_circle")
-        assert summary["paid"] == 675 == payouts[0]["gross_cents"]
+        assert summary["paid"] == 1800 == payouts[0]["gross_cents"]
         item = fdb.referral_payout_queue.docs[0]
         assert item["status"] == "completed"
         assert item["payout_id"] == payouts[0]["id"]
@@ -207,9 +221,9 @@ def test_sequential_double_complete_is_a_clean_noop(monkeypatch):
         # unlikely. Pre-fix the key was a fresh random id.
         assert payout["batch_key"] == (
             f"melio-batch:{batch_id}:{person['id']}:trade_circle")
-        assert payout["gross_cents"] == 675
+        assert payout["gross_cents"] == 1800
         assert payout["fee_cents"] == 200  # paper check
-        assert payout["net_cents"] == 475
+        assert payout["net_cents"] == 1600
 
         # A stale in-memory item driven straight at the lib refuses
         # cleanly — never a second record.
@@ -225,7 +239,8 @@ def test_sequential_double_complete_is_a_clean_noop(monkeypatch):
 
 async def _paid_pot(fdb, tag, members=4):
     """A referrer whose whole pot is already paid out (manual rail).
-    4 members x 900c -> 4 earnings of 225c -> one 900c payout."""
+    4 members x 2 rounds x 900c -> 8 earnings of 225c -> one 1800c
+    payout (the qualification month counts in full)."""
     person, code = await _mk_referrer(fdb, tag, "stripe")
     await _mk_pot(code, tag, members=members)
     await RL.record_manual_payout(person["id"], "trade_circle",
@@ -239,7 +254,7 @@ def test_refund_after_payout_books_negative_adjustment(monkeypatch):
         fdb = _wire_yielding(monkeypatch)
         person, code = await _paid_pot(fdb, "p6")
         assert len(fdb.referral_payouts.docs) == 1
-        assert fdb.referral_payouts.docs[0]["gross_cents"] == 900
+        assert fdb.referral_payouts.docs[0]["gross_cents"] == 1800
 
         res = await RL.apply_refund(
             product="trade_circle", payment_id="p6_pay0",
@@ -255,7 +270,7 @@ def test_refund_after_payout_books_negative_adjustment(monkeypatch):
         assert adj["earning_id"] == "trade_circle:p6_pay0"
 
         summary = await RL.site_summary(person["id"], "trade_circle")
-        assert summary["paid"] == 675  # the refunded share is gone
+        assert summary["paid"] == 1575  # the refunded share is gone
         assert summary["adjustments"] == -225
         # Reconciliation to the cent: payout records = what the
         # summary still calls paid + what is owed back.
@@ -275,7 +290,7 @@ def test_refunded_share_comes_off_the_next_pot(monkeypatch):
 
         # One more cleared referral (+225c) exactly cancels the
         # clawback: nothing is payable, and asking is refused.
-        await _mk_pot(code, "nxt2", members=1)
+        await _mk_pot(code, "nxt2", members=1, rounds=1)
         s = await RL.site_summary(person["id"], "trade_circle")
         assert s["available"] == 225 and s["adjustments"] == -225
         assert s["payable"] == 0
@@ -286,7 +301,7 @@ def test_refunded_share_comes_off_the_next_pot(monkeypatch):
 
         # A second new referral tips the pot positive by exactly the
         # amount past the clawback, and the payout applies it.
-        await _mk_pot(code, "nxt3", members=1)
+        await _mk_pot(code, "nxt3", members=1, rounds=1)
         payout = await RL.record_manual_payout(
             person["id"], "trade_circle", note="second",
             by="op@empire.example")
@@ -304,14 +319,14 @@ def test_refund_of_unpaid_earning_books_no_adjustment(monkeypatch):
     async def _run():
         fdb = _wire_yielding(monkeypatch)
         person, code = await _mk_referrer(fdb, "pend", "stripe")
-        await _mk_pot(code, "pend", members=3)
+        await _mk_pot(code, "pend", members=4)
         res = await RL.apply_refund(
             product="trade_circle", payment_id="pend_pay1",
             refunded_delta_cents=900, refunded_total_cents=900)
         assert res["share_cents"] == 0
         assert fdb.referral_adjustments.docs == []
         s = await RL.site_summary(person["id"], "trade_circle")
-        assert s["available"] == 450  # the other two shares stand
+        assert s["available"] == 1575  # the other seven shares stand
     TH.run(_run())
 
 
