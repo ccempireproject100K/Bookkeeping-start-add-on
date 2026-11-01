@@ -12,5 +12,7 @@
   "dictation.walkDone": "全部完成 — 请检查每一项，然后点击下方按钮完成。尚未发送任何内容。",
   "dictation.walkPrompt": "{{label}} — 请现在说话，或说“下一个”跳过此项。",
   "dictation.walkStopped": "语音填写已停止。尚未发送任何内容 — 请检查表单，然后亲自点击按钮完成。",
-  "dictation.browserNote": "语音功能可在 Chrome 和 Edge 中使用，在 Safari 中可能表现不同，Firefox 不提供此功能——打字输入始终可用。"
+  "dictation.browserNote": "语音功能可在 Chrome 和 Edge 中使用，在 Safari 中可能表现不同，Firefox 不提供此功能——打字输入始终可用。",
+  "dictation.browserNoteService": "语音功能可在 Chrome 和 Edge 中使用，在 Safari 中可能表现不同，Firefox 不提供此功能——打字输入始终可用。",
+  "dictation.privacyService": "您的语音会发送到我们的语音服务(Cloudflare)转换为文字。本网站不会录制或保存您所说的任何内容。"
 }

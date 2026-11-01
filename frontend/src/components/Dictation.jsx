@@ -1,25 +1,53 @@
-// Tap-and-talk voice input for the public forms, built on the browser's
-// built-in speech recognition (the pattern Trade Circle's Dictation.jsx
-// proved in production). Nothing is recorded by us and no audio leaves
-// the browser's own speech service: the recognizer turns speech into
-// text locally in the page, and only text the visitor keeps in a field
-// is ever submitted — by the visitor, with the form's own button.
+// Tap-and-talk voice input for the public forms. The primary engine is
+// the browser's built-in speech recognition (the pattern Trade Circle's
+// Dictation.jsx proved in production): nothing is recorded by us and no
+// audio leaves the browser's own speech service.
+//
+// Where the browser has NO built-in recognizer (Firefox), the same
+// controls fall back to recorded transcription (owner cascade design,
+// 2026-11-01 — the Compliance Finder cascade, ported): each answer is
+// recorded with MediaRecorder and posted to the books API's
+// /voice/transcribe endpoint, which turns it into text via our speech
+// service (Cloudflare). The clip exists only in memory, is never
+// stored, and the privacy line beside the controls names the path that
+// is actually active. Silence is never posted: transcription models
+// invent words for silence, and a field must never be filled with
+// words nobody said. Where neither engine exists, these controls
+// render NOTHING at all (no dead buttons, no apology text).
 //
 // Two deliberate rules from the owner's voice standard:
-//   * where the browser has no speech recognition, these controls
-//     render NOTHING at all (no dead buttons, no apology text);
 //   * the recognition language follows the page's selected language,
-//     never the browser's own locale guess.
+//     never the browser's own locale guess;
+//   * the small browser note beside the controls has two honest
+//     variants, keyed to whether the service reports the transcription
+//     fallback configured (GET /voice/config): the original sentence
+//     describes the built-in recognizer alone, and the Firefox wording
+//     appears only once the fallback is actually live.
 // Password fields never get a microphone: speaking a password aloud
 // defeats it.
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Mic, Square } from "lucide-react";
+import { resolveApiBase } from "@/lib/apiBase";
 
 const Recognition =
   typeof window !== "undefined"
     ? window.SpeechRecognition || window.webkitSpeechRecognition
     : undefined;
+
+// Recorder fallback detection (module scope, like Recognition): only
+// where there is NO built-in recognizer — the built-in path always
+// wins — and only where the full recording stack exists.
+const RecorderCtor =
+  typeof window !== "undefined" ? window.MediaRecorder : undefined;
+const recorderSupported =
+  !Recognition &&
+  typeof RecorderCtor === "function" &&
+  typeof navigator !== "undefined" &&
+  !!navigator.mediaDevices &&
+  typeof navigator.mediaDevices.getUserMedia === "function" &&
+  typeof Blob === "function" &&
+  typeof fetch === "function";
 
 // Page language (i18next code) -> BCP 47 code the recognizer and the
 // speech synthesizer both speak. Mirrors getActiveLocale() in lib/i18n.
@@ -188,6 +216,303 @@ export function useDictation({ onFinal, onEnd, onError } = {}) {
   return { supported: !!Recognition, state, interim, start, stop };
 }
 
+// Recorder-based dictation with the same handler contract as
+// useDictation (onFinal / onError / onEnd), so the walk and the
+// correction mics never know which engine heard the answer. One
+// utterance per start(): record until the visitor pauses (voice
+// activity detection — RMS over the analyser's time-domain data), a
+// fixed window ends a clip when no analyser is available, or a hard
+// cap stops it; then post the clip and answer through the handlers.
+// A clip with no detected speech is NOT posted. The microphone stream
+// is released on every exit path; the clip is never stored.
+export function useRecorderDictation({ onFinal, onEnd, onError } = {}) {
+  const [state, setState] = useState(recorderSupported ? "idle" : "unsupported");
+  const handlers = useRef({ onFinal, onEnd, onError });
+  handlers.current = { onFinal, onEnd, onError };
+  const captureRef = useRef(null);
+
+  const start = useCallback((lang) => {
+    if (!recorderSupported || captureRef.current) return false;
+    setState("listening");
+    const capture = {
+      cancelled: false, settled: false, stream: null, recorder: null,
+      analyser: null, audioCtx: null, chunks: [], pollTimer: null,
+      waitTimer: null, startedAt: 0, lastLoudAt: 0, heardSpeech: false,
+    };
+    captureRef.current = capture;
+
+    const releaseHardware = () => {
+      if (capture.pollTimer) { window.clearTimeout(capture.pollTimer); capture.pollTimer = null; }
+      if (capture.waitTimer) { window.clearTimeout(capture.waitTimer); capture.waitTimer = null; }
+      if (capture.stream) {
+        const tracks = typeof capture.stream.getTracks === "function" ? capture.stream.getTracks() : [];
+        for (const track of tracks) { try { track.stop(); } catch { /* already stopped */ } }
+        capture.stream = null;
+      }
+      if (capture.audioCtx && typeof capture.audioCtx.close === "function") {
+        try { capture.audioCtx.close(); } catch { /* nothing to close */ }
+      }
+      capture.audioCtx = null;
+      capture.analyser = null;
+    };
+    const settleOnce = (fn) => {
+      if (capture.settled) return;
+      capture.settled = true;
+      if (captureRef.current === capture) captureRef.current = null;
+      releaseHardware();
+      fn();
+    };
+    const endSilently = () => settleOnce(() => {
+      setState((s) => (s === "listening" ? "idle" : s));
+      if (handlers.current.onEnd) handlers.current.onEnd({ gotFinal: false });
+    });
+    const endWithError = (kind) => settleOnce(() => {
+      setState(kind);
+      if (handlers.current.onError) handlers.current.onError(kind);
+      if (handlers.current.onEnd) handlers.current.onEnd({ gotFinal: false });
+    });
+    const endWithText = (text) => settleOnce(() => {
+      if (handlers.current.onFinal) handlers.current.onFinal(text);
+      setState((s) => (s === "listening" ? "idle" : s));
+      if (handlers.current.onEnd) handlers.current.onEnd({ gotFinal: true });
+    });
+    // Reachable from stop()/unmount while the mic is still opening.
+    capture.abort = () => { capture.cancelled = true; settleOnce(() => {}); };
+    capture.finishSilently = endSilently;
+
+    const postTranscript = (blob, type, durationMs) => {
+      let responsePromise;
+      try {
+        responsePromise = fetch(
+          `${resolveApiBase()}/voice/transcribe?lang=${encodeURIComponent(lang || "en-US")}`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": type,
+              "X-Audio-Duration-Ms": String(Math.max(0, Math.round(durationMs))),
+            },
+            body: blob,
+          }
+        );
+      } catch {
+        endWithError("error");
+        return;
+      }
+      Promise.resolve(responsePromise)
+        .then(async (response) => {
+          if (capture.cancelled || capture.settled) return;
+          if (!response || !response.ok) { endWithError("error"); return; }
+          let data = null;
+          try { data = await response.json(); } catch { /* no body: treated as silence */ }
+          if (capture.cancelled || capture.settled) return;
+          const text = data && data.ok && typeof data.text === "string" ? data.text.trim() : "";
+          if (text) endWithText(text);
+          else endSilently();
+        })
+        .catch(() => { if (!capture.cancelled) endWithError("error"); });
+    };
+
+    const onRecorderStop = () => {
+      const durationMs = capture.startedAt ? Date.now() - capture.startedAt : 0;
+      const type = (capture.recorder && capture.recorder.mimeType) || "audio/webm";
+      const parts = capture.chunks;
+      const hadAnalyser = !!capture.analyser;
+      const heard = capture.heardSpeech;
+      releaseHardware();
+      if (capture.cancelled || capture.settled) return;
+      if (!parts.length || (hadAnalyser && !heard)) { endSilently(); return; }
+      let blob;
+      try {
+        blob = new Blob(parts, { type });
+      } catch {
+        endWithError("error");
+        return;
+      }
+      postTranscript(blob, type, durationMs);
+    };
+
+    const poll = () => {
+      if (capture.settled || capture.cancelled) return;
+      const nowMs = Date.now();
+      if (capture.analyser) {
+        const data = new Uint8Array(capture.analyser.fftSize);
+        capture.analyser.getByteTimeDomainData(data);
+        let sum = 0;
+        for (let i = 0; i < data.length; i += 1) {
+          const v = (data[i] - 128) / 128;
+          sum += v * v;
+        }
+        if (Math.sqrt(sum / data.length) > 0.02) {
+          capture.heardSpeech = true;
+          capture.lastLoudAt = nowMs;
+        }
+      }
+      const elapsed = nowMs - capture.startedAt;
+      const paused = capture.heardSpeech && nowMs - capture.lastLoudAt > 1300;
+      const noSpeech = capture.analyser && !capture.heardSpeech && elapsed > 2500;
+      if (paused || noSpeech || elapsed > 12000 || (!capture.analyser && elapsed > 6000)) {
+        capture.pollTimer = null;
+        try { capture.recorder.stop(); } catch { endWithError("error"); }
+        return;
+      }
+      capture.pollTimer = window.setTimeout(poll, 150);
+    };
+
+    const beginCapture = () => {
+      if (capture.cancelled || capture.settled) return;
+      let gum;
+      try {
+        gum = navigator.mediaDevices.getUserMedia({ audio: true });
+      } catch {
+        endWithError("error");
+        return;
+      }
+      Promise.resolve(gum)
+        .then((stream) => {
+          if (capture.cancelled || capture.settled) {
+            if (stream && typeof stream.getTracks === "function") {
+              for (const track of stream.getTracks()) { try { track.stop(); } catch { /* ignore */ } }
+            }
+            return;
+          }
+          capture.stream = stream;
+          try {
+            capture.recorder = new RecorderCtor(stream);
+          } catch {
+            endWithError("error");
+            return;
+          }
+          capture.chunks = [];
+          capture.recorder.ondataavailable = (event) => {
+            if (event && event.data && event.data.size) capture.chunks.push(event.data);
+          };
+          capture.recorder.onstop = onRecorderStop;
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (typeof AudioCtx === "function") {
+            try {
+              capture.audioCtx = new AudioCtx();
+              const source = capture.audioCtx.createMediaStreamSource(stream);
+              capture.analyser = capture.audioCtx.createAnalyser();
+              capture.analyser.fftSize = 2048;
+              source.connect(capture.analyser);
+            } catch {
+              capture.analyser = null;
+              capture.audioCtx = null;
+            }
+          }
+          capture.startedAt = Date.now();
+          capture.lastLoudAt = capture.startedAt;
+          try {
+            capture.recorder.start(250);
+          } catch {
+            endWithError("error");
+            return;
+          }
+          capture.pollTimer = window.setTimeout(poll, 150);
+        })
+        .catch((err) => {
+          const kind =
+            err && (err.name === "NotAllowedError" || err.name === "SecurityError")
+              ? "denied"
+              : "error";
+          endWithError(kind);
+        });
+    };
+
+    // If the page is speaking a prompt (the walk speaks each field's
+    // prompt), wait for it to finish before opening the mic — the
+    // recorder must never transcribe the page's own voice. Bounded at
+    // ~4 s, like the Compliance Finder reference, then record anyway.
+    const waitForSpeechEnd = (deadline) => {
+      if (capture.cancelled || capture.settled) return;
+      const synth = typeof window !== "undefined" ? window.speechSynthesis : undefined;
+      if (synth && synth.speaking && Date.now() < deadline) {
+        capture.waitTimer = window.setTimeout(() => waitForSpeechEnd(deadline), 150);
+        return;
+      }
+      beginCapture();
+    };
+    waitForSpeechEnd(Date.now() + 4000);
+    return true;
+  }, []);
+
+  const stop = useCallback(() => {
+    const capture = captureRef.current;
+    if (!capture) return;
+    if (capture.pollTimer) { window.clearTimeout(capture.pollTimer); capture.pollTimer = null; }
+    if (capture.waitTimer) { window.clearTimeout(capture.waitTimer); capture.waitTimer = null; }
+    if (capture.recorder && capture.recorder.state && capture.recorder.state !== "inactive") {
+      // Finish the utterance now; onstop posts it if speech was heard.
+      try { capture.recorder.stop(); } catch { /* session already ended */ }
+    } else if (capture.finishSilently) {
+      capture.finishSilently();
+    }
+  }, []);
+
+  // Leaving the page always releases the microphone.
+  useEffect(
+    () => () => {
+      const capture = captureRef.current;
+      if (capture && capture.abort) capture.abort();
+      captureRef.current = null;
+    },
+    []
+  );
+
+  return { supported: recorderSupported, state, interim: "", start, stop };
+}
+
+// The browser note beside the voice controls is keyed to whether the
+// service's transcription fallback is configured (the owner's ruling:
+// the Firefox wording is claimed only when it is true). The config is
+// fetched lazily — once, shared by every voice control on the page —
+// when a control mounts; until it answers (and whenever it answers
+// "not configured"), the original sentence stands.
+let voiceConfigPromise = null;
+export function resetVoiceFallbackConfigCache() {
+  voiceConfigPromise = null;
+}
+function fetchVoiceFallbackConfig() {
+  if (!voiceConfigPromise) {
+    if (typeof fetch !== "function") {
+      voiceConfigPromise = Promise.resolve(false);
+    } else {
+      try {
+        voiceConfigPromise = Promise.resolve(fetch(`${resolveApiBase()}/voice/config`))
+          .then((r) => (r && r.ok ? r.json() : null))
+          .then((d) => !!(d && d.voice && d.voice.fallback))
+          .catch(() => false);
+      } catch {
+        voiceConfigPromise = Promise.resolve(false);
+      }
+    }
+  }
+  return voiceConfigPromise;
+}
+export function useVoiceFallbackConfig() {
+  const [active, setActive] = useState(false);
+  useEffect(() => {
+    let live = true;
+    fetchVoiceFallbackConfig().then((v) => {
+      if (live && v) setActive(true);
+    });
+    return () => {
+      live = false;
+    };
+  }, []);
+  return active;
+}
+
+// One driver, two engines: the browser's built-in recognizer where it
+// exists (primary — nothing leaves the browser), the recorder +
+// service transcription fallback where it does not.
+export function useVoiceInput(handlers) {
+  const recog = useDictation(handlers);
+  const recorder = useRecorderDictation(handlers);
+  if (recog.supported) return { ...recog, usingFallback: false };
+  return { ...recorder, usingFallback: recorder.supported };
+}
+
 const noticeCls = "text-[11px] text-red-400 mt-1";
 const hintCls = "text-[11px] text-gray-500 mt-1";
 
@@ -198,9 +523,10 @@ const hintCls = "text-[11px] text-gray-500 mt-1";
 export function DictateButton({ onText }) {
   const { t, i18n } = useTranslation();
   const lang = voiceLangFor(i18n.language);
-  const { supported, state, interim, start, stop } = useDictation({
+  const { supported, state, interim, start, stop } = useVoiceInput({
     onFinal: (text) => onText(text),
   });
+  const fallbackActive = useVoiceFallbackConfig();
   if (!supported) return null;
   const listening = state === "listening";
   return (
@@ -228,7 +554,9 @@ export function DictateButton({ onText }) {
       {state === "denied" && <p className={noticeCls}>{t("dictation.denied")}</p>}
       {state === "error" && <p className={noticeCls}>{t("dictation.error")}</p>}
       {state === "langError" && <p className={noticeCls}>{t("dictation.langError")}</p>}
-      <p className="text-[11px] text-gray-600 mt-1 max-w-[200px]">{t("dictation.browserNote")}</p>
+      <p className="text-[11px] text-gray-600 mt-1 max-w-[200px]">
+        {fallbackActive ? t("dictation.browserNoteService") : t("dictation.browserNote")}
+      </p>
     </div>
   );
 }
@@ -248,6 +576,7 @@ export function DictateButton({ onText }) {
 export function GuidedVoiceFill({ fields, onFill }) {
   const { t, i18n } = useTranslation();
   const lang = voiceLangFor(i18n.language);
+  const fallbackActive = useVoiceFallbackConfig();
   const [walking, setWalking] = useState(false);
   const [step, setStep] = useState(0);
   const [notice, setNotice] = useState(null);
@@ -313,7 +642,7 @@ export function GuidedVoiceFill({ fields, onFill }) {
     [lang, speak, setHighlight, t]
   );
 
-  const { supported, interim, start, stop } = useDictation({
+  const { supported, interim, start, stop, usingFallback } = useVoiceInput({
     onFinal: (text) => {
       session.current.result = text;
     },
@@ -436,8 +765,8 @@ export function GuidedVoiceFill({ fields, onFill }) {
       {notice === "denied" && <p className={noticeCls}>{t("dictation.denied")}</p>}
       {notice === "error" && <p className={noticeCls}>{t("dictation.error")}</p>}
       {notice === "langError" && <p className={noticeCls}>{t("dictation.langError")}</p>}
-      <p className={hintCls}>{t("dictation.privacy")}</p>
-      <p className={hintCls}>{t("dictation.browserNote")}</p>
+      <p className={hintCls}>{usingFallback ? t("dictation.privacyService") : t("dictation.privacy")}</p>
+      <p className={hintCls}>{fallbackActive ? t("dictation.browserNoteService") : t("dictation.browserNote")}</p>
     </div>
   );
 }

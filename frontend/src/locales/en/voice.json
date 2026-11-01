@@ -12,5 +12,7 @@
   "dictation.walkDone": "All set — check everything, then tap the button below to finish. Nothing has been sent yet.",
   "dictation.walkPrompt": "{{label}} — speak now, or say “next” to skip.",
   "dictation.walkStopped": "Voice fill stopped. Nothing has been sent — check the form, then finish by tapping the button yourself.",
-  "dictation.browserNote": "Voice typing is offered by your browser — it works in Chrome and Edge, may behave differently in Safari, and isn't available in Firefox. Typing always works."
+  "dictation.browserNote": "Voice typing is offered by your browser — it works in Chrome and Edge, may behave differently in Safari, and isn't available in Firefox. Typing always works.",
+  "dictation.browserNoteService": "Voice typing works in Chrome, Edge, and Firefox, and may behave differently in Safari. Typing always works.",
+  "dictation.privacyService": "Your voice is sent to our speech service (Cloudflare) to be turned into text. Nothing you say is recorded or stored by this site."
 }
