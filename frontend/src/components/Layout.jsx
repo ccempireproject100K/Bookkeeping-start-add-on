@@ -418,6 +418,13 @@ const NAV = [{
   roles: ["owner"],
   groupKey: "navGroup.operations"
 }, {
+  to: "/platform-credentials",
+  labelKey: "nav.platformCredentials",
+  icon: KeyRound,
+  testid: "nav-platform-credentials",
+  roles: ["owner"],
+  groupKey: "navGroup.operations"
+}, {
   to: "/settings",
   labelKey: "nav.settings",
   icon: ShieldCheck,
