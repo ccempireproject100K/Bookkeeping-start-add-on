@@ -10,8 +10,28 @@ from db import db
 JWT_ALG = "HS256"
 
 
+MIN_SECRET_LEN = 32
+
+
 def _secret() -> str:
     return os.environ["JWT_SECRET"]
+
+
+def check_jwt_secret(env: dict | None = None) -> None:
+    """Refuse to start with a missing or guessable signing secret.
+
+    Every session cookie is an HS256 JWT signed with JWT_SECRET, so a short
+    secret can be brute-forced offline into forged logins. Render's
+    blueprint generates a long random value; a hand-set one must be at
+    least MIN_SECRET_LEN characters (e.g. `openssl rand -base64 48`).
+    """
+    env = os.environ if env is None else env
+    secret = env.get("JWT_SECRET", "")
+    if len(secret) < MIN_SECRET_LEN:
+        raise RuntimeError(
+            f"JWT_SECRET must be set to at least {MIN_SECRET_LEN} characters "
+            f"(got {len(secret)}). Generate one with: openssl rand -base64 48"
+        )
 
 
 def hash_password(pw: str) -> str:
