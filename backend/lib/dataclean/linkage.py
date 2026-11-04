@@ -61,6 +61,13 @@ gated by the labeled fixtures in tests/):
     into the review band; batched scans add population rules (a
     name-only pair suggests only when the name is rare in the list).
     Every cap demotes to review — a human still sees the pair.
+  - Venue-prefix street numbers (next phase, 2026-11-04): when the
+    parsed parts carry no street number, the raw-text fallback also
+    reads the number off the first later comma segment that begins
+    with one ("Burlington, 6537 NE LOOP 820, ..." — mall / host-store
+    shapes whose parsed lane is fine but whose raw records carried
+    no parts, so no location clash could fire). See
+    _street_number_from_text for the guard rules.
 """
 import itertools
 import re
@@ -83,6 +90,33 @@ _STREET_TOKEN_RE = re.compile(
     r"pkwy|parkway|loop|xing|trl|trail|ct|court|way|cir|circle|pl|"
     r"place|ter|terrace|fm|highway|freeway|sq|square|row|walk|path)\b",
     re.I)
+
+
+def _street_number_from_text(address):
+    """Street number from raw address text, for records whose parsed
+    parts carry none (uncleaned lists, failed parses). The leading
+    number wins, exactly as the original fallback read it. Failing
+    that, a venue name may stand before the street segment
+    ("Burlington, 6537 NE LOOP 820, ...", "Albertsons, 3525 Sycamore
+    School Rd, ...", locker-host and mall shapes): the first later
+    comma segment that BEGINS with a number followed by a
+    street-bearing token (a street type, per _STREET_TOKEN_RE) holds
+    the number. The street-token requirement is what keeps unit,
+    building and care-of segments ("Suite 400", "Building 4, Floor
+    2", a venue's own "#4519") and bare ZIP segments from being
+    misread as street numbers, and segment 0 is never scanned (a
+    "PO Box 6537" is a box, not a street number). Returns None when
+    no segment qualifies — an absent number, never a guess."""
+    if not address:
+        return None
+    m = re.match(r"\s*(\d+)", address)
+    if m:
+        return m.group(1)
+    for seg in address.split(",")[1:]:
+        m = re.match(r"\s*(\d+)\s+[A-Za-z]", seg)
+        if m and _STREET_TOKEN_RE.search(seg):
+            return m.group(1)
+    return None
 
 
 def _website_domain(entity):
@@ -127,8 +161,7 @@ def features(entity):
     tokens = (name_key or "").split()
     street_number = parts.get("street_number")
     if not street_number:
-        m = re.match(r"\s*(\d+)", address or "")
-        street_number = m.group(1) if m else None
+        street_number = _street_number_from_text(address)
     # City as a matching key only: parsed parts when present, else the
     # ", City, ST" segment of the raw address. Never displayed, never
     # written back — it exists so two records in DIFFERENT cities can
