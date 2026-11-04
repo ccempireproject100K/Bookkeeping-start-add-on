@@ -114,3 +114,45 @@ export function splitValues(text) {
     .map((s) => s.trim())
     .filter(Boolean);
 }
+
+/** Project records onto the kind's flat fields without the scan
+ * cap — the payload shape for a stored list (POST /v1/dataclean/
+ * lists), which accepts up to 500,000 records and mints its own ids. */
+export function projectRecords(records, kind) {
+  const fields = KIND_FIELDS[kind] || [];
+  return (records || []).map((r) => {
+    const out = {};
+    for (const f of fields) {
+      if (r?.[f] != null && r[f] !== "") out[f] = r[f];
+    }
+    return out;
+  });
+}
+
+/** The stored-list create payload for the current clean result. */
+export function queueListPayload(records, kind, name) {
+  return { name: String(name || kind), kind, records: projectRecords(records, kind) };
+}
+
+/** Split a suggestion page into the two review bands the backend
+ * returns: "suggested" (the engine would act, pending a human) and
+ * "review" (weaker evidence, human judgment). Each band is sorted by
+ * score descending; anything without a band counts as suggested. */
+export function queueGroups(suggestions) {
+  const groups = { suggested: [], review: [] };
+  for (const s of suggestions || []) {
+    const band = s?.band === "review" ? "review" : "suggested";
+    groups[band].push(s);
+  }
+  const byScore = (a, b) => (Number(b?.score) || 0) - (Number(a?.score) || 0);
+  groups.suggested.sort(byScore);
+  groups.review.sort(byScore);
+  return groups;
+}
+
+/** Download filename for a list's merge-decision export. */
+export function decisionsFilename(name) {
+  const slug = String(name || "list").toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "list";
+  return `dataclean-decisions-${slug}.json`;
+}

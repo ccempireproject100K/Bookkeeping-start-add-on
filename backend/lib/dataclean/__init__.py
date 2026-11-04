@@ -20,7 +20,9 @@ usaddress MIT · RapidFuzz MIT · Splink MIT (DuckDB backend MIT).
 """
 RESULT_SHAPE = "dataclean.result/1"
 
-from . import addresses, cleaning, fuzzy, linkage, mess, names, normalize, schema  # noqa: E402
+from . import (addresses, cleaning, fuzzy, linkage, mess, names,  # noqa: E402
+               nicknames, niche_rules, normalize, phonetic, schema)
 
 __all__ = ["RESULT_SHAPE", "addresses", "cleaning", "fuzzy", "linkage",
-           "mess", "names", "normalize", "schema"]
+           "mess", "names", "nicknames", "niche_rules", "normalize",
+           "phonetic", "schema"]
