@@ -28,7 +28,20 @@ gated by the labeled fixtures in tests/):
     every result. Review pairs are never merged into the suggested
     list, and the internal console keeps storing suggestions only.
   - Cross-list mode (suggest_duplicates_cross): pairs form only across
-    the A x B boundary of two lists from the same tenant.
+    the A x B boundary of two lists from the same tenant. Cross mode
+    adds its own caps (the warehouse dogfood's full run — 39,332 pool
+    records against an 81,871-row seed — exposed both): (a) a pair
+    where either side carries no street-level address (place-level
+    only, or none) may not suggest on name evidence alone — it needs
+    a shared contact field, or a shared website domain with identical
+    name token sets, else it caps into the review band; (b) the
+    population rule is derived per list, never from the union count:
+    a name-only pair suggests only when the name is rare (<= 2
+    carriers) in EACH list separately, because a genuine re-listing
+    explains at most two carriers per side while a third carrier on
+    either side means the name denotes a population there. The same
+    caps run on the batched cross-job path (dataclean_jobs), which
+    previously applied the within-list union frequency verbatim.
   - Nickname booster: known nickname variants (Robert/Bob, Pepe/José)
     raise the name signal ONLY when an independent contact signal
     already agrees and the rest of the name is compatible — a nickname
@@ -70,6 +83,23 @@ _STREET_TOKEN_RE = re.compile(
     r"pkwy|parkway|loop|xing|trl|trail|ct|court|way|cir|circle|pl|"
     r"place|ter|terrace|fm|highway|freeway|sq|square|row|walk|path)\b",
     re.I)
+
+
+def _website_domain(entity):
+    """Bare host of the record's website (scheme / path / leading
+    www. stripped), or None. Read for CROSS-MODE corroboration only:
+    pair_evidence never scores it (a shared domain is a shared
+    identifier for chains and franchises — the crm-data-cleanup law —
+    so it can corroborate a place-level pair whose names are the
+    identical token set, and nothing more)."""
+    raw = (entity.get("website") or entity.get("url")
+           or entity.get("_website") or "").strip().lower()
+    if not raw:
+        return None
+    raw = raw.split("://", 1)[-1].split("/", 1)[0].split(":", 1)[0]
+    if raw.startswith("www."):
+        raw = raw[4:]
+    return raw or None
 
 
 def features(entity):
@@ -132,6 +162,7 @@ def features(entity):
         "street_number": street_number,
         "city_key": city_key,
         "phonetic_keys": phonetic_keys(tokens[0]) if tokens else [],
+        "website_domain": _website_domain(entity),
         "source": entity.get("_source"),
     }
 
@@ -495,6 +526,174 @@ def suggest_duplicates(entities):
             "review_pairs": review}
 
 
+CROSS_CAP_SCORE = REVIEW_THRESHOLD + 0.14
+# Demoted cross pairs land here: above both review floors (0.65
+# deterministic / 0.75 Splink), below both suggestion thresholds
+# (0.80 / 0.90) — the same landing the within-list caps use.
+
+
+def _loc_missing(f):
+    """No street-level location on this record: no address at all,
+    or a place-level ("vacuous") one — city/ZIP only, no street."""
+    return not f.get("address") or bool(f.get("address_vacuous"))
+
+
+def _name_token_set(f):
+    out = set((f.get("name_key") or "").split())
+    if f.get("alt_name_key"):
+        out |= set(f["alt_name_key"].split())
+    return out
+
+
+def _cross_caps(suggested, review, feats_by_id, side_by_id,
+                side_counts):
+    """Cross-mode precision caps, applied to the SUGGESTED band
+    whichever engine scored it (the deterministic caps live inside
+    pair_evidence, which the Splink path bypasses; the population
+    rule needs per-list counts the within-list tiering never sees
+    in cross mode). Every cap demotes into the review band with the
+    reason appended to the pair's why — nothing is deleted, and a
+    shared contact field (email/phone) exempts a pair from all of
+    them: contact follows the business when it moves.
+
+    side_counts: {side: Counter of name_key over that side's list}.
+    The population threshold derives per list (see module docstring):
+    > 2 carriers of either record's name in either list makes the
+    name population-ambiguous for a name-only pair."""
+    kept, demoted = [], []
+    for row in suggested:
+        fa = feats_by_id.get(row["a_id"])
+        fb = feats_by_id.get(row["b_id"])
+        if fa is None or fb is None:
+            kept.append(row)   # unmappable id — leave as scored
+            continue
+        ev = row["evidence"]
+        contact = bool(ev.get("email_match") or ev.get("phone_match"))
+        rules, notes = [], []
+        if not contact:
+            zip_clash = bool(fa.get("zip") and fb.get("zip")
+                             and fa["zip"] != fb["zip"])
+            street_clash = bool(fa.get("street_number")
+                                and fb.get("street_number")
+                                and fa["street_number"]
+                                != fb["street_number"])
+            city_clash = bool(fa.get("city_key") and fb.get("city_key")
+                              and fa["city_key"] != fb["city_key"])
+            if zip_clash or street_clash or city_clash:
+                rules.append("cross-location-clash")
+                notes.append("different street addresses and no "
+                             "shared contact field — treated as "
+                             "separate locations")
+            city_tokens = set((fa.get("city_key") or "").split()) | \
+                set((fb.get("city_key") or "").split())
+            if city_tokens:
+                ta = (fa["name_key"] or "").split()
+                tb = (fb["name_key"] or "").split()
+                sa = [t for t in ta if t not in city_tokens]
+                sb = [t for t in tb if t not in city_tokens]
+                shared = set(ta) & set(tb)
+                if shared and (not sa or not sb
+                               or not (set(sa) & set(sb))):
+                    rules.append("cross-geo-name")
+                    notes.append("names agree only on the city name "
+                                 "— geography, not identity")
+            if _loc_missing(fa) or _loc_missing(fb):
+                web = bool(fa.get("website_domain")
+                           and fa["website_domain"]
+                           == fb.get("website_domain"))
+                if web:
+                    ta, tb = _name_token_set(fa), _name_token_set(fb)
+                    jacc = (len(ta & tb) / len(ta | tb)) if ta and tb \
+                        else 1.0
+                    if jacc < 0.99:
+                        rules.append("cross-vacuous-facility")
+                        notes.append("one record carries only a "
+                                     "place-level address and the "
+                                     "names differ — a facility of "
+                                     "the same organization, held "
+                                     "for review")
+                    # Identical name token sets + a shared website
+                    # domain corroborate the pair (the hardening
+                    # spec's website-signal exemption).
+                else:
+                    rules.append("cross-vacuous-uncorroborated")
+                    notes.append("one record carries only a "
+                                 "place-level address and no contact "
+                                 "or website signal agrees — held "
+                                 "for review")
+            ta_set, tb_set = _name_token_set(fa), _name_token_set(fb)
+            if ta_set and tb_set \
+                    and len(ta_set & tb_set) / len(ta_set | tb_set) \
+                    < 0.99 \
+                    and ev.get("address_similarity", 0) < 0.9:
+                # Sibling locations of one brand (the dogfood's
+                # Amazon Locker class): the names genuinely differ,
+                # nothing agrees — brand kinship is not identity.
+                # The address exemption bar is 0.9, not the
+                # population rule's 0.8: address token similarity
+                # counts the shared street number / city / ZIP, so
+                # two different streets in one ZIP already score
+                # ~0.83. Same-address pairs (DBA / franchisee
+                # listings, similarity ~1.0) stay exempt.
+                rules.append("cross-name-drift")
+                notes.append("names differ beyond punctuation "
+                             "with no shared contact or address "
+                             "agreement — sibling locations of "
+                             "one brand, held for review")
+            if ev.get("address_similarity", 0) < 0.8 \
+                    and fa.get("name_key") and fb.get("name_key"):
+                sa = side_by_id.get(row["a_id"])
+                sb = side_by_id.get(row["b_id"])
+                amb = max(
+                    side_counts.get(sa, {}).get(fa["name_key"], 0),
+                    side_counts.get(sb, {}).get(fb["name_key"], 0),
+                    side_counts.get(sa, {}).get(fb["name_key"], 0),
+                    side_counts.get(sb, {}).get(fa["name_key"], 0))
+                if amb > 2:
+                    rules.append("cross-population")
+                    notes.append(
+                        f"name appears {amb} times in one list "
+                        "with no shared contact or address "
+                        "agreement — population-ambiguous, held "
+                        "for review")
+        if not rules:
+            kept.append(row)
+            continue
+        new_ev = dict(ev)
+        new_ev["why"] = (ev.get("why") + "; " if ev.get("why")
+                         else "") + "; ".join(notes)
+        new_ev["cross_caps"] = rules
+        demoted.append({**row, "score": min(row["score"],
+                                            CROSS_CAP_SCORE),
+                        "evidence": new_ev, "band": "review"})
+    key = lambda p: -p["score"]  # noqa: E731
+    return (sorted(kept, key=key),
+            sorted(list(review) + demoted, key=key))
+
+
+def _cross_cap_context(feats, n_a):
+    """(feats_by_id, side_by_id, side_counts) for _cross_caps.
+
+    An id carried by more than one record in the union is left out
+    of feats_by_id: its pairs pass through uncapped rather than
+    risk a cap computed against the wrong record."""
+    from collections import Counter
+    side_counts = {0: Counter(), 1: Counter()}
+    seen, dupes = {}, set()
+    for i, f in enumerate(feats):
+        side = 0 if i < n_a else 1
+        if f.get("name_key"):
+            side_counts[side][f["name_key"]] += 1
+        if f.get("id") is None:
+            continue
+        if f["id"] in seen:
+            dupes.add(f["id"])
+        seen[f["id"]] = (side, f)
+    feats_by_id = {i: f for i, (s, f) in seen.items() if i not in dupes}
+    side_by_id = {i: s for i, (s, f) in seen.items() if i not in dupes}
+    return feats_by_id, side_by_id, side_counts
+
+
 def suggest_duplicates_cross(entities_a, entities_b,
                              label_a="records", label_b="records_b"):
     """Cross-list linkage (P2): pairs form ONLY across the A x B
@@ -505,6 +704,8 @@ def suggest_duplicates_cross(entities_a, entities_b,
     b = [dict(e, _source=label_b) for e in entities_b]
     union = a + b
     n_a = len(a)
+    feats = [features(e) for e in union]
+    cap_ctx = _cross_cap_context(feats, n_a)
 
     def finish(rows):
         out = []
@@ -535,24 +736,27 @@ def suggest_duplicates_cross(entities_a, entities_b,
                 elif p["score"] >= SPLINK_REVIEW_THRESHOLD:
                     row["band"] = "review"
                     review.append(row)
+            suggested, review = _cross_caps(suggested, review,
+                                            *cap_ctx)
             key = lambda p: -p["score"]  # noqa: E731
             return {"engine": "splink", "mode": "cross",
                     "pairs": finish(sorted(suggested, key=key)),
                     "review_pairs": finish(sorted(review, key=key))}
         except Exception as exc:
-            feats = [features(e) for e in union]
             cand = {(i, j) for (i, j) in _blocks(feats)
                     if (i < n_a) != (j < n_a)}
             suggested, review = _tiered_deterministic(feats, cand)
+            suggested, review = _cross_caps(suggested, review,
+                                            *cap_ctx)
             # Candidate pairs are index-ordered (i < j) and filtered to
             # the A x B boundary, so a_id is always the A-side record.
             return {"engine": "deterministic-fallback", "mode": "cross",
                     "engine_note": f"Splink unavailable: {exc}",
                     "pairs": finish(suggested),
                     "review_pairs": finish(review)}
-    feats = [features(e) for e in union]
     cand = {(i, j) for (i, j) in _blocks(feats) if (i < n_a) != (j < n_a)}
     suggested, review = _tiered_deterministic(feats, cand)
+    suggested, review = _cross_caps(suggested, review, *cap_ctx)
     return {"engine": "deterministic", "mode": "cross",
             "pairs": finish(suggested), "review_pairs": finish(review)}
 
