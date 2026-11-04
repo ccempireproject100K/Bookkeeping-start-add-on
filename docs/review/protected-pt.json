@@ -1,0 +1,426 @@
+{
+  "_meta": {
+    "lang": "pt",
+    "status": "DRAFT for human review only. Do NOT copy into frontend/src/locales/pt/translation.json until a qualified reviewer (counsel/CPA where relevant) approves each string. Live locale keeps English for these keys.",
+    "source": "docs/TRANSLATION_PLAN.md flagged keys (legal/financial/tax/privacy/safety)",
+    "notice": "Approximate translation from English/Spanish, may not be accurate."
+  },
+  "strings": {
+    "salestaxtab.taxJurisdictions": {
+      "en": "Tax jurisdictions",
+      "draft": "Jurisdições fiscais"
+    },
+    "salestaxtab.everywhereYouCollectSalesTaxState": {
+      "en": "Everywhere you collect sales tax — state, county, city, special district.\n          Tag invoices with a jurisdiction and this page tells you what you owe, where.",
+      "draft": "Todos os lugares onde você recolhe imposto sobre vendas — estado, condado, cidade, distrito especial.\n          Vincule uma jurisdição às faturas e esta página mostra o que você deve, onde."
+    },
+    "salestaxtab.noJurisdictionsYetAddTheFirst": {
+      "en": "No jurisdictions yet. Add the first place you collect sales tax.",
+      "draft": "Sem jurisdições ainda. Adicione o primeiro lugar onde você recolhe imposto sobre vendas."
+    },
+    "salestaxtab.ofSalesTaxIsnTTagged": {
+      "en": "of sales tax isn't tagged to a jurisdiction yet.\n            Tag invoices with a jurisdiction so every dollar lands in the right bucket.",
+      "draft": "do imposto sobre vendas ainda não está vinculado a uma jurisdição.\n            Vincule uma jurisdição às faturas para que cada dólar caia no lugar certo."
+    },
+    "salestaxtab.taxCollected": {
+      "en": "Tax collected",
+      "draft": "Imposto recolhido"
+    },
+    "teaminvites.inviteYourAccountantOrTaxPro": {
+      "en": "Invite your accountant or tax pro — they join with the right permissions\n        and can switch between all the workspaces they serve.",
+      "draft": "Convide seu contador ou fiscal — ele entra com as permissões certas\n        e pode alternar entre todos os espaços que atende."
+    },
+    "auditlog.eGTaxInvoiceLogin": {
+      "en": "e.g. tax, invoice, login",
+      "draft": "ex.: imposto, fatura, login"
+    },
+    "cpapackage.mileageLogWithIRSRatesApplied": {
+      "en": "Mileage log with IRS rates applied",
+      "draft": "Registro de quilometragem com tabelas do IRS aplicadas"
+    },
+    "customers.delete": {
+      "en": "Delete",
+      "draft": "Excluir"
+    },
+    "customers.deleteConfirm": {
+      "en": "Delete customer \"{{name}}\"? Their invoices and statements stay on record.",
+      "draft": "Excluir o cliente «{{name}}»? As faturas e extratos dele permanecem arquivados."
+    },
+    "estimates.tax": {
+      "en": "Tax ($)",
+      "draft": "Imposto ($)"
+    },
+    "expenses.taxID": {
+      "en": "Tax ID",
+      "draft": "ID fiscal"
+    },
+    "expenses.taxYear": {
+      "en": "Tax year",
+      "draft": "Ano fiscal"
+    },
+    "expenses.tax": {
+      "en": "Tax",
+      "draft": "Imposto"
+    },
+    "expenses.taxIDEIN": {
+      "en": "Tax ID / EIN",
+      "draft": "ID fiscal / EIN"
+    },
+    "invoices.refund": {
+      "en": "Refund",
+      "draft": "Reembolsar"
+    },
+    "invoices.taxJurisdictionOptional": {
+      "en": "Tax jurisdiction (optional)",
+      "draft": "Jurisdição fiscal (opcional)"
+    },
+    "invoices.tax": {
+      "en": "Tax ($)",
+      "draft": "Imposto ($)"
+    },
+    "invoices.refundCredit": {
+      "en": "Refund credit —",
+      "draft": "Reembolsar crédito —"
+    },
+    "invoices.refundTheRemaining": {
+      "en": "Refund the remaining",
+      "draft": "Reembolsar o restante"
+    },
+    "mileage.irsLogCSV": {
+      "en": "IRS log CSV",
+      "draft": "CSV do registro do IRS"
+    },
+    "payroll.deleteDraft": {
+      "en": "Delete draft",
+      "draft": "Excluir minuta"
+    },
+    "payroll.partnershipStubWhenAProviderIs": {
+      "en": "Partnership stub: when a provider is connected, runs here will hand off tax filing and direct deposit automatically.",
+      "draft": "Stub de parceria: quando um provedor está conectado, as folhas daqui passam a transmitir a declaração fiscal e o depósito direto automaticamente."
+    },
+    "payroll.employerTaxEst": {
+      "en": "Employer payroll tax (est.)",
+      "draft": "Encargos patronais (est.)"
+    },
+    "portalview.tax": {
+      "en": "Tax",
+      "draft": "Imposto"
+    },
+    "recurringinvoices.tax": {
+      "en": "Tax ($)",
+      "draft": "Imposto ($)"
+    },
+    "simulator.safetyFloor": {
+      "en": "Safety floor $",
+      "draft": "Margem de segurança $"
+    },
+    "tax.nameIsRequired": {
+      "en": "Name is required",
+      "draft": "Nome é obrigatório"
+    },
+    "tax.contractorAdded": {
+      "en": "Contractor added",
+      "draft": "Prestador adicionado"
+    },
+    "tax.w9StatusUpdated": {
+      "en": "W-9 status updated",
+      "draft": "Status do W-9 atualizado"
+    },
+    "tax.contractorRemoved": {
+      "en": "Contractor removed",
+      "draft": "Prestador removido"
+    },
+    "tax.enterAPositiveAmount": {
+      "en": "Enter a positive amount",
+      "draft": "Informe um valor positivo"
+    },
+    "tax.paymentRecorded": {
+      "en": "Payment recorded",
+      "draft": "Pagamento registrado"
+    },
+    "tax.paymentDeleted": {
+      "en": "Payment deleted",
+      "draft": "Pagamento excluído"
+    },
+    "tax.statusRefreshed": {
+      "en": "Status refreshed",
+      "draft": "Status atualizado"
+    },
+    "tax.addContractor": {
+      "en": "Add contractor",
+      "draft": "Adicionar prestador"
+    },
+    "tax.contractors1099s": {
+      "en": "Contractors & 1099s",
+      "draft": "Prestadores e 1099s"
+    },
+    "tax.salesTax": {
+      "en": "Sales Tax",
+      "draft": "Imposto sobre vendas"
+    },
+    "tax.taxbanditsNotConnected": {
+      "en": "TaxBandits not connected.",
+      "draft": "TaxBandits não conectado."
+    },
+    "tax.taxbanditsSETUPMd": {
+      "en": "TAXBANDITS_SETUP.md",
+      "draft": "TAXBANDITS_SETUP.md"
+    },
+    "tax.inTheRepoNoIRSFiling": {
+      "en": "in the repo. No IRS filing is ever done in-house.",
+      "draft": "no repositório. Nenhuma declaração ao IRS é feita internamente."
+    },
+    "tax.taxbanditsConnectedIn": {
+      "en": "TaxBandits connected in",
+      "draft": "TaxBandits conectado em modo"
+    },
+    "tax.sandbox": {
+      "en": "sandbox",
+      "draft": "sandbox"
+    },
+    "tax.modeNoRealFilingsFlip": {
+      "en": "mode — no real filings. Flip",
+      "draft": "modo — sem declarações reais. Alterne"
+    },
+    "tax.taxbanditsSANDBOXFalse": {
+      "en": "TAXBANDITS_SANDBOX=false",
+      "draft": "TAXBANDITS_SANDBOX=false"
+    },
+    "tax.toGoLive": {
+      "en": "to go live.",
+      "draft": "para entrar em produção."
+    },
+    "tax.newContractor": {
+      "en": "New contractor",
+      "draft": "Novo prestador"
+    },
+    "tax.name": {
+      "en": "Name *",
+      "draft": "Nome *"
+    },
+    "tax.businessName": {
+      "en": "Business name",
+      "draft": "Nome da empresa"
+    },
+    "tax.email": {
+      "en": "Email",
+      "draft": "E-mail"
+    },
+    "tax.phone": {
+      "en": "Phone",
+      "draft": "Telefone"
+    },
+    "tax.entityType": {
+      "en": "Entity type",
+      "draft": "Tipo de entidade"
+    },
+    "tax.ssnEIN": {
+      "en": "SSN / EIN",
+      "draft": "SSN / EIN"
+    },
+    "tax.storedSecurely": {
+      "en": "Stored securely",
+      "draft": "Armazenado com segurança"
+    },
+    "tax.street": {
+      "en": "Street",
+      "draft": "Rua"
+    },
+    "tax.city": {
+      "en": "City",
+      "draft": "Cidade"
+    },
+    "tax.state": {
+      "en": "State",
+      "draft": "Estado"
+    },
+    "tax.zip": {
+      "en": "ZIP",
+      "draft": "CEP"
+    },
+    "tax.cancel": {
+      "en": "Cancel",
+      "draft": "Cancelar"
+    },
+    "tax.contractor": {
+      "en": "Contractor",
+      "draft": "Prestador"
+    },
+    "tax.paid": {
+      "en": "Paid",
+      "draft": "Pago"
+    },
+    "tax.w9": {
+      "en": "W-9",
+      "draft": "W-9"
+    },
+    "tax.NEC": {
+      "en": "1099-NEC",
+      "draft": "1099-NEC"
+    },
+    "tax.eFile": {
+      "en": "E-file",
+      "draft": "Declaração eletrônica"
+    },
+    "tax.actions": {
+      "en": "Actions",
+      "draft": "Ações"
+    },
+    "tax.viewPaymentHistory": {
+      "en": "View payment history",
+      "draft": "Ver histórico de pagamentos"
+    },
+    "tax.toggleW9Received": {
+      "en": "Toggle W-9 received",
+      "draft": "Alternar W-9 recebido"
+    },
+    "tax.required": {
+      "en": "Required",
+      "draft": "Obrigatório"
+    },
+    "tax.viewFilingStatus": {
+      "en": "View filing status",
+      "draft": "Ver status da declaração"
+    },
+    "tax.notFiled": {
+      "en": "Not filed",
+      "draft": "Não declarado"
+    },
+    "tax.recordPayment": {
+      "en": "Record payment",
+      "draft": "Registrar pagamento"
+    },
+    "tax.noContractorsYet": {
+      "en": "No contractors yet.",
+      "draft": "Sem prestadores ainda."
+    },
+    "tax.NECDataPreview": {
+      "en": "1099-NEC data preview",
+      "draft": "Prévia dos dados 1099-NEC"
+    },
+    "tax.recipientBox1DataShapedFor": {
+      "en": "Recipient + Box 1 data shaped for e-filing. Tax IDs stay masked — reveal needs PII access. Draft data only, nothing is filed in-house.",
+      "draft": "Dados do beneficiário + caixa 1 formatados para declaração eletrônica. IDs fiscais ficam mascarados — revelar exige acesso PII. Somente rascunho, nada é declarado internamente."
+    },
+    "tax.loadPreview": {
+      "en": "Load preview",
+      "draft": "Carregar prévia"
+    },
+    "tax.recipient": {
+      "en": "Recipient",
+      "draft": "Beneficiário"
+    },
+    "tax.tin": {
+      "en": "TIN",
+      "draft": "TIN"
+    },
+    "tax.address": {
+      "en": "Address",
+      "draft": "Endereço"
+    },
+    "tax.box1": {
+      "en": "Box 1",
+      "draft": "Caixa 1"
+    },
+    "tax.missing": {
+      "en": "missing",
+      "draft": "faltante"
+    },
+    "tax.reveal": {
+      "en": "reveal",
+      "draft": "revelar"
+    },
+    "tax.noContractorsMeetThe": {
+      "en": "No contractors meet the",
+      "draft": "Nenhum prestador atinge o"
+    },
+    "tax.reportingThresholdFor": {
+      "en": "reporting threshold for",
+      "draft": "limite de declaração para"
+    },
+    "tax.recordPayment2": {
+      "en": "Record payment —",
+      "draft": "Registrar pagamento —"
+    },
+    "tax.date": {
+      "en": "Date",
+      "draft": "Data"
+    },
+    "tax.amount": {
+      "en": "Amount $",
+      "draft": "Valor $"
+    },
+    "tax.description": {
+      "en": "Description",
+      "draft": "Descrição"
+    },
+    "tax.eGMarchBoothRentPayout": {
+      "en": "e.g. March booth rent payout",
+      "draft": "ex.: pagamento do aluguel de cadeira de março"
+    },
+    "tax.record": {
+      "en": "Record",
+      "draft": "Registrar"
+    },
+    "tax.paymentHistory": {
+      "en": "Payment history —",
+      "draft": "Histórico de pagamentos —"
+    },
+    "tax.noPaymentsRecordedFor": {
+      "en": "No payments recorded for",
+      "draft": "Sem pagamentos registrados para"
+    },
+    "tax.amount2": {
+      "en": "Amount",
+      "draft": "Valor"
+    },
+    "tax.deletePayment": {
+      "en": "Delete payment",
+      "draft": "Excluir pagamento"
+    },
+    "tax.yearTotal": {
+      "en": "Year total:",
+      "draft": "Total do ano:"
+    },
+    "tax.NECFiling": {
+      "en": "1099-NEC filing —",
+      "draft": "Declaração 1099-NEC —"
+    },
+    "tax.thisDraftLivesInTaxBanditsReview": {
+      "en": "This draft lives in TaxBandits — review and Transmit there to file with the IRS. This app never files in-house.",
+      "draft": "Esta minuta está no TaxBandits — revise e transmita lá para declarar ao IRS. Este app nunca declara internamente."
+    },
+    "tax.NECIsRequiredForNon": {
+      "en": "1099-NEC is required for non-corporate contractors paid ≥",
+      "draft": "O 1099-NEC é obrigatório para prestadores não constituídos como empresa pagos ≥"
+    },
+    "tax.inTheYearEFilingCreates": {
+      "en": "in the year. E-filing creates a draft in TaxBandits — you review and transmit there. This app never files with the IRS directly.",
+      "draft": "no ano. A declaração eletrônica cria uma minuta no TaxBandits — você revisa e transmite lá. Este app nunca declara diretamente ao IRS."
+    },
+    "taxforecast.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "Previsão fiscal"
+    },
+    "taxforecast.OfPriorYearTax": {
+      "en": "100% of prior-year tax",
+      "draft": "100% do imposto do ano anterior"
+    },
+    "taxforecast.irsDirectPay": {
+      "en": "IRS Direct Pay",
+      "draft": "Pagamento direto do IRS"
+    },
+    "nav.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "Previsão fiscal"
+    },
+    "nav.tax1099s": {
+      "en": "Tax & 1099s",
+      "draft": "Impostos e 1099s"
+    },
+    "teamInvites.accountantTaxPro": {
+      "en": "Accountant / Tax pro",
+      "draft": "Contador / fiscal"
+    }
+  }
+}

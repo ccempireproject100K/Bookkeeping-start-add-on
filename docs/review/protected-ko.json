@@ -1,0 +1,426 @@
+{
+  "_meta": {
+    "lang": "ko",
+    "status": "DRAFT for human review only. Do NOT copy into frontend/src/locales/ko/translation.json until a qualified reviewer (counsel/CPA where relevant) approves each string. Live locale keeps English for these keys.",
+    "source": "docs/TRANSLATION_PLAN.md flagged keys (legal/financial/tax/privacy/safety)",
+    "notice": "Approximate translation from English/Spanish, may not be accurate."
+  },
+  "strings": {
+    "auditlog.eGTaxInvoiceLogin": {
+      "en": "e.g. tax, invoice, login",
+      "draft": "예: 세금, 청구서, 로그인"
+    },
+    "cpapackage.mileageLogWithIRSRatesApplied": {
+      "en": "Mileage log with IRS rates applied",
+      "draft": "IRS 요율이 적용된 주행 기록"
+    },
+    "customers.delete": {
+      "en": "Delete",
+      "draft": "삭제"
+    },
+    "customers.deleteConfirm": {
+      "en": "Delete customer \"{{name}}\"? Their invoices and statements stay on record.",
+      "draft": "고객 \"{{name}}\"을(를) 삭제할까요? 청구서와 명세서는 기록에 남습니다."
+    },
+    "estimates.tax": {
+      "en": "Tax ($)",
+      "draft": "세금 ($)"
+    },
+    "expenses.tax": {
+      "en": "Tax",
+      "draft": "세금"
+    },
+    "expenses.taxID": {
+      "en": "Tax ID",
+      "draft": "세금 ID"
+    },
+    "expenses.taxIDEIN": {
+      "en": "Tax ID / EIN",
+      "draft": "세금 ID / EIN"
+    },
+    "expenses.taxYear": {
+      "en": "Tax year",
+      "draft": "세금 연도"
+    },
+    "invoices.refund": {
+      "en": "Refund",
+      "draft": "환불"
+    },
+    "invoices.refundCredit": {
+      "en": "Refund credit —",
+      "draft": "환불 크레딧 —"
+    },
+    "invoices.refundTheRemaining": {
+      "en": "Refund the remaining",
+      "draft": "잔액 환불"
+    },
+    "invoices.tax": {
+      "en": "Tax ($)",
+      "draft": "세금 ($)"
+    },
+    "invoices.taxJurisdictionOptional": {
+      "en": "Tax jurisdiction (optional)",
+      "draft": "세금 관할 구역 (선택 사항)"
+    },
+    "mileage.irsLogCSV": {
+      "en": "IRS log CSV",
+      "draft": "IRS 기록 CSV"
+    },
+    "nav.tax1099s": {
+      "en": "Tax & 1099s",
+      "draft": "세금 및 1099"
+    },
+    "nav.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "세금 예측"
+    },
+    "payroll.deleteDraft": {
+      "en": "Delete draft",
+      "draft": "초안 삭제"
+    },
+    "payroll.employerTaxEst": {
+      "en": "Employer payroll tax (est.)",
+      "draft": "고용주 급여세 (견적)"
+    },
+    "payroll.partnershipStubWhenAProviderIs": {
+      "en": "Partnership stub: when a provider is connected, runs here will hand off tax filing and direct deposit automatically.",
+      "draft": "파트너십 스텁: 업체가 연결되면 여기서 실행한 내용이 세금 신고와 직접 입금을 인계합니다."
+    },
+    "portalview.tax": {
+      "en": "Tax",
+      "draft": "세금"
+    },
+    "recurringinvoices.tax": {
+      "en": "Tax ($)",
+      "draft": "세금 ($)"
+    },
+    "salestaxtab.everywhereYouCollectSalesTaxState": {
+      "en": "Everywhere you collect sales tax — state, county, city, special district.\n          Tag invoices with a jurisdiction and this page tells you what you owe, where.",
+      "draft": "판매세를 징수하는 모든 곳 — 주, 카운티, 시, 특별구.\n          청구서에 관할 구역을 태그하면 이 페이지에서 납부액을 확인할 수 있습니다."
+    },
+    "salestaxtab.noJurisdictionsYetAddTheFirst": {
+      "en": "No jurisdictions yet. Add the first place you collect sales tax.",
+      "draft": "관할 구역이 아직 없습니다. 판매세를 징수하는 첫 장소를 추가하세요."
+    },
+    "salestaxtab.ofSalesTaxIsnTTagged": {
+      "en": "of sales tax isn't tagged to a jurisdiction yet.\n            Tag invoices with a jurisdiction so every dollar lands in the right bucket.",
+      "draft": "의 판매세에 아직 관할 구역이 태그되지 않았습니다.\n            청구서에 관할 구역을 태그하면 모든 금액이 올바른 항목에 들어갑니다."
+    },
+    "salestaxtab.taxCollected": {
+      "en": "Tax collected",
+      "draft": "징수된 세금"
+    },
+    "salestaxtab.taxJurisdictions": {
+      "en": "Tax jurisdictions",
+      "draft": "세금 관할 구역"
+    },
+    "simulator.safetyFloor": {
+      "en": "Safety floor $",
+      "draft": "안전 하한 $"
+    },
+    "tax.NEC": {
+      "en": "1099-NEC",
+      "draft": "1099-NEC"
+    },
+    "tax.NECDataPreview": {
+      "en": "1099-NEC data preview",
+      "draft": "1099-NEC 데이터 미리보기"
+    },
+    "tax.NECFiling": {
+      "en": "1099-NEC filing —",
+      "draft": "1099-NEC 신고 —"
+    },
+    "tax.NECIsRequiredForNon": {
+      "en": "1099-NEC is required for non-corporate contractors paid ≥",
+      "draft": "비법인 계약자에게 지급한 금액이 ≥인 경우 1099-NEC가 필요합니다"
+    },
+    "tax.actions": {
+      "en": "Actions",
+      "draft": "작업"
+    },
+    "tax.addContractor": {
+      "en": "Add contractor",
+      "draft": "계약자 추가"
+    },
+    "tax.address": {
+      "en": "Address",
+      "draft": "주소"
+    },
+    "tax.amount": {
+      "en": "Amount $",
+      "draft": "금액 $"
+    },
+    "tax.amount2": {
+      "en": "Amount",
+      "draft": "금액"
+    },
+    "tax.box1": {
+      "en": "Box 1",
+      "draft": "상자 1"
+    },
+    "tax.businessName": {
+      "en": "Business name",
+      "draft": "사업체명"
+    },
+    "tax.cancel": {
+      "en": "Cancel",
+      "draft": "취소"
+    },
+    "tax.city": {
+      "en": "City",
+      "draft": "시"
+    },
+    "tax.contractor": {
+      "en": "Contractor",
+      "draft": "계약자"
+    },
+    "tax.contractorAdded": {
+      "en": "Contractor added",
+      "draft": "계약자가 추가되었습니다"
+    },
+    "tax.contractorRemoved": {
+      "en": "Contractor removed",
+      "draft": "계약자가 삭제되었습니다"
+    },
+    "tax.contractors1099s": {
+      "en": "Contractors & 1099s",
+      "draft": "계약자 및 1099"
+    },
+    "tax.date": {
+      "en": "Date",
+      "draft": "날짜"
+    },
+    "tax.deletePayment": {
+      "en": "Delete payment",
+      "draft": "결제 삭제"
+    },
+    "tax.description": {
+      "en": "Description",
+      "draft": "설명"
+    },
+    "tax.eFile": {
+      "en": "E-file",
+      "draft": "전자 신고"
+    },
+    "tax.eGMarchBoothRentPayout": {
+      "en": "e.g. March booth rent payout",
+      "draft": "예: 3월 자리 임대료 지급"
+    },
+    "tax.email": {
+      "en": "Email",
+      "draft": "이메일"
+    },
+    "tax.enterAPositiveAmount": {
+      "en": "Enter a positive amount",
+      "draft": "양의 금액을 입력하세요"
+    },
+    "tax.entityType": {
+      "en": "Entity type",
+      "draft": "엔터티 유형"
+    },
+    "tax.inTheRepoNoIRSFiling": {
+      "en": "in the repo. No IRS filing is ever done in-house.",
+      "draft": "리포에 있습니다. IRS 신고는 절대 내부에서 처리되지 않습니다."
+    },
+    "tax.inTheYearEFilingCreates": {
+      "en": "in the year. E-filing creates a draft in TaxBandits — you review and transmit there. This app never files with the IRS directly.",
+      "draft": "해당 연도에. 전자 신고하면 TaxBandits에 초안이 생성됩니다 — 그곳에서 검토하고 전송하세요. 이 앱은 IRS에 직접 신고하지 않습니다."
+    },
+    "tax.loadPreview": {
+      "en": "Load preview",
+      "draft": "미리보기 불러오기"
+    },
+    "tax.missing": {
+      "en": "missing",
+      "draft": "누락"
+    },
+    "tax.modeNoRealFilingsFlip": {
+      "en": "mode — no real filings. Flip",
+      "draft": "모드 — 실제 신고 없음. 전환"
+    },
+    "tax.name": {
+      "en": "Name *",
+      "draft": "이름 *"
+    },
+    "tax.nameIsRequired": {
+      "en": "Name is required",
+      "draft": "이름은 필수입니다"
+    },
+    "tax.newContractor": {
+      "en": "New contractor",
+      "draft": "새 계약자"
+    },
+    "tax.noContractorsMeetThe": {
+      "en": "No contractors meet the",
+      "draft": "조건에 맞는 계약자가 없습니다"
+    },
+    "tax.noContractorsYet": {
+      "en": "No contractors yet.",
+      "draft": "계약자가 아직 없습니다."
+    },
+    "tax.noPaymentsRecordedFor": {
+      "en": "No payments recorded for",
+      "draft": "에 대해 기록된 결제가 없습니다"
+    },
+    "tax.notFiled": {
+      "en": "Not filed",
+      "draft": "미신고"
+    },
+    "tax.paid": {
+      "en": "Paid",
+      "draft": "지급됨"
+    },
+    "tax.paymentDeleted": {
+      "en": "Payment deleted",
+      "draft": "결제가 삭제되었습니다"
+    },
+    "tax.paymentHistory": {
+      "en": "Payment history —",
+      "draft": "결제 내역 —"
+    },
+    "tax.paymentRecorded": {
+      "en": "Payment recorded",
+      "draft": "결제가 기록되었습니다"
+    },
+    "tax.phone": {
+      "en": "Phone",
+      "draft": "전화"
+    },
+    "tax.recipient": {
+      "en": "Recipient",
+      "draft": "수령인"
+    },
+    "tax.recipientBox1DataShapedFor": {
+      "en": "Recipient + Box 1 data shaped for e-filing. Tax IDs stay masked — reveal needs PII access. Draft data only, nothing is filed in-house.",
+      "draft": "전자 신고용 수령인 + 상자 1 데이터. 세금 ID는 마스킹됩니다 — 확인에는 PII 액세스가 필요합니다. 초안 데이터일 뿐이며 내부에서 신고되지 않습니다."
+    },
+    "tax.record": {
+      "en": "Record",
+      "draft": "기록"
+    },
+    "tax.recordPayment": {
+      "en": "Record payment",
+      "draft": "결제 기록"
+    },
+    "tax.recordPayment2": {
+      "en": "Record payment —",
+      "draft": "결제 기록 —"
+    },
+    "tax.reportingThresholdFor": {
+      "en": "reporting threshold for",
+      "draft": "에 대한 신고 기준"
+    },
+    "tax.required": {
+      "en": "Required",
+      "draft": "필수"
+    },
+    "tax.reveal": {
+      "en": "reveal",
+      "draft": "표시"
+    },
+    "tax.salesTax": {
+      "en": "Sales Tax",
+      "draft": "판매세"
+    },
+    "tax.sandbox": {
+      "en": "sandbox",
+      "draft": "샌드박스"
+    },
+    "tax.ssnEIN": {
+      "en": "SSN / EIN",
+      "draft": "SSN / EIN"
+    },
+    "tax.state": {
+      "en": "State",
+      "draft": "주"
+    },
+    "tax.statusRefreshed": {
+      "en": "Status refreshed",
+      "draft": "상태가 새로고침되었습니다"
+    },
+    "tax.storedSecurely": {
+      "en": "Stored securely",
+      "draft": "안전하게 저장됨"
+    },
+    "tax.street": {
+      "en": "Street",
+      "draft": "도로명"
+    },
+    "tax.taxbanditsConnectedIn": {
+      "en": "TaxBandits connected in",
+      "draft": "TaxBandits가 다음에 연결됨"
+    },
+    "tax.taxbanditsNotConnected": {
+      "en": "TaxBandits not connected.",
+      "draft": "TaxBandits가 연결되지 않았습니다."
+    },
+    "tax.taxbanditsSANDBOXFalse": {
+      "en": "TAXBANDITS_SANDBOX=false",
+      "draft": "TAXBANDITS_SANDBOX=false"
+    },
+    "tax.taxbanditsSETUPMd": {
+      "en": "TAXBANDITS_SETUP.md",
+      "draft": "TAXBANDITS_SETUP.md"
+    },
+    "tax.thisDraftLivesInTaxBanditsReview": {
+      "en": "This draft lives in TaxBandits — review and Transmit there to file with the IRS. This app never files in-house.",
+      "draft": "이 초안은 TaxBandits에 있습니다 — IRS에 신고하려면 그곳에서 검토하고 전송하세요. 이 앱은 내부에서 신고하지 않습니다."
+    },
+    "tax.tin": {
+      "en": "TIN",
+      "draft": "TIN"
+    },
+    "tax.toGoLive": {
+      "en": "to go live.",
+      "draft": "운영 전환."
+    },
+    "tax.toggleW9Received": {
+      "en": "Toggle W-9 received",
+      "draft": "W-9 수령 전환"
+    },
+    "tax.viewFilingStatus": {
+      "en": "View filing status",
+      "draft": "신고 상태 보기"
+    },
+    "tax.viewPaymentHistory": {
+      "en": "View payment history",
+      "draft": "결제 내역 보기"
+    },
+    "tax.w9": {
+      "en": "W-9",
+      "draft": "W-9"
+    },
+    "tax.w9StatusUpdated": {
+      "en": "W-9 status updated",
+      "draft": "W-9 상태가 업데이트되었습니다"
+    },
+    "tax.yearTotal": {
+      "en": "Year total:",
+      "draft": "연간 합계:"
+    },
+    "tax.zip": {
+      "en": "ZIP",
+      "draft": "우편번호"
+    },
+    "taxforecast.OfPriorYearTax": {
+      "en": "100% of prior-year tax",
+      "draft": "전년도 세금의 100%"
+    },
+    "taxforecast.irsDirectPay": {
+      "en": "IRS Direct Pay",
+      "draft": "IRS 직접 납부"
+    },
+    "taxforecast.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "세금 예측"
+    },
+    "teamInvites.accountantTaxPro": {
+      "en": "Accountant / Tax pro",
+      "draft": "회계사 / 세무 전문가"
+    },
+    "teaminvites.inviteYourAccountantOrTaxPro": {
+      "en": "Invite your accountant or tax pro — they join with the right permissions\n        and can switch between all the workspaces they serve.",
+      "draft": "회계사나 세무 전문가를 초대하세요 — 적절한 권한으로 가입하고\n        담당하는 모든 워크스페이스를 오갈 수 있습니다."
+    }
+  }
+}

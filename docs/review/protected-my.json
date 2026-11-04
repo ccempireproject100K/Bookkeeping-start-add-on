@@ -1,0 +1,426 @@
+{
+  "_meta": {
+    "lang": "my",
+    "status": "DRAFT for human review only. Do NOT copy into frontend/src/locales/my/translation.json until a qualified reviewer (counsel/CPA where relevant) approves each string. Live locale keeps English for these keys.",
+    "source": "docs/TRANSLATION_PLAN.md flagged keys (legal/financial/tax/privacy/safety)",
+    "notice": "Approximate translation from English/Spanish, may not be accurate."
+  },
+  "strings": {
+    "salestaxtab.taxJurisdictions": {
+      "en": "Tax jurisdictions",
+      "draft": "အခွန် တရားစီရင်ပိုင်ခွင့်များ"
+    },
+    "salestaxtab.everywhereYouCollectSalesTaxState": {
+      "en": "Everywhere you collect sales tax — state, county, city, special district.\n          Tag invoices with a jurisdiction and this page tells you what you owe, where.",
+      "draft": "နေရာတိုင်း သင် ကောက်ခံရယူပါ အရောင်းအခွန် — ပြည်နယ်, ကောင်တီ, မြို့, အထူး ခရိုင်.\n          Tag အင်ဗွိုင်းများ တရားစီရင်ပိုင်ခွင့် နှင့် ဒီ စာမျက်နှာ ပြောပြသည် သင် ဘာ သင် အကြွေးရှိသည်, ဘယ်မှာ."
+    },
+    "salestaxtab.noJurisdictionsYetAddTheFirst": {
+      "en": "No jurisdictions yet. Add the first place you collect sales tax.",
+      "draft": "မရှိပါ တရားစီရင်ပိုင်ခွင့်များ အခုထိ. ထည့်ပါ ပထမ နေရာ သင် ကောက်ခံရယူပါ အရောင်းအခွန်."
+    },
+    "salestaxtab.ofSalesTaxIsnTTagged": {
+      "en": "of sales tax isn't tagged to a jurisdiction yet.\n            Tag invoices with a jurisdiction so every dollar lands in the right bucket.",
+      "draft": " အရောင်းအခွန် တဂ်တပ်မထားပါ တရားစီရင်ပိုင်ခွင့် အခုထိ.\n            Tag အင်ဗွိုင်းများ တရားစီရင်ပိုင်ခွင့် ထို့ကြောင့် တစ်ခုချင်းစီ ဒေါ်လာ ကျရောက်သည် မှန်ကန်သော အုပ်."
+    },
+    "salestaxtab.taxCollected": {
+      "en": "Tax collected",
+      "draft": "အခွန် စုဆောင်းထားသော"
+    },
+    "teaminvites.inviteYourAccountantOrTaxPro": {
+      "en": "Invite your accountant or tax pro — they join with the right permissions\n        and can switch between all the workspaces they serve.",
+      "draft": "ဖိတ်ကြားပါ သင့် စာရင်းကိုင် သို့မဟုတ် အခွန်ပညာရှင် — သူတို့ ပါဝင်ပါ မှန်ကန်သော ခွင့်ပြုချက်များ\n        နှင့် ပြောင်းနိုင်သည် အကြား အားလုံး အလုပ်နေရာများ သူတို့ ဝန်ဆောင်မှုပေးပါ."
+    },
+    "auditlog.eGTaxInvoiceLogin": {
+      "en": "e.g. tax, invoice, login",
+      "draft": "ဥပမာ အခွန်, အင်ဗွိုင်း, ဝင်ရောက်မှု"
+    },
+    "cpapackage.mileageLogWithIRSRatesApplied": {
+      "en": "Mileage log with IRS rates applied",
+      "draft": "မိုင်အကွာအဝေး မှတ်တမ်းတင်ပါ IRS နှုန်းများ အသုံးချထားသော"
+    },
+    "customers.delete": {
+      "en": "Delete",
+      "draft": "ဖျက်ပါ"
+    },
+    "customers.deleteConfirm": {
+      "en": "Delete customer \"{{name}}\"? Their invoices and statements stay on record.",
+      "draft": "ဖျက်ပါ ဖောက်သည် \"{{name}}\"? သူတို့၏ အင်ဗွိုင်းများ နှင့် ထုတ်ပြန်ချက်များ ဆက်ရှိနေသည် မှတ်တမ်းတင်ပါ."
+    },
+    "estimates.tax": {
+      "en": "Tax ($)",
+      "draft": "အခွန် ($)"
+    },
+    "expenses.taxID": {
+      "en": "Tax ID",
+      "draft": "အခွန် ID"
+    },
+    "expenses.taxYear": {
+      "en": "Tax year",
+      "draft": "အခွန် နှစ်"
+    },
+    "expenses.tax": {
+      "en": "Tax",
+      "draft": "အခွန်"
+    },
+    "expenses.taxIDEIN": {
+      "en": "Tax ID / EIN",
+      "draft": "အခွန် ID / EIN"
+    },
+    "invoices.refund": {
+      "en": "Refund",
+      "draft": "ပြန်အမ်းပါ"
+    },
+    "invoices.taxJurisdictionOptional": {
+      "en": "Tax jurisdiction (optional)",
+      "draft": "အခွန် တရားစီရင်ပိုင်ခွင့် (ရွေးချယ်နိုင်သော)"
+    },
+    "invoices.tax": {
+      "en": "Tax ($)",
+      "draft": "အခွန် ($)"
+    },
+    "invoices.refundCredit": {
+      "en": "Refund credit —",
+      "draft": "ပြန်အမ်းပါ ခရက်ဒစ် —"
+    },
+    "invoices.refundTheRemaining": {
+      "en": "Refund the remaining",
+      "draft": "ပြန်အမ်းပါ ကျန်ရှိသော"
+    },
+    "mileage.irsLogCSV": {
+      "en": "IRS log CSV",
+      "draft": "IRS မှတ်တမ်းတင်ပါ CSV"
+    },
+    "payroll.deleteDraft": {
+      "en": "Delete draft",
+      "draft": "ဖျက်ပါ မူကြမ်း"
+    },
+    "payroll.partnershipStubWhenAProviderIs": {
+      "en": "Partnership stub: when a provider is connected, runs here will hand off tax filing and direct deposit automatically.",
+      "draft": "မိတ်ဖက်လုပ်ငန်း ဖြတ်ပိုင်း: ဝန်ဆောင်မှုပေးသူ ချိတ်ဆက်ထားသော, လည်ပတ်သည် ဤနေရာ မည် လက် ပိတ် အခွန် တင်သွင်းမှု နှင့် ညွှန်ကြားပါ အပ်နှံပါ အလိုအလျောက်."
+    },
+    "payroll.employerTaxEst": {
+      "en": "Employer payroll tax (est.)",
+      "draft": "အလုပ်ရှင် လစာအခွန် (ခန့်မှန်း.)"
+    },
+    "portalview.tax": {
+      "en": "Tax",
+      "draft": "အခွန်"
+    },
+    "recurringinvoices.tax": {
+      "en": "Tax ($)",
+      "draft": "အခွန် ($)"
+    },
+    "simulator.safetyFloor": {
+      "en": "Safety floor $",
+      "draft": "ဘေးကင်းရေး ကြမ်းပြင် $"
+    },
+    "tax.nameIsRequired": {
+      "en": "Name is required",
+      "draft": "အမည် လိုအပ်သော"
+    },
+    "tax.contractorAdded": {
+      "en": "Contractor added",
+      "draft": "ကန်ထရိုက်တာ ထည့်ခဲ့သည်"
+    },
+    "tax.w9StatusUpdated": {
+      "en": "W-9 status updated",
+      "draft": "W-9 အခြေအနေ ပြင်ဆင်ခဲ့သည်"
+    },
+    "tax.contractorRemoved": {
+      "en": "Contractor removed",
+      "draft": "ကန်ထရိုက်တာ ဖယ်ရှားခဲ့သည်"
+    },
+    "tax.enterAPositiveAmount": {
+      "en": "Enter a positive amount",
+      "draft": "ထည့်သွင်းပါ အပြုသဘော ပမာဏ"
+    },
+    "tax.paymentRecorded": {
+      "en": "Payment recorded",
+      "draft": "ငွေပေးချေမှု မှတ်တမ်းတင်ထားသော"
+    },
+    "tax.paymentDeleted": {
+      "en": "Payment deleted",
+      "draft": "ငွေပေးချေမှု ဖျက်ခဲ့သည်"
+    },
+    "tax.statusRefreshed": {
+      "en": "Status refreshed",
+      "draft": "အခြေအနေ ပြန်လည်ဖွင့်ထားသော"
+    },
+    "tax.addContractor": {
+      "en": "Add contractor",
+      "draft": "ထည့်ပါ ကန်ထရိုက်တာ"
+    },
+    "tax.contractors1099s": {
+      "en": "Contractors & 1099s",
+      "draft": "ကန်ထရိုက်တာများ & 1099s"
+    },
+    "tax.salesTax": {
+      "en": "Sales Tax",
+      "draft": "အရောင်းအခွန်"
+    },
+    "tax.taxbanditsNotConnected": {
+      "en": "TaxBandits not connected.",
+      "draft": "TaxBandits မဟုတ် ချိတ်ဆက်ထားသော."
+    },
+    "tax.taxbanditsSETUPMd": {
+      "en": "TAXBANDITS_SETUP.md",
+      "draft": "TAXBANDITS_SETUP.md"
+    },
+    "tax.inTheRepoNoIRSFiling": {
+      "en": "in the repo. No IRS filing is ever done in-house.",
+      "draft": " repo. မရှိပါ IRS တင်သွင်းမှု ဘယ်တော့မှ ပြီးမြောက်သော အတွင်းပိုင်း."
+    },
+    "tax.taxbanditsConnectedIn": {
+      "en": "TaxBandits connected in",
+      "draft": "TaxBandits ချိတ်ဆက်ထားသော "
+    },
+    "tax.sandbox": {
+      "en": "sandbox",
+      "draft": "ဆန်းဘောက်စ်"
+    },
+    "tax.modeNoRealFilingsFlip": {
+      "en": "mode — no real filings. Flip",
+      "draft": "စနစ် — မရှိပါ အစစ်အမှန် တင်သွင်းမှုများ. လှန်ပါ"
+    },
+    "tax.taxbanditsSANDBOXFalse": {
+      "en": "TAXBANDITS_SANDBOX=false",
+      "draft": "TAXBANDITS_SANDBOX=false"
+    },
+    "tax.toGoLive": {
+      "en": "to go live.",
+      "draft": "သွားရန် တိုက်ရိုက်."
+    },
+    "tax.newContractor": {
+      "en": "New contractor",
+      "draft": "အသစ် ကန်ထရိုက်တာ"
+    },
+    "tax.name": {
+      "en": "Name *",
+      "draft": "အမည် *"
+    },
+    "tax.businessName": {
+      "en": "Business name",
+      "draft": "လုပ်ငန်း အမည်"
+    },
+    "tax.email": {
+      "en": "Email",
+      "draft": "အီးမေးလ်"
+    },
+    "tax.phone": {
+      "en": "Phone",
+      "draft": "ဖုန်း"
+    },
+    "tax.entityType": {
+      "en": "Entity type",
+      "draft": "အဖွဲ့အစည်း အမျိုးအစား"
+    },
+    "tax.ssnEIN": {
+      "en": "SSN / EIN",
+      "draft": "SSN / EIN"
+    },
+    "tax.storedSecurely": {
+      "en": "Stored securely",
+      "draft": "သိမ်းဆည်းထားသော လုံခြုံစွာ"
+    },
+    "tax.street": {
+      "en": "Street",
+      "draft": "လမ်း"
+    },
+    "tax.city": {
+      "en": "City",
+      "draft": "မြို့"
+    },
+    "tax.state": {
+      "en": "State",
+      "draft": "ပြည်နယ်"
+    },
+    "tax.zip": {
+      "en": "ZIP",
+      "draft": "ZIP"
+    },
+    "tax.cancel": {
+      "en": "Cancel",
+      "draft": "မလုပ်တော့ပါ"
+    },
+    "tax.contractor": {
+      "en": "Contractor",
+      "draft": "ကန်ထရိုက်တာ"
+    },
+    "tax.paid": {
+      "en": "Paid",
+      "draft": "ပေးချေပြီးသော"
+    },
+    "tax.w9": {
+      "en": "W-9",
+      "draft": "W-9"
+    },
+    "tax.NEC": {
+      "en": "1099-NEC",
+      "draft": "1099-NEC"
+    },
+    "tax.eFile": {
+      "en": "E-file",
+      "draft": "အီလက်ထရွန်းနစ်တင်သွင်းပါ"
+    },
+    "tax.actions": {
+      "en": "Actions",
+      "draft": "လုပ်ဆောင်ချက်များ"
+    },
+    "tax.viewPaymentHistory": {
+      "en": "View payment history",
+      "draft": "ကြည့်ရှုပါ ငွေပေးချေမှု မှတ်တမ်း"
+    },
+    "tax.toggleW9Received": {
+      "en": "Toggle W-9 received",
+      "draft": "Toggle W-9 လက်ခံရရှိထားသော"
+    },
+    "tax.required": {
+      "en": "Required",
+      "draft": "လိုအပ်သော"
+    },
+    "tax.viewFilingStatus": {
+      "en": "View filing status",
+      "draft": "ကြည့်ရှုပါ တင်သွင်းမှု အခြေအနေ"
+    },
+    "tax.notFiled": {
+      "en": "Not filed",
+      "draft": "မဟုတ် တင်သွင်းထားသော"
+    },
+    "tax.recordPayment": {
+      "en": "Record payment",
+      "draft": "မှတ်တမ်းတင်ပါ ငွေပေးချေမှု"
+    },
+    "tax.noContractorsYet": {
+      "en": "No contractors yet.",
+      "draft": "မရှိပါ ကန်ထရိုက်တာများ အခုထိ."
+    },
+    "tax.NECDataPreview": {
+      "en": "1099-NEC data preview",
+      "draft": "1099-NEC data ကြိုတင်ကြည့်ပါ"
+    },
+    "tax.recipientBox1DataShapedFor": {
+      "en": "Recipient + Box 1 data shaped for e-filing. Tax IDs stay masked — reveal needs PII access. Draft data only, nothing is filed in-house.",
+      "draft": "လက်ခံသူ + သေတ္တာ 1 data ပုံဖော်ထားသော အီလက်ထရွန်းနစ်တင်သွင်းမှု. အခွန် IDs ဆက်ရှိနေသည် ဖုံးကွယ်ထားသော — ပေါ်လွင်စေပါ လိုအပ်သည် PII ဝင်ရောက်ပါ. မူကြမ်း data သာ, ဘာမှမရှိပါ တင်သွင်းထားသော အတွင်းပိုင်း."
+    },
+    "tax.loadPreview": {
+      "en": "Load preview",
+      "draft": "ဖွင့်တင်ပါ ကြိုတင်ကြည့်ပါ"
+    },
+    "tax.recipient": {
+      "en": "Recipient",
+      "draft": "လက်ခံသူ"
+    },
+    "tax.tin": {
+      "en": "TIN",
+      "draft": "TIN"
+    },
+    "tax.address": {
+      "en": "Address",
+      "draft": "လိပ်စာ"
+    },
+    "tax.box1": {
+      "en": "Box 1",
+      "draft": "သေတ္တာ 1"
+    },
+    "tax.missing": {
+      "en": "missing",
+      "draft": "ပျောက်ဆုံးနေသော"
+    },
+    "tax.reveal": {
+      "en": "reveal",
+      "draft": "ပေါ်လွင်စေပါ"
+    },
+    "tax.noContractorsMeetThe": {
+      "en": "No contractors meet the",
+      "draft": "မရှိပါ ကန်ထရိုက်တာများ တွေ့ဆုံပါ "
+    },
+    "tax.reportingThresholdFor": {
+      "en": "reporting threshold for",
+      "draft": "အစီရင်ခံခြင်း အတိုင်းအတာသတ်မှတ်ချက် "
+    },
+    "tax.recordPayment2": {
+      "en": "Record payment —",
+      "draft": "မှတ်တမ်းတင်ပါ ငွေပေးချေမှု —"
+    },
+    "tax.date": {
+      "en": "Date",
+      "draft": "ရက်စွဲ"
+    },
+    "tax.amount": {
+      "en": "Amount $",
+      "draft": "ပမာဏ $"
+    },
+    "tax.description": {
+      "en": "Description",
+      "draft": "ဖော်ပြချက်"
+    },
+    "tax.eGMarchBoothRentPayout": {
+      "en": "e.g. March booth rent payout",
+      "draft": "ဥပမာ မတ် ပြခန်း ငှားရမ်းခ ထုတ်ပေးငွေ"
+    },
+    "tax.record": {
+      "en": "Record",
+      "draft": "မှတ်တမ်းတင်ပါ"
+    },
+    "tax.paymentHistory": {
+      "en": "Payment history —",
+      "draft": "ငွေပေးချေမှု မှတ်တမ်း —"
+    },
+    "tax.noPaymentsRecordedFor": {
+      "en": "No payments recorded for",
+      "draft": "မရှိပါ ငွေပေးချေမှုများ မှတ်တမ်းတင်ထားသော "
+    },
+    "tax.amount2": {
+      "en": "Amount",
+      "draft": "ပမာဏ"
+    },
+    "tax.deletePayment": {
+      "en": "Delete payment",
+      "draft": "ဖျက်ပါ ငွေပေးချေမှု"
+    },
+    "tax.yearTotal": {
+      "en": "Year total:",
+      "draft": "နှစ် စုစုပေါင်း:"
+    },
+    "tax.NECFiling": {
+      "en": "1099-NEC filing —",
+      "draft": "1099-NEC တင်သွင်းမှု —"
+    },
+    "tax.thisDraftLivesInTaxBanditsReview": {
+      "en": "This draft lives in TaxBandits — review and Transmit there to file with the IRS. This app never files in-house.",
+      "draft": "ဒီ မူကြမ်း နေထိုင်သည် TaxBandits — သုံးသပ်ပါ နှင့် Transmit ထိုနေရာ ဖိုင် IRS. ဒီ အပ် ဘယ်တော့မှ ဖိုင်များ အတွင်းပိုင်း."
+    },
+    "tax.NECIsRequiredForNon": {
+      "en": "1099-NEC is required for non-corporate contractors paid ≥",
+      "draft": "1099-NEC လိုအပ်သော ကော်ပိုရေးရှင်းမဟုတ်သော ကန်ထရိုက်တာများ ပေးချေပြီးသော ≥"
+    },
+    "tax.inTheYearEFilingCreates": {
+      "en": "in the year. E-filing creates a draft in TaxBandits — you review and transmit there. This app never files with the IRS directly.",
+      "draft": " နှစ်. အီလက်ထရွန်းနစ်တင်သွင်းမှု ဖန်တီးသည် မူကြမ်း TaxBandits — သင် သုံးသပ်ပါ နှင့် transmit ထိုနေရာ. ဒီ အပ် ဘယ်တော့မှ ဖိုင်များ IRS တိုက်ရိုက်."
+    },
+    "taxforecast.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "အခွန် ခန့်မှန်းချက်"
+    },
+    "taxforecast.OfPriorYearTax": {
+      "en": "100% of prior-year tax",
+      "draft": "100% ယခင်နှစ် အခွန်"
+    },
+    "taxforecast.irsDirectPay": {
+      "en": "IRS Direct Pay",
+      "draft": "IRS ညွှန်ကြားပါ ပေးချေပါ"
+    },
+    "nav.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "အခွန် ခန့်မှန်းချက်"
+    },
+    "nav.tax1099s": {
+      "en": "Tax & 1099s",
+      "draft": "အခွန် & 1099s"
+    },
+    "teamInvites.accountantTaxPro": {
+      "en": "Accountant / Tax pro",
+      "draft": "စာရင်းကိုင် / အခွန်ပညာရှင်"
+    }
+  }
+}

@@ -22,6 +22,7 @@ import am from "@/locales/am/translation.json";
 import my from "@/locales/my/translation.json";
 import ne from "@/locales/ne/translation.json";
 import sw from "@/locales/sw/translation.json";
+import loc_te from "@/locales/te/translation.json";
 
 export const SUPPORTED_LANGUAGES = [
   { code: "en", label: "English", flag: "🇺🇸" },
@@ -44,6 +45,7 @@ export const SUPPORTED_LANGUAGES = [
   { code: "my", label: "မြန်မာ", flag: "🇲🇲" },
   { code: "ne", label: "नेपाली", flag: "🇳🇵" },
   { code: "sw", label: "Kiswahili", flag: "🇰🇪" },
+  { code: "te", label: "తెలుగు", flag: "🌐" },
 ];
 
 i18n
@@ -71,6 +73,7 @@ i18n
       my: { translation: my },
       ne: { translation: ne },
       sw: { translation: sw },
+      "te": { translation: loc_te },
     },
     fallbackLng: "en",
     defaultNS: "translation",

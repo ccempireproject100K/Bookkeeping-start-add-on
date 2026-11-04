@@ -1,0 +1,426 @@
+{
+  "_meta": {
+    "lang": "zh-CN",
+    "status": "DRAFT for human review only. Do NOT copy into frontend/src/locales/zh-CN/translation.json until a qualified reviewer (counsel/CPA where relevant) approves each string. Live locale keeps English for these keys.",
+    "source": "docs/TRANSLATION_PLAN.md flagged keys (legal/financial/tax/privacy/safety)",
+    "notice": "Approximate translation from English/Spanish, may not be accurate."
+  },
+  "strings": {
+    "auditlog.eGTaxInvoiceLogin": {
+      "en": "e.g. tax, invoice, login",
+      "draft": "例如：税、发票、登录"
+    },
+    "cpapackage.mileageLogWithIRSRatesApplied": {
+      "en": "Mileage log with IRS rates applied",
+      "draft": "已应用 IRS 费率的里程记录"
+    },
+    "customers.delete": {
+      "en": "Delete",
+      "draft": "删除"
+    },
+    "customers.deleteConfirm": {
+      "en": "Delete customer \"{{name}}\"? Their invoices and statements stay on record.",
+      "draft": "删除客户“{{name}}”？其发票和对账单将保留在记录中。"
+    },
+    "estimates.tax": {
+      "en": "Tax ($)",
+      "draft": "税 ($)"
+    },
+    "expenses.tax": {
+      "en": "Tax",
+      "draft": "税"
+    },
+    "expenses.taxID": {
+      "en": "Tax ID",
+      "draft": "税号"
+    },
+    "expenses.taxIDEIN": {
+      "en": "Tax ID / EIN",
+      "draft": "税号 / EIN"
+    },
+    "expenses.taxYear": {
+      "en": "Tax year",
+      "draft": "税务年度"
+    },
+    "invoices.refund": {
+      "en": "Refund",
+      "draft": "退款"
+    },
+    "invoices.refundCredit": {
+      "en": "Refund credit —",
+      "draft": "退款贷项 —"
+    },
+    "invoices.refundTheRemaining": {
+      "en": "Refund the remaining",
+      "draft": "退还剩余"
+    },
+    "invoices.tax": {
+      "en": "Tax ($)",
+      "draft": "税 ($)"
+    },
+    "invoices.taxJurisdictionOptional": {
+      "en": "Tax jurisdiction (optional)",
+      "draft": "税务辖区（可选）"
+    },
+    "mileage.irsLogCSV": {
+      "en": "IRS log CSV",
+      "draft": "IRS 记录 CSV"
+    },
+    "nav.tax1099s": {
+      "en": "Tax & 1099s",
+      "draft": "税务与 1099"
+    },
+    "nav.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "税务预测"
+    },
+    "payroll.deleteDraft": {
+      "en": "Delete draft",
+      "draft": "删除草稿"
+    },
+    "payroll.employerTaxEst": {
+      "en": "Employer payroll tax (est.)",
+      "draft": "雇主工资税（估算）"
+    },
+    "payroll.partnershipStubWhenAProviderIs": {
+      "en": "Partnership stub: when a provider is connected, runs here will hand off tax filing and direct deposit automatically.",
+      "draft": "合作 stub：连接服务商后，在此运行的内容将交接税款申报和直接存款。"
+    },
+    "portalview.tax": {
+      "en": "Tax",
+      "draft": "税"
+    },
+    "recurringinvoices.tax": {
+      "en": "Tax ($)",
+      "draft": "税 ($)"
+    },
+    "salestaxtab.everywhereYouCollectSalesTaxState": {
+      "en": "Everywhere you collect sales tax — state, county, city, special district.\n          Tag invoices with a jurisdiction and this page tells you what you owe, where.",
+      "draft": "您征收销售税的所有地方 — 州、县、市、特别区。\n          为发票标记辖区，本页会告诉您应缴多少。"
+    },
+    "salestaxtab.noJurisdictionsYetAddTheFirst": {
+      "en": "No jurisdictions yet. Add the first place you collect sales tax.",
+      "draft": "暂无辖区。请添加您征收销售税的第一个地点。"
+    },
+    "salestaxtab.ofSalesTaxIsnTTagged": {
+      "en": "of sales tax isn't tagged to a jurisdiction yet.\n            Tag invoices with a jurisdiction so every dollar lands in the right bucket.",
+      "draft": "的销售税尚未标记辖区。\n            请为发票标记辖区，让每一美元都归入正确的类别。"
+    },
+    "salestaxtab.taxCollected": {
+      "en": "Tax collected",
+      "draft": "已征税款"
+    },
+    "salestaxtab.taxJurisdictions": {
+      "en": "Tax jurisdictions",
+      "draft": "税务辖区"
+    },
+    "simulator.safetyFloor": {
+      "en": "Safety floor $",
+      "draft": "安全下限 $"
+    },
+    "tax.NEC": {
+      "en": "1099-NEC",
+      "draft": "1099-NEC"
+    },
+    "tax.NECDataPreview": {
+      "en": "1099-NEC data preview",
+      "draft": "1099-NEC 数据预览"
+    },
+    "tax.NECFiling": {
+      "en": "1099-NEC filing —",
+      "draft": "1099-NEC 申报 —"
+    },
+    "tax.NECIsRequiredForNon": {
+      "en": "1099-NEC is required for non-corporate contractors paid ≥",
+      "draft": "向非公司制承包商付款达到 ≥ 时需要 1099-NEC"
+    },
+    "tax.actions": {
+      "en": "Actions",
+      "draft": "操作"
+    },
+    "tax.addContractor": {
+      "en": "Add contractor",
+      "draft": "添加承包商"
+    },
+    "tax.address": {
+      "en": "Address",
+      "draft": "地址"
+    },
+    "tax.amount": {
+      "en": "Amount $",
+      "draft": "金额 $"
+    },
+    "tax.amount2": {
+      "en": "Amount",
+      "draft": "金额"
+    },
+    "tax.box1": {
+      "en": "Box 1",
+      "draft": "第 1 栏"
+    },
+    "tax.businessName": {
+      "en": "Business name",
+      "draft": "企业名称"
+    },
+    "tax.cancel": {
+      "en": "Cancel",
+      "draft": "取消"
+    },
+    "tax.city": {
+      "en": "City",
+      "draft": "城市"
+    },
+    "tax.contractor": {
+      "en": "Contractor",
+      "draft": "承包商"
+    },
+    "tax.contractorAdded": {
+      "en": "Contractor added",
+      "draft": "承包商已添加"
+    },
+    "tax.contractorRemoved": {
+      "en": "Contractor removed",
+      "draft": "承包商已移除"
+    },
+    "tax.contractors1099s": {
+      "en": "Contractors & 1099s",
+      "draft": "承包商与 1099"
+    },
+    "tax.date": {
+      "en": "Date",
+      "draft": "日期"
+    },
+    "tax.deletePayment": {
+      "en": "Delete payment",
+      "draft": "删除付款"
+    },
+    "tax.description": {
+      "en": "Description",
+      "draft": "描述"
+    },
+    "tax.eFile": {
+      "en": "E-file",
+      "draft": "电子申报"
+    },
+    "tax.eGMarchBoothRentPayout": {
+      "en": "e.g. March booth rent payout",
+      "draft": "例如：3 月工位租金发放"
+    },
+    "tax.email": {
+      "en": "Email",
+      "draft": "电子邮件"
+    },
+    "tax.enterAPositiveAmount": {
+      "en": "Enter a positive amount",
+      "draft": "请输入正数金额"
+    },
+    "tax.entityType": {
+      "en": "Entity type",
+      "draft": "实体类型"
+    },
+    "tax.inTheRepoNoIRSFiling": {
+      "en": "in the repo. No IRS filing is ever done in-house.",
+      "draft": "在仓库中。IRS 申报从不在内部处理。"
+    },
+    "tax.inTheYearEFilingCreates": {
+      "en": "in the year. E-filing creates a draft in TaxBandits — you review and transmit there. This app never files with the IRS directly.",
+      "draft": "在该年度。电子申报会在 TaxBandits 中生成草稿 — 请在那里复核并传输。本应用从不直接向 IRS 申报。"
+    },
+    "tax.loadPreview": {
+      "en": "Load preview",
+      "draft": "加载预览"
+    },
+    "tax.missing": {
+      "en": "missing",
+      "draft": "缺失"
+    },
+    "tax.modeNoRealFilingsFlip": {
+      "en": "mode — no real filings. Flip",
+      "draft": "模式 — 无真实申报。请切换"
+    },
+    "tax.name": {
+      "en": "Name *",
+      "draft": "姓名 *"
+    },
+    "tax.nameIsRequired": {
+      "en": "Name is required",
+      "draft": "姓名为必填"
+    },
+    "tax.newContractor": {
+      "en": "New contractor",
+      "draft": "新承包商"
+    },
+    "tax.noContractorsMeetThe": {
+      "en": "No contractors meet the",
+      "draft": "没有符合条件的承包商"
+    },
+    "tax.noContractorsYet": {
+      "en": "No contractors yet.",
+      "draft": "暂无承包商。"
+    },
+    "tax.noPaymentsRecordedFor": {
+      "en": "No payments recorded for",
+      "draft": "没有已记录的付款"
+    },
+    "tax.notFiled": {
+      "en": "Not filed",
+      "draft": "未申报"
+    },
+    "tax.paid": {
+      "en": "Paid",
+      "draft": "已付"
+    },
+    "tax.paymentDeleted": {
+      "en": "Payment deleted",
+      "draft": "付款已删除"
+    },
+    "tax.paymentHistory": {
+      "en": "Payment history —",
+      "draft": "付款历史 —"
+    },
+    "tax.paymentRecorded": {
+      "en": "Payment recorded",
+      "draft": "付款已记录"
+    },
+    "tax.phone": {
+      "en": "Phone",
+      "draft": "电话"
+    },
+    "tax.recipient": {
+      "en": "Recipient",
+      "draft": "收款人"
+    },
+    "tax.recipientBox1DataShapedFor": {
+      "en": "Recipient + Box 1 data shaped for e-filing. Tax IDs stay masked — reveal needs PII access. Draft data only, nothing is filed in-house.",
+      "draft": "为电子申报整理的收款人 + 第 1 栏数据。税号保持掩码 — 查看需要 PII 权限。仅为草稿数据，不会在内部申报。"
+    },
+    "tax.record": {
+      "en": "Record",
+      "draft": "记录"
+    },
+    "tax.recordPayment": {
+      "en": "Record payment",
+      "draft": "记录付款"
+    },
+    "tax.recordPayment2": {
+      "en": "Record payment —",
+      "draft": "记录付款 —"
+    },
+    "tax.reportingThresholdFor": {
+      "en": "reporting threshold for",
+      "draft": "的申报门槛"
+    },
+    "tax.required": {
+      "en": "Required",
+      "draft": "必填"
+    },
+    "tax.reveal": {
+      "en": "reveal",
+      "draft": "显示"
+    },
+    "tax.salesTax": {
+      "en": "Sales Tax",
+      "draft": "销售税"
+    },
+    "tax.sandbox": {
+      "en": "sandbox",
+      "draft": "沙盒"
+    },
+    "tax.ssnEIN": {
+      "en": "SSN / EIN",
+      "draft": "SSN / EIN"
+    },
+    "tax.state": {
+      "en": "State",
+      "draft": "州"
+    },
+    "tax.statusRefreshed": {
+      "en": "Status refreshed",
+      "draft": "状态已刷新"
+    },
+    "tax.storedSecurely": {
+      "en": "Stored securely",
+      "draft": "已安全存储"
+    },
+    "tax.street": {
+      "en": "Street",
+      "draft": "街道"
+    },
+    "tax.taxbanditsConnectedIn": {
+      "en": "TaxBandits connected in",
+      "draft": "TaxBandits 连接于"
+    },
+    "tax.taxbanditsNotConnected": {
+      "en": "TaxBandits not connected.",
+      "draft": "TaxBandits 未连接。"
+    },
+    "tax.taxbanditsSANDBOXFalse": {
+      "en": "TAXBANDITS_SANDBOX=false",
+      "draft": "TAXBANDITS_SANDBOX=false"
+    },
+    "tax.taxbanditsSETUPMd": {
+      "en": "TAXBANDITS_SETUP.md",
+      "draft": "TAXBANDITS_SETUP.md"
+    },
+    "tax.thisDraftLivesInTaxBanditsReview": {
+      "en": "This draft lives in TaxBandits — review and Transmit there to file with the IRS. This app never files in-house.",
+      "draft": "此草稿位于 TaxBandits — 请在那里复核并传输以向 IRS 申报。本应用从不在内部申报。"
+    },
+    "tax.tin": {
+      "en": "TIN",
+      "draft": "TIN"
+    },
+    "tax.toGoLive": {
+      "en": "to go live.",
+      "draft": "以上线。"
+    },
+    "tax.toggleW9Received": {
+      "en": "Toggle W-9 received",
+      "draft": "切换 W-9 已收"
+    },
+    "tax.viewFilingStatus": {
+      "en": "View filing status",
+      "draft": "查看申报状态"
+    },
+    "tax.viewPaymentHistory": {
+      "en": "View payment history",
+      "draft": "查看付款历史"
+    },
+    "tax.w9": {
+      "en": "W-9",
+      "draft": "W-9"
+    },
+    "tax.w9StatusUpdated": {
+      "en": "W-9 status updated",
+      "draft": "W-9 状态已更新"
+    },
+    "tax.yearTotal": {
+      "en": "Year total:",
+      "draft": "年度合计："
+    },
+    "tax.zip": {
+      "en": "ZIP",
+      "draft": "邮编"
+    },
+    "taxforecast.OfPriorYearTax": {
+      "en": "100% of prior-year tax",
+      "draft": "上年税款的 100%"
+    },
+    "taxforecast.irsDirectPay": {
+      "en": "IRS Direct Pay",
+      "draft": "IRS 直接缴付"
+    },
+    "taxforecast.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "税务预测"
+    },
+    "teamInvites.accountantTaxPro": {
+      "en": "Accountant / Tax pro",
+      "draft": "会计师 / 税务专家"
+    },
+    "teaminvites.inviteYourAccountantOrTaxPro": {
+      "en": "Invite your accountant or tax pro — they join with the right permissions\n        and can switch between all the workspaces they serve.",
+      "draft": "邀请您的会计师或税务专家 — 他们将以适当的权限加入，\n        并可在其服务的所有工作区之间切换。"
+    }
+  }
+}

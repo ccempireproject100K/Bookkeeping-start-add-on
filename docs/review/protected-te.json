@@ -1,0 +1,426 @@
+{
+  "_meta": {
+    "lang": "te",
+    "status": "DRAFT for human review only. Do NOT copy into frontend/src/locales/te/translation.json until a qualified reviewer (counsel/CPA where relevant) approves each string. Live locale keeps English for these keys.",
+    "source": "docs/TRANSLATION_PLAN.md flagged keys (legal/financial/tax/privacy/safety)",
+    "notice": "Approximate translation from English/Spanish, may not be accurate."
+  },
+  "strings": {
+    "auditlog.eGTaxInvoiceLogin": {
+      "en": "e.g. tax, invoice, login",
+      "draft": "ఉదా. పన్ను, ఇన్‌వాయిస్, లాగిన్"
+    },
+    "cpapackage.mileageLogWithIRSRatesApplied": {
+      "en": "Mileage log with IRS rates applied",
+      "draft": "IRS రేట్లు వర్తింపజేసిన మైలేజ్ లాగ్"
+    },
+    "customers.delete": {
+      "en": "Delete",
+      "draft": "తొలగించండి"
+    },
+    "customers.deleteConfirm": {
+      "en": "Delete customer \"{{name}}\"? Their invoices and statements stay on record.",
+      "draft": "కస్టమర్ “{{name}}”ను తొలగించాలా? వారి ఇన్‌వాయిస్‌లు మరియు స్టేట్‌మెంట్‌లు రికార్డులో ఉంటాయి."
+    },
+    "estimates.tax": {
+      "en": "Tax ($)",
+      "draft": "పన్ను ($)"
+    },
+    "expenses.tax": {
+      "en": "Tax",
+      "draft": "పన్ను"
+    },
+    "expenses.taxID": {
+      "en": "Tax ID",
+      "draft": "పన్ను ID"
+    },
+    "expenses.taxIDEIN": {
+      "en": "Tax ID / EIN",
+      "draft": "పన్ను ID / EIN"
+    },
+    "expenses.taxYear": {
+      "en": "Tax year",
+      "draft": "పన్ను సంవత్సరం"
+    },
+    "invoices.refund": {
+      "en": "Refund",
+      "draft": "వాపసు"
+    },
+    "invoices.refundCredit": {
+      "en": "Refund credit —",
+      "draft": "వాపసు క్రెడిట్ —"
+    },
+    "invoices.refundTheRemaining": {
+      "en": "Refund the remaining",
+      "draft": "మిగిలినదాన్ని వాపసు చేయండి"
+    },
+    "invoices.tax": {
+      "en": "Tax ($)",
+      "draft": "పన్ను ($)"
+    },
+    "invoices.taxJurisdictionOptional": {
+      "en": "Tax jurisdiction (optional)",
+      "draft": "పన్ను అధికార పరిధి (ఐచ్ఛికం)"
+    },
+    "mileage.irsLogCSV": {
+      "en": "IRS log CSV",
+      "draft": "IRS లాగ్ CSV"
+    },
+    "nav.tax1099s": {
+      "en": "Tax & 1099s",
+      "draft": "పన్ను & 1099లు"
+    },
+    "nav.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "పన్ను అంచనా"
+    },
+    "payroll.deleteDraft": {
+      "en": "Delete draft",
+      "draft": "ముసాయిదాను తొలగించండి"
+    },
+    "payroll.employerTaxEst": {
+      "en": "Employer payroll tax (est.)",
+      "draft": "యజమాని పేరోల్ పన్ను (అంచనా)"
+    },
+    "payroll.partnershipStubWhenAProviderIs": {
+      "en": "Partnership stub: when a provider is connected, runs here will hand off tax filing and direct deposit automatically.",
+      "draft": "భాగస్వామ్య స్టబ్: ప్రొవైడర్ కనెక్ట్ చేయబడినప్పుడు, ఇక్కడ నడపడాలు పన్ను దాఖలు మరియు డైరెక్ట్ డిపాజిట్‌ను స్వయంచాలకంగా అప్పగిస్తాయి."
+    },
+    "portalview.tax": {
+      "en": "Tax",
+      "draft": "పన్ను"
+    },
+    "recurringinvoices.tax": {
+      "en": "Tax ($)",
+      "draft": "పన్ను ($)"
+    },
+    "salestaxtab.everywhereYouCollectSalesTaxState": {
+      "en": "Everywhere you collect sales tax — state, county, city, special district.\n          Tag invoices with a jurisdiction and this page tells you what you owe, where.",
+      "draft": "మీరు అమ్మకపు పన్ను వసూలు చేసే ప్రతిచోటా — రాష్ట్రం, కౌంటీ, నగరం, ప్రత్యేక జిల్లా.\nఇన్‌వాయిస్‌లకు అధికార పరిధిని ట్యాగ్ చేయండి, మీరు ఎక్కడ ఎంత చెల్లించాలో ఈ పేజీ చెబుతుంది."
+    },
+    "salestaxtab.noJurisdictionsYetAddTheFirst": {
+      "en": "No jurisdictions yet. Add the first place you collect sales tax.",
+      "draft": "ఇంకా అధికార పరిధులు లేవు. మీరు అమ్మకపు పన్ను వసూలు చేసే మొదటి స్థలాన్ని జోడించండి."
+    },
+    "salestaxtab.ofSalesTaxIsnTTagged": {
+      "en": "of sales tax isn't tagged to a jurisdiction yet.\n            Tag invoices with a jurisdiction so every dollar lands in the right bucket.",
+      "draft": "లో అమ్మకపు పన్ను ఇంకా అధికార పరిధికి ట్యాగ్ చేయబడలేదు.\nప్రతి డాలర్ సరైన చోటికి చేరేలా ఇన్‌వాయిస్‌లకు అధికార పరిధిని ట్యాగ్ చేయండి."
+    },
+    "salestaxtab.taxCollected": {
+      "en": "Tax collected",
+      "draft": "వసూలు చేసిన పన్ను"
+    },
+    "salestaxtab.taxJurisdictions": {
+      "en": "Tax jurisdictions",
+      "draft": "పన్ను అధికార పరిధులు"
+    },
+    "simulator.safetyFloor": {
+      "en": "Safety floor $",
+      "draft": "భద్రతా కనిష్ట నిల్వ $"
+    },
+    "tax.NEC": {
+      "en": "1099-NEC",
+      "draft": "1099-NEC"
+    },
+    "tax.NECDataPreview": {
+      "en": "1099-NEC data preview",
+      "draft": "1099-NEC డేటా ముందుదర్శనం"
+    },
+    "tax.NECFiling": {
+      "en": "1099-NEC filing —",
+      "draft": "1099-NEC దాఖలు —"
+    },
+    "tax.NECIsRequiredForNon": {
+      "en": "1099-NEC is required for non-corporate contractors paid ≥",
+      "draft": "కార్పొరేట్ కాని కాంట్రాక్టర్లకు ≥ చెల్లించినప్పుడు 1099-NEC అవసరం"
+    },
+    "tax.actions": {
+      "en": "Actions",
+      "draft": "చర్యలు"
+    },
+    "tax.addContractor": {
+      "en": "Add contractor",
+      "draft": "కాంట్రాక్టర్‌ను జోడించండి"
+    },
+    "tax.address": {
+      "en": "Address",
+      "draft": "చిరునామా"
+    },
+    "tax.amount": {
+      "en": "Amount $",
+      "draft": "మొత్తం $"
+    },
+    "tax.amount2": {
+      "en": "Amount",
+      "draft": "మొత్తం"
+    },
+    "tax.box1": {
+      "en": "Box 1",
+      "draft": "పెట్టె 1"
+    },
+    "tax.businessName": {
+      "en": "Business name",
+      "draft": "వ్యాపార పేరు"
+    },
+    "tax.cancel": {
+      "en": "Cancel",
+      "draft": "రద్దు చేయండి"
+    },
+    "tax.city": {
+      "en": "City",
+      "draft": "నగరం"
+    },
+    "tax.contractor": {
+      "en": "Contractor",
+      "draft": "కాంట్రాక్టర్"
+    },
+    "tax.contractorAdded": {
+      "en": "Contractor added",
+      "draft": "కాంట్రాక్టర్ జోడించబడ్డారు"
+    },
+    "tax.contractorRemoved": {
+      "en": "Contractor removed",
+      "draft": "కాంట్రాక్టర్ తొలగించబడ్డారు"
+    },
+    "tax.contractors1099s": {
+      "en": "Contractors & 1099s",
+      "draft": "కాంట్రాక్టర్లు & 1099లు"
+    },
+    "tax.date": {
+      "en": "Date",
+      "draft": "తేదీ"
+    },
+    "tax.deletePayment": {
+      "en": "Delete payment",
+      "draft": "చెల్లింపును తొలగించండి"
+    },
+    "tax.description": {
+      "en": "Description",
+      "draft": "వివరణ"
+    },
+    "tax.eFile": {
+      "en": "E-file",
+      "draft": "ఇ-ఫైల్"
+    },
+    "tax.eGMarchBoothRentPayout": {
+      "en": "e.g. March booth rent payout",
+      "draft": "ఉదా. మార్చి బూత్ అద్దె చెల్లింపు"
+    },
+    "tax.email": {
+      "en": "Email",
+      "draft": "ఇమెయిల్"
+    },
+    "tax.enterAPositiveAmount": {
+      "en": "Enter a positive amount",
+      "draft": "సానుకూల మొత్తాన్ని నమోదు చేయండి"
+    },
+    "tax.entityType": {
+      "en": "Entity type",
+      "draft": "సంస్థ రకం"
+    },
+    "tax.inTheRepoNoIRSFiling": {
+      "en": "in the repo. No IRS filing is ever done in-house.",
+      "draft": "రిపోలో. IRS దాఖలు ఎప్పుడూ ఇంట్లో చేయబడదు."
+    },
+    "tax.inTheYearEFilingCreates": {
+      "en": "in the year. E-filing creates a draft in TaxBandits — you review and transmit there. This app never files with the IRS directly.",
+      "draft": "సంవత్సరంలో. ఇ-ఫైలింగ్ TaxBanditsలో ముసాయిదాను సృష్టిస్తుంది — మీరు అక్కడ సమీక్షించి ప్రసారం చేస్తారు. ఈ యాప్ IRSకు నేరుగా దాఖలు చేయదు."
+    },
+    "tax.loadPreview": {
+      "en": "Load preview",
+      "draft": "ముందుదర్శనాన్ని లోడ్ చేయండి"
+    },
+    "tax.missing": {
+      "en": "missing",
+      "draft": "లేదు"
+    },
+    "tax.modeNoRealFilingsFlip": {
+      "en": "mode — no real filings. Flip",
+      "draft": "మోడ్ — నిజమైన దాఖళ్లు లేవు. మార్చండి"
+    },
+    "tax.name": {
+      "en": "Name *",
+      "draft": "పేరు *"
+    },
+    "tax.nameIsRequired": {
+      "en": "Name is required",
+      "draft": "పేరు అవసరం"
+    },
+    "tax.newContractor": {
+      "en": "New contractor",
+      "draft": "కొత్త కాంట్రాక్టర్"
+    },
+    "tax.noContractorsMeetThe": {
+      "en": "No contractors meet the",
+      "draft": "కాంట్రాక్టర్లు ఎవరూ దీనికి సరిపోలేదు"
+    },
+    "tax.noContractorsYet": {
+      "en": "No contractors yet.",
+      "draft": "ఇంకా కాంట్రాక్టర్లు లేరు."
+    },
+    "tax.noPaymentsRecordedFor": {
+      "en": "No payments recorded for",
+      "draft": "కోసం చెల్లింపులు నమోదు చేయబడలేదు"
+    },
+    "tax.notFiled": {
+      "en": "Not filed",
+      "draft": "దాఖలు చేయలేదు"
+    },
+    "tax.paid": {
+      "en": "Paid",
+      "draft": "చెల్లించబడింది"
+    },
+    "tax.paymentDeleted": {
+      "en": "Payment deleted",
+      "draft": "చెల్లింపు తొలగించబడింది"
+    },
+    "tax.paymentHistory": {
+      "en": "Payment history —",
+      "draft": "చెల్లింపు చరిత్ర —"
+    },
+    "tax.paymentRecorded": {
+      "en": "Payment recorded",
+      "draft": "చెల్లింపు నమోదు చేయబడింది"
+    },
+    "tax.phone": {
+      "en": "Phone",
+      "draft": "ఫోన్"
+    },
+    "tax.recipient": {
+      "en": "Recipient",
+      "draft": "గ్రహీత"
+    },
+    "tax.recipientBox1DataShapedFor": {
+      "en": "Recipient + Box 1 data shaped for e-filing. Tax IDs stay masked — reveal needs PII access. Draft data only, nothing is filed in-house.",
+      "draft": "ఇ-ఫైలింగ్ కోసం రూపొందించిన గ్రహీత + పెట్టె 1 డేటా. పన్ను IDలు మాస్క్ చేయబడి ఉంటాయి — బహిర్గతం చేయడానికి PII ప్రాప్యత అవసరం. ముసాయిదా డేటా మాత్రమే, ఇంట్లో ఏమీ దాఖలు చేయబడదు."
+    },
+    "tax.record": {
+      "en": "Record",
+      "draft": "నమోదు చేయండి"
+    },
+    "tax.recordPayment": {
+      "en": "Record payment",
+      "draft": "చెల్లింపును నమోదు చేయండి"
+    },
+    "tax.recordPayment2": {
+      "en": "Record payment —",
+      "draft": "చెల్లింపును నమోదు చేయండి —"
+    },
+    "tax.reportingThresholdFor": {
+      "en": "reporting threshold for",
+      "draft": "కోసం నివేదన పరిమితి"
+    },
+    "tax.required": {
+      "en": "Required",
+      "draft": "అవసరం"
+    },
+    "tax.reveal": {
+      "en": "reveal",
+      "draft": "బహిర్గతం చేయండి"
+    },
+    "tax.salesTax": {
+      "en": "Sales Tax",
+      "draft": "అమ్మకపు పన్ను"
+    },
+    "tax.sandbox": {
+      "en": "sandbox",
+      "draft": "శాండ్‌బాక్స్"
+    },
+    "tax.ssnEIN": {
+      "en": "SSN / EIN",
+      "draft": "SSN / EIN"
+    },
+    "tax.state": {
+      "en": "State",
+      "draft": "రాష్ట్రం"
+    },
+    "tax.statusRefreshed": {
+      "en": "Status refreshed",
+      "draft": "స్థితి రిఫ్రెష్ చేయబడింది"
+    },
+    "tax.storedSecurely": {
+      "en": "Stored securely",
+      "draft": "సురక్షితంగా నిల్వ చేయబడింది"
+    },
+    "tax.street": {
+      "en": "Street",
+      "draft": "వీధి"
+    },
+    "tax.taxbanditsConnectedIn": {
+      "en": "TaxBandits connected in",
+      "draft": "TaxBandits కనెక్ట్ చేయబడింది:"
+    },
+    "tax.taxbanditsNotConnected": {
+      "en": "TaxBandits not connected.",
+      "draft": "TaxBandits కనెక్ట్ చేయబడలేదు."
+    },
+    "tax.taxbanditsSANDBOXFalse": {
+      "en": "TAXBANDITS_SANDBOX=false",
+      "draft": "TAXBANDITS_SANDBOX=false"
+    },
+    "tax.taxbanditsSETUPMd": {
+      "en": "TAXBANDITS_SETUP.md",
+      "draft": "TAXBANDITS_SETUP.md"
+    },
+    "tax.thisDraftLivesInTaxBanditsReview": {
+      "en": "This draft lives in TaxBandits — review and Transmit there to file with the IRS. This app never files in-house.",
+      "draft": "ఈ ముసాయిదా TaxBanditsలో ఉంది — IRSకు దాఖలు చేయడానికి అక్కడ సమీక్షించి ప్రసారం చేయండి. ఈ యాప్ ఎప్పుడూ ఇంట్లో దాఖలు చేయదు."
+    },
+    "tax.tin": {
+      "en": "TIN",
+      "draft": "TIN"
+    },
+    "tax.toGoLive": {
+      "en": "to go live.",
+      "draft": "ప్రత్యక్షం కావడానికి."
+    },
+    "tax.toggleW9Received": {
+      "en": "Toggle W-9 received",
+      "draft": "W-9 అందిందో లేదో మార్చండి"
+    },
+    "tax.viewFilingStatus": {
+      "en": "View filing status",
+      "draft": "దాఖలు స్థితిని చూడండి"
+    },
+    "tax.viewPaymentHistory": {
+      "en": "View payment history",
+      "draft": "చెల్లింపు చరిత్రను చూడండి"
+    },
+    "tax.w9": {
+      "en": "W-9",
+      "draft": "W-9"
+    },
+    "tax.w9StatusUpdated": {
+      "en": "W-9 status updated",
+      "draft": "W-9 స్థితి నవీకరించబడింది"
+    },
+    "tax.yearTotal": {
+      "en": "Year total:",
+      "draft": "సంవత్సర మొత్తం:"
+    },
+    "tax.zip": {
+      "en": "ZIP",
+      "draft": "ZIP"
+    },
+    "taxforecast.OfPriorYearTax": {
+      "en": "100% of prior-year tax",
+      "draft": "గత సంవత్సర పన్నులో 100%"
+    },
+    "taxforecast.irsDirectPay": {
+      "en": "IRS Direct Pay",
+      "draft": "IRS ప్రత్యక్ష చెల్లింపు"
+    },
+    "taxforecast.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "పన్ను అంచనా"
+    },
+    "teamInvites.accountantTaxPro": {
+      "en": "Accountant / Tax pro",
+      "draft": "అకౌంటెంట్ / పన్ను నిపుణుడు"
+    },
+    "teaminvites.inviteYourAccountantOrTaxPro": {
+      "en": "Invite your accountant or tax pro — they join with the right permissions\n        and can switch between all the workspaces they serve.",
+      "draft": "మీ అకౌంటెంట్ లేదా పన్ను నిపుణుడిని ఆహ్వానించండి — వారు సరైన అనుమతులతో చేరతారు\nమరియు వారు సేవ చేసే అన్ని వర్క్‌స్పేస్‌ల మధ్య మారవచ్చు."
+    }
+  }
+}

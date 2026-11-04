@@ -1,0 +1,426 @@
+{
+  "_meta": {
+    "lang": "tl",
+    "status": "DRAFT for human review only. Do NOT copy into frontend/src/locales/tl/translation.json until a qualified reviewer (counsel/CPA where relevant) approves each string. Live locale keeps English for these keys.",
+    "source": "docs/TRANSLATION_PLAN.md flagged keys (legal/financial/tax/privacy/safety)",
+    "notice": "Approximate translation from English/Spanish, may not be accurate."
+  },
+  "strings": {
+    "auditlog.eGTaxInvoiceLogin": {
+      "en": "e.g. tax, invoice, login",
+      "draft": "hal. buwis, invoice, pag-login"
+    },
+    "cpapackage.mileageLogWithIRSRatesApplied": {
+      "en": "Mileage log with IRS rates applied",
+      "draft": "Log ng milyahe na may inilapat na mga rate ng IRS"
+    },
+    "customers.delete": {
+      "en": "Delete",
+      "draft": "Tanggalin"
+    },
+    "customers.deleteConfirm": {
+      "en": "Delete customer \"{{name}}\"? Their invoices and statements stay on record.",
+      "draft": "Tanggalin ang customer na “{{name}}”? Nananatili sa tala ang kanilang mga invoice at statement."
+    },
+    "estimates.tax": {
+      "en": "Tax ($)",
+      "draft": "Buwis ($)"
+    },
+    "expenses.tax": {
+      "en": "Tax",
+      "draft": "Buwis"
+    },
+    "expenses.taxID": {
+      "en": "Tax ID",
+      "draft": "ID ng Buwis"
+    },
+    "expenses.taxIDEIN": {
+      "en": "Tax ID / EIN",
+      "draft": "ID ng Buwis / EIN"
+    },
+    "expenses.taxYear": {
+      "en": "Tax year",
+      "draft": "Taon ng buwis"
+    },
+    "invoices.refund": {
+      "en": "Refund",
+      "draft": "I-refund"
+    },
+    "invoices.refundCredit": {
+      "en": "Refund credit —",
+      "draft": "I-refund ang credit —"
+    },
+    "invoices.refundTheRemaining": {
+      "en": "Refund the remaining",
+      "draft": "I-refund ang natitira"
+    },
+    "invoices.tax": {
+      "en": "Tax ($)",
+      "draft": "Buwis ($)"
+    },
+    "invoices.taxJurisdictionOptional": {
+      "en": "Tax jurisdiction (optional)",
+      "draft": "Hurisdiksyon sa buwis (opsyonal)"
+    },
+    "mileage.irsLogCSV": {
+      "en": "IRS log CSV",
+      "draft": "CSV ng log ng IRS"
+    },
+    "nav.tax1099s": {
+      "en": "Tax & 1099s",
+      "draft": "Buwis at 1099s"
+    },
+    "nav.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "Pagtataya sa Buwis"
+    },
+    "payroll.deleteDraft": {
+      "en": "Delete draft",
+      "draft": "Tanggalin ang draft"
+    },
+    "payroll.employerTaxEst": {
+      "en": "Employer payroll tax (est.)",
+      "draft": "Buwis sa payroll ng employer (tantiya)"
+    },
+    "payroll.partnershipStubWhenAProviderIs": {
+      "en": "Partnership stub: when a provider is connected, runs here will hand off tax filing and direct deposit automatically.",
+      "draft": "Stub ng pakikipagsosyo: kapag nakakonekta ang provider, ang mga run dito ay magpapasa ng pagfa-file ng buwis at direct deposit nang awtomatiko."
+    },
+    "portalview.tax": {
+      "en": "Tax",
+      "draft": "Buwis"
+    },
+    "recurringinvoices.tax": {
+      "en": "Tax ($)",
+      "draft": "Buwis ($)"
+    },
+    "salestaxtab.everywhereYouCollectSalesTaxState": {
+      "en": "Everywhere you collect sales tax — state, county, city, special district.\n          Tag invoices with a jurisdiction and this page tells you what you owe, where.",
+      "draft": "Saanman ka nangongolekta ng buwis sa benta — estado, county, lungsod, espesyal na distrito.\nLagyan ng hurisdiksyon ang mga invoice at sasabihin sa iyo ng pahinang ito kung magkano ang utang mo, saan."
+    },
+    "salestaxtab.noJurisdictionsYetAddTheFirst": {
+      "en": "No jurisdictions yet. Add the first place you collect sales tax.",
+      "draft": "Wala pang mga hurisdiksyon. Idagdag ang unang lugar kung saan ka nangongolekta ng buwis sa benta."
+    },
+    "salestaxtab.ofSalesTaxIsnTTagged": {
+      "en": "of sales tax isn't tagged to a jurisdiction yet.\n            Tag invoices with a jurisdiction so every dollar lands in the right bucket.",
+      "draft": "ng buwis sa benta ay hindi pa naka-tag sa hurisdiksyon.\nLagyan ng hurisdiksyon ang mga invoice upang ang bawat dolyar ay mapunta sa tamang lalagyan."
+    },
+    "salestaxtab.taxCollected": {
+      "en": "Tax collected",
+      "draft": "Nakolektang buwis"
+    },
+    "salestaxtab.taxJurisdictions": {
+      "en": "Tax jurisdictions",
+      "draft": "Mga hurisdiksyon sa buwis"
+    },
+    "simulator.safetyFloor": {
+      "en": "Safety floor $",
+      "draft": "Pinakamababang ligtas na balanse $"
+    },
+    "tax.NEC": {
+      "en": "1099-NEC",
+      "draft": "1099-NEC"
+    },
+    "tax.NECDataPreview": {
+      "en": "1099-NEC data preview",
+      "draft": "Preview ng datos ng 1099-NEC"
+    },
+    "tax.NECFiling": {
+      "en": "1099-NEC filing —",
+      "draft": "Pagfa-file ng 1099-NEC —"
+    },
+    "tax.NECIsRequiredForNon": {
+      "en": "1099-NEC is required for non-corporate contractors paid ≥",
+      "draft": "Kinakailangan ang 1099-NEC para sa mga non-corporate contractor na binayaran ng ≥"
+    },
+    "tax.actions": {
+      "en": "Actions",
+      "draft": "Mga aksyon"
+    },
+    "tax.addContractor": {
+      "en": "Add contractor",
+      "draft": "Magdagdag ng contractor"
+    },
+    "tax.address": {
+      "en": "Address",
+      "draft": "Address"
+    },
+    "tax.amount": {
+      "en": "Amount $",
+      "draft": "Halaga $"
+    },
+    "tax.amount2": {
+      "en": "Amount",
+      "draft": "Halaga"
+    },
+    "tax.box1": {
+      "en": "Box 1",
+      "draft": "Kahon 1"
+    },
+    "tax.businessName": {
+      "en": "Business name",
+      "draft": "Pangalan ng negosyo"
+    },
+    "tax.cancel": {
+      "en": "Cancel",
+      "draft": "Kanselahin"
+    },
+    "tax.city": {
+      "en": "City",
+      "draft": "Lungsod"
+    },
+    "tax.contractor": {
+      "en": "Contractor",
+      "draft": "Contractor"
+    },
+    "tax.contractorAdded": {
+      "en": "Contractor added",
+      "draft": "Naidagdag ang contractor"
+    },
+    "tax.contractorRemoved": {
+      "en": "Contractor removed",
+      "draft": "Inalis ang contractor"
+    },
+    "tax.contractors1099s": {
+      "en": "Contractors & 1099s",
+      "draft": "Mga Contractor at 1099s"
+    },
+    "tax.date": {
+      "en": "Date",
+      "draft": "Petsa"
+    },
+    "tax.deletePayment": {
+      "en": "Delete payment",
+      "draft": "Tanggalin ang bayad"
+    },
+    "tax.description": {
+      "en": "Description",
+      "draft": "Paglalarawan"
+    },
+    "tax.eFile": {
+      "en": "E-file",
+      "draft": "I-e-file"
+    },
+    "tax.eGMarchBoothRentPayout": {
+      "en": "e.g. March booth rent payout",
+      "draft": "hal. Bayad sa renta ng booth sa Marso"
+    },
+    "tax.email": {
+      "en": "Email",
+      "draft": "Email"
+    },
+    "tax.enterAPositiveAmount": {
+      "en": "Enter a positive amount",
+      "draft": "Maglagay ng positibong halaga"
+    },
+    "tax.entityType": {
+      "en": "Entity type",
+      "draft": "Uri ng entidad"
+    },
+    "tax.inTheRepoNoIRSFiling": {
+      "en": "in the repo. No IRS filing is ever done in-house.",
+      "draft": "sa repo. Walang pagfa-file sa IRS na ginagawa dito."
+    },
+    "tax.inTheYearEFilingCreates": {
+      "en": "in the year. E-filing creates a draft in TaxBandits — you review and transmit there. This app never files with the IRS directly.",
+      "draft": "sa taon. Ang e-filing ay lumilikh ng draft sa TaxBandits — sinusuri at ipinapadala mo doon. Hindi nagfa-file ang app na ito nang direkta sa IRS."
+    },
+    "tax.loadPreview": {
+      "en": "Load preview",
+      "draft": "I-load ang preview"
+    },
+    "tax.missing": {
+      "en": "missing",
+      "draft": "nawawala"
+    },
+    "tax.modeNoRealFilingsFlip": {
+      "en": "mode — no real filings. Flip",
+      "draft": "mode — walang tunay na pagfa-file. I-flip"
+    },
+    "tax.name": {
+      "en": "Name *",
+      "draft": "Pangalan *"
+    },
+    "tax.nameIsRequired": {
+      "en": "Name is required",
+      "draft": "Kailangan ang pangalan"
+    },
+    "tax.newContractor": {
+      "en": "New contractor",
+      "draft": "Bagong contractor"
+    },
+    "tax.noContractorsMeetThe": {
+      "en": "No contractors meet the",
+      "draft": "Walang contractor ang tumutugon sa"
+    },
+    "tax.noContractorsYet": {
+      "en": "No contractors yet.",
+      "draft": "Wala pang mga contractor."
+    },
+    "tax.noPaymentsRecordedFor": {
+      "en": "No payments recorded for",
+      "draft": "Walang naitalang bayad para sa"
+    },
+    "tax.notFiled": {
+      "en": "Not filed",
+      "draft": "Hindi nai-file"
+    },
+    "tax.paid": {
+      "en": "Paid",
+      "draft": "Nabayaran"
+    },
+    "tax.paymentDeleted": {
+      "en": "Payment deleted",
+      "draft": "Tinanggal ang bayad"
+    },
+    "tax.paymentHistory": {
+      "en": "Payment history —",
+      "draft": "Kasaysayan ng bayad —"
+    },
+    "tax.paymentRecorded": {
+      "en": "Payment recorded",
+      "draft": "Naitala ang bayad"
+    },
+    "tax.phone": {
+      "en": "Phone",
+      "draft": "Telepono"
+    },
+    "tax.recipient": {
+      "en": "Recipient",
+      "draft": "Tatanggap"
+    },
+    "tax.recipientBox1DataShapedFor": {
+      "en": "Recipient + Box 1 data shaped for e-filing. Tax IDs stay masked — reveal needs PII access. Draft data only, nothing is filed in-house.",
+      "draft": "Datos ng tatanggap + Kahon 1 na hinubog para sa e-filing. Nananatiling naka-mask ang mga Tax ID — kailangan ng access sa PII ang pagbubunyag. Datos ng draft lamang, walang inihahain dito."
+    },
+    "tax.record": {
+      "en": "Record",
+      "draft": "Itala"
+    },
+    "tax.recordPayment": {
+      "en": "Record payment",
+      "draft": "Itala ang bayad"
+    },
+    "tax.recordPayment2": {
+      "en": "Record payment —",
+      "draft": "Itala ang bayad —"
+    },
+    "tax.reportingThresholdFor": {
+      "en": "reporting threshold for",
+      "draft": "threshold sa pag-uulat para sa"
+    },
+    "tax.required": {
+      "en": "Required",
+      "draft": "Kinakailangan"
+    },
+    "tax.reveal": {
+      "en": "reveal",
+      "draft": "ibunyag"
+    },
+    "tax.salesTax": {
+      "en": "Sales Tax",
+      "draft": "Buwis sa Benta"
+    },
+    "tax.sandbox": {
+      "en": "sandbox",
+      "draft": "sandbox"
+    },
+    "tax.ssnEIN": {
+      "en": "SSN / EIN",
+      "draft": "SSN / EIN"
+    },
+    "tax.state": {
+      "en": "State",
+      "draft": "Estado"
+    },
+    "tax.statusRefreshed": {
+      "en": "Status refreshed",
+      "draft": "Na-refresh ang katayuan"
+    },
+    "tax.storedSecurely": {
+      "en": "Stored securely",
+      "draft": "Ligtas na nakaimbak"
+    },
+    "tax.street": {
+      "en": "Street",
+      "draft": "Kalye"
+    },
+    "tax.taxbanditsConnectedIn": {
+      "en": "TaxBandits connected in",
+      "draft": "Nakakonekta ang TaxBandits sa"
+    },
+    "tax.taxbanditsNotConnected": {
+      "en": "TaxBandits not connected.",
+      "draft": "Hindi nakakonekta ang TaxBandits."
+    },
+    "tax.taxbanditsSANDBOXFalse": {
+      "en": "TAXBANDITS_SANDBOX=false",
+      "draft": "TAXBANDITS_SANDBOX=false"
+    },
+    "tax.taxbanditsSETUPMd": {
+      "en": "TAXBANDITS_SETUP.md",
+      "draft": "TAXBANDITS_SETUP.md"
+    },
+    "tax.thisDraftLivesInTaxBanditsReview": {
+      "en": "This draft lives in TaxBandits — review and Transmit there to file with the IRS. This app never files in-house.",
+      "draft": "Nasa TaxBandits ang draft na ito — suriin at I-transmit doon upang mag-file sa IRS. Hindi nagfa-file ang app na ito dito."
+    },
+    "tax.tin": {
+      "en": "TIN",
+      "draft": "TIN"
+    },
+    "tax.toGoLive": {
+      "en": "to go live.",
+      "draft": "upang maging live."
+    },
+    "tax.toggleW9Received": {
+      "en": "Toggle W-9 received",
+      "draft": "I-toggle ang natanggap na W-9"
+    },
+    "tax.viewFilingStatus": {
+      "en": "View filing status",
+      "draft": "Tingnan ang katayuan ng pag-file"
+    },
+    "tax.viewPaymentHistory": {
+      "en": "View payment history",
+      "draft": "Tingnan ang kasaysayan ng bayad"
+    },
+    "tax.w9": {
+      "en": "W-9",
+      "draft": "W-9"
+    },
+    "tax.w9StatusUpdated": {
+      "en": "W-9 status updated",
+      "draft": "Na-update ang katayuan ng W-9"
+    },
+    "tax.yearTotal": {
+      "en": "Year total:",
+      "draft": "Kabuuang taon:"
+    },
+    "tax.zip": {
+      "en": "ZIP",
+      "draft": "ZIP"
+    },
+    "taxforecast.OfPriorYearTax": {
+      "en": "100% of prior-year tax",
+      "draft": "100% ng buwis ng nakaraang taon"
+    },
+    "taxforecast.irsDirectPay": {
+      "en": "IRS Direct Pay",
+      "draft": "Direktang Bayad ng IRS"
+    },
+    "taxforecast.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "Pagtataya sa Buwis"
+    },
+    "teamInvites.accountantTaxPro": {
+      "en": "Accountant / Tax pro",
+      "draft": "Accountant / Tax pro"
+    },
+    "teaminvites.inviteYourAccountantOrTaxPro": {
+      "en": "Invite your accountant or tax pro — they join with the right permissions\n        and can switch between all the workspaces they serve.",
+      "draft": "Imbitahan ang iyong accountant o tax pro — sasali sila nang may tamang mga pahintulot\nat maaaring lumipat sa lahat ng workspace na kanilang pinaglilingkuran."
+    }
+  }
+}

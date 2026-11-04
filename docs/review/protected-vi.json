@@ -1,0 +1,426 @@
+{
+  "_meta": {
+    "lang": "vi",
+    "status": "DRAFT for human review only. Do NOT copy into frontend/src/locales/vi/translation.json until a qualified reviewer (counsel/CPA where relevant) approves each string. Live locale keeps English for these keys.",
+    "source": "docs/TRANSLATION_PLAN.md flagged keys (legal/financial/tax/privacy/safety)",
+    "notice": "Approximate translation from English/Spanish, may not be accurate."
+  },
+  "strings": {
+    "salestaxtab.taxJurisdictions": {
+      "en": "Tax jurisdictions",
+      "draft": "Khu vực thuế"
+    },
+    "salestaxtab.everywhereYouCollectSalesTaxState": {
+      "en": "Everywhere you collect sales tax — state, county, city, special district.\n          Tag invoices with a jurisdiction and this page tells you what you owe, where.",
+      "draft": "Mọi nơi bạn thu thuế bán hàng — tiểu bang, quận, thành phố, khu đặc biệt. Gắn thẻ khu vực cho hóa đơn và trang này cho bạn biết bạn nợ bao nhiêu, ở đâu."
+    },
+    "salestaxtab.noJurisdictionsYetAddTheFirst": {
+      "en": "No jurisdictions yet. Add the first place you collect sales tax.",
+      "draft": "Chưa có khu vực nào. Hãy thêm nơi đầu tiên bạn thu thuế bán hàng."
+    },
+    "salestaxtab.ofSalesTaxIsnTTagged": {
+      "en": "of sales tax isn't tagged to a jurisdiction yet.\n            Tag invoices with a jurisdiction so every dollar lands in the right bucket.",
+      "draft": "thuế bán hàng chưa được gắn thẻ khu vực. Hãy gắn thẻ khu vực cho hóa đơn để mỗi đồng đều vào đúng chỗ."
+    },
+    "salestaxtab.taxCollected": {
+      "en": "Tax collected",
+      "draft": "Thuế đã thu"
+    },
+    "teaminvites.inviteYourAccountantOrTaxPro": {
+      "en": "Invite your accountant or tax pro — they join with the right permissions\n        and can switch between all the workspaces they serve.",
+      "draft": "Mời kế toán hoặc chuyên gia thuế của bạn — họ tham gia với đúng quyền và có thể chuyển đổi giữa mọi không gian làm việc họ phục vụ."
+    },
+    "auditlog.eGTaxInvoiceLogin": {
+      "en": "e.g. tax, invoice, login",
+      "draft": "VD: thuế, hóa đơn, đăng nhập"
+    },
+    "cpapackage.mileageLogWithIRSRatesApplied": {
+      "en": "Mileage log with IRS rates applied",
+      "draft": "Nhật ký quãng đường đã áp dụng mức IRS"
+    },
+    "customers.delete": {
+      "en": "Delete",
+      "draft": "Xóa"
+    },
+    "customers.deleteConfirm": {
+      "en": "Delete customer \"{{name}}\"? Their invoices and statements stay on record.",
+      "draft": "Xóa khách hàng \"{{name}}\"? Hóa đơn và bảng sao kê của họ vẫn được lưu."
+    },
+    "estimates.tax": {
+      "en": "Tax ($)",
+      "draft": "Thuế ($)"
+    },
+    "expenses.taxID": {
+      "en": "Tax ID",
+      "draft": "Mã số thuế"
+    },
+    "expenses.taxYear": {
+      "en": "Tax year",
+      "draft": "Năm tính thuế"
+    },
+    "expenses.tax": {
+      "en": "Tax",
+      "draft": "Thuế"
+    },
+    "expenses.taxIDEIN": {
+      "en": "Tax ID / EIN",
+      "draft": "Mã số thuế / EIN"
+    },
+    "invoices.refund": {
+      "en": "Refund",
+      "draft": "Hoàn tiền"
+    },
+    "invoices.taxJurisdictionOptional": {
+      "en": "Tax jurisdiction (optional)",
+      "draft": "Khu vực thuế (tùy chọn)"
+    },
+    "invoices.tax": {
+      "en": "Tax ($)",
+      "draft": "Thuế ($)"
+    },
+    "invoices.refundCredit": {
+      "en": "Refund credit —",
+      "draft": "Hoàn tín dụng —"
+    },
+    "invoices.refundTheRemaining": {
+      "en": "Refund the remaining",
+      "draft": "Hoàn phần còn lại"
+    },
+    "mileage.irsLogCSV": {
+      "en": "IRS log CSV",
+      "draft": "CSV nhật ký IRS"
+    },
+    "payroll.deleteDraft": {
+      "en": "Delete draft",
+      "draft": "Xóa nháp"
+    },
+    "payroll.partnershipStubWhenAProviderIs": {
+      "en": "Partnership stub: when a provider is connected, runs here will hand off tax filing and direct deposit automatically.",
+      "draft": "Khung liên kết: khi đã kết nối nhà cung cấp, các kỳ lương ở đây sẽ tự chuyển việc kê khai thuế và trả lương trực tiếp."
+    },
+    "payroll.employerTaxEst": {
+      "en": "Employer payroll tax (est.)",
+      "draft": "Thuế lương của người sử dụng lao động (ước tính)"
+    },
+    "portalview.tax": {
+      "en": "Tax",
+      "draft": "Thuế"
+    },
+    "recurringinvoices.tax": {
+      "en": "Tax ($)",
+      "draft": "Thuế ($)"
+    },
+    "simulator.safetyFloor": {
+      "en": "Safety floor $",
+      "draft": "Ngưỡng an toàn $"
+    },
+    "tax.nameIsRequired": {
+      "en": "Name is required",
+      "draft": "Tên là bắt buộc"
+    },
+    "tax.contractorAdded": {
+      "en": "Contractor added",
+      "draft": "Đã thêm nhà thầu"
+    },
+    "tax.w9StatusUpdated": {
+      "en": "W-9 status updated",
+      "draft": "Đã cập nhật trạng thái W-9"
+    },
+    "tax.contractorRemoved": {
+      "en": "Contractor removed",
+      "draft": "Đã xóa nhà thầu"
+    },
+    "tax.enterAPositiveAmount": {
+      "en": "Enter a positive amount",
+      "draft": "Nhập số tiền dương"
+    },
+    "tax.paymentRecorded": {
+      "en": "Payment recorded",
+      "draft": "Đã ghi nhận thanh toán"
+    },
+    "tax.paymentDeleted": {
+      "en": "Payment deleted",
+      "draft": "Đã xóa thanh toán"
+    },
+    "tax.statusRefreshed": {
+      "en": "Status refreshed",
+      "draft": "Đã làm mới trạng thái"
+    },
+    "tax.addContractor": {
+      "en": "Add contractor",
+      "draft": "Thêm nhà thầu"
+    },
+    "tax.contractors1099s": {
+      "en": "Contractors & 1099s",
+      "draft": "Nhà thầu & 1099"
+    },
+    "tax.salesTax": {
+      "en": "Sales Tax",
+      "draft": "Thuế bán hàng"
+    },
+    "tax.taxbanditsNotConnected": {
+      "en": "TaxBandits not connected.",
+      "draft": "Chưa kết nối TaxBandits."
+    },
+    "tax.taxbanditsSETUPMd": {
+      "en": "TAXBANDITS_SETUP.md",
+      "draft": "TAXBANDITS_SETUP.md"
+    },
+    "tax.inTheRepoNoIRSFiling": {
+      "en": "in the repo. No IRS filing is ever done in-house.",
+      "draft": "trong kho mã. Không bao giờ kê khai IRS ngay trong ứng dụng."
+    },
+    "tax.taxbanditsConnectedIn": {
+      "en": "TaxBandits connected in",
+      "draft": "TaxBandits đã kết nối trong"
+    },
+    "tax.sandbox": {
+      "en": "sandbox",
+      "draft": "môi trường thử nghiệm"
+    },
+    "tax.modeNoRealFilingsFlip": {
+      "en": "mode — no real filings. Flip",
+      "draft": "chế độ — không kê khai thật. Chuyển"
+    },
+    "tax.taxbanditsSANDBOXFalse": {
+      "en": "TAXBANDITS_SANDBOX=false",
+      "draft": "TAXBANDITS_SANDBOX=false"
+    },
+    "tax.toGoLive": {
+      "en": "to go live.",
+      "draft": "để vận hành thật."
+    },
+    "tax.newContractor": {
+      "en": "New contractor",
+      "draft": "Nhà thầu mới"
+    },
+    "tax.name": {
+      "en": "Name *",
+      "draft": "Tên *"
+    },
+    "tax.businessName": {
+      "en": "Business name",
+      "draft": "Tên doanh nghiệp"
+    },
+    "tax.email": {
+      "en": "Email",
+      "draft": "Email"
+    },
+    "tax.phone": {
+      "en": "Phone",
+      "draft": "Điện thoại"
+    },
+    "tax.entityType": {
+      "en": "Entity type",
+      "draft": "Loại hình pháp nhân"
+    },
+    "tax.ssnEIN": {
+      "en": "SSN / EIN",
+      "draft": "SSN / EIN"
+    },
+    "tax.storedSecurely": {
+      "en": "Stored securely",
+      "draft": "Được lưu trữ an toàn"
+    },
+    "tax.street": {
+      "en": "Street",
+      "draft": "Đường"
+    },
+    "tax.city": {
+      "en": "City",
+      "draft": "Thành phố"
+    },
+    "tax.state": {
+      "en": "State",
+      "draft": "Tiểu bang"
+    },
+    "tax.zip": {
+      "en": "ZIP",
+      "draft": "ZIP"
+    },
+    "tax.cancel": {
+      "en": "Cancel",
+      "draft": "Hủy"
+    },
+    "tax.contractor": {
+      "en": "Contractor",
+      "draft": "Nhà thầu"
+    },
+    "tax.paid": {
+      "en": "Paid",
+      "draft": "Đã thanh toán"
+    },
+    "tax.w9": {
+      "en": "W-9",
+      "draft": "W-9"
+    },
+    "tax.NEC": {
+      "en": "1099-NEC",
+      "draft": "1099-NEC"
+    },
+    "tax.eFile": {
+      "en": "E-file",
+      "draft": "Kê khai điện tử"
+    },
+    "tax.actions": {
+      "en": "Actions",
+      "draft": "Thao tác"
+    },
+    "tax.viewPaymentHistory": {
+      "en": "View payment history",
+      "draft": "Xem lịch sử thanh toán"
+    },
+    "tax.toggleW9Received": {
+      "en": "Toggle W-9 received",
+      "draft": "Bật/tắt đã nhận W-9"
+    },
+    "tax.required": {
+      "en": "Required",
+      "draft": "Bắt buộc"
+    },
+    "tax.viewFilingStatus": {
+      "en": "View filing status",
+      "draft": "Xem trạng thái kê khai"
+    },
+    "tax.notFiled": {
+      "en": "Not filed",
+      "draft": "Chưa kê khai"
+    },
+    "tax.recordPayment": {
+      "en": "Record payment",
+      "draft": "Ghi nhận thanh toán"
+    },
+    "tax.noContractorsYet": {
+      "en": "No contractors yet.",
+      "draft": "Chưa có nhà thầu nào."
+    },
+    "tax.NECDataPreview": {
+      "en": "1099-NEC data preview",
+      "draft": "Xem trước dữ liệu 1099-NEC"
+    },
+    "tax.recipientBox1DataShapedFor": {
+      "en": "Recipient + Box 1 data shaped for e-filing. Tax IDs stay masked — reveal needs PII access. Draft data only, nothing is filed in-house.",
+      "draft": "Dữ liệu Người nhận + Ô 1 đã định dạng để kê khai điện tử. Mã số thuế vẫn che — hiện cần quyền xem PII. Chỉ là dữ liệu nháp, không kê khai gì trong ứng dụng."
+    },
+    "tax.loadPreview": {
+      "en": "Load preview",
+      "draft": "Tải xem trước"
+    },
+    "tax.recipient": {
+      "en": "Recipient",
+      "draft": "Người nhận"
+    },
+    "tax.tin": {
+      "en": "TIN",
+      "draft": "TIN"
+    },
+    "tax.address": {
+      "en": "Address",
+      "draft": "Địa chỉ"
+    },
+    "tax.box1": {
+      "en": "Box 1",
+      "draft": "Ô 1"
+    },
+    "tax.missing": {
+      "en": "missing",
+      "draft": "còn thiếu"
+    },
+    "tax.reveal": {
+      "en": "reveal",
+      "draft": "hiện"
+    },
+    "tax.noContractorsMeetThe": {
+      "en": "No contractors meet the",
+      "draft": "Không có nhà thầu nào đạt"
+    },
+    "tax.reportingThresholdFor": {
+      "en": "reporting threshold for",
+      "draft": "ngưỡng phải báo cáo cho"
+    },
+    "tax.recordPayment2": {
+      "en": "Record payment —",
+      "draft": "Ghi nhận thanh toán —"
+    },
+    "tax.date": {
+      "en": "Date",
+      "draft": "Ngày"
+    },
+    "tax.amount": {
+      "en": "Amount $",
+      "draft": "Số tiền $"
+    },
+    "tax.description": {
+      "en": "Description",
+      "draft": "Mô tả"
+    },
+    "tax.eGMarchBoothRentPayout": {
+      "en": "e.g. March booth rent payout",
+      "draft": "VD: Thanh toán tiền thuê ghế tháng Ba"
+    },
+    "tax.record": {
+      "en": "Record",
+      "draft": "Ghi nhận"
+    },
+    "tax.paymentHistory": {
+      "en": "Payment history —",
+      "draft": "Lịch sử thanh toán —"
+    },
+    "tax.noPaymentsRecordedFor": {
+      "en": "No payments recorded for",
+      "draft": "Không có thanh toán nào được ghi cho"
+    },
+    "tax.amount2": {
+      "en": "Amount",
+      "draft": "Số tiền"
+    },
+    "tax.deletePayment": {
+      "en": "Delete payment",
+      "draft": "Xóa thanh toán"
+    },
+    "tax.yearTotal": {
+      "en": "Year total:",
+      "draft": "Tổng cả năm:"
+    },
+    "tax.NECFiling": {
+      "en": "1099-NEC filing —",
+      "draft": "Kê khai 1099-NEC —"
+    },
+    "tax.thisDraftLivesInTaxBanditsReview": {
+      "en": "This draft lives in TaxBandits — review and Transmit there to file with the IRS. This app never files in-house.",
+      "draft": "Nháp này nằm trong TaxBandits — hãy xem lại và Truyền tại đó để nộp cho IRS. Ứng dụng này không bao giờ kê khai nội bộ."
+    },
+    "tax.NECIsRequiredForNon": {
+      "en": "1099-NEC is required for non-corporate contractors paid ≥",
+      "draft": "1099-NEC bắt buộc đối với nhà thầu không phải công ty được trả ≥"
+    },
+    "tax.inTheYearEFilingCreates": {
+      "en": "in the year. E-filing creates a draft in TaxBandits — you review and transmit there. This app never files with the IRS directly.",
+      "draft": "trong năm. Kê khai điện tử tạo một nháp trong TaxBandits — bạn xem lại và truyền tại đó. Ứng dụng này không bao giờ nộp trực tiếp cho IRS."
+    },
+    "taxforecast.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "Dự báo thuế"
+    },
+    "taxforecast.OfPriorYearTax": {
+      "en": "100% of prior-year tax",
+      "draft": "100% thuế năm trước"
+    },
+    "taxforecast.irsDirectPay": {
+      "en": "IRS Direct Pay",
+      "draft": "IRS Direct Pay"
+    },
+    "nav.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "Dự báo thuế"
+    },
+    "nav.tax1099s": {
+      "en": "Tax & 1099s",
+      "draft": "Thuế & 1099"
+    },
+    "teamInvites.accountantTaxPro": {
+      "en": "Accountant / Tax pro",
+      "draft": "Kế toán / Chuyên gia thuế"
+    }
+  }
+}

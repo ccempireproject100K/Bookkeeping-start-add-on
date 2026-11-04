@@ -1,0 +1,426 @@
+{
+  "_meta": {
+    "lang": "ar",
+    "status": "DRAFT for human review only. Do NOT copy into frontend/src/locales/ar/translation.json until a qualified reviewer (counsel/CPA where relevant) approves each string. Live locale keeps English for these keys.",
+    "source": "docs/TRANSLATION_PLAN.md flagged keys (legal/financial/tax/privacy/safety)",
+    "notice": "Approximate translation from English/Spanish, may not be accurate."
+  },
+  "strings": {
+    "salestaxtab.taxJurisdictions": {
+      "en": "Tax jurisdictions",
+      "draft": "الضريبة المناطق الضريبية"
+    },
+    "salestaxtab.everywhereYouCollectSalesTaxState": {
+      "en": "Everywhere you collect sales tax — state, county, city, special district.\n          Tag invoices with a jurisdiction and this page tells you what you owe, where.",
+      "draft": "في كل مكان أنت تحصيل المبيعات الضريبة — الولاية, المقاطعة, المدينة, الخاص المنطقة.\nوسم الفواتير مع المنطقة الضريبية و هذا الصفحة يخبر أنت ماذا أنت الدَّين, حيث."
+    },
+    "salestaxtab.noJurisdictionsYetAddTheFirst": {
+      "en": "No jurisdictions yet. Add the first place you collect sales tax.",
+      "draft": "لا المناطق الضريبية بعد. إضافة الأول المكان أنت تحصيل المبيعات الضريبة."
+    },
+    "salestaxtab.ofSalesTaxIsnTTagged": {
+      "en": "of sales tax isn't tagged to a jurisdiction yet.\n            Tag invoices with a jurisdiction so every dollar lands in the right bucket.",
+      "draft": "من المبيعات الضريبة غير موسوم إلى المنطقة الضريبية بعد.\nوسم الفواتير مع المنطقة الضريبية لذا كل الدولار يستقر في الصحيح السلة."
+    },
+    "salestaxtab.taxCollected": {
+      "en": "Tax collected",
+      "draft": "الضريبة محصَّل"
+    },
+    "teaminvites.inviteYourAccountantOrTaxPro": {
+      "en": "Invite your accountant or tax pro — they join with the right permissions\n        and can switch between all the workspaces they serve.",
+      "draft": "دعوة الخاص بك المحاسب أو الضريبة المحترف — هم الانضمام مع الصحيح الأذونات\nو التبديل بين الكل مساحات العمل هم الخدمة."
+    },
+    "auditlog.eGTaxInvoiceLogin": {
+      "en": "e.g. tax, invoice, login",
+      "draft": "مثلاً الضريبة, فاتورة, تسجيل الدخول"
+    },
+    "cpapackage.mileageLogWithIRSRatesApplied": {
+      "en": "Mileage log with IRS rates applied",
+      "draft": "المسافة المقطوعة سجل مع IRS المعدلات المطبق"
+    },
+    "customers.delete": {
+      "en": "Delete",
+      "draft": "حذف"
+    },
+    "customers.deleteConfirm": {
+      "en": "Delete customer \"{{name}}\"? Their invoices and statements stay on record.",
+      "draft": "حذف العميل \"{{name}}\"? الخاص بهم الفواتير و البيانات البقاء على سجل."
+    },
+    "estimates.tax": {
+      "en": "Tax ($)",
+      "draft": "الضريبة ($)"
+    },
+    "expenses.taxID": {
+      "en": "Tax ID",
+      "draft": "المعرف الضريبي"
+    },
+    "expenses.taxYear": {
+      "en": "Tax year",
+      "draft": "الضريبة السنة"
+    },
+    "expenses.tax": {
+      "en": "Tax",
+      "draft": "الضريبة"
+    },
+    "expenses.taxIDEIN": {
+      "en": "Tax ID / EIN",
+      "draft": "المعرف الضريبي / EIN"
+    },
+    "invoices.refund": {
+      "en": "Refund",
+      "draft": "الاسترداد"
+    },
+    "invoices.taxJurisdictionOptional": {
+      "en": "Tax jurisdiction (optional)",
+      "draft": "الضريبة المنطقة الضريبية (اختياري)"
+    },
+    "invoices.tax": {
+      "en": "Tax ($)",
+      "draft": "الضريبة ($)"
+    },
+    "invoices.refundCredit": {
+      "en": "Refund credit —",
+      "draft": "الاسترداد الائتمان —"
+    },
+    "invoices.refundTheRemaining": {
+      "en": "Refund the remaining",
+      "draft": "الاسترداد المتبقي"
+    },
+    "mileage.irsLogCSV": {
+      "en": "IRS log CSV",
+      "draft": "IRS سجل CSV"
+    },
+    "payroll.deleteDraft": {
+      "en": "Delete draft",
+      "draft": "حذف المسودة"
+    },
+    "payroll.partnershipStubWhenAProviderIs": {
+      "en": "Partnership stub: when a provider is connected, runs here will hand off tax filing and direct deposit automatically.",
+      "draft": "الشراكة كعب القسيمة: عندما المزود متصل, يعمل هنا سوف اليد متوقف الضريبة التقديم و المباشر الإيداع تلقائيا."
+    },
+    "payroll.employerTaxEst": {
+      "en": "Employer payroll tax (est.)",
+      "draft": "صاحب العمل المرتبات الضريبة (تقديري.)"
+    },
+    "portalview.tax": {
+      "en": "Tax",
+      "draft": "الضريبة"
+    },
+    "recurringinvoices.tax": {
+      "en": "Tax ($)",
+      "draft": "الضريبة ($)"
+    },
+    "simulator.safetyFloor": {
+      "en": "Safety floor $",
+      "draft": "السلامة الأرضية $"
+    },
+    "tax.nameIsRequired": {
+      "en": "Name is required",
+      "draft": "الاسم مطلوب"
+    },
+    "tax.contractorAdded": {
+      "en": "Contractor added",
+      "draft": "المقاول مضاف"
+    },
+    "tax.w9StatusUpdated": {
+      "en": "W-9 status updated",
+      "draft": "W-9 الحالة محدَّث"
+    },
+    "tax.contractorRemoved": {
+      "en": "Contractor removed",
+      "draft": "المقاول مزال"
+    },
+    "tax.enterAPositiveAmount": {
+      "en": "Enter a positive amount",
+      "draft": "إدخال إيجابي المبلغ"
+    },
+    "tax.paymentRecorded": {
+      "en": "Payment recorded",
+      "draft": "الدفع مسجّل"
+    },
+    "tax.paymentDeleted": {
+      "en": "Payment deleted",
+      "draft": "الدفع محذوف"
+    },
+    "tax.statusRefreshed": {
+      "en": "Status refreshed",
+      "draft": "الحالة محدَّث"
+    },
+    "tax.addContractor": {
+      "en": "Add contractor",
+      "draft": "إضافة المقاول"
+    },
+    "tax.contractors1099s": {
+      "en": "Contractors & 1099s",
+      "draft": "المقاولون & 1099s"
+    },
+    "tax.salesTax": {
+      "en": "Sales Tax",
+      "draft": "المبيعات الضريبة"
+    },
+    "tax.taxbanditsNotConnected": {
+      "en": "TaxBandits not connected.",
+      "draft": "TaxBandits لا متصل."
+    },
+    "tax.taxbanditsSETUPMd": {
+      "en": "TAXBANDITS_SETUP.md",
+      "draft": "TAXBANDITS_SETUP.md"
+    },
+    "tax.inTheRepoNoIRSFiling": {
+      "en": "in the repo. No IRS filing is ever done in-house.",
+      "draft": "في المستودع. لا IRS التقديم أبدا تم داخلي."
+    },
+    "tax.taxbanditsConnectedIn": {
+      "en": "TaxBandits connected in",
+      "draft": "TaxBandits متصل في"
+    },
+    "tax.sandbox": {
+      "en": "sandbox",
+      "draft": "البيئة التجريبية"
+    },
+    "tax.modeNoRealFilingsFlip": {
+      "en": "mode — no real filings. Flip",
+      "draft": "الوضع — لا الحقيقي الإقرارات. القلب"
+    },
+    "tax.taxbanditsSANDBOXFalse": {
+      "en": "TAXBANDITS_SANDBOX=false",
+      "draft": "TAXBANDITS_SANDBOX=خطأ"
+    },
+    "tax.toGoLive": {
+      "en": "to go live.",
+      "draft": "إلى انتقال مباشر."
+    },
+    "tax.newContractor": {
+      "en": "New contractor",
+      "draft": "جديد المقاول"
+    },
+    "tax.name": {
+      "en": "Name *",
+      "draft": "الاسم *"
+    },
+    "tax.businessName": {
+      "en": "Business name",
+      "draft": "العمل الاسم"
+    },
+    "tax.email": {
+      "en": "Email",
+      "draft": "البريد الإلكتروني"
+    },
+    "tax.phone": {
+      "en": "Phone",
+      "draft": "الهاتف"
+    },
+    "tax.entityType": {
+      "en": "Entity type",
+      "draft": "الكيان النوع"
+    },
+    "tax.ssnEIN": {
+      "en": "SSN / EIN",
+      "draft": "SSN / EIN"
+    },
+    "tax.storedSecurely": {
+      "en": "Stored securely",
+      "draft": "مخزَّن بأمان"
+    },
+    "tax.street": {
+      "en": "Street",
+      "draft": "الشارع"
+    },
+    "tax.city": {
+      "en": "City",
+      "draft": "المدينة"
+    },
+    "tax.state": {
+      "en": "State",
+      "draft": "الولاية"
+    },
+    "tax.zip": {
+      "en": "ZIP",
+      "draft": "الرمز البريدي"
+    },
+    "tax.cancel": {
+      "en": "Cancel",
+      "draft": "إلغاء"
+    },
+    "tax.contractor": {
+      "en": "Contractor",
+      "draft": "المقاول"
+    },
+    "tax.paid": {
+      "en": "Paid",
+      "draft": "مدفوع"
+    },
+    "tax.w9": {
+      "en": "W-9",
+      "draft": "W-9"
+    },
+    "tax.NEC": {
+      "en": "1099-NEC",
+      "draft": "1099-NEC"
+    },
+    "tax.eFile": {
+      "en": "E-file",
+      "draft": "e-الملف"
+    },
+    "tax.actions": {
+      "en": "Actions",
+      "draft": "الإجراءات"
+    },
+    "tax.viewPaymentHistory": {
+      "en": "View payment history",
+      "draft": "العرض الدفع السجل"
+    },
+    "tax.toggleW9Received": {
+      "en": "Toggle W-9 received",
+      "draft": "التبديل W-9 مستلم"
+    },
+    "tax.required": {
+      "en": "Required",
+      "draft": "مطلوب"
+    },
+    "tax.viewFilingStatus": {
+      "en": "View filing status",
+      "draft": "العرض التقديم الحالة"
+    },
+    "tax.notFiled": {
+      "en": "Not filed",
+      "draft": "لا مقدّم"
+    },
+    "tax.recordPayment": {
+      "en": "Record payment",
+      "draft": "سجل الدفع"
+    },
+    "tax.noContractorsYet": {
+      "en": "No contractors yet.",
+      "draft": "لا المقاولون بعد."
+    },
+    "tax.NECDataPreview": {
+      "en": "1099-NEC data preview",
+      "draft": "1099-NEC البيانات معاينة"
+    },
+    "tax.recipientBox1DataShapedFor": {
+      "en": "Recipient + Box 1 data shaped for e-filing. Tax IDs stay masked — reveal needs PII access. Draft data only, nothing is filed in-house.",
+      "draft": "المستلم + الصندوق 1 البيانات مشكَّل لـ e-التقديم. الضريبة المعرفات البقاء مقنّع — الكشف يحتاج PII الوصول. المسودة البيانات فقط, لا شيء مقدّم داخلي."
+    },
+    "tax.loadPreview": {
+      "en": "Load preview",
+      "draft": "التحميل معاينة"
+    },
+    "tax.recipient": {
+      "en": "Recipient",
+      "draft": "المستلم"
+    },
+    "tax.tin": {
+      "en": "TIN",
+      "draft": "TIN"
+    },
+    "tax.address": {
+      "en": "Address",
+      "draft": "العنوان"
+    },
+    "tax.box1": {
+      "en": "Box 1",
+      "draft": "الصندوق 1"
+    },
+    "tax.missing": {
+      "en": "missing",
+      "draft": "المفقود"
+    },
+    "tax.reveal": {
+      "en": "reveal",
+      "draft": "الكشف"
+    },
+    "tax.noContractorsMeetThe": {
+      "en": "No contractors meet the",
+      "draft": "لا المقاولون تلبية"
+    },
+    "tax.reportingThresholdFor": {
+      "en": "reporting threshold for",
+      "draft": "إعداد التقارير العتبة لـ"
+    },
+    "tax.recordPayment2": {
+      "en": "Record payment —",
+      "draft": "سجل الدفع —"
+    },
+    "tax.date": {
+      "en": "Date",
+      "draft": "التاريخ"
+    },
+    "tax.amount": {
+      "en": "Amount $",
+      "draft": "المبلغ $"
+    },
+    "tax.description": {
+      "en": "Description",
+      "draft": "الوصف"
+    },
+    "tax.eGMarchBoothRentPayout": {
+      "en": "e.g. March booth rent payout",
+      "draft": "مثلاً مارس الجناح الإيجار العائد"
+    },
+    "tax.record": {
+      "en": "Record",
+      "draft": "سجل"
+    },
+    "tax.paymentHistory": {
+      "en": "Payment history —",
+      "draft": "الدفع السجل —"
+    },
+    "tax.noPaymentsRecordedFor": {
+      "en": "No payments recorded for",
+      "draft": "لا المدفوعات مسجّل لـ"
+    },
+    "tax.amount2": {
+      "en": "Amount",
+      "draft": "المبلغ"
+    },
+    "tax.deletePayment": {
+      "en": "Delete payment",
+      "draft": "حذف الدفع"
+    },
+    "tax.yearTotal": {
+      "en": "Year total:",
+      "draft": "السنة الإجمالي:"
+    },
+    "tax.NECFiling": {
+      "en": "1099-NEC filing —",
+      "draft": "1099-NEC التقديم —"
+    },
+    "tax.thisDraftLivesInTaxBanditsReview": {
+      "en": "This draft lives in TaxBandits — review and Transmit there to file with the IRS. This app never files in-house.",
+      "draft": "هذا المسودة يعيش في TaxBandits — مراجعة و الإرسال هناك إلى الملف مع IRS. هذا التطبيق أبدا الملفات داخلي."
+    },
+    "tax.NECIsRequiredForNon": {
+      "en": "1099-NEC is required for non-corporate contractors paid ≥",
+      "draft": "1099-NEC مطلوب لـ غير-الشركات المقاولون مدفوع ≥"
+    },
+    "tax.inTheYearEFilingCreates": {
+      "en": "in the year. E-filing creates a draft in TaxBandits — you review and transmit there. This app never files with the IRS directly.",
+      "draft": "في السنة. e-التقديم ينشئ المسودة في TaxBandits — أنت مراجعة و الإرسال هناك. هذا التطبيق أبدا الملفات مع IRS مباشرة."
+    },
+    "taxforecast.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "الضريبة التوقعات"
+    },
+    "taxforecast.OfPriorYearTax": {
+      "en": "100% of prior-year tax",
+      "draft": "100% من السابق-السنة الضريبة"
+    },
+    "taxforecast.irsDirectPay": {
+      "en": "IRS Direct Pay",
+      "draft": "IRS المباشر الدفع"
+    },
+    "nav.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "الضريبة التوقعات"
+    },
+    "nav.tax1099s": {
+      "en": "Tax & 1099s",
+      "draft": "الضريبة & 1099s"
+    },
+    "teamInvites.accountantTaxPro": {
+      "en": "Accountant / Tax pro",
+      "draft": "المحاسب / الضريبة المحترف"
+    }
+  }
+}

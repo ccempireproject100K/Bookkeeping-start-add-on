@@ -1,0 +1,426 @@
+{
+  "_meta": {
+    "lang": "fa",
+    "status": "DRAFT for human review only. Do NOT copy into frontend/src/locales/fa/translation.json until a qualified reviewer (counsel/CPA where relevant) approves each string. Live locale keeps English for these keys.",
+    "source": "docs/TRANSLATION_PLAN.md flagged keys (legal/financial/tax/privacy/safety)",
+    "notice": "Approximate translation from English/Spanish, may not be accurate."
+  },
+  "strings": {
+    "auditlog.eGTaxInvoiceLogin": {
+      "en": "e.g. tax, invoice, login",
+      "draft": "مثلاً مالیات، فاکتور، ورود"
+    },
+    "cpapackage.mileageLogWithIRSRatesApplied": {
+      "en": "Mileage log with IRS rates applied",
+      "draft": "گزارش مسافت با نرخ‌های IRS"
+    },
+    "customers.delete": {
+      "en": "Delete",
+      "draft": "حذف کنید"
+    },
+    "customers.deleteConfirm": {
+      "en": "Delete customer \"{{name}}\"? Their invoices and statements stay on record.",
+      "draft": "مشتری \"{{name}}\" حذف شود؟ فاکتورها و صورت‌حساب‌های او در سوابق می‌مانند."
+    },
+    "estimates.tax": {
+      "en": "Tax ($)",
+      "draft": "مالیات ($)"
+    },
+    "expenses.tax": {
+      "en": "Tax",
+      "draft": "مالیات"
+    },
+    "expenses.taxID": {
+      "en": "Tax ID",
+      "draft": "شناسه مالیاتی"
+    },
+    "expenses.taxIDEIN": {
+      "en": "Tax ID / EIN",
+      "draft": "شناسه مالیاتی / EIN"
+    },
+    "expenses.taxYear": {
+      "en": "Tax year",
+      "draft": "سال مالیاتی"
+    },
+    "invoices.refund": {
+      "en": "Refund",
+      "draft": "بازپرداخت"
+    },
+    "invoices.refundCredit": {
+      "en": "Refund credit —",
+      "draft": "اعتبار بازپرداخت —"
+    },
+    "invoices.refundTheRemaining": {
+      "en": "Refund the remaining",
+      "draft": "باقی‌مانده را بازپرداخت کنید"
+    },
+    "invoices.tax": {
+      "en": "Tax ($)",
+      "draft": "مالیات ($)"
+    },
+    "invoices.taxJurisdictionOptional": {
+      "en": "Tax jurisdiction (optional)",
+      "draft": "حوزه مالیاتی (اختیاری)"
+    },
+    "mileage.irsLogCSV": {
+      "en": "IRS log CSV",
+      "draft": "گزارش IRS به CSV"
+    },
+    "nav.tax1099s": {
+      "en": "Tax & 1099s",
+      "draft": "مالیات و 1099ها"
+    },
+    "nav.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "پیش‌بینی مالیاتی"
+    },
+    "payroll.deleteDraft": {
+      "en": "Delete draft",
+      "draft": "پیش‌نویس حذف کنید"
+    },
+    "payroll.employerTaxEst": {
+      "en": "Employer payroll tax (est.)",
+      "draft": "مالیات حقوق کارفرما (برآورد)"
+    },
+    "payroll.partnershipStubWhenAProviderIs": {
+      "en": "Partnership stub: when a provider is connected, runs here will hand off tax filing and direct deposit automatically.",
+      "draft": "استاب مشارکت: وقتی ارائه‌دهنده‌ای متصل است، اجراهای اینجا ثبت مالیاتی و واریز مستقیم را خودکار واگذار می‌کنند."
+    },
+    "portalview.tax": {
+      "en": "Tax",
+      "draft": "مالیات"
+    },
+    "recurringinvoices.tax": {
+      "en": "Tax ($)",
+      "draft": "مالیات ($)"
+    },
+    "salestaxtab.everywhereYouCollectSalesTaxState": {
+      "en": "Everywhere you collect sales tax — state, county, city, special district.\n          Tag invoices with a jurisdiction and this page tells you what you owe, where.",
+      "draft": "هرجا که مالیات فروش وصول می‌کنید — ایالت، شهرستان، شهر، ناحیه ویژه.\n          فاکتورها را با حوزه قضایی برچسب بزنید و این صفحه می‌گوید چه چیزی، کجا بدهکارید."
+    },
+    "salestaxtab.noJurisdictionsYetAddTheFirst": {
+      "en": "No jurisdictions yet. Add the first place you collect sales tax.",
+      "draft": "هنوز حوزه‌ای نیست. اولین جایی را اضافه کنید که مالیات فروش وصول می‌کنید."
+    },
+    "salestaxtab.ofSalesTaxIsnTTagged": {
+      "en": "of sales tax isn't tagged to a jurisdiction yet.\n            Tag invoices with a jurisdiction so every dollar lands in the right bucket.",
+      "draft": "بخشی از مالیات فروش هنوز به حوزه‌ای برچسب نخورده است.\n            فاکتورها را با حوزه برچسب بزنید تا هر دلار در جای درست بنشیند."
+    },
+    "salestaxtab.taxCollected": {
+      "en": "Tax collected",
+      "draft": "مالیات وصول‌شده"
+    },
+    "salestaxtab.taxJurisdictions": {
+      "en": "Tax jurisdictions",
+      "draft": "حوزه‌های مالیاتی"
+    },
+    "simulator.safetyFloor": {
+      "en": "Safety floor $",
+      "draft": "کف ایمنی $"
+    },
+    "tax.NEC": {
+      "en": "1099-NEC",
+      "draft": "1099-NEC"
+    },
+    "tax.NECDataPreview": {
+      "en": "1099-NEC data preview",
+      "draft": "پیش‌نمایش داده 1099-NEC"
+    },
+    "tax.NECFiling": {
+      "en": "1099-NEC filing —",
+      "draft": "ثبت 1099-NEC —"
+    },
+    "tax.NECIsRequiredForNon": {
+      "en": "1099-NEC is required for non-corporate contractors paid ≥",
+      "draft": "1099-NEC برای پیمانکاران غیرشرکتی با پرداخت ≥ الزامی است"
+    },
+    "tax.actions": {
+      "en": "Actions",
+      "draft": "اقدامات"
+    },
+    "tax.addContractor": {
+      "en": "Add contractor",
+      "draft": "پیمانکار اضافه کنید"
+    },
+    "tax.address": {
+      "en": "Address",
+      "draft": "نشانی"
+    },
+    "tax.amount": {
+      "en": "Amount $",
+      "draft": "مبلغ $"
+    },
+    "tax.amount2": {
+      "en": "Amount",
+      "draft": "مبلغ"
+    },
+    "tax.box1": {
+      "en": "Box 1",
+      "draft": "کادر 1"
+    },
+    "tax.businessName": {
+      "en": "Business name",
+      "draft": "نام کسب‌وکار"
+    },
+    "tax.cancel": {
+      "en": "Cancel",
+      "draft": "لغو کنید"
+    },
+    "tax.city": {
+      "en": "City",
+      "draft": "شهر"
+    },
+    "tax.contractor": {
+      "en": "Contractor",
+      "draft": "پیمانکار"
+    },
+    "tax.contractorAdded": {
+      "en": "Contractor added",
+      "draft": "پیمانکار اضافه شد"
+    },
+    "tax.contractorRemoved": {
+      "en": "Contractor removed",
+      "draft": "پیمانکار حذف شد"
+    },
+    "tax.contractors1099s": {
+      "en": "Contractors & 1099s",
+      "draft": "پیمانکاران و 1099ها"
+    },
+    "tax.date": {
+      "en": "Date",
+      "draft": "تاریخ"
+    },
+    "tax.deletePayment": {
+      "en": "Delete payment",
+      "draft": "پرداخت حذف کنید"
+    },
+    "tax.description": {
+      "en": "Description",
+      "draft": "شرح"
+    },
+    "tax.eFile": {
+      "en": "E-file",
+      "draft": "ثبت الکترونیک"
+    },
+    "tax.eGMarchBoothRentPayout": {
+      "en": "e.g. March booth rent payout",
+      "draft": "مثلاً پرداخت اجاره غرفه مارس"
+    },
+    "tax.email": {
+      "en": "Email",
+      "draft": "ایمیل"
+    },
+    "tax.enterAPositiveAmount": {
+      "en": "Enter a positive amount",
+      "draft": "مبلغ مثبت وارد کنید"
+    },
+    "tax.entityType": {
+      "en": "Entity type",
+      "draft": "نوع نهاد"
+    },
+    "tax.inTheRepoNoIRSFiling": {
+      "en": "in the repo. No IRS filing is ever done in-house.",
+      "draft": "در مخزن. ثبت IRS هرگز درون‌سازمانی انجام نمی‌شود."
+    },
+    "tax.inTheYearEFilingCreates": {
+      "en": "in the year. E-filing creates a draft in TaxBandits — you review and transmit there. This app never files with the IRS directly.",
+      "draft": "در سال. ثبت الکترونیک در TaxBandits پیش‌نویس می‌سازد — آنجا بررسی و ارسال می‌کنید. این برنامه هرگز مستقیم نزد IRS ثبت نمی‌کند."
+    },
+    "tax.loadPreview": {
+      "en": "Load preview",
+      "draft": "پیش‌نمایش بارگذاری کنید"
+    },
+    "tax.missing": {
+      "en": "missing",
+      "draft": "موجود نیست"
+    },
+    "tax.modeNoRealFilingsFlip": {
+      "en": "mode — no real filings. Flip",
+      "draft": "حالت — ثبت واقعی نیست. جابه‌جا کنید"
+    },
+    "tax.name": {
+      "en": "Name *",
+      "draft": "نام *"
+    },
+    "tax.nameIsRequired": {
+      "en": "Name is required",
+      "draft": "نام الزامی است"
+    },
+    "tax.newContractor": {
+      "en": "New contractor",
+      "draft": "پیمانکار جدید"
+    },
+    "tax.noContractorsMeetThe": {
+      "en": "No contractors meet the",
+      "draft": "هیچ پیمانکاری احراز نمی‌کند"
+    },
+    "tax.noContractorsYet": {
+      "en": "No contractors yet.",
+      "draft": "هنوز پیمانکاری نیست."
+    },
+    "tax.noPaymentsRecordedFor": {
+      "en": "No payments recorded for",
+      "draft": "پرداختی برای ثبت نشده است"
+    },
+    "tax.notFiled": {
+      "en": "Not filed",
+      "draft": "ثبت نشده"
+    },
+    "tax.paid": {
+      "en": "Paid",
+      "draft": "پرداخت‌شده"
+    },
+    "tax.paymentDeleted": {
+      "en": "Payment deleted",
+      "draft": "پرداخت حذف شد"
+    },
+    "tax.paymentHistory": {
+      "en": "Payment history —",
+      "draft": "تاریخچه پرداخت —"
+    },
+    "tax.paymentRecorded": {
+      "en": "Payment recorded",
+      "draft": "پرداخت ثبت شد"
+    },
+    "tax.phone": {
+      "en": "Phone",
+      "draft": "تلفن"
+    },
+    "tax.recipient": {
+      "en": "Recipient",
+      "draft": "گیرنده"
+    },
+    "tax.recipientBox1DataShapedFor": {
+      "en": "Recipient + Box 1 data shaped for e-filing. Tax IDs stay masked — reveal needs PII access. Draft data only, nothing is filed in-house.",
+      "draft": "داده گیرنده + کادر 1 برای ثبت الکترونیک شکل داده شده. شناسه‌های مالیاتی پوشیده می‌مانند — نمایش نیاز به دسترسی PII دارد. فقط داده پیش‌نویس، چیزی درون‌سازمانی ثبت نمی‌شود."
+    },
+    "tax.record": {
+      "en": "Record",
+      "draft": "ثبت کنید"
+    },
+    "tax.recordPayment": {
+      "en": "Record payment",
+      "draft": "پرداخت ثبت کنید"
+    },
+    "tax.recordPayment2": {
+      "en": "Record payment —",
+      "draft": "پرداخت ثبت کنید —"
+    },
+    "tax.reportingThresholdFor": {
+      "en": "reporting threshold for",
+      "draft": "آستانه گزارش برای"
+    },
+    "tax.required": {
+      "en": "Required",
+      "draft": "الزامی"
+    },
+    "tax.reveal": {
+      "en": "reveal",
+      "draft": "نمایش دهید"
+    },
+    "tax.salesTax": {
+      "en": "Sales Tax",
+      "draft": "مالیات فروش"
+    },
+    "tax.sandbox": {
+      "en": "sandbox",
+      "draft": "سندباکس"
+    },
+    "tax.ssnEIN": {
+      "en": "SSN / EIN",
+      "draft": "SSN / EIN"
+    },
+    "tax.state": {
+      "en": "State",
+      "draft": "ایالت"
+    },
+    "tax.statusRefreshed": {
+      "en": "Status refreshed",
+      "draft": "وضعیت به‌روزرسانی شد"
+    },
+    "tax.storedSecurely": {
+      "en": "Stored securely",
+      "draft": "به‌طور امن ذخیره شد"
+    },
+    "tax.street": {
+      "en": "Street",
+      "draft": "خیابان"
+    },
+    "tax.taxbanditsConnectedIn": {
+      "en": "TaxBandits connected in",
+      "draft": "TaxBandits متصل شد در"
+    },
+    "tax.taxbanditsNotConnected": {
+      "en": "TaxBandits not connected.",
+      "draft": "TaxBandits متصل نیست."
+    },
+    "tax.taxbanditsSANDBOXFalse": {
+      "en": "TAXBANDITS_SANDBOX=false",
+      "draft": "TAXBANDITS_SANDBOX=false"
+    },
+    "tax.taxbanditsSETUPMd": {
+      "en": "TAXBANDITS_SETUP.md",
+      "draft": "TAXBANDITS_SETUP.md"
+    },
+    "tax.thisDraftLivesInTaxBanditsReview": {
+      "en": "This draft lives in TaxBandits — review and Transmit there to file with the IRS. This app never files in-house.",
+      "draft": "این پیش‌نویس در TaxBandits است — برای ثبت نزد IRS آنجا بررسی و ارسال کنید. این برنامه هرگز درون‌سازمانی ثبت نمی‌کند."
+    },
+    "tax.tin": {
+      "en": "TIN",
+      "draft": "TIN"
+    },
+    "tax.toGoLive": {
+      "en": "to go live.",
+      "draft": "برای راه‌اندازی."
+    },
+    "tax.toggleW9Received": {
+      "en": "Toggle W-9 received",
+      "draft": "W-9 دریافتی تغییر دهید"
+    },
+    "tax.viewFilingStatus": {
+      "en": "View filing status",
+      "draft": "وضعیت ثبت مشاهده کنید"
+    },
+    "tax.viewPaymentHistory": {
+      "en": "View payment history",
+      "draft": "تاریخچه پرداخت مشاهده کنید"
+    },
+    "tax.w9": {
+      "en": "W-9",
+      "draft": "W-9"
+    },
+    "tax.w9StatusUpdated": {
+      "en": "W-9 status updated",
+      "draft": "وضعیت W-9 به‌روزرسانی شد"
+    },
+    "tax.yearTotal": {
+      "en": "Year total:",
+      "draft": "جمع سال:"
+    },
+    "tax.zip": {
+      "en": "ZIP",
+      "draft": "ZIP"
+    },
+    "taxforecast.OfPriorYearTax": {
+      "en": "100% of prior-year tax",
+      "draft": "100% مالیات سال گذشته"
+    },
+    "taxforecast.irsDirectPay": {
+      "en": "IRS Direct Pay",
+      "draft": "پرداخت مستقیم IRS"
+    },
+    "taxforecast.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "پیش‌بینی مالیاتی"
+    },
+    "teamInvites.accountantTaxPro": {
+      "en": "Accountant / Tax pro",
+      "draft": "حسابدار / کارشناس مالیاتی"
+    },
+    "teaminvites.inviteYourAccountantOrTaxPro": {
+      "en": "Invite your accountant or tax pro — they join with the right permissions\n        and can switch between all the workspaces they serve.",
+      "draft": "حسابدار یا کارشناس مالیاتی خود را دعوت کنید — با دسترسی‌های درست می‌پیوندند\n        و می‌توانند میان همه فضاهای کاری که خدمت می‌کنند جابه‌جا شوند."
+    }
+  }
+}

@@ -1,0 +1,426 @@
+{
+  "_meta": {
+    "lang": "so",
+    "status": "DRAFT for human review only. Do NOT copy into frontend/src/locales/so/translation.json until a qualified reviewer (counsel/CPA where relevant) approves each string. Live locale keeps English for these keys.",
+    "source": "docs/TRANSLATION_PLAN.md flagged keys (legal/financial/tax/privacy/safety)",
+    "notice": "Approximate translation from English/Spanish, may not be accurate."
+  },
+  "strings": {
+    "salestaxtab.taxJurisdictions": {
+      "en": "Tax jurisdictions",
+      "draft": "Cashuur awoodaha"
+    },
+    "salestaxtab.everywhereYouCollectSalesTaxState": {
+      "en": "Everywhere you collect sales tax — state, county, city, special district.\n          Tag invoices with a jurisdiction and this page tells you what you owe, where.",
+      "draft": "Meel kasta adiga uruuri cashuurta iibka — gobol, degmada, magaalada, gaar ah degmada.\n          Calaamadee qaansheegadyada la awood iyo kan bog sheegaa adiga maxay adiga ku leeyahay, xaggee."
+    },
+    "salestaxtab.noJurisdictionsYetAddTheFirst": {
+      "en": "No jurisdictions yet. Add the first place you collect sales tax.",
+      "draft": "Maya awoodaha weligii. Kudar ugu horreeya meel adiga uruuri cashuurta iibka."
+    },
+    "salestaxtab.ofSalesTaxIsnTTagged": {
+      "en": "of sales tax isn't tagged to a jurisdiction yet.\n            Tag invoices with a jurisdiction so every dollar lands in the right bucket.",
+      "draft": "ee cashuurta iibka ma aha la calaamadeeyay ilaa awood weligii.\n            Calaamadee qaansheegadyada la awood sidaa mid kasta doolar dhulalka gudaha midig weel."
+    },
+    "salestaxtab.taxCollected": {
+      "en": "Tax collected",
+      "draft": "Cashuur la ururiyay"
+    },
+    "teaminvites.inviteYourAccountantOrTaxPro": {
+      "en": "Invite your accountant or tax pro — they join with the right permissions\n        and can switch between all the workspaces they serve.",
+      "draft": "Casuum taada xisaabiye ama xirfadle cashuureed — iyaga ku biir la midig ogolaanshaha\n        iyo kartaa beddel dhexdooda dhammaan goobaha shaqada iyaga u adeeg."
+    },
+    "auditlog.eGTaxInvoiceLogin": {
+      "en": "e.g. tax, invoice, login",
+      "draft": "e.g. cashuur, qaansheegad, galitaanka"
+    },
+    "cpapackage.mileageLogWithIRSRatesApplied": {
+      "en": "Mileage log with IRS rates applied",
+      "draft": "Masaafada diiwaan la IRS sicirrada la dabaqay"
+    },
+    "customers.delete": {
+      "en": "Delete",
+      "draft": "Tirtir"
+    },
+    "customers.deleteConfirm": {
+      "en": "Delete customer \"{{name}}\"? Their invoices and statements stay on record.",
+      "draft": "Tirtir macmiil \"{{name}}\"? Tooda qaansheegadyada iyo bayaannada joog dusha diiwaan."
+    },
+    "estimates.tax": {
+      "en": "Tax ($)",
+      "draft": "Cashuur ($)"
+    },
+    "expenses.taxID": {
+      "en": "Tax ID",
+      "draft": "Aqoonsiga cashuurta"
+    },
+    "expenses.taxYear": {
+      "en": "Tax year",
+      "draft": "Sanad cashuureed"
+    },
+    "expenses.tax": {
+      "en": "Tax",
+      "draft": "Cashuur"
+    },
+    "expenses.taxIDEIN": {
+      "en": "Tax ID / EIN",
+      "draft": "Aqoonsiga cashuurta / EIN"
+    },
+    "invoices.refund": {
+      "en": "Refund",
+      "draft": "Celi lacagta"
+    },
+    "invoices.taxJurisdictionOptional": {
+      "en": "Tax jurisdiction (optional)",
+      "draft": "Cashuur awood (ikhtiyaari)"
+    },
+    "invoices.tax": {
+      "en": "Tax ($)",
+      "draft": "Cashuur ($)"
+    },
+    "invoices.refundCredit": {
+      "en": "Refund credit —",
+      "draft": "Celi lacagta kiridit —"
+    },
+    "invoices.refundTheRemaining": {
+      "en": "Refund the remaining",
+      "draft": "Celi lacagta hadhay"
+    },
+    "mileage.irsLogCSV": {
+      "en": "IRS log CSV",
+      "draft": "IRS diiwaan CSV"
+    },
+    "payroll.deleteDraft": {
+      "en": "Delete draft",
+      "draft": "Tirtir qabyo"
+    },
+    "payroll.partnershipStubWhenAProviderIs": {
+      "en": "Partnership stub: when a provider is connected, runs here will hand off tax filing and direct deposit automatically.",
+      "draft": "Shaqo wadaag qabyo: marka bixiyaha waa ku xiran, ordaa halkan doonaa gacan dansan cashuur xarayn iyo deebaaji toos ah si otomaatik ah."
+    },
+    "payroll.employerTaxEst": {
+      "en": "Employer payroll tax (est.)",
+      "draft": "Loo shaqeeyo cashuurta mushaharka (qiyaas.)"
+    },
+    "portalview.tax": {
+      "en": "Tax",
+      "draft": "Cashuur"
+    },
+    "recurringinvoices.tax": {
+      "en": "Tax ($)",
+      "draft": "Cashuur ($)"
+    },
+    "simulator.safetyFloor": {
+      "en": "Safety floor $",
+      "draft": "Ammaanka dabaqa $"
+    },
+    "tax.nameIsRequired": {
+      "en": "Name is required",
+      "draft": "Magac waa loo baahan yahay"
+    },
+    "tax.contractorAdded": {
+      "en": "Contractor added",
+      "draft": "Qandaraasle la kudaray"
+    },
+    "tax.w9StatusUpdated": {
+      "en": "W-9 status updated",
+      "draft": "W-9 xaalad la cusboonaysiiyay"
+    },
+    "tax.contractorRemoved": {
+      "en": "Contractor removed",
+      "draft": "Qandaraasle la saaray"
+    },
+    "tax.enterAPositiveAmount": {
+      "en": "Enter a positive amount",
+      "draft": "Geli togan qaddar"
+    },
+    "tax.paymentRecorded": {
+      "en": "Payment recorded",
+      "draft": "Lacag bixin la diiwaan geliyay"
+    },
+    "tax.paymentDeleted": {
+      "en": "Payment deleted",
+      "draft": "Lacag bixin la tirtiray"
+    },
+    "tax.statusRefreshed": {
+      "en": "Status refreshed",
+      "draft": "Xaalad la cusboonaysiiyay"
+    },
+    "tax.addContractor": {
+      "en": "Add contractor",
+      "draft": "Kudar qandaraasle"
+    },
+    "tax.contractors1099s": {
+      "en": "Contractors & 1099s",
+      "draft": "Qandaraaslayaal & 1099s"
+    },
+    "tax.salesTax": {
+      "en": "Sales Tax",
+      "draft": "Cashuurta iibka"
+    },
+    "tax.taxbanditsNotConnected": {
+      "en": "TaxBandits not connected.",
+      "draft": "TaxBandits ma ku xiran."
+    },
+    "tax.taxbanditsSETUPMd": {
+      "en": "TAXBANDITS_SETUP.md",
+      "draft": "TAXBANDITS_SETUP.md"
+    },
+    "tax.inTheRepoNoIRSFiling": {
+      "en": "in the repo. No IRS filing is ever done in-house.",
+      "draft": "gudaha kaydka. Maya IRS xarayn waa waligaa la sameeyay gudaha-guriga."
+    },
+    "tax.taxbanditsConnectedIn": {
+      "en": "TaxBandits connected in",
+      "draft": "TaxBandits ku xiran gudaha"
+    },
+    "tax.sandbox": {
+      "en": "sandbox",
+      "draft": "goob tijaabo"
+    },
+    "tax.modeNoRealFilingsFlip": {
+      "en": "mode — no real filings. Flip",
+      "draft": "hab — maya dhab ah xaraynta. Rog"
+    },
+    "tax.taxbanditsSANDBOXFalse": {
+      "en": "TAXBANDITS_SANDBOX=false",
+      "draft": "TAXBANDITS_goob tijaabo=been"
+    },
+    "tax.toGoLive": {
+      "en": "to go live.",
+      "draft": "ilaa tag toos ah."
+    },
+    "tax.newContractor": {
+      "en": "New contractor",
+      "draft": "Cusub qandaraasle"
+    },
+    "tax.name": {
+      "en": "Name *",
+      "draft": "Magac *"
+    },
+    "tax.businessName": {
+      "en": "Business name",
+      "draft": "Ganacsi magac"
+    },
+    "tax.email": {
+      "en": "Email",
+      "draft": "Iimayl"
+    },
+    "tax.phone": {
+      "en": "Phone",
+      "draft": "Telefoon"
+    },
+    "tax.entityType": {
+      "en": "Entity type",
+      "draft": "Hayad nooc"
+    },
+    "tax.ssnEIN": {
+      "en": "SSN / EIN",
+      "draft": "SSN / EIN"
+    },
+    "tax.storedSecurely": {
+      "en": "Stored securely",
+      "draft": "La kaydiyay si ammaan ah"
+    },
+    "tax.street": {
+      "en": "Street",
+      "draft": "Wadada"
+    },
+    "tax.city": {
+      "en": "City",
+      "draft": "Magaalada"
+    },
+    "tax.state": {
+      "en": "State",
+      "draft": "Gobol"
+    },
+    "tax.zip": {
+      "en": "ZIP",
+      "draft": "ZIP"
+    },
+    "tax.cancel": {
+      "en": "Cancel",
+      "draft": "Jooji"
+    },
+    "tax.contractor": {
+      "en": "Contractor",
+      "draft": "Qandaraasle"
+    },
+    "tax.paid": {
+      "en": "Paid",
+      "draft": "La bixiyay"
+    },
+    "tax.w9": {
+      "en": "W-9",
+      "draft": "W-9"
+    },
+    "tax.NEC": {
+      "en": "1099-NEC",
+      "draft": "1099-NEC"
+    },
+    "tax.eFile": {
+      "en": "E-file",
+      "draft": "Xarayn elektaroonik ah"
+    },
+    "tax.actions": {
+      "en": "Actions",
+      "draft": "Ficillada"
+    },
+    "tax.viewPaymentHistory": {
+      "en": "View payment history",
+      "draft": "Eeg taariikhda lacag bixinta"
+    },
+    "tax.toggleW9Received": {
+      "en": "Toggle W-9 received",
+      "draft": "Beddel W-9 la helay"
+    },
+    "tax.required": {
+      "en": "Required",
+      "draft": "Loo baahan yahay"
+    },
+    "tax.viewFilingStatus": {
+      "en": "View filing status",
+      "draft": "Eeg xarayn xaalad"
+    },
+    "tax.notFiled": {
+      "en": "Not filed",
+      "draft": "Ma la xareeyay"
+    },
+    "tax.recordPayment": {
+      "en": "Record payment",
+      "draft": "Diiwaan lacag bixin"
+    },
+    "tax.noContractorsYet": {
+      "en": "No contractors yet.",
+      "draft": "Maya qandaraaslayaal weligii."
+    },
+    "tax.NECDataPreview": {
+      "en": "1099-NEC data preview",
+      "draft": "1099-NEC xogta horudhac"
+    },
+    "tax.recipientBox1DataShapedFor": {
+      "en": "Recipient + Box 1 data shaped for e-filing. Tax IDs stay masked — reveal needs PII access. Draft data only, nothing is filed in-house.",
+      "draft": "Qaataha + Sanduuq 1 xogta qaabeeya ee xarayn elektaroonik ah. Cashuur Aqoonsiyo joog la qarshay — muuji baahiyaha PII helid. Qabyo xogta kaliya, waxba waa la xareeyay gudaha-guriga."
+    },
+    "tax.loadPreview": {
+      "en": "Load preview",
+      "draft": "Rar horudhac"
+    },
+    "tax.recipient": {
+      "en": "Recipient",
+      "draft": "Qaataha"
+    },
+    "tax.tin": {
+      "en": "TIN",
+      "draft": "TIN"
+    },
+    "tax.address": {
+      "en": "Address",
+      "draft": "Cinwaan"
+    },
+    "tax.box1": {
+      "en": "Box 1",
+      "draft": "Sanduuq 1"
+    },
+    "tax.missing": {
+      "en": "missing",
+      "draft": "maqan"
+    },
+    "tax.reveal": {
+      "en": "reveal",
+      "draft": "muuji"
+    },
+    "tax.noContractorsMeetThe": {
+      "en": "No contractors meet the",
+      "draft": "Maya qandaraaslayaal la kulun"
+    },
+    "tax.reportingThresholdFor": {
+      "en": "reporting threshold for",
+      "draft": "warbixinta xadka ee"
+    },
+    "tax.recordPayment2": {
+      "en": "Record payment —",
+      "draft": "Diiwaan lacag bixin —"
+    },
+    "tax.date": {
+      "en": "Date",
+      "draft": "Taariikh"
+    },
+    "tax.amount": {
+      "en": "Amount $",
+      "draft": "Qaddar $"
+    },
+    "tax.description": {
+      "en": "Description",
+      "draft": "Sharaxaad"
+    },
+    "tax.eGMarchBoothRentPayout": {
+      "en": "e.g. March booth rent payout",
+      "draft": "e.g. Maarso goob kiro bixin"
+    },
+    "tax.record": {
+      "en": "Record",
+      "draft": "Diiwaan"
+    },
+    "tax.paymentHistory": {
+      "en": "Payment history —",
+      "draft": "Taariikhda lacag bixinta —"
+    },
+    "tax.noPaymentsRecordedFor": {
+      "en": "No payments recorded for",
+      "draft": "Maya lacag bixinada la diiwaan geliyay ee"
+    },
+    "tax.amount2": {
+      "en": "Amount",
+      "draft": "Qaddar"
+    },
+    "tax.deletePayment": {
+      "en": "Delete payment",
+      "draft": "Tirtir lacag bixin"
+    },
+    "tax.yearTotal": {
+      "en": "Year total:",
+      "draft": "Sanad wadarta:"
+    },
+    "tax.NECFiling": {
+      "en": "1099-NEC filing —",
+      "draft": "1099-NEC xarayn —"
+    },
+    "tax.thisDraftLivesInTaxBanditsReview": {
+      "en": "This draft lives in TaxBandits — review and Transmit there to file with the IRS. This app never files in-house.",
+      "draft": "Kan qabyo nool yahay gudaha TaxBandits — dib u eeg iyo Gudbi halkaas ilaa fayl la IRS. Kan abka waligaa faylasha gudaha-guriga."
+    },
+    "tax.NECIsRequiredForNon": {
+      "en": "1099-NEC is required for non-corporate contractors paid ≥",
+      "draft": "1099-NEC waa loo baahan yahay ee aan ahayn-shirkadeed qandaraaslayaal la bixiyay ≥"
+    },
+    "tax.inTheYearEFilingCreates": {
+      "en": "in the year. E-filing creates a draft in TaxBandits — you review and transmit there. This app never files with the IRS directly.",
+      "draft": "gudaha sanad. Xarayn elektaroonik ah sameeyaa qabyo gudaha TaxBandits — adiga dib u eeg iyo gudbi halkaas. Kan abka waligaa faylasha la IRS si toos ah."
+    },
+    "taxforecast.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "Cashuur Saadaal"
+    },
+    "taxforecast.OfPriorYearTax": {
+      "en": "100% of prior-year tax",
+      "draft": "100% ee hore-sanad cashuur"
+    },
+    "taxforecast.irsDirectPay": {
+      "en": "IRS Direct Pay",
+      "draft": "IRS Toos ah Bixi"
+    },
+    "nav.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "Cashuur Saadaal"
+    },
+    "nav.tax1099s": {
+      "en": "Tax & 1099s",
+      "draft": "Cashuur & 1099s"
+    },
+    "teamInvites.accountantTaxPro": {
+      "en": "Accountant / Tax pro",
+      "draft": "Xisaabiye / Xirfadle cashuureed"
+    }
+  }
+}

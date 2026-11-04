@@ -11,7 +11,7 @@ const flatten = (o, p = "", out = {}) => {
   });
   return out;
 };
-const EXPECTED = ["en","es","fr","zh-CN","ht","ar","vi","tl","hi","ko","pt","so","ur","bn","pa","fa","am","my","ne","sw"];
+const EXPECTED = ["en","es","fr","zh-CN","ht","ar","vi","tl","hi","ko","pt","so","ur","bn","pa","fa","am","my","ne","sw","te"];
 const en = flatten(load("en"));
 const tokens = (s) => (typeof s === "string" ? (s.match(/\{\{[^}]+\}\}/g) || []).sort() : []);
 

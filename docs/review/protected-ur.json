@@ -1,0 +1,426 @@
+{
+  "_meta": {
+    "lang": "ur",
+    "status": "DRAFT for human review only. Do NOT copy into frontend/src/locales/ur/translation.json until a qualified reviewer (counsel/CPA where relevant) approves each string. Live locale keeps English for these keys.",
+    "source": "docs/TRANSLATION_PLAN.md flagged keys (legal/financial/tax/privacy/safety)",
+    "notice": "Approximate translation from English/Spanish, may not be accurate."
+  },
+  "strings": {
+    "auditlog.eGTaxInvoiceLogin": {
+      "en": "e.g. tax, invoice, login",
+      "draft": "مثلاً ٹیکس، انوائس، لاگ ان"
+    },
+    "cpapackage.mileageLogWithIRSRatesApplied": {
+      "en": "Mileage log with IRS rates applied",
+      "draft": "IRS شرحوں کے ساتھ مائلیج لاگ"
+    },
+    "customers.delete": {
+      "en": "Delete",
+      "draft": "حذف کریں"
+    },
+    "customers.deleteConfirm": {
+      "en": "Delete customer \"{{name}}\"? Their invoices and statements stay on record.",
+      "draft": "گاہک \"{{name}}\" حذف کریں؟ ان کے انوائسز اور اسٹیٹمنٹس ریکارڈ پر رہتے ہیں۔"
+    },
+    "estimates.tax": {
+      "en": "Tax ($)",
+      "draft": "ٹیکس ($)"
+    },
+    "expenses.tax": {
+      "en": "Tax",
+      "draft": "ٹیکس"
+    },
+    "expenses.taxID": {
+      "en": "Tax ID",
+      "draft": "ٹیکس ID"
+    },
+    "expenses.taxIDEIN": {
+      "en": "Tax ID / EIN",
+      "draft": "ٹیکس ID / EIN"
+    },
+    "expenses.taxYear": {
+      "en": "Tax year",
+      "draft": "ٹیکس سال"
+    },
+    "invoices.refund": {
+      "en": "Refund",
+      "draft": "رقم واپسی"
+    },
+    "invoices.refundCredit": {
+      "en": "Refund credit —",
+      "draft": "واپسی کریڈٹ —"
+    },
+    "invoices.refundTheRemaining": {
+      "en": "Refund the remaining",
+      "draft": "باقی رقم واپس کریں"
+    },
+    "invoices.tax": {
+      "en": "Tax ($)",
+      "draft": "ٹیکس ($)"
+    },
+    "invoices.taxJurisdictionOptional": {
+      "en": "Tax jurisdiction (optional)",
+      "draft": "ٹیکس دائرہ اختیار (اختیاری)"
+    },
+    "mileage.irsLogCSV": {
+      "en": "IRS log CSV",
+      "draft": "IRS لاگ CSV"
+    },
+    "nav.tax1099s": {
+      "en": "Tax & 1099s",
+      "draft": "ٹیکس اور 1099s"
+    },
+    "nav.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "ٹیکس پیش گوئی"
+    },
+    "payroll.deleteDraft": {
+      "en": "Delete draft",
+      "draft": "مسودہ حذف کریں"
+    },
+    "payroll.employerTaxEst": {
+      "en": "Employer payroll tax (est.)",
+      "draft": "آجر پے رول ٹیکس (تخمینہ)"
+    },
+    "payroll.partnershipStubWhenAProviderIs": {
+      "en": "Partnership stub: when a provider is connected, runs here will hand off tax filing and direct deposit automatically.",
+      "draft": "شراکت اسٹب: جب فراہم کنندہ منسلک ہو، یہاں کی رنز ٹیکس فائلنگ اور ڈائریکٹ ڈپازٹ خودکار سونپ دیں گی۔"
+    },
+    "portalview.tax": {
+      "en": "Tax",
+      "draft": "ٹیکس"
+    },
+    "recurringinvoices.tax": {
+      "en": "Tax ($)",
+      "draft": "ٹیکس ($)"
+    },
+    "salestaxtab.everywhereYouCollectSalesTaxState": {
+      "en": "Everywhere you collect sales tax — state, county, city, special district.\n          Tag invoices with a jurisdiction and this page tells you what you owe, where.",
+      "draft": "ہر جگہ جہاں آپ سیلز ٹیکس وصول کرتے ہیں — ریاست، کاؤنٹی، شہر، خصوصی ضلع۔\n          انوائسز کو دائرہ اختیار سے ٹیگ کریں اور یہ صفحہ بتاتا ہے کہ آپ کو کیا، کہاں واجب ہے۔"
+    },
+    "salestaxtab.noJurisdictionsYetAddTheFirst": {
+      "en": "No jurisdictions yet. Add the first place you collect sales tax.",
+      "draft": "ابھی کوئی دائرہ اختیار نہیں۔ پہلی جگہ شامل کریں جہاں آپ سیلز ٹیکس وصول کرتے ہیں۔"
+    },
+    "salestaxtab.ofSalesTaxIsnTTagged": {
+      "en": "of sales tax isn't tagged to a jurisdiction yet.\n            Tag invoices with a jurisdiction so every dollar lands in the right bucket.",
+      "draft": "سیلز ٹیکس کا کچھ حصہ ابھی کسی دائرہ اختیار سے ٹیگ نہیں۔\n            انوائسز کو دائرہ اختیار سے ٹیگ کریں تاکہ ہر ڈالر صحیح جگہ جائے۔"
+    },
+    "salestaxtab.taxCollected": {
+      "en": "Tax collected",
+      "draft": "وصول شدہ ٹیکس"
+    },
+    "salestaxtab.taxJurisdictions": {
+      "en": "Tax jurisdictions",
+      "draft": "ٹیکس دائرہ اختیار"
+    },
+    "simulator.safetyFloor": {
+      "en": "Safety floor $",
+      "draft": "حفاظتی فرش $"
+    },
+    "tax.NEC": {
+      "en": "1099-NEC",
+      "draft": "1099-NEC"
+    },
+    "tax.NECDataPreview": {
+      "en": "1099-NEC data preview",
+      "draft": "1099-NEC ڈیٹا پیش نظارہ"
+    },
+    "tax.NECFiling": {
+      "en": "1099-NEC filing —",
+      "draft": "1099-NEC فائلنگ —"
+    },
+    "tax.NECIsRequiredForNon": {
+      "en": "1099-NEC is required for non-corporate contractors paid ≥",
+      "draft": "غیر کارپوریٹ ٹھیکیداروں کے لیے 1099-NEC ضروری ہے جنہیں ≥ ادا ہوا"
+    },
+    "tax.actions": {
+      "en": "Actions",
+      "draft": "اقدامات"
+    },
+    "tax.addContractor": {
+      "en": "Add contractor",
+      "draft": "ٹھیکیدار شامل کریں"
+    },
+    "tax.address": {
+      "en": "Address",
+      "draft": "پتہ"
+    },
+    "tax.amount": {
+      "en": "Amount $",
+      "draft": "رقم $"
+    },
+    "tax.amount2": {
+      "en": "Amount",
+      "draft": "رقم"
+    },
+    "tax.box1": {
+      "en": "Box 1",
+      "draft": "خانہ 1"
+    },
+    "tax.businessName": {
+      "en": "Business name",
+      "draft": "کاروباری نام"
+    },
+    "tax.cancel": {
+      "en": "Cancel",
+      "draft": "منسوخ کریں"
+    },
+    "tax.city": {
+      "en": "City",
+      "draft": "شہر"
+    },
+    "tax.contractor": {
+      "en": "Contractor",
+      "draft": "ٹھیکیدار"
+    },
+    "tax.contractorAdded": {
+      "en": "Contractor added",
+      "draft": "ٹھیکیدار شامل ہوا"
+    },
+    "tax.contractorRemoved": {
+      "en": "Contractor removed",
+      "draft": "ٹھیکیدار ہٹایا گیا"
+    },
+    "tax.contractors1099s": {
+      "en": "Contractors & 1099s",
+      "draft": "ٹھیکیدار اور 1099s"
+    },
+    "tax.date": {
+      "en": "Date",
+      "draft": "تاریخ"
+    },
+    "tax.deletePayment": {
+      "en": "Delete payment",
+      "draft": "ادائیگی حذف کریں"
+    },
+    "tax.description": {
+      "en": "Description",
+      "draft": "تفصیل"
+    },
+    "tax.eFile": {
+      "en": "E-file",
+      "draft": "ای فائل"
+    },
+    "tax.eGMarchBoothRentPayout": {
+      "en": "e.g. March booth rent payout",
+      "draft": "مثلاً مارچ بوتھ کرایہ ادائیگی"
+    },
+    "tax.email": {
+      "en": "Email",
+      "draft": "ای میل"
+    },
+    "tax.enterAPositiveAmount": {
+      "en": "Enter a positive amount",
+      "draft": "مثبت رقم درج کریں"
+    },
+    "tax.entityType": {
+      "en": "Entity type",
+      "draft": "ادارے کی قسم"
+    },
+    "tax.inTheRepoNoIRSFiling": {
+      "en": "in the repo. No IRS filing is ever done in-house.",
+      "draft": "ریپو میں۔ IRS فائلنگ کبھی اندرون خانہ نہیں ہوتی۔"
+    },
+    "tax.inTheYearEFilingCreates": {
+      "en": "in the year. E-filing creates a draft in TaxBandits — you review and transmit there. This app never files with the IRS directly.",
+      "draft": "سال میں۔ ای فائلنگ TaxBandits میں مسودہ بناتی ہے — آپ وہاں جائزہ لیتے اور بھیجتے ہیں۔ یہ ایپ کبھی براہ راست IRS میں فائل نہیں کرتی۔"
+    },
+    "tax.loadPreview": {
+      "en": "Load preview",
+      "draft": "پیش نظارہ لوڈ کریں"
+    },
+    "tax.missing": {
+      "en": "missing",
+      "draft": "غائب"
+    },
+    "tax.modeNoRealFilingsFlip": {
+      "en": "mode — no real filings. Flip",
+      "draft": "موڈ — کوئی حقیقی فائلنگ نہیں۔ پلٹیں"
+    },
+    "tax.name": {
+      "en": "Name *",
+      "draft": "نام *"
+    },
+    "tax.nameIsRequired": {
+      "en": "Name is required",
+      "draft": "نام ضروری ہے"
+    },
+    "tax.newContractor": {
+      "en": "New contractor",
+      "draft": "نیا ٹھیکیدار"
+    },
+    "tax.noContractorsMeetThe": {
+      "en": "No contractors meet the",
+      "draft": "کوئی ٹھیکیدار پورا نہیں اترتا"
+    },
+    "tax.noContractorsYet": {
+      "en": "No contractors yet.",
+      "draft": "ابھی کوئی ٹھیکیدار نہیں۔"
+    },
+    "tax.noPaymentsRecordedFor": {
+      "en": "No payments recorded for",
+      "draft": "کے لیے کوئی ادائیگی ریکارڈ نہیں"
+    },
+    "tax.notFiled": {
+      "en": "Not filed",
+      "draft": "فائل نہیں ہوا"
+    },
+    "tax.paid": {
+      "en": "Paid",
+      "draft": "ادا شدہ"
+    },
+    "tax.paymentDeleted": {
+      "en": "Payment deleted",
+      "draft": "ادائیگی حذف ہوئی"
+    },
+    "tax.paymentHistory": {
+      "en": "Payment history —",
+      "draft": "ادائیگی ہسٹری —"
+    },
+    "tax.paymentRecorded": {
+      "en": "Payment recorded",
+      "draft": "ادائیگی ریکارڈ ہوئی"
+    },
+    "tax.phone": {
+      "en": "Phone",
+      "draft": "فون"
+    },
+    "tax.recipient": {
+      "en": "Recipient",
+      "draft": "وصول کنندہ"
+    },
+    "tax.recipientBox1DataShapedFor": {
+      "en": "Recipient + Box 1 data shaped for e-filing. Tax IDs stay masked — reveal needs PII access. Draft data only, nothing is filed in-house.",
+      "draft": "وصول کنندہ + خانہ 1 ڈیٹا ای فائلنگ کے لیے ترتیب شدہ۔ ٹیکس IDs ماسک رہتی ہیں — دیکھنے کے لیے PII رسائی درکار۔ صرف مسودہ ڈیٹا، اندرون خانہ کچھ فائل نہیں ہوتا۔"
+    },
+    "tax.record": {
+      "en": "Record",
+      "draft": "ریکارڈ کریں"
+    },
+    "tax.recordPayment": {
+      "en": "Record payment",
+      "draft": "ادائیگی ریکارڈ کریں"
+    },
+    "tax.recordPayment2": {
+      "en": "Record payment —",
+      "draft": "ادائیگی ریکارڈ کریں —"
+    },
+    "tax.reportingThresholdFor": {
+      "en": "reporting threshold for",
+      "draft": "کے لیے رپورٹنگ حد"
+    },
+    "tax.required": {
+      "en": "Required",
+      "draft": "ضروری"
+    },
+    "tax.reveal": {
+      "en": "reveal",
+      "draft": "ظاہر کریں"
+    },
+    "tax.salesTax": {
+      "en": "Sales Tax",
+      "draft": "سیلز ٹیکس"
+    },
+    "tax.sandbox": {
+      "en": "sandbox",
+      "draft": "سینڈ باکس"
+    },
+    "tax.ssnEIN": {
+      "en": "SSN / EIN",
+      "draft": "SSN / EIN"
+    },
+    "tax.state": {
+      "en": "State",
+      "draft": "ریاست"
+    },
+    "tax.statusRefreshed": {
+      "en": "Status refreshed",
+      "draft": "حیثیت تازہ ہوئی"
+    },
+    "tax.storedSecurely": {
+      "en": "Stored securely",
+      "draft": "محفوظ ذخیرہ شدہ"
+    },
+    "tax.street": {
+      "en": "Street",
+      "draft": "گلی"
+    },
+    "tax.taxbanditsConnectedIn": {
+      "en": "TaxBandits connected in",
+      "draft": "TaxBandits منسلک ہوا"
+    },
+    "tax.taxbanditsNotConnected": {
+      "en": "TaxBandits not connected.",
+      "draft": "TaxBandits منسلک نہیں۔"
+    },
+    "tax.taxbanditsSANDBOXFalse": {
+      "en": "TAXBANDITS_SANDBOX=false",
+      "draft": "TAXBANDITS_SANDBOX=false"
+    },
+    "tax.taxbanditsSETUPMd": {
+      "en": "TAXBANDITS_SETUP.md",
+      "draft": "TAXBANDITS_SETUP.md"
+    },
+    "tax.thisDraftLivesInTaxBanditsReview": {
+      "en": "This draft lives in TaxBandits — review and Transmit there to file with the IRS. This app never files in-house.",
+      "draft": "یہ مسودہ TaxBandits میں ہے — IRS میں فائل کرنے کے لیے وہاں جائزہ لیں اور بھیجیں۔ یہ ایپ کبھی اندرون خانہ فائل نہیں کرتی۔"
+    },
+    "tax.tin": {
+      "en": "TIN",
+      "draft": "TIN"
+    },
+    "tax.toGoLive": {
+      "en": "to go live.",
+      "draft": "لائیو ہونے کے لیے۔"
+    },
+    "tax.toggleW9Received": {
+      "en": "Toggle W-9 received",
+      "draft": "W-9 موصول ٹوگل کریں"
+    },
+    "tax.viewFilingStatus": {
+      "en": "View filing status",
+      "draft": "فائلنگ حیثیت دیکھیں"
+    },
+    "tax.viewPaymentHistory": {
+      "en": "View payment history",
+      "draft": "ادائیگی ہسٹری دیکھیں"
+    },
+    "tax.w9": {
+      "en": "W-9",
+      "draft": "W-9"
+    },
+    "tax.w9StatusUpdated": {
+      "en": "W-9 status updated",
+      "draft": "W-9 حیثیت اپ ڈیٹ ہوئی"
+    },
+    "tax.yearTotal": {
+      "en": "Year total:",
+      "draft": "سال کل:"
+    },
+    "tax.zip": {
+      "en": "ZIP",
+      "draft": "ZIP"
+    },
+    "taxforecast.OfPriorYearTax": {
+      "en": "100% of prior-year tax",
+      "draft": "پچھلے سال کے ٹیکس کا 100%"
+    },
+    "taxforecast.irsDirectPay": {
+      "en": "IRS Direct Pay",
+      "draft": "IRS ڈائریکٹ پے"
+    },
+    "taxforecast.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "ٹیکس پیش گوئی"
+    },
+    "teamInvites.accountantTaxPro": {
+      "en": "Accountant / Tax pro",
+      "draft": "اکاؤنٹنٹ / ٹیکس ماہر"
+    },
+    "teaminvites.inviteYourAccountantOrTaxPro": {
+      "en": "Invite your accountant or tax pro — they join with the right permissions\n        and can switch between all the workspaces they serve.",
+      "draft": "اپنے اکاؤنٹنٹ یا ٹیکس ماہر کو مدعو کریں — وہ درست اجازتوں کے ساتھ شامل ہوتے ہیں\n        اور اپنے تمام ورک اسپیسز کے درمیان بدل سکتے ہیں جن کی وہ خدمت کرتے ہیں۔"
+    }
+  }
+}

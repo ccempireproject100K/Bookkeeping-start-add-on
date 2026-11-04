@@ -1,0 +1,426 @@
+{
+  "_meta": {
+    "lang": "ht",
+    "status": "DRAFT for human review only. Do NOT copy into frontend/src/locales/ht/translation.json until a qualified reviewer (counsel/CPA where relevant) approves each string. Live locale keeps English for these keys.",
+    "source": "docs/TRANSLATION_PLAN.md flagged keys (legal/financial/tax/privacy/safety)",
+    "notice": "Approximate translation from English/Spanish, may not be accurate."
+  },
+  "strings": {
+    "salestaxtab.taxJurisdictions": {
+      "en": "Tax jurisdictions",
+      "draft": "Taks jiridiksyon"
+    },
+    "salestaxtab.everywhereYouCollectSalesTaxState": {
+      "en": "Everywhere you collect sales tax — state, county, city, special district.\n          Tag invoices with a jurisdiction and this page tells you what you owe, where.",
+      "draft": "Tout kote ou kolekte vant taks — eta, konte, vil, espesyal distri.\n etyikèt fakti ak jiridiksyon ak sa a paj di ou kisa ou dwe, kote."
+    },
+    "salestaxtab.noJurisdictionsYetAddTheFirst": {
+      "en": "No jurisdictions yet. Add the first place you collect sales tax.",
+      "draft": "Pa gen jiridiksyon ankò. ajoute premye kote ou kolekte vant taks."
+    },
+    "salestaxtab.ofSalesTaxIsnTTagged": {
+      "en": "of sales tax isn't tagged to a jurisdiction yet.\n            Tag invoices with a jurisdiction so every dollar lands in the right bucket.",
+      "draft": "vant taks pa etyikete nan yon jiridiksyon ankò.\n etyikèt fakti ak jiridiksyon konsa chak dola rive nan bon kategori."
+    },
+    "salestaxtab.taxCollected": {
+      "en": "Tax collected",
+      "draft": "Taks kolekte"
+    },
+    "teaminvites.inviteYourAccountantOrTaxPro": {
+      "en": "Invite your accountant or tax pro — they join with the right permissions\n        and can switch between all the workspaces they serve.",
+      "draft": "Envite ou kontab oswa taks pwofesyonèl — yo rantre ak bon pèmisyon\n ak ka chanje ant tout espas travay yo sèvi."
+    },
+    "auditlog.eGTaxInvoiceLogin": {
+      "en": "e.g. tax, invoice, login",
+      "draft": "\u00000\u0000 taks, fakti, koneksyon"
+    },
+    "cpapackage.mileageLogWithIRSRatesApplied": {
+      "en": "Mileage log with IRS rates applied",
+      "draft": "Jounal kilometraj ak IRS to aplike"
+    },
+    "customers.delete": {
+      "en": "Delete",
+      "draft": "Efase"
+    },
+    "customers.deleteConfirm": {
+      "en": "Delete customer \"{{name}}\"? Their invoices and statements stay on record.",
+      "draft": "Efase kliyan \"{{name}}\"? Fakti ak releve li yo rete nan dosye."
+    },
+    "estimates.tax": {
+      "en": "Tax ($)",
+      "draft": "Taks ($)"
+    },
+    "expenses.taxID": {
+      "en": "Tax ID",
+      "draft": "Taks ID"
+    },
+    "expenses.taxYear": {
+      "en": "Tax year",
+      "draft": "Taks ane"
+    },
+    "expenses.tax": {
+      "en": "Tax",
+      "draft": "Taks"
+    },
+    "expenses.taxIDEIN": {
+      "en": "Tax ID / EIN",
+      "draft": "Taks ID / EIN"
+    },
+    "invoices.refund": {
+      "en": "Refund",
+      "draft": "Ranbousman"
+    },
+    "invoices.taxJurisdictionOptional": {
+      "en": "Tax jurisdiction (optional)",
+      "draft": "Taks jiridiksyon (opsyonèl)"
+    },
+    "invoices.tax": {
+      "en": "Tax ($)",
+      "draft": "Taks ($)"
+    },
+    "invoices.refundCredit": {
+      "en": "Refund credit —",
+      "draft": "Ranbousman kredi —"
+    },
+    "invoices.refundTheRemaining": {
+      "en": "Refund the remaining",
+      "draft": "Ranbousman rete"
+    },
+    "mileage.irsLogCSV": {
+      "en": "IRS log CSV",
+      "draft": "IRS anrejistre CSV"
+    },
+    "payroll.deleteDraft": {
+      "en": "Delete draft",
+      "draft": "Efase bouyon"
+    },
+    "payroll.partnershipStubWhenAProviderIs": {
+      "en": "Partnership stub: when a provider is connected, runs here will hand off tax filing and direct deposit automatically.",
+      "draft": "Sosyete souch: lè founisè se konekte, lanse isit la pral men ete taks deklarasyon ak dirèk depoze otomatikman."
+    },
+    "payroll.employerTaxEst": {
+      "en": "Employer payroll tax (est.)",
+      "draft": "Patwon peywòl taks (estime.)"
+    },
+    "portalview.tax": {
+      "en": "Tax",
+      "draft": "Taks"
+    },
+    "recurringinvoices.tax": {
+      "en": "Tax ($)",
+      "draft": "Taks ($)"
+    },
+    "simulator.safetyFloor": {
+      "en": "Safety floor $",
+      "draft": "Sekirite planche $"
+    },
+    "tax.nameIsRequired": {
+      "en": "Name is required",
+      "draft": "Non se obligatwa"
+    },
+    "tax.contractorAdded": {
+      "en": "Contractor added",
+      "draft": "Kontraktè ajoute"
+    },
+    "tax.w9StatusUpdated": {
+      "en": "W-9 status updated",
+      "draft": "W-9 estati mete ajou"
+    },
+    "tax.contractorRemoved": {
+      "en": "Contractor removed",
+      "draft": "Kontraktè retire"
+    },
+    "tax.enterAPositiveAmount": {
+      "en": "Enter a positive amount",
+      "draft": "Antre pozitif montan"
+    },
+    "tax.paymentRecorded": {
+      "en": "Payment recorded",
+      "draft": "Peman anrejistre"
+    },
+    "tax.paymentDeleted": {
+      "en": "Payment deleted",
+      "draft": "Peman efase"
+    },
+    "tax.statusRefreshed": {
+      "en": "Status refreshed",
+      "draft": "Estati rafrechi"
+    },
+    "tax.addContractor": {
+      "en": "Add contractor",
+      "draft": "Ajoute kontraktè"
+    },
+    "tax.contractors1099s": {
+      "en": "Contractors & 1099s",
+      "draft": "Kontraktè & 1099s"
+    },
+    "tax.salesTax": {
+      "en": "Sales Tax",
+      "draft": "Vant taks"
+    },
+    "tax.taxbanditsNotConnected": {
+      "en": "TaxBandits not connected.",
+      "draft": "TaxBandits pa konekte."
+    },
+    "tax.taxbanditsSETUPMd": {
+      "en": "TAXBANDITS_SETUP.md",
+      "draft": "TAXBANDITS_enstale.md"
+    },
+    "tax.inTheRepoNoIRSFiling": {
+      "en": "in the repo. No IRS filing is ever done in-house.",
+      "draft": "nan depo. pa gen IRS deklarasyon se jamè fini nan-kay."
+    },
+    "tax.taxbanditsConnectedIn": {
+      "en": "TaxBandits connected in",
+      "draft": "TaxBandits konekte nan"
+    },
+    "tax.sandbox": {
+      "en": "sandbox",
+      "draft": "bak sab"
+    },
+    "tax.modeNoRealFilingsFlip": {
+      "en": "mode — no real filings. Flip",
+      "draft": "mòd — pa gen reyèl deklarasyon. chanje"
+    },
+    "tax.taxbanditsSANDBOXFalse": {
+      "en": "TAXBANDITS_SANDBOX=false",
+      "draft": "TAXBANDITS_bak sab=fo"
+    },
+    "tax.toGoLive": {
+      "en": "to go live.",
+      "draft": "pou ale an dirèk."
+    },
+    "tax.newContractor": {
+      "en": "New contractor",
+      "draft": "Nouvo kontraktè"
+    },
+    "tax.name": {
+      "en": "Name *",
+      "draft": "Non *"
+    },
+    "tax.businessName": {
+      "en": "Business name",
+      "draft": "Biznis non"
+    },
+    "tax.email": {
+      "en": "Email",
+      "draft": "Imèl"
+    },
+    "tax.phone": {
+      "en": "Phone",
+      "draft": "Telefòn"
+    },
+    "tax.entityType": {
+      "en": "Entity type",
+      "draft": "Antite tip"
+    },
+    "tax.ssnEIN": {
+      "en": "SSN / EIN",
+      "draft": "SSN / EIN"
+    },
+    "tax.storedSecurely": {
+      "en": "Stored securely",
+      "draft": "Estoke an sekirite"
+    },
+    "tax.street": {
+      "en": "Street",
+      "draft": "Lari"
+    },
+    "tax.city": {
+      "en": "City",
+      "draft": "Vil"
+    },
+    "tax.state": {
+      "en": "State",
+      "draft": "Eta"
+    },
+    "tax.zip": {
+      "en": "ZIP",
+      "draft": "Kòd postal"
+    },
+    "tax.cancel": {
+      "en": "Cancel",
+      "draft": "Anile"
+    },
+    "tax.contractor": {
+      "en": "Contractor",
+      "draft": "Kontraktè"
+    },
+    "tax.paid": {
+      "en": "Paid",
+      "draft": "Peye"
+    },
+    "tax.w9": {
+      "en": "W-9",
+      "draft": "W-9"
+    },
+    "tax.NEC": {
+      "en": "1099-NEC",
+      "draft": "1099-NEC"
+    },
+    "tax.eFile": {
+      "en": "E-file",
+      "draft": "Depoze elektwonikman"
+    },
+    "tax.actions": {
+      "en": "Actions",
+      "draft": "Aksyon"
+    },
+    "tax.viewPaymentHistory": {
+      "en": "View payment history",
+      "draft": "Wè peman istwa"
+    },
+    "tax.toggleW9Received": {
+      "en": "Toggle W-9 received",
+      "draft": "Chanje W-9 resevwa"
+    },
+    "tax.required": {
+      "en": "Required",
+      "draft": "Obligatwa"
+    },
+    "tax.viewFilingStatus": {
+      "en": "View filing status",
+      "draft": "Wè deklarasyon estati"
+    },
+    "tax.notFiled": {
+      "en": "Not filed",
+      "draft": "Pa depoze"
+    },
+    "tax.recordPayment": {
+      "en": "Record payment",
+      "draft": "Anrejistre peman"
+    },
+    "tax.noContractorsYet": {
+      "en": "No contractors yet.",
+      "draft": "Pa gen kontraktè ankò."
+    },
+    "tax.NECDataPreview": {
+      "en": "1099-NEC data preview",
+      "draft": "1099-NEC done apèsi"
+    },
+    "tax.recipientBox1DataShapedFor": {
+      "en": "Recipient + Box 1 data shaped for e-filing. Tax IDs stay masked — reveal needs PII access. Draft data only, nothing is filed in-house.",
+      "draft": "Benefisyè + bwat 1 done prepare pou e-deklarasyon. taks ID rete kache — montre bezwen PII aksè. bouyon done sèlman, anyen se depoze nan-kay."
+    },
+    "tax.loadPreview": {
+      "en": "Load preview",
+      "draft": "Chaje apèsi"
+    },
+    "tax.recipient": {
+      "en": "Recipient",
+      "draft": "Benefisyè"
+    },
+    "tax.tin": {
+      "en": "TIN",
+      "draft": "TIN"
+    },
+    "tax.address": {
+      "en": "Address",
+      "draft": "Adrès"
+    },
+    "tax.box1": {
+      "en": "Box 1",
+      "draft": "Bwat 1"
+    },
+    "tax.missing": {
+      "en": "missing",
+      "draft": "manke"
+    },
+    "tax.reveal": {
+      "en": "reveal",
+      "draft": "montre"
+    },
+    "tax.noContractorsMeetThe": {
+      "en": "No contractors meet the",
+      "draft": "Pa gen kontraktè satisfè"
+    },
+    "tax.reportingThresholdFor": {
+      "en": "reporting threshold for",
+      "draft": "rapò papòt pou"
+    },
+    "tax.recordPayment2": {
+      "en": "Record payment —",
+      "draft": "Anrejistre peman —"
+    },
+    "tax.date": {
+      "en": "Date",
+      "draft": "Dat"
+    },
+    "tax.amount": {
+      "en": "Amount $",
+      "draft": "Montan $"
+    },
+    "tax.description": {
+      "en": "Description",
+      "draft": "Deskripsyon"
+    },
+    "tax.eGMarchBoothRentPayout": {
+      "en": "e.g. March booth rent payout",
+      "draft": "\u00000\u0000 mas ti boutik lwaye peman"
+    },
+    "tax.record": {
+      "en": "Record",
+      "draft": "Anrejistre"
+    },
+    "tax.paymentHistory": {
+      "en": "Payment history —",
+      "draft": "Peman istwa —"
+    },
+    "tax.noPaymentsRecordedFor": {
+      "en": "No payments recorded for",
+      "draft": "Pa gen peman anrejistre pou"
+    },
+    "tax.amount2": {
+      "en": "Amount",
+      "draft": "Montan"
+    },
+    "tax.deletePayment": {
+      "en": "Delete payment",
+      "draft": "Efase peman"
+    },
+    "tax.yearTotal": {
+      "en": "Year total:",
+      "draft": "Ane total:"
+    },
+    "tax.NECFiling": {
+      "en": "1099-NEC filing —",
+      "draft": "1099-NEC deklarasyon —"
+    },
+    "tax.thisDraftLivesInTaxBanditsReview": {
+      "en": "This draft lives in TaxBandits — review and Transmit there to file with the IRS. This app never files in-house.",
+      "draft": "Sa a bouyon rete nan TaxBandits — revize ak transmèt la pou dosye ak IRS. sa a aplikasyon jamè dosye nan-kay."
+    },
+    "tax.NECIsRequiredForNon": {
+      "en": "1099-NEC is required for non-corporate contractors paid ≥",
+      "draft": "1099-NEC se obligatwa pou ki pa-sosyete kontraktè peye ≥"
+    },
+    "tax.inTheYearEFilingCreates": {
+      "en": "in the year. E-filing creates a draft in TaxBandits — you review and transmit there. This app never files with the IRS directly.",
+      "draft": "nan ane. E-deklarasyon kreye bouyon nan TaxBandits — ou revize ak transmèt la. sa a aplikasyon jamè dosye ak IRS dirèkteman."
+    },
+    "taxforecast.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "Taks previzyon"
+    },
+    "taxforecast.OfPriorYearTax": {
+      "en": "100% of prior-year tax",
+      "draft": "100% anvan-ane taks"
+    },
+    "taxforecast.irsDirectPay": {
+      "en": "IRS Direct Pay",
+      "draft": "IRS dirèk peye"
+    },
+    "nav.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "Taks previzyon"
+    },
+    "nav.tax1099s": {
+      "en": "Tax & 1099s",
+      "draft": "Taks & 1099s"
+    },
+    "teamInvites.accountantTaxPro": {
+      "en": "Accountant / Tax pro",
+      "draft": "Kontab / taks pwofesyonèl"
+    }
+  }
+}

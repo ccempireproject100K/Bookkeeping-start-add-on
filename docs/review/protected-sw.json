@@ -1,0 +1,426 @@
+{
+  "_meta": {
+    "lang": "sw",
+    "status": "DRAFT for human review only. Do NOT copy into frontend/src/locales/sw/translation.json until a qualified reviewer (counsel/CPA where relevant) approves each string. Live locale keeps English for these keys.",
+    "source": "docs/TRANSLATION_PLAN.md flagged keys (legal/financial/tax/privacy/safety)",
+    "notice": "Approximate translation from English/Spanish, may not be accurate."
+  },
+  "strings": {
+    "salestaxtab.taxJurisdictions": {
+      "en": "Tax jurisdictions",
+      "draft": "Kodi mamlaka"
+    },
+    "salestaxtab.everywhereYouCollectSalesTaxState": {
+      "en": "Everywhere you collect sales tax — state, county, city, special district.\n          Tag invoices with a jurisdiction and this page tells you what you owe, where.",
+      "draft": "Kila mahali wewe kusanya kodi ya mauzo — jimbo, kaunti, jiji, maalum wilaya.\n          Weka lebo ankara na mamlaka na hii ukurasa inaeleza wewe nini wewe daiwa, wapi."
+    },
+    "salestaxtab.noJurisdictionsYetAddTheFirst": {
+      "en": "No jurisdictions yet. Add the first place you collect sales tax.",
+      "draft": "Hapana mamlaka bado. Ongeza ya kwanza mahali wewe kusanya kodi ya mauzo."
+    },
+    "salestaxtab.ofSalesTaxIsnTTagged": {
+      "en": "of sales tax isn't tagged to a jurisdiction yet.\n            Tag invoices with a jurisdiction so every dollar lands in the right bucket.",
+      "draft": "ya kodi ya mauzo sio imewekwa lebo kwa mamlaka bado.\n            Weka lebo ankara na mamlaka hivyo kila dola ardhi katika kulia ntoo."
+    },
+    "salestaxtab.taxCollected": {
+      "en": "Tax collected",
+      "draft": "Kodi imekusanywa"
+    },
+    "teaminvites.inviteYourAccountantOrTaxPro": {
+      "en": "Invite your accountant or tax pro — they join with the right permissions\n        and can switch between all the workspaces they serve.",
+      "draft": "Alika yako mhasibu au mtaalamu wa kodi — wao jiunge na kulia ruhusa\n        na naweza badili kati ya zote maeneo ya kazi wao hudumia."
+    },
+    "auditlog.eGTaxInvoiceLogin": {
+      "en": "e.g. tax, invoice, login",
+      "draft": "e.g. kodi, ankara, kuingia"
+    },
+    "cpapackage.mileageLogWithIRSRatesApplied": {
+      "en": "Mileage log with IRS rates applied",
+      "draft": "Umilele kumbukumbu na IRS viwango imetumika"
+    },
+    "customers.delete": {
+      "en": "Delete",
+      "draft": "Futa"
+    },
+    "customers.deleteConfirm": {
+      "en": "Delete customer \"{{name}}\"? Their invoices and statements stay on record.",
+      "draft": "Futa mteja \"{{name}}\"? Zao ankara na taarifa kaa kwenye rekodi."
+    },
+    "estimates.tax": {
+      "en": "Tax ($)",
+      "draft": "Kodi ($)"
+    },
+    "expenses.taxID": {
+      "en": "Tax ID",
+      "draft": "Kitambulisho cha kodi"
+    },
+    "expenses.taxYear": {
+      "en": "Tax year",
+      "draft": "Mwaka wa kodi"
+    },
+    "expenses.tax": {
+      "en": "Tax",
+      "draft": "Kodi"
+    },
+    "expenses.taxIDEIN": {
+      "en": "Tax ID / EIN",
+      "draft": "Kitambulisho cha kodi / EIN"
+    },
+    "invoices.refund": {
+      "en": "Refund",
+      "draft": "Rejesha pesa"
+    },
+    "invoices.taxJurisdictionOptional": {
+      "en": "Tax jurisdiction (optional)",
+      "draft": "Kodi mamlaka (hiari)"
+    },
+    "invoices.tax": {
+      "en": "Tax ($)",
+      "draft": "Kodi ($)"
+    },
+    "invoices.refundCredit": {
+      "en": "Refund credit —",
+      "draft": "Rejesha pesa kredi —"
+    },
+    "invoices.refundTheRemaining": {
+      "en": "Refund the remaining",
+      "draft": "Rejesha pesa iliyobaki"
+    },
+    "mileage.irsLogCSV": {
+      "en": "IRS log CSV",
+      "draft": "IRS kumbukumbu CSV"
+    },
+    "payroll.deleteDraft": {
+      "en": "Delete draft",
+      "draft": "Futa rasimu"
+    },
+    "payroll.partnershipStubWhenAProviderIs": {
+      "en": "Partnership stub: when a provider is connected, runs here will hand off tax filing and direct deposit automatically.",
+      "draft": "Ushirikiano kibaki: wakati mtoa huduma ni imeunganishwa, inaendesha hapa taka mkono zima kodi kuwasilisha na amana ya moja kwa moja kiotomatiki."
+    },
+    "payroll.employerTaxEst": {
+      "en": "Employer payroll tax (est.)",
+      "draft": "Mwajiri kodi ya mshahara (kadirio.)"
+    },
+    "portalview.tax": {
+      "en": "Tax",
+      "draft": "Kodi"
+    },
+    "recurringinvoices.tax": {
+      "en": "Tax ($)",
+      "draft": "Kodi ($)"
+    },
+    "simulator.safetyFloor": {
+      "en": "Safety floor $",
+      "draft": "Usalama ghorofa $"
+    },
+    "tax.nameIsRequired": {
+      "en": "Name is required",
+      "draft": "Jina ni inahitajika"
+    },
+    "tax.contractorAdded": {
+      "en": "Contractor added",
+      "draft": "Mkandarasi imeongezwa"
+    },
+    "tax.w9StatusUpdated": {
+      "en": "W-9 status updated",
+      "draft": "W-9 hali imesasishwa"
+    },
+    "tax.contractorRemoved": {
+      "en": "Contractor removed",
+      "draft": "Mkandarasi imeondolewa"
+    },
+    "tax.enterAPositiveAmount": {
+      "en": "Enter a positive amount",
+      "draft": "Ingiza chanya kiasi"
+    },
+    "tax.paymentRecorded": {
+      "en": "Payment recorded",
+      "draft": "Malipo imerekodiwa"
+    },
+    "tax.paymentDeleted": {
+      "en": "Payment deleted",
+      "draft": "Malipo imefutwa"
+    },
+    "tax.statusRefreshed": {
+      "en": "Status refreshed",
+      "draft": "Hali imesasishwa"
+    },
+    "tax.addContractor": {
+      "en": "Add contractor",
+      "draft": "Ongeza mkandarasi"
+    },
+    "tax.contractors1099s": {
+      "en": "Contractors & 1099s",
+      "draft": "Wakandarasi & 1099s"
+    },
+    "tax.salesTax": {
+      "en": "Sales Tax",
+      "draft": "Kodi ya mauzo"
+    },
+    "tax.taxbanditsNotConnected": {
+      "en": "TaxBandits not connected.",
+      "draft": "TaxBandits si imeunganishwa."
+    },
+    "tax.taxbanditsSETUPMd": {
+      "en": "TAXBANDITS_SETUP.md",
+      "draft": "TAXBANDITS_SETUP.md"
+    },
+    "tax.inTheRepoNoIRSFiling": {
+      "en": "in the repo. No IRS filing is ever done in-house.",
+      "draft": "katika hazina. Hapana IRS kuwasilisha ni wahi imefanywa katika-nyumba."
+    },
+    "tax.taxbanditsConnectedIn": {
+      "en": "TaxBandits connected in",
+      "draft": "TaxBandits imeunganishwa katika"
+    },
+    "tax.sandbox": {
+      "en": "sandbox",
+      "draft": "mazingira ya majaribio"
+    },
+    "tax.modeNoRealFilingsFlip": {
+      "en": "mode — no real filings. Flip",
+      "draft": "hali — hapana halisi mawasilisho. Geuza"
+    },
+    "tax.taxbanditsSANDBOXFalse": {
+      "en": "TAXBANDITS_SANDBOX=false",
+      "draft": "TAXBANDITS_mazingira ya majaribio=uongo"
+    },
+    "tax.toGoLive": {
+      "en": "to go live.",
+      "draft": "kwa nenda moja kwa moja."
+    },
+    "tax.newContractor": {
+      "en": "New contractor",
+      "draft": "Mpya mkandarasi"
+    },
+    "tax.name": {
+      "en": "Name *",
+      "draft": "Jina *"
+    },
+    "tax.businessName": {
+      "en": "Business name",
+      "draft": "Biashara jina"
+    },
+    "tax.email": {
+      "en": "Email",
+      "draft": "Barua pepe"
+    },
+    "tax.phone": {
+      "en": "Phone",
+      "draft": "Simu"
+    },
+    "tax.entityType": {
+      "en": "Entity type",
+      "draft": "Huluki aina"
+    },
+    "tax.ssnEIN": {
+      "en": "SSN / EIN",
+      "draft": "SSN / EIN"
+    },
+    "tax.storedSecurely": {
+      "en": "Stored securely",
+      "draft": "Imehifadhiwa kwa usalama"
+    },
+    "tax.street": {
+      "en": "Street",
+      "draft": "Mtaa"
+    },
+    "tax.city": {
+      "en": "City",
+      "draft": "Jiji"
+    },
+    "tax.state": {
+      "en": "State",
+      "draft": "Jimbo"
+    },
+    "tax.zip": {
+      "en": "ZIP",
+      "draft": "ZIP"
+    },
+    "tax.cancel": {
+      "en": "Cancel",
+      "draft": "Ghairi"
+    },
+    "tax.contractor": {
+      "en": "Contractor",
+      "draft": "Mkandarasi"
+    },
+    "tax.paid": {
+      "en": "Paid",
+      "draft": "Imelipwa"
+    },
+    "tax.w9": {
+      "en": "W-9",
+      "draft": "W-9"
+    },
+    "tax.NEC": {
+      "en": "1099-NEC",
+      "draft": "1099-NEC"
+    },
+    "tax.eFile": {
+      "en": "E-file",
+      "draft": "Uwasilishaji wa kielektroniki"
+    },
+    "tax.actions": {
+      "en": "Actions",
+      "draft": "Vitendo"
+    },
+    "tax.viewPaymentHistory": {
+      "en": "View payment history",
+      "draft": "Tazama historia ya malipo"
+    },
+    "tax.toggleW9Received": {
+      "en": "Toggle W-9 received",
+      "draft": "Geuza W-9 imepokelewa"
+    },
+    "tax.required": {
+      "en": "Required",
+      "draft": "Inahitajika"
+    },
+    "tax.viewFilingStatus": {
+      "en": "View filing status",
+      "draft": "Tazama kuwasilisha hali"
+    },
+    "tax.notFiled": {
+      "en": "Not filed",
+      "draft": "Si imewasilishwa"
+    },
+    "tax.recordPayment": {
+      "en": "Record payment",
+      "draft": "Rekodi malipo"
+    },
+    "tax.noContractorsYet": {
+      "en": "No contractors yet.",
+      "draft": "Hapana wakandarasi bado."
+    },
+    "tax.NECDataPreview": {
+      "en": "1099-NEC data preview",
+      "draft": "1099-NEC data hakikisho"
+    },
+    "tax.recipientBox1DataShapedFor": {
+      "en": "Recipient + Box 1 data shaped for e-filing. Tax IDs stay masked — reveal needs PII access. Draft data only, nothing is filed in-house.",
+      "draft": "Mpokeaji + Kisanduku 1 data umbo kwa uwasilishaji wa kielektroniki. Kodi Vitambulisho kaa imefichwa — onyesha mahitaji PII upatikanaji. Rasimu data tu, hakuna ni imewasilishwa katika-nyumba."
+    },
+    "tax.loadPreview": {
+      "en": "Load preview",
+      "draft": "Pakia hakikisho"
+    },
+    "tax.recipient": {
+      "en": "Recipient",
+      "draft": "Mpokeaji"
+    },
+    "tax.tin": {
+      "en": "TIN",
+      "draft": "TIN"
+    },
+    "tax.address": {
+      "en": "Address",
+      "draft": "Anwani"
+    },
+    "tax.box1": {
+      "en": "Box 1",
+      "draft": "Kisanduku 1"
+    },
+    "tax.missing": {
+      "en": "missing",
+      "draft": "inayokosekana"
+    },
+    "tax.reveal": {
+      "en": "reveal",
+      "draft": "onyesha"
+    },
+    "tax.noContractorsMeetThe": {
+      "en": "No contractors meet the",
+      "draft": "Hapana wakandarasi kutana"
+    },
+    "tax.reportingThresholdFor": {
+      "en": "reporting threshold for",
+      "draft": "kuripoti kizingiti kwa"
+    },
+    "tax.recordPayment2": {
+      "en": "Record payment —",
+      "draft": "Rekodi malipo —"
+    },
+    "tax.date": {
+      "en": "Date",
+      "draft": "Tarehe"
+    },
+    "tax.amount": {
+      "en": "Amount $",
+      "draft": "Kiasi $"
+    },
+    "tax.description": {
+      "en": "Description",
+      "draft": "Maelezo"
+    },
+    "tax.eGMarchBoothRentPayout": {
+      "en": "e.g. March booth rent payout",
+      "draft": "e.g. Machi kibanda kodi malipo"
+    },
+    "tax.record": {
+      "en": "Record",
+      "draft": "Rekodi"
+    },
+    "tax.paymentHistory": {
+      "en": "Payment history —",
+      "draft": "Historia ya malipo —"
+    },
+    "tax.noPaymentsRecordedFor": {
+      "en": "No payments recorded for",
+      "draft": "Hapana malipo imerekodiwa kwa"
+    },
+    "tax.amount2": {
+      "en": "Amount",
+      "draft": "Kiasi"
+    },
+    "tax.deletePayment": {
+      "en": "Delete payment",
+      "draft": "Futa malipo"
+    },
+    "tax.yearTotal": {
+      "en": "Year total:",
+      "draft": "Mwaka jumla:"
+    },
+    "tax.NECFiling": {
+      "en": "1099-NEC filing —",
+      "draft": "1099-NEC kuwasilisha —"
+    },
+    "tax.thisDraftLivesInTaxBanditsReview": {
+      "en": "This draft lives in TaxBandits — review and Transmit there to file with the IRS. This app never files in-house.",
+      "draft": "Hii rasimu inaishi katika TaxBandits — pitia na Tuma huko kwa faili na IRS. Hii programu kamwe faili katika-nyumba."
+    },
+    "tax.NECIsRequiredForNon": {
+      "en": "1099-NEC is required for non-corporate contractors paid ≥",
+      "draft": "1099-NEC ni inahitajika kwa sio-ya shirika wakandarasi imelipwa ≥"
+    },
+    "tax.inTheYearEFilingCreates": {
+      "en": "in the year. E-filing creates a draft in TaxBandits — you review and transmit there. This app never files with the IRS directly.",
+      "draft": "katika mwaka. Uwasilishaji wa kielektroniki inaunda rasimu katika TaxBandits — wewe pitia na tuma huko. Hii programu kamwe faili na IRS moja kwa moja."
+    },
+    "taxforecast.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "Kodi Utabiri"
+    },
+    "taxforecast.OfPriorYearTax": {
+      "en": "100% of prior-year tax",
+      "draft": "100% ya ya awali-mwaka kodi"
+    },
+    "taxforecast.irsDirectPay": {
+      "en": "IRS Direct Pay",
+      "draft": "IRS Moja kwa moja Lipa"
+    },
+    "nav.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "Kodi Utabiri"
+    },
+    "nav.tax1099s": {
+      "en": "Tax & 1099s",
+      "draft": "Kodi & 1099s"
+    },
+    "teamInvites.accountantTaxPro": {
+      "en": "Accountant / Tax pro",
+      "draft": "Mhasibu / Mtaalamu wa kodi"
+    }
+  }
+}
