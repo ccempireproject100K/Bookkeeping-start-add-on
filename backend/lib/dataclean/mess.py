@@ -16,7 +16,7 @@ _STREET_HINT = re.compile(
     re.I)
 
 
-def detect_column_type(values):
+def detect_column_type(values, date_policy="us_month_first"):
     """Best-guess type for one column from its non-empty values."""
     vals = [str(v).strip() for v in values if str(v or "").strip()]
     if not vals:
@@ -25,7 +25,8 @@ def detect_column_type(values):
     n = len(sample)
     rates = {
         "email": sum(1 for v in sample if EMAIL_RE.match(v)) / n,
-        "date": sum(1 for v in sample if normalize_date(v)["ok"]) / n,
+        "date": sum(1 for v in sample
+                    if normalize_date(v, policy=date_policy)["ok"]) / n,
         "phone": sum(1 for v in sample if normalize_phone(v)["ok"]) / n,
         "amount": sum(1 for v in sample if _AMOUNT_RE.match(v)) / n,
     }
@@ -45,7 +46,7 @@ def detect_column_type(values):
     return {"type": "text", "confidence": 0.4, "rates": rates}
 
 
-def mess_report(rows):
+def mess_report(rows, date_policy="us_month_first"):
     """Per-column mess stats for a list of row dicts."""
     columns = []
     seen = []
@@ -56,12 +57,12 @@ def mess_report(rows):
     for col in seen:
         values = [r.get(col) for r in rows]
         nonempty = [v for v in values if str(v or "").strip()]
-        det = detect_column_type(values)
+        det = detect_column_type(values, date_policy)
         issues = {}
         if det["type"] in ("date", "mixed"):
             bad, formats = 0, set()
             for v in nonempty:
-                res = normalize_date(v)
+                res = normalize_date(v, policy=date_policy)
                 if res["ok"]:
                     formats.add(res.get("format", "?"))
                 else:
