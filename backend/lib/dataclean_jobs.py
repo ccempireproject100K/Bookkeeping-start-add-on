@@ -160,9 +160,17 @@ async def _run_dedupe(actor, job):
                 await _mark(actor, job["id"],
                             chunks_done=job["chunks_done"])
     cand, stats = linkage._guarded_blocks(feats)
-    if job["list_b_id"]:
+    cross = bool(job["list_b_id"])
+    side_by_id = {}
+    if cross:
         cand = {(i, j) for (i, j) in cand
                 if feats[i]["_side"] != feats[j]["_side"]}
+        # Capture the side map BEFORE _side is popped: cross mode's
+        # population caps are derived per list (linkage._cross_caps),
+        # not from a union frequency.
+        side_by_id = {f["id"]: f["_side"] for f in feats
+                      if f.get("id") is not None}
+        n_a = sum(1 for f in feats if f["_side"] == 0)
         for f in feats:
             f.pop("_side", None)
     name_freq = Counter()
@@ -170,8 +178,17 @@ async def _run_dedupe(actor, job):
         if f["name_key"]:
             name_freq[f["name_key"]] += 1
             name_freq[f["name_key"].split()[0]] += 1
-    suggested, review = linkage._tiered_deterministic(feats, cand,
-                                                      name_freq)
+    # Within-list jobs keep the union-frequency population rules.
+    # Cross jobs skip them: a name carried once per list is a normal
+    # re-listing, and the 39k-pool calibration (> 2 union carriers =
+    # ambiguous) demoted genuine pairs wholesale on a two-list union.
+    # linkage._cross_caps applies the per-list derivation instead.
+    suggested, review = linkage._tiered_deterministic(
+        feats, cand, None if cross else name_freq)
+    if cross:
+        cap_ctx = linkage._cross_cap_context(feats, n_a)
+        suggested, review = linkage._cross_caps(
+            suggested, review, cap_ctx[0], side_by_id, cap_ctx[2])
     # Idempotent artifact rewrite for this job.
     old = await _artifacts(actor).find_list({"job_id": job["id"]},
                                             limit=1000000)
