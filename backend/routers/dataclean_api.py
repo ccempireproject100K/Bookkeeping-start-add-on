@@ -115,13 +115,15 @@ def _mapped_rows(kind: str, rows, csv_text, mapping):
     raise _err(422, "invalid_payload", "send rows or csv_text")
 
 
-def _preview_payload(kind, mapped, mapping):
+def _preview_payload(kind, mapped, mapping, date_policy="us_month_first",
+                     country=None):
     """The internal cleanup-preview computation, verbatim keys."""
-    column_types = {f: _mess.detect_column_type([d.get(f) for d in mapped])
+    column_types = {f: _mess.detect_column_type(
+                        [d.get(f) for d in mapped], date_policy)
                     for f in FIELDS[kind]}
     applied = []
     for idx, d in enumerate(mapped[:50]):
-        _, ch = _cleaning.clean_row(d, kind)
+        _, ch = _cleaning.clean_row(d, kind, country=country)
         applied += [(idx + 2, c) for c in ch]
     sv = _cleanschema.validate_rows(mapped, kind)
     states = {rule: {"enabled": True, "source": "default"}
@@ -132,7 +134,7 @@ def _preview_payload(kind, mapped, mapping):
             "changes_in_first_50_rows": len(applied),
             "held_changes": {}, "held_in_first_50_rows": 0,
             "rule_states": states, "profile": None,
-            "mess_report": _mess.mess_report(mapped),
+            "mess_report": _mess.mess_report(mapped, date_policy),
             "schema": {"blocking": sv["blocking"],
                        "row_errors": sv["row_errors"][:20],
                        "row_error_count": len(sv["row_errors"])},
@@ -144,6 +146,20 @@ class CleanupIn(BaseModel):
     rows: Optional[list] = None
     csv_text: Optional[str] = None
     mapping: Optional[list] = None
+    date_policy: Optional[str] = None
+    country: Optional[str] = None
+
+
+def _resolve_locale(actor, date_policy, country):
+    """Per-request locale values win over the key's stored defaults."""
+    defaults = dca.effective_defaults(actor)
+    policy = date_policy or defaults["date_policy"]
+    if policy not in dca.DATE_POLICIES:
+        raise _err(422, "invalid_date_policy",
+                   f"date_policy must be one of {list(dca.DATE_POLICIES)}")
+    ctry = (country or defaults["country"] or "")
+    ctry = ctry.strip().upper() or None
+    return policy, ctry
 
 
 async def _compute(actor, endpoint, body: CleanupIn, fn):
@@ -154,9 +170,12 @@ async def _compute(actor, endpoint, body: CleanupIn, fn):
                    f"at most {MAX_ROWS} rows per call",
                    max_rows=MAX_ROWS)
     await dca.enforce_limits(actor, endpoint, len(mapped))
-    out = fn(body.kind, mapped, mapping)
+    policy, country = _resolve_locale(actor, body.date_policy, body.country)
+    out = fn(body.kind, mapped, mapping, policy, country)
     out["shape"] = RESULT_SHAPE
     out["api_version"] = "v1"
+    out["date_policy"] = policy
+    out["country"] = country
     await dca.record_usage(actor, endpoint, len(mapped), "ok")
     return out
 
@@ -167,17 +186,20 @@ async def cleanup_preview(body: CleanupIn,
     """Mess report + before/after samples + schema verdict for a file
     or row set. Cleans nothing, stores nothing of the caller's data —
     the only write is the usage-metering row."""
-    return await _compute(actor, "cleanup/preview", body, _preview_payload)
+    return await _compute(
+        actor, "cleanup/preview", body,
+        lambda kind, mapped, mapping, policy, country: _preview_payload(
+            kind, mapped, mapping, policy, country))
 
 
 @router.post("/cleanup/clean")
 async def cleanup_clean(body: CleanupIn,
                         actor: dict = Depends(dca.get_dataclean_actor)):
     """The cleaned records + every change, explainable per field."""
-    def _clean(kind, mapped, _mapping):
+    def _clean(kind, mapped, _mapping, _policy, country):
         records, changes = [], []
         for idx, d in enumerate(mapped):
-            cleaned, ch = _cleaning.clean_row(d, kind)
+            cleaned, ch = _cleaning.clean_row(d, kind, country=country)
             records.append(cleaned)
             changes += [{"row": idx + 2, **c} for c in ch]
         by_rule = {}
@@ -190,6 +212,18 @@ async def cleanup_clean(body: CleanupIn,
 
 class DedupeIn(BaseModel):
     records: list
+    records_b: Optional[list] = None
+    mode: Optional[str] = None
+
+
+def _entities(records, prefix="row"):
+    entities = []
+    for i, r in enumerate(records):
+        e = {k: (str(v).strip() if v is not None else None)
+             for k, v in r.items()}
+        e["id"] = str(r.get("id") or f"{prefix}-{i + 1}")
+        entities.append(e)
+    return entities
 
 
 @router.post("/dedupe/scan")
@@ -198,7 +232,14 @@ async def dedupe_scan(body: DedupeIn,
     """Duplicate-candidate pairs over SUBMITTED records, with the
     engine's evidence shape ({name_similarity, email_match,
     phone_match, address_similarity, why}). Suggestions only — this
-    surface never merges anything."""
+    surface never merges anything.
+
+    Two modes: within-list (default; `records` scanned against itself)
+    and cross-list (`mode="cross"` + `records_b`: pairs form ONLY
+    across the two lists — e.g. a CRM export against the books' vendor
+    list). Pairs are tiered: `pairs` is the suggestion band and
+    `review_pairs` the lower-confidence "possible" band, kept
+    structurally separate in every response."""
     records = body.records
     if not all(isinstance(r, dict) for r in records):
         raise _err(422, "invalid_payload", "records must be a list of objects")
@@ -206,31 +247,46 @@ async def dedupe_scan(body: DedupeIn,
         raise _err(413, "payload_too_large",
                    f"at most {MAX_DEDUPE_RECORDS} records per scan",
                    max_records=MAX_DEDUPE_RECORDS)
-    entities = []
-    for i, r in enumerate(records):
-        e = {k: (str(v).strip() if v is not None else None)
-             for k, v in r.items()}
-        e["id"] = str(r.get("id") or f"row-{i + 1}")
-        entities.append(e)
+    cross = body.mode == "cross" or body.records_b is not None
+    if cross and body.records_b is None:
+        raise _err(422, "invalid_payload",
+                   "mode='cross' requires records_b")
+    entities = _entities(records)
+    if cross:
+        records_b = body.records_b
+        if not all(isinstance(r, dict) for r in records_b):
+            raise _err(422, "invalid_payload",
+                       "records_b must be a list of objects")
+        if len(records_b) > MAX_DEDUPE_RECORDS:
+            raise _err(413, "payload_too_large",
+                       f"at most {MAX_DEDUPE_RECORDS} records per scan",
+                       max_records=MAX_DEDUPE_RECORDS)
+        entities_b = _entities(records_b, prefix="rowb")
+        total = len(entities) + len(entities_b)
+        await dca.enforce_limits(actor, "dedupe/scan", total)
+        result = _linkage.suggest_duplicates_cross(entities, entities_b)
+        await dca.record_usage(actor, "dedupe/scan", total, "ok")
+        return {"shape": RESULT_SHAPE, "api_version": "v1", "mode": "cross",
+                "records": len(entities), "records_b": len(entities_b),
+                "engine": result["engine"],
+                "engine_note": result.get("engine_note"),
+                "pairs": result["pairs"],
+                "review_pairs": result.get("review_pairs", [])}
     await dca.enforce_limits(actor, "dedupe/scan", len(entities))
     result = _linkage.suggest_duplicates(entities)
     await dca.record_usage(actor, "dedupe/scan", len(entities), "ok")
     return {"shape": RESULT_SHAPE, "api_version": "v1",
             "records": len(entities), "engine": result["engine"],
             "engine_note": result.get("engine_note"),
-            "pairs": result["pairs"]}
+            "pairs": result["pairs"],
+            "review_pairs": result.get("review_pairs", [])}
 
 
 class NormalizeIn(BaseModel):
     type: str
     values: list
-
-
-_NORMALIZERS = {
-    "date": _normalize.normalize_date,
-    "phone": _normalize.normalize_phone,
-    "address": _addresses.parse_address,
-}
+    date_policy: Optional[str] = None
+    country: Optional[str] = None
 
 
 @router.post("/normalize")
@@ -239,17 +295,28 @@ async def normalize(body: NormalizeIn,
     """Per-value normalization, returning the engine's result dicts
     verbatim (shape dataclean.result/1): {shape, original, normalized,
     ok, rule, confidence, notes}. Unparseable values come back with
-    ok=false and the original preserved — never invented."""
-    fn = _NORMALIZERS.get(body.type)
-    if fn is None:
+    ok=false and the original preserved — never invented.
+
+    Locale: `date_policy` (us_month_first | day_first | iso_only) and
+    `country` on the call win over the key's stored defaults."""
+    if body.type not in ("date", "phone", "address"):
         raise _err(422, "unknown_type",
-                   f"type must be one of {sorted(_NORMALIZERS)}")
+                   "type must be one of ['address', 'date', 'phone']")
     if len(body.values) > MAX_NORMALIZE_VALUES:
         raise _err(413, "payload_too_large",
                    f"at most {MAX_NORMALIZE_VALUES} values per call",
                    max_values=MAX_NORMALIZE_VALUES)
     await dca.enforce_limits(actor, "normalize", len(body.values))
-    results = [fn(v) for v in body.values]
+    policy, country = _resolve_locale(actor, body.date_policy, body.country)
+    if body.type == "date":
+        results = [_normalize.normalize_date(v, policy=policy)
+                   for v in body.values]
+    elif body.type == "phone":
+        results = [_normalize.normalize_phone(v, region=country or "US")
+                   for v in body.values]
+    else:
+        results = [_addresses.parse_address(v, country=country)
+                   for v in body.values]
     await dca.record_usage(actor, "normalize", len(body.values), "ok")
     return {"shape": RESULT_SHAPE, "api_version": "v1", "type": body.type,
             "results": results}

@@ -26,7 +26,7 @@ from routers import (auth, ledger, products, pos, invoices, cashclose, dashboard
                      whitelabel, entities, cleanup, purchase_orders,
                      fx, market_packs, cfdi, integrations, marketplace,
                      developers, invoice_payments,
-                     dataclean_api, dataclean_admin)
+                     dataclean_api, dataclean_admin, dataclean_jobs)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("mindatease")
@@ -71,7 +71,8 @@ for r in (auth.router, password_reset.router, ledger.router, products.router, po
           marketplace.router, developers.router, invoice_payments.router,
           pdftools.router, onboarding.router, welcome_gift.router, trial.router, guide.router, importer.router, autopay.router,
           taxpacket.router, dedupe.router,
-          dataclean_api.router, dataclean_admin.router):
+          dataclean_api.router, dataclean_admin.router,
+          dataclean_jobs.router):
     api_router.include_router(r)
 api_router.include_router(plans.router)
 
@@ -158,6 +159,17 @@ async def startup():
         (db.dataclean_api_keys, [("tenant_id", 1), ("created_at", -1)], {}),
         (db.dataclean_api_usage, [("tenant_id", 1), ("created_at", -1)], {}),
         (db.dataclean_api_usage, [("key_id", 1), ("created_at", -1)], {}),
+        # DataClean power-up: stored lists, batch jobs, lookup cache.
+        (db.dataclean_lists, [("tenant_id", 1), ("created_at", -1)], {}),
+        (db.dataclean_list_records, [("tenant_id", 1), ("list_id", 1)], {}),
+        (db.dataclean_list_suggestions, [("tenant_id", 1), ("list_id", 1), ("status", 1)], {}),
+        (db.dataclean_list_merges, [("tenant_id", 1), ("list_id", 1)], {}),
+        (db.dataclean_list_schedules, [("tenant_id", 1), ("next_run_at", 1)], {}),
+        (db.dataclean_jobs, [("tenant_id", 1), ("created_at", -1)], {}),
+        (db.dataclean_jobs, [("status", 1), ("created_at", 1)], {}),
+        (db.dataclean_job_artifacts, [("tenant_id", 1), ("job_id", 1), ("seq", 1)], {}),
+        (db.dataclean_lookup_cache, [("tenant_id", 1), ("kind", 1), ("value_hash", 1)], {"unique": True}),
+        (db.dataclean_connector_tokens, [("tenant_id", 1), ("provider", 1)], {"unique": True}),
         # Subscription billing (Stripe): the billing webhook shares the
         # stripe_webhook_events unique index above; the referral outbox
         # holds exactly one record per product payment (the empire
