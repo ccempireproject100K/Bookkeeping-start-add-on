@@ -33,6 +33,21 @@ works the skill inside this repo.
 | `coverage_census_before_complete` | Before any surface is reported complete: enumerate the universe independently and recount — e.g. the niche census (36 packs × subdomains × icons) behind the subdomain wiring. |
 | `lost_report_recovery_from_disk` | When a crew's completion report is cut off: recover the work from the staging tree/disk first; respawn only what is actually missing. |
 
+## DataClean build skills (ADOPT verdict; MIT)
+
+Equipped for the DataClean power-up build (owner directive 2026-11-03).
+Full text + provenance live in the operator's central library
+(`~/workspace/custom-skills/`, each with its upstream license file);
+mapping record: `~/workspace/buildout/security-skills-harvest/SHORTLIST.md`
+§(b) (operator's workspace). These are named here, not copied.
+
+| Skill | Applies where in this repo |
+|---|---|
+| `data-cleaning-pipeline` | `backend/lib/dataclean/` — staged normalize → validate → dedupe pipeline discipline; engine stays framework-free and lifts wholesale. |
+| `data-qa` | DataClean test gates: labeled-fixture precision == 1.00 ship gate, verbatim-post regression, per-phase test evidence before any phase is called done. |
+| `crm-data-cleanup` | Merge law for every surface incl. the Studio queue: never auto-merge on shared/role identifiers, never overwrite a non-empty value with an empty one, flag-don't-delete, the human executes merges — snapshot-backed and reversible. |
+| `csv-excel-merger` | Bulk import + cross-list work: importer mapping discipline, cross-list dedupe semantics (pairs only across the A × B boundary), batch job chunking. |
+
 ## ADAPT methods — used by reference only (never copied)
 
 | Method (source) | Applies where in this repo |
