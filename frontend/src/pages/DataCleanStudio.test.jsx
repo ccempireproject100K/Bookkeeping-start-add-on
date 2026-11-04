@@ -152,3 +152,49 @@ test("normalize: posts typed values and renders the engine's verdicts", async ()
     { headers: { "X-API-Key": KEY } });
   expect(screen.getByTestId("studio-norm-results").textContent).toContain("+15125550134");
 });
+
+test("queue: clean -> save list -> scan -> merge hits the queue endpoints", async () => {
+  const SUGG = {
+    id: "sugg-1", a_id: "r1", b_id: "r2", a_name: "Acme", b_name: "ACME",
+    score: 0.91, band: "suggested", status: "pending",
+    evidence: { why: "exact email match" },
+  };
+  api.post.mockImplementation((url) => {
+    if (url.includes("cleanup/clean")) return Promise.resolve({
+      kind: "customers", rows: 2,
+      records: [
+        { name: "Acme", email: "a@x.example", phone: "", address: "" },
+        { name: "ACME", email: "a@x.example", phone: "5125550134", address: "" },
+      ],
+      changes: [],
+    });
+    if (url === "/v1/dataclean/lists") return Promise.resolve({
+      list: { id: "list-1", name: "customers — today", record_count: 2 } });
+    if (url.includes("/scan")) return Promise.resolve({
+      list_id: "list-1", suggested_pairs: 1, review_pairs: 0 });
+    if (url.includes("/merge")) return Promise.resolve({ merge: { id: "m1" } });
+    return Promise.resolve({});
+  });
+  api.get.mockImplementation((url) => {
+    if (url.includes("/usage")) return Promise.resolve(USAGE);
+    if (url.includes("status=pending")) return Promise.resolve({ suggestions: [SUGG] });
+    if (url.includes("status=dismissed")) return Promise.resolve({ suggestions: [] });
+    if (url.includes("/merges")) return Promise.resolve({ merges: [] });
+    return Promise.resolve({});
+  });
+  renderPage();
+  await connect();
+  fireEvent.change(screen.getByTestId("studio-csv"), {
+    target: { value: "name,email\nAcme,a@x.example\nACME,a@x.example\n" } });
+  fireEvent.click(screen.getByTestId("studio-clean"));
+  const saveBtn = await screen.findByTestId("studio-queue-save");
+  await waitFor(() => expect(saveBtn.disabled).toBe(false));
+  fireEvent.click(saveBtn);
+  fireEvent.click(await screen.findByTestId("studio-queue-scan"));
+  const mergeBtn = await screen.findByTestId("studio-queue-merge-sugg-1");
+  await waitFor(() => expect(mergeBtn.disabled).toBe(false));
+  fireEvent.click(mergeBtn);
+  await waitFor(() => expect(api.post).toHaveBeenCalledWith(
+    "/v1/dataclean/lists/list-1/suggestions/sugg-1/merge", {},
+    { headers: { "X-API-Key": KEY } }));
+});

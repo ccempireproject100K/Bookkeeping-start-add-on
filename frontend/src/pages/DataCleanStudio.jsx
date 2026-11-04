@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import {
   UploadCloud, Sparkles, ShieldCheck, ShieldAlert, KeyRound, LogOut,
-  Loader2, Eye, Download, ScanSearch, Wand2, Copy,
+  Loader2, Eye, Download, ScanSearch, Wand2, Copy, ListPlus, Undo2,
 } from "lucide-react";
 import { api, errMsg } from "@/lib/api";
 import { PageHeader, Card } from "@/components/Page";
@@ -16,7 +16,8 @@ import {
 } from "@/lib/cleanupConsole";
 import {
   KIND_FIELDS, STUDIO_CAPS, dedupeBatch, keyLooksValid, recordsToCsv,
-  resolvePair, splitValues, cleanSummary,
+  resolvePair, splitValues, cleanSummary, queueGroups, queueListPayload,
+  decisionsFilename,
 } from "@/lib/datacleanStudio";
 
 const selectCls = "h-9 rounded-md border border-[#222838] bg-[#14171E] px-2.5 text-sm text-gray-200 focus:outline-none focus:ring-1 focus:ring-amber-500/60";
@@ -58,6 +59,11 @@ export default function DataCleanStudio() {
   const [normText, setNormText] = useState("");
   const [normResults, setNormResults] = useState(null);
   const [normBusy, setNormBusy] = useState(false);
+  const [qList, setQList] = useState(null);
+  const [qPending, setQPending] = useState([]);
+  const [qDismissed, setQDismissed] = useState([]);
+  const [qMerges, setQMerges] = useState([]);
+  const [qBusy, setQBusy] = useState(false);
   const fileRef = useRef(null);
 
   const dc = {
@@ -129,6 +135,66 @@ export default function DataCleanStudio() {
       setNormResults(out.results || []);
     } catch (e) { toast.error(errMsg(e)); }
     finally { setNormBusy(false); }
+  };
+
+  // --- Merge review queue (stored lists; power-up Phase B) --------
+  // The queue works on a stored copy of the cleaned records. Merges
+  // are human clicks only: the backend fills blanks on the survivor,
+  // snapshots both records, and every merge can be undone.
+  const refreshQueue = async (listId) => {
+    const [pend, dism, merges] = await Promise.all([
+      dc.get(`/v1/dataclean/lists/${listId}/suggestions?status=pending&limit=500`),
+      dc.get(`/v1/dataclean/lists/${listId}/suggestions?status=dismissed&limit=500`),
+      dc.get(`/v1/dataclean/lists/${listId}/merges`),
+    ]);
+    setQPending(pend.suggestions || []);
+    setQDismissed(dism.suggestions || []);
+    setQMerges(merges.merges || []);
+  };
+
+  const saveList = async () => {
+    setQBusy(true);
+    try {
+      const name = `${kind} — ${new Date().toLocaleDateString()}`;
+      const out = await dc.post("/v1/dataclean/lists",
+        queueListPayload(cleanRecords, kind, name));
+      setQList(out.list);
+      await refreshQueue(out.list.id);
+      toast.success(t("datacleanStudio.queueSaved"));
+    } catch (e) { toast.error(errMsg(e)); }
+    finally { setQBusy(false); }
+  };
+
+  const scanList = async () => {
+    if (!qList) return;
+    setQBusy(true);
+    try {
+      await dc.post(`/v1/dataclean/lists/${qList.id}/scan`, {});
+      await refreshQueue(qList.id);
+    } catch (e) { toast.error(errMsg(e)); }
+    finally { setQBusy(false); }
+  };
+
+  const queueAct = async (path, okMsg) => {
+    setQBusy(true);
+    try {
+      await dc.post(path, {});
+      if (okMsg) toast.success(okMsg);
+      await refreshQueue(qList.id);
+    } catch (e) { toast.error(errMsg(e)); }
+    finally { setQBusy(false); }
+  };
+
+  const exportDecisions = async () => {
+    try {
+      const out = await dc.get(`/v1/dataclean/lists/${qList.id}/export`);
+      const blob = new Blob([JSON.stringify(out, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = decisionsFilename(qList.name);
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+    } catch (e) { toast.error(errMsg(e)); }
   };
 
   const downloadClean = () => {
@@ -383,6 +449,91 @@ export default function DataCleanStudio() {
               </Card>;
             })}
       </section>}
+
+      <Card className="space-y-4" data-testid="studio-queue">
+        <div className="flex items-center gap-2">
+          <ListPlus size={16} className="text-amber-400" />
+          <h3 className="font-display font-semibold">{t("datacleanStudio.queueTitle")}</h3>
+        </div>
+        <p className="text-sm text-gray-400 max-w-2xl">{t("datacleanStudio.queueBody")}</p>
+        {!qList && <div>
+          <Button data-testid="studio-queue-save" onClick={saveList} disabled={qBusy || !cleanRecords.length}>
+            {qBusy ? <Loader2 size={15} className="animate-spin motion-reduce:animate-none" /> : <ListPlus size={15} />}
+            {t("datacleanStudio.queueSaveList")}
+          </Button>
+        </div>}
+        {qList && <div className="space-y-4">
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="text-sm text-gray-300">{t("datacleanStudio.queueListLabel")}: <span className="font-mono text-amber-300/90">{qList.name}</span></span>
+            <Button size="sm" variant="outline" data-testid="studio-queue-scan" onClick={scanList} disabled={qBusy}>
+              {qBusy ? <Loader2 size={13} className="animate-spin motion-reduce:animate-none" /> : <ScanSearch size={13} />}
+              {t("datacleanStudio.queueScan")}
+            </Button>
+            <Button size="sm" variant="ghost" data-testid="studio-queue-export" onClick={exportDecisions}>
+              <Download size={13} />{t("datacleanStudio.queueExport")}
+            </Button>
+          </div>
+          {qPending.length === 0 && qDismissed.length === 0 &&
+            <p className="text-sm text-gray-500">{t("datacleanStudio.queueEmpty")}</p>}
+          {(() => {
+            const groups = queueGroups(qPending);
+            const bandSection = (band, title, hint) => groups[band].length > 0 && (
+              <div key={band} className="space-y-2">
+                <h4 className="text-sm font-semibold text-gray-200">{title}</h4>
+                {hint && <p className="text-xs text-gray-500">{hint}</p>}
+                {groups[band].map((s) => (
+                  <div key={s.id} data-testid={`studio-queue-pair-${s.id}`}
+                    className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-[#222838] bg-[#10131a] px-4 py-3">
+                    <div className="min-w-0">
+                      <p className="text-sm text-gray-200 truncate">{s.a_name} <span className="text-gray-600">/</span> {s.b_name}</p>
+                      {s.evidence?.why && <p className="text-xs text-gray-500 truncate">{s.evidence.why}</p>}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-sm text-amber-300/90">{Math.round((s.score || 0) * 100)}%</span>
+                      <Button size="sm" data-testid={`studio-queue-merge-${s.id}`} disabled={qBusy}
+                        onClick={() => queueAct(`/v1/dataclean/lists/${qList.id}/suggestions/${s.id}/merge`, t("datacleanStudio.queueMergedToast"))}>
+                        {t("datacleanStudio.queueMerge")}
+                      </Button>
+                      <Button size="sm" variant="outline" data-testid={`studio-queue-dismiss-${s.id}`} disabled={qBusy}
+                        onClick={() => queueAct(`/v1/dataclean/lists/${qList.id}/suggestions/${s.id}/dismiss`)}>
+                        {t("datacleanStudio.queueDismiss")}
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            );
+            return <>
+              {bandSection("suggested", t("datacleanStudio.queueSuggested"), null)}
+              {bandSection("review", t("datacleanStudio.queueReviewBand"), t("datacleanStudio.queueReviewHint"))}
+            </>;
+          })()}
+          {qDismissed.length > 0 && <div className="space-y-2">
+            <h4 className="text-sm font-semibold text-gray-400">{t("datacleanStudio.queueDismissed")}</h4>
+            {qDismissed.map((s) => (
+              <div key={s.id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-[#1a1f2b] px-4 py-2">
+                <span className="text-sm text-gray-400 truncate">{s.a_name} <span className="text-gray-600">/</span> {s.b_name}</span>
+                <Button size="sm" variant="ghost" data-testid={`studio-queue-restore-${s.id}`} disabled={qBusy}
+                  onClick={() => queueAct(`/v1/dataclean/lists/${qList.id}/suggestions/${s.id}/restore`)}>
+                  {t("datacleanStudio.queueRestore")}
+                </Button>
+              </div>
+            ))}
+          </div>}
+          {qMerges.length > 0 && <div className="space-y-2">
+            <h4 className="text-sm font-semibold text-gray-400">{t("datacleanStudio.queueMerged")}</h4>
+            {qMerges.map((m) => (
+              <div key={m.id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-[#1a1f2b] px-4 py-2">
+                <span className="text-sm text-gray-300 truncate">{m.survivor_name} <span className="text-gray-600">←</span> {m.absorbed_name}</span>
+                <Button size="sm" variant="ghost" data-testid={`studio-queue-reverse-${m.id}`} disabled={qBusy}
+                  onClick={() => queueAct(`/v1/dataclean/lists/${qList.id}/merges/${m.id}/reverse`)}>
+                  <Undo2 size={13} />{t("datacleanStudio.queueReverse")}
+                </Button>
+              </div>
+            ))}
+          </div>}
+        </div>}
+      </Card>
 
       <Card className="space-y-4">
         <div className="flex items-center gap-2">

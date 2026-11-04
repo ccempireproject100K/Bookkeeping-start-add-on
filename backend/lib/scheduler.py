@@ -62,6 +62,8 @@ FX_JOB_ID = "fx-rates-daily"
 RECURRING_JOB_ID = "recurring-invoices"
 BANK_SYNC_JOB_ID = "bank-sync"
 DEDUPE_JOB_ID = "dedupe-scans"
+DATACLEAN_JOB_ID = "dataclean-jobs"
+DATACLEAN_LISTS_JOB_ID = "dataclean-list-scans"
 
 _state = {
     "running": False,
@@ -126,6 +128,26 @@ def bank_sync_enabled() -> bool:
 
 def dedupe_scans_enabled() -> bool:
     return os.environ.get("DEDUPE_SCANS_ENABLED", "true").lower() == "true"
+
+
+async def run_dataclean_powerup_sweeps() -> dict:
+    """DataClean power-up sweeps: resume queued/stale batch jobs, then
+    run due continuous list scans (Phase C). Both halves are safe to
+    run hourly: jobs are chunk-marked and idempotent, list scans only
+    ever store suggestions + drift reports."""
+    out = {}
+    try:
+        from lib import dataclean_jobs as dc_jobs
+        if dc_jobs.jobs_enabled():
+            out["jobs"] = await dc_jobs.run_pending_jobs()
+    except Exception as exc:  # a sweep must never break the scheduler
+        logger.warning("dataclean jobs sweep failed: %s", exc)
+    try:
+        from lib import dataclean_schedules as dc_sched
+        out["list_scans"] = await dc_sched.run_dataclean_list_scans()
+    except Exception as exc:
+        logger.warning("dataclean list-scan sweep failed: %s", exc)
+    return out
 
 
 def bank_sync_interval_hours() -> int:
@@ -561,6 +583,21 @@ async def start() -> bool:
     else:
         logger.info("Scheduler: dedupe scans disabled "
                     "(DEDUPE_SCANS_ENABLED != true).")
+    try:
+        _scheduler.add_job(
+            run_dataclean_powerup_sweeps,
+            IntervalTrigger(hours=1),
+            id=DATACLEAN_JOB_ID,
+            replace_existing=True,
+            max_instances=1,
+            coalesce=True,
+            misfire_grace_time=900,
+        )
+        logger.info("Scheduler: dataclean power-up sweeps hourly "
+                    "(jobs resume + continuous list scans)")
+    except Exception as exc:  # never let dataclean break the scheduler
+        logger.warning("Scheduler: dataclean sweeps not registered: %s",
+                       exc)
     _scheduler.start()
     job = _scheduler.get_job(JOB_ID)
     _state.update(

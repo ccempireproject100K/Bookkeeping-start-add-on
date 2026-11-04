@@ -128,3 +128,32 @@ describe("splitValues", () => {
     expect(splitValues(null)).toEqual([]);
   });
 });
+
+describe("merge review queue helpers (power-up)", () => {
+  const { queueGroups, queueListPayload, projectRecords, decisionsFilename } =
+    require("./datacleanStudio");
+  test("queueGroups splits bands and sorts by score desc", () => {
+    const g = queueGroups([
+      { id: "1", band: "review", score: 0.7 },
+      { id: "2", band: "suggested", score: 0.85 },
+      { id: "3", score: 0.99 },
+      { id: "4", band: "review", score: 0.78 },
+    ]);
+    expect(g.suggested.map((s) => s.id)).toEqual(["3", "2"]);
+    expect(g.review.map((s) => s.id)).toEqual(["4", "1"]);
+    expect(queueGroups(null)).toEqual({ suggested: [], review: [] });
+  });
+  test("queueListPayload projects flat fields, uncapped, no engine keys", () => {
+    const rows = [{ name: "A", email: "a@x.example", name_key: "a", address_parts: {} },
+                  { name: "B", phone: "512" }];
+    expect(queueListPayload(rows, "customers", "My list")).toEqual({
+      name: "My list", kind: "customers",
+      records: [{ name: "A", email: "a@x.example" }, { name: "B", phone: "512" }],
+    });
+    expect(projectRecords(null, "customers")).toEqual([]);
+  });
+  test("decisionsFilename slugs the list name", () => {
+    expect(decisionsFilename("March  Imports!!")).toBe("dataclean-decisions-march-imports.json");
+    expect(decisionsFilename("")).toBe("dataclean-decisions-list.json");
+  });
+});

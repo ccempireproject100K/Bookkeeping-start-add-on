@@ -27,10 +27,11 @@ KNOWN_RULES = [
     "email:trim-and-lowercase",
     "phone:libphonenumber-e164",
     "address:usaddress-canonical",
+    "address:generic-intl",
 ]
 
 
-def _clean(doc, kind, disabled_rules):
+def _clean(doc, kind, disabled_rules, country=None):
     out = dict(doc)
     changes = []
     held = []
@@ -74,25 +75,30 @@ def _clean(doc, kind, disabled_rules):
 
     address = doc.get("address")
     if address:
-        res = parse_address(address)
+        intl = bool(country) and str(country).strip().upper() not in (
+            "US", "USA")
+        rule = "address:generic-intl" if intl else "address:usaddress-canonical"
+        res = parse_address(address, country=country)
         if res["ok"]:
             # address_parts is a parse product (set whenever the parse
             # succeeds and the rule is live, as before); only the
-            # display-line rewrite is the rule's "change".
-            if "address:usaddress-canonical" not in disabled:
+            # display-line rewrite is the rule's "change". For the intl
+            # lane the "rewrite" is whitespace-collapsing only — foreign
+            # address text is never re-formed.
+            if rule not in disabled:
                 out["address_parts"] = res["parts"]
             attempt("address", address, res["normalized"],
-                    "address:usaddress-canonical", res["confidence"])
+                    rule, res["confidence"])
 
     return out, changes, held
 
 
-def clean_row(doc, kind):
-    out, changes, _held = _clean(doc, kind, ())
+def clean_row(doc, kind, country=None):
+    out, changes, _held = _clean(doc, kind, (), country)
     return out, changes
 
 
-def clean_row_full(doc, kind, disabled_rules=()):
+def clean_row_full(doc, kind, disabled_rules=(), country=None):
     """(cleaned, applied_changes, held_changes) — held changes are the
     ones a profile/run toggle suppressed: reported, never applied."""
-    return _clean(doc, kind, disabled_rules)
+    return _clean(doc, kind, disabled_rules, country)
