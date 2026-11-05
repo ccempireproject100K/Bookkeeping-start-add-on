@@ -6,6 +6,7 @@ import {
   UnknownJurisdictionError,
 } from '../src/index.js';
 import { calculate as calculateNY } from '../src/states/newyork.js';
+import { calculate as calculateCA } from '../src/states/california.js';
 import { progressiveCalculator } from '../src/states/engine.js';
 import { CALIFORNIA_2026 } from '../src/config/california-2026.js';
 import { NEW_YORK_2026 } from '../src/config/newyork-2026.js';
@@ -118,7 +119,7 @@ describe('New York — head of household uses its own threshold table', () => {
   });
 });
 
-describe('California — personal exemption credit is MODELED (config 2026.3.0)', () => {
+describe('California — personal exemption credit is MODELED (since config 2026.3.0)', () => {
   // Built 2026-11-01 (gap sweep S3). Before this build the credit was a
   // documented omission and the golden CA tax on this profile was
   // $2,770.97; the ONLY change is the credit: −$158.00 → $2,612.97.
@@ -142,7 +143,7 @@ describe('California — personal exemption credit is MODELED (config 2026.3.0)'
     expect(step?.detail).toContain('$158');
     expect(step?.detail).toContain('no phaseout applies');
     // Config discipline: the workpaper records the bumped config version.
-    expect(caPaper?.configVersion).toBe('2026.3.0');
+    expect(caPaper?.configVersion).toBe('2026.4.0');
   });
 
   it('gives joint filers two exemptions — $316', () => {
@@ -195,24 +196,196 @@ describe('California — personal exemption credit is MODELED (config 2026.3.0)'
   });
 });
 
-describe('California — dependent exemption credit omission is disclosed, not silent', () => {
+describe('California — dependent exemption credit is MODELED (config 2026.4.0)', () => {
+  // Built 2026-11-05 (gap audit). $491 per dependent (FTB 2026
+  // indexing, R&TC §17054(d)(1)), supplied per state as
+  // profile.state.CA.dependents. Same Form 540 line 32 as the personal
+  // credit; the AGI Limitation Worksheet phases the dependent pool out
+  // SEPARATELY from the personal pool (2025 Form 540 instructions,
+  // worksheet lines j–m).
+
+  it('leaves the golden case untouched when no dependents are supplied', () => {
+    const r = calculateTax(80_000, 'US-CA', GOLDEN);
+    expect(r.state?.totalTaxCents).toBe(261_297);
+    expect(r.breakdown.some((c) => c.type === 'state_dependent_exemption_credit')).toBe(false);
+    const caPaper = r.workpapers.find((w) => w.jurisdiction === 'US-CA');
+    expect(caPaper?.steps.some((s) => s.label === 'Dependent exemption credit')).toBe(false);
+  });
+
+  it('leaves the golden case untouched when dependents is explicitly 0', () => {
+    const r = calculateTax(80_000, 'US-CA', {
+      filingStatus: 'single',
+      state: { CA: { dependents: 0 } },
+    });
+    expect(r.state?.totalTaxCents).toBe(261_297);
+    expect(r.totalLiabilityCents).toBe(1_664_746 + 261_297);
+    expect(r.breakdown.some((c) => c.type === 'state_dependent_exemption_credit')).toBe(false);
+  });
+
+  it('credits $491 per dependent on the golden profile — 2 dependents', () => {
+    // Bracket tax $2,770.97 − $158 personal credit − 2 × $491 dependent
+    // credit = $1,630.97. Federal AGI is far below the phaseout
+    // threshold, so the full credit applies.
+    const r = calculateTax(80_000, 'US-CA', {
+      filingStatus: 'single',
+      state: { CA: { dependents: 2 } },
+    });
+    const credit = r.breakdown.find((c) => c.type === 'state_dependent_exemption_credit');
+    expect(credit?.jurisdiction).toBe('US-CA');
+    expect(credit?.amountCents).toBe(-98_200); // −2 × $491.00
+    expect(r.state?.totalTaxCents).toBe(163_097);
+    expect(r.totalLiabilityCents).toBe(1_664_746 + 163_097);
+    // Bracket tax and both credits reconcile to the state total.
+    const tax = r.breakdown.find((c) => c.type === 'state_income_tax');
+    const personal = r.breakdown.find((c) => c.type === 'state_exemption_credit');
+    expect(
+      (tax?.amountCents ?? 0) + (personal?.amountCents ?? 0) + (credit?.amountCents ?? 0),
+    ).toBe(r.state?.totalTaxCents);
+  });
+
+  it('is traced in the CA workpaper with its amount', () => {
+    const r = calculateTax(80_000, 'US-CA', {
+      filingStatus: 'single',
+      state: { CA: { dependents: 2 } },
+    });
+    const step = r.state?.workpaper.steps.find((s) => s.label === 'Dependent exemption credit');
+    expect(step).toBeDefined();
+    expect(step?.amountCents).toBe(-98_200);
+    expect(step?.detail).toContain('2 dependent(s) × $491');
+    expect(step?.detail).toContain('no phaseout applies');
+  });
+
+  it('phases each dependent credit out by the same $6 per whole step', () => {
+    // $300k profit → federal AGI $284,543.77 → 10 whole steps × $6 =
+    // $60 off EACH credit (see the personal-credit suite): personal
+    // $158 − $60 = $98; dependent $491 − $60 = $431.
+    const withDep = calculateTax(300_000, 'US-CA', {
+      filingStatus: 'single',
+      state: { CA: { dependents: 1 } },
+    });
+    const without = calculateTax(300_000, 'US-CA', GOLDEN);
+    expect(
+      withDep.breakdown.find((c) => c.type === 'state_dependent_exemption_credit')?.amountCents,
+    ).toBe(-43_100);
+    expect((without.state?.totalTaxCents ?? 0) - (withDep.state?.totalTaxCents ?? 0)).toBe(43_100);
+    const step = withDep.state?.workpaper.steps.find(
+      (s) => s.label === 'Dependent exemption credit',
+    );
+    expect(step?.detail).toContain('10 whole $2,500 phaseout step(s)');
+    expect(step?.detail).toContain('separately');
+  });
+
+  it('uses $1,250 phaseout steps for married filing separately', () => {
+    // Same AGI as the single case → 20 steps × $6 = $120 per credit →
+    // $491 − $120 = $371 per dependent; 2 dependents = $742.
+    const mfs = calculateTax(300_000, 'US-CA', {
+      filingStatus: 'married_filing_separately',
+      state: { CA: { dependents: 2 } },
+    });
+    expect(
+      mfs.breakdown.find((c) => c.type === 'state_dependent_exemption_credit')?.amountCents,
+    ).toBe(-74_200);
+  });
+
+  it('floors the dependent pool separately — excess personal phaseout cannot eat it', () => {
+    // Direct state call at federal AGI $385,000 (single): excess
+    // $124,222 → 50 whole steps × $6 = $300 off each credit. The
+    // personal credit ($158) is fully phased out, but the dependent
+    // credit keeps $491 − $300 = $191. A single combined pool would
+    // wrongly leave only ($158 + $491) − 2 × $300 = $49 of total
+    // credit — the FTB worksheet computes the dependent pool on its
+    // own lines (j–m), floored at $0 alone.
+    const r = calculateCA({
+      netProfitCents: 0,
+      federalAgiCents: 38_500_000,
+      profile: { filingStatus: 'single', state: { CA: { dependents: 1 } } },
+    });
+    expect(r.status).toBe('OK');
+    expect(
+      r.components.find((c) => c.type === 'state_dependent_exemption_credit')?.amountCents,
+    ).toBe(-19_100);
+    // Personal credit fully phased out at this AGI: no component.
+    expect(r.components.some((c) => c.type === 'state_exemption_credit')).toBe(false);
+    const tax = r.components.find((c) => c.type === 'state_income_tax');
+    expect(r.totalTaxCents).toBe((tax?.amountCents ?? 0) - 19_100);
+  });
+
+  it('is nonrefundable — the combined credits cannot take the tax below $0', () => {
+    // Joint at $80k: bracket tax $1,186.53; personal credit $316
+    // leaves $870.53; 3 dependents claim $1,473 but only the remaining
+    // $870.53 can apply → state total exactly $0.
+    const mfj = calculateTax(80_000, 'US-CA', {
+      filingStatus: 'married_filing_jointly',
+      state: { CA: { dependents: 3 } },
+    });
+    expect(mfj.breakdown.find((c) => c.type === 'state_exemption_credit')?.amountCents).toBe(
+      -31_600,
+    );
+    expect(
+      mfj.breakdown.find((c) => c.type === 'state_dependent_exemption_credit')?.amountCents,
+    ).toBe(-87_053);
+    expect(mfj.state?.totalTaxCents).toBe(0);
+  });
+
+  it('emits no credit component when the bracket tax is already $0', () => {
+    const tiny = calculateTax(1_000, 'US-CA', {
+      filingStatus: 'single',
+      state: { CA: { dependents: 3 } },
+    });
+    expect(tiny.state?.totalTaxCents).toBe(0);
+    expect(tiny.breakdown.some((c) => c.type === 'state_dependent_exemption_credit')).toBe(false);
+  });
+
+  it('sanitizes the dependents input — fractional floors; negative counts as none', () => {
+    const frac = calculateTax(80_000, 'US-CA', {
+      filingStatus: 'single',
+      state: { CA: { dependents: 1.9 } },
+    });
+    expect(
+      frac.breakdown.find((c) => c.type === 'state_dependent_exemption_credit')?.amountCents,
+    ).toBe(-49_100);
+    const neg = calculateTax(80_000, 'US-CA', {
+      filingStatus: 'single',
+      state: { CA: { dependents: -2 } },
+    });
+    expect(neg.state?.totalTaxCents).toBe(261_297);
+    expect(neg.breakdown.some((c) => c.type === 'state_dependent_exemption_credit')).toBe(false);
+  });
+
+  it('does not leak into other states — NY ignores the CA namespace', () => {
+    const ny = calculateTax(80_000, 'US-NY', {
+      filingStatus: 'single',
+      state: { CA: { dependents: 2 } },
+    });
+    expect(ny.state?.totalTaxCents).toBe(341_780);
+    expect(ny.breakdown.some((c) => c.type === 'state_dependent_exemption_credit')).toBe(false);
+  });
+});
+
+describe('California — blind / age-65 omission is disclosed, not silent', () => {
   const r = calculateTax(80_000, 'US-CA', GOLDEN);
 
   it('carries the remaining omission notice in the CA workpaper steps', () => {
     const caPaper = r.workpapers.find((w) => w.jurisdiction === 'US-CA');
-    const step = caPaper?.steps.find((s) => s.label.includes('Dependent exemption credit'));
+    const step = caPaper?.steps.find((s) => s.label.includes('Blind / age-65'));
     expect(step).toBeDefined();
     expect(step?.detail).toContain('NOT modeled');
-    expect(step?.detail).toContain('$491');
+    expect(step?.detail).toContain('$158');
     expect(step?.detail).toContain('overstate');
   });
 
   it('carries the remaining omission notice in the CA result notes', () => {
     expect(
-      r.state?.notes.some(
-        (n) => n.includes('dependent exemption credit') && n.includes('NOT modeled'),
-      ),
+      r.state?.notes.some((n) => n.includes('blind and age-65') && n.includes('NOT modeled')),
     ).toBe(true);
+  });
+
+  it('no longer claims the dependent credit is unmodeled', () => {
+    expect(r.state?.notes.some((n) => n.includes('dependent exemption credit is NOT modeled'))).toBe(
+      false,
+    );
+    const caPaper = r.workpapers.find((w) => w.jurisdiction === 'US-CA');
+    expect(caPaper?.steps.some((s) => s.label.includes('Dependent exemption credit —'))).toBe(false);
   });
 });
 

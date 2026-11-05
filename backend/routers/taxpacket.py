@@ -220,6 +220,12 @@ class TaxEstimateIn(BaseModel):
     prior_year_tax: Optional[float] = None
     prior_year_agi: Optional[float] = None
     payments_already_made: Optional[float] = None
+    # Dependent count for state dependent exemption credits. Passed to
+    # the engine namespaced as profile.state.CA.dependents — the CA
+    # calculator is the only consumer today (CA dependent exemption
+    # credit, $491/dependent TY2026); other jurisdictions ignore the CA
+    # namespace by construction.
+    dependents: Optional[int] = None
 
 
 @router.post("/{year}/tax-estimate")
@@ -240,6 +246,11 @@ async def compute_tax_estimate(year: int, body: TaxEstimateIn,
         v = getattr(body, src)
         if v is not None:
             profile[dst] = v
+    if body.dependents is not None:
+        if body.dependents < 0:
+            raise HTTPException(status_code=422,
+                                detail="dependents must be >= 0")
+        profile["state"] = {"CA": {"dependents": body.dependents}}
     try:
         result = await run_tax_estimate(net_cents, body.jurisdiction, profile)
     except TaxEngineUnavailable as e:

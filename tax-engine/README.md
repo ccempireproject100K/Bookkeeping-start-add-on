@@ -225,11 +225,18 @@ per-jurisdiction health list:
    Mental Health Services Tax — with the FTB high-income phaseout
    ($6 per exemption per whole $2,500 of federal AGI over $260,778
    single/MFS, $391,173 HoH, $521,561 joint; $1,250 steps for MFS).
-   The **dependent exemption credit ($491 per dependent) and the
-   blind / age-65 exemption credits are NOT modeled** — the profile
-   carries no dependents/blind/age inputs — so CA estimates for filers
-   with dependents overstate tax by up to $491 per dependent; every CA
-   result discloses this in its workpapers and notes. NY simplifications:
+   The **dependent exemption credit IS modeled** (since config
+   2026.4.0, 2026-11-05): $491 per dependent, supplied per state as
+   `profile.state.CA.dependents`, nonrefundable against the bracket tax
+   only — never against the Mental Health Services Tax — and phased out
+   on the same worksheet, except that FTB phases the dependent pool
+   out separately from the personal pool (each dependent credit is
+   reduced $6 per whole step; each pool floors at $0 on its own). The
+   **blind / age-65 exemption credits ($158 each) are NOT modeled** —
+   the profile carries no blindness/age inputs — so CA estimates for
+   blind or age-65 filers overstate tax by up to $158 per qualifying
+   exemption; every CA result discloses this in its workpapers and
+   notes. NY simplifications:
    the tax-benefit recapture above $107,650 of NY AGI is not modeled;
    MCTMT is not modeled.
 9. State due dates reuse the federal statutory dates and federal holiday

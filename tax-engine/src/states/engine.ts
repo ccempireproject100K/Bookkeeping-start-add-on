@@ -68,6 +68,20 @@ function effectiveStateProfile(cfg: StateConfig, profile: TaxProfile): TaxProfil
   return eff;
 }
 
+/**
+ * Dependent count for a state's dependent exemption credit, from
+ * profile.state[CODE].dependents. Sanitized: only a finite number
+ * counts, floored to a whole dependent and clamped at 0 — a malformed
+ * input means "no dependents supplied", never a fractional or negative
+ * credit.
+ */
+function dependentsFor(cfg: StateConfig, profile: TaxProfile): number {
+  const raw = profile.state?.[cfg.stateCode]?.['dependents'];
+  return typeof raw === 'number' && Number.isFinite(raw)
+    ? Math.max(0, Math.floor(raw))
+    : 0;
+}
+
 /** Generic progressive-bracket state engine (CA, NY). All state-specific
  *  behavior lives in the config; this function holds no state constants. */
 export function progressiveCalculator(
@@ -152,6 +166,47 @@ export function progressiveCalculator(
           `. Credit allowed $${(allowedCents / 100).toLocaleString()}; nonrefundable, applied against the bracket tax only (never against any surtax), $${(appliedCents / 100).toLocaleString()} applied.`,
         -appliedCents,
       );
+
+      if (ec.perDependent !== undefined) {
+        // Dependent exemption credit — same Form 540 line 32 and the
+        // SAME worksheet step count as the personal credit, but the
+        // worksheet phases the dependent pool out SEPARATELY (2025
+        // Form 540 instructions, AGI Limitation Worksheet lines j–m):
+        // each dependent credit is reduced by the per-step amount and
+        // the pool is floored at $0 on its own — an excess personal-pool
+        // reduction never eats into the dependent credit, or vice versa.
+        // Nonrefundable against the bracket tax only, applied after the
+        // personal credit; the two credits together can take the regular
+        // tax to $0, never below, and never touch any surtax.
+        const dependents = dependentsFor(cfg, profile);
+        if (dependents > 0) {
+          const grossDepCents = toCents(ec.perDependent) * dependents;
+          const phaseoutDepCents = Math.min(
+            grossDepCents,
+            phaseoutSteps * toCents(ec.phaseout.reductionPerStep) * dependents,
+          );
+          const allowedDepCents = grossDepCents - phaseoutDepCents;
+          const appliedDepCents = Math.min(allowedDepCents, totalCents);
+          if (appliedDepCents > 0) {
+            components.push({
+              jurisdiction: cfg.jurisdiction,
+              type: 'state_dependent_exemption_credit',
+              label: `${cfg.stateCode} dependent exemption credit`,
+              amountCents: -appliedDepCents,
+            });
+          }
+          totalCents -= appliedDepCents;
+          step(
+            'Dependent exemption credit',
+            `${dependents} dependent(s) × $${ec.perDependent} = $${(grossDepCents / 100).toLocaleString()}` +
+              (phaseoutSteps > 0
+                ? `; the same ${phaseoutSteps} whole $${ec.phaseout.step[status].toLocaleString()} phaseout step(s) reduce EACH dependent credit by $${ec.phaseout.reductionPerStep}, a $${(phaseoutDepCents / 100).toLocaleString()} reduction — the worksheet phases the dependent pool out separately from the personal pool (FTB AGI Limitation Worksheet)`
+                : '; federal AGI is at or below the phaseout threshold, so no phaseout applies') +
+              `. Credit allowed $${(allowedDepCents / 100).toLocaleString()}; nonrefundable, applied against the bracket tax only (never against any surtax), $${(appliedDepCents / 100).toLocaleString()} applied.`,
+            -appliedDepCents,
+          );
+        }
+      }
     }
 
     if (cfg.surtax) {
@@ -170,7 +225,7 @@ export function progressiveCalculator(
     }
     step(
       `Total ${cfg.stateCode} tax`,
-      'Bracket tax, less any personal exemption credit applied, plus any surtax.',
+      'Bracket tax, less any exemption credits applied, plus any surtax.',
       totalCents,
     );
 
