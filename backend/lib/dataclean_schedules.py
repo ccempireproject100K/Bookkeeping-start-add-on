@@ -142,11 +142,22 @@ async def run_scheduled_scan(actor, schedule):
         raise RuntimeError(f"scheduled job creation failed: {err}")
     job = await jobs_lib.process_job(actor, job["id"])
     after = await _pending_pairs(actor, list_id)
-    drift = diff_pairs(before, after)
+    # The drift baseline is the PREVIOUS run's after-state, so merges
+    # and dismissals a human made between runs read as "resolved".
+    # The first run has no predecessor: its baseline is the pending
+    # set as it stood just before this scan.
+    history = await _drift(actor).find_list({"list_id": list_id},
+                                            limit=100000)
+    history.sort(key=lambda d: d.get("created_at") or "", reverse=True)
+    prev_after = history[0].get("pairs_after") if history else None
+    baseline = ({_pair_key(p): p for p in prev_after}
+                if prev_after is not None else before)
+    drift = diff_pairs(baseline, after)
     report = {"id": new_id(), "list_id": list_id,
               "schedule_id": schedule["id"], "job_id": job["id"],
               "job_status": job["status"],
               "created_at": now_iso(), **drift,
+              "pairs_after": [after[k] for k in sorted(after)],
               "webhook_status": None, "webhook_error": None}
     if schedule.get("webhook_url"):
         payload = {"event": "dataclean.list_scan_complete",

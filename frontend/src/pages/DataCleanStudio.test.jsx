@@ -188,10 +188,12 @@ test("queue: clean -> save list -> scan -> merge hits the queue endpoints", asyn
     target: { value: "name,email\nAcme,a@x.example\nACME,a@x.example\n" } });
   fireEvent.click(screen.getByTestId("studio-clean"));
   const saveBtn = await screen.findByTestId("studio-queue-save");
-  await waitFor(() => expect(saveBtn).not.toBeDisabled());
+  await waitFor(() => expect(saveBtn.disabled).toBe(false));
   fireEvent.click(saveBtn);
   fireEvent.click(await screen.findByTestId("studio-queue-scan"));
-  fireEvent.click(await screen.findByTestId("studio-queue-merge-sugg-1"));
+  const mergeBtn = await screen.findByTestId("studio-queue-merge-sugg-1");
+  await waitFor(() => expect(mergeBtn.disabled).toBe(false));
+  fireEvent.click(mergeBtn);
   await waitFor(() => expect(api.post).toHaveBeenCalledWith(
     "/v1/dataclean/lists/list-1/suggestions/sugg-1/merge", {},
     { headers: { "X-API-Key": KEY } }));
