@@ -57,7 +57,7 @@ from .fuzzy import similarity
 from .names import company_key, entity_key
 from .niche_rules import niche_key, split_dba
 from .normalize import normalize_phone
-from .phonetic import phonetic_keys
+from .phonetic import phonetic_key
 
 SUGGEST_THRESHOLD = 0.80          # deterministic score needed to suggest
 SPLINK_THRESHOLD = 0.90           # Splink match probability to suggest
@@ -131,7 +131,7 @@ def features(entity):
         "zip": parts.get("zip") or ((_ZIP_RE.search(address) or [None, None])[1]),
         "street_number": street_number,
         "city_key": city_key,
-        "phonetic_keys": phonetic_keys(tokens[0]) if tokens else [],
+        "phonetic": phonetic_key(tokens[0]) if tokens else "",
         "source": entity.get("_source"),
     }
 
@@ -292,8 +292,8 @@ def _blocks(feats):
             keys.append(("name", tokens[0]))
         if f["zip"] and tokens:
             keys.append(("zip+name", f["zip"], tokens[0]))
-        for pk in f.get("phonetic_keys") or []:
-            keys.append(("phon", pk))
+        if f.get("phonetic"):
+            keys.append(("phon", f["phonetic"]))
         alt = (f.get("alt_name_key") or "").split()
         if alt:
             keys.append(("name", alt[0]))
@@ -583,8 +583,8 @@ def _guarded_blocks(feats):
             keys.append(("name", tokens[0]))
         if f["zip"] and tokens:
             keys.append(("zip+name", f["zip"], tokens[0]))
-        for pk in f.get("phonetic_keys") or []:
-            keys.append(("phon", pk))
+        if f.get("phonetic"):
+            keys.append(("phon", f["phonetic"]))
         alt = (f.get("alt_name_key") or "").split()
         if alt:
             keys.append(("name", alt[0]))

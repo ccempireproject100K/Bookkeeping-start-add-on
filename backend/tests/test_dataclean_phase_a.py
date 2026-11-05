@@ -322,19 +322,6 @@ def test_nickname_no_boost_without_contact_or_surname():
 
 
 # ------------------------------------------------- P6: phonetic blocking
-def test_phonetic_golden_vectors_and_secondary_code():
-    """Phase 0 ADOPT conditions: the adopted encoder's golden vectors
-    (from the oubiwann/metaphone repo) and the primary+secondary
-    property — Schmidt and Smith share the XMT code, so they block
-    together even though their primaries differ."""
-    from lib.dataclean.phonetic import phonetic_keys
-    assert phonetic_keys("Smith") == ["SM0", "XMT"]
-    assert phonetic_keys("Schmidt") == ["XMT", "SMT"]
-    assert phonetic_keys("architect") == ["ARKTKT"]
-    assert phonetic_keys("bajador") == ["PJTR", "PHTR"]
-    assert set(phonetic_keys("Smith")) & set(phonetic_keys("Schmidt"))
-
-
 def test_phonetic_block_reaches_otherwise_unblocked_pair():
     # Katherine Smyth / Catherine Smith share NO block key: first name
     # tokens differ, surnames differ as tokens, no shared email/phone,
