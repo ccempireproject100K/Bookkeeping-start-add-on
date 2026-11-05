@@ -91,8 +91,15 @@ async def update_lead(lead_id: str, body: LeadPatch, user: dict = Depends(requir
 
 @router.delete("/leads/{lead_id}")
 async def delete_lead(lead_id: str, user: dict = Depends(require("ops:manage"))):
-    if not await _leads(user).delete({"id": lead_id}):
+    # Scoped has no delete() method — the house idiom is .c.delete_one
+    # with an explicit tenant filter (cf. routers/receipts.py, whose
+    # identical bug was fixed in PR #205). The old _leads(user).delete(...)
+    # call raised AttributeError, so this endpoint 500'd on main.
+    res = await _leads(user).c.delete_one(
+        {"tenant_id": user["tenant_id"], "id": lead_id})
+    if not res.deleted_count:
         raise HTTPException(404, "Lead not found")
+    await audit(user, "combo.lead.delete", "lead", lead_id, {})
     return {"ok": True}
 
 

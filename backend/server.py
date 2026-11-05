@@ -27,7 +27,8 @@ from routers import (auth, ledger, products, pos, invoices, cashclose, dashboard
                      fx, market_packs, cfdi, integrations, marketplace,
                      developers, invoice_payments,
                      dataclean_api, dataclean_admin, dataclean_jobs,
-                     dataclean_connectors, dataclean_billing)
+                     dataclean_connectors, dataclean_billing,
+                     integration_events, platform_entitlements)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("mindatease")
@@ -74,7 +75,8 @@ for r in (auth.router, password_reset.router, ledger.router, products.router, po
           taxpacket.router, dedupe.router,
           dataclean_api.router, dataclean_admin.router,
           dataclean_jobs.router,
-          dataclean_connectors.router, dataclean_billing.router):
+          dataclean_connectors.router, dataclean_billing.router,
+          integration_events.router, platform_entitlements.router):
     api_router.include_router(r)
 api_router.include_router(plans.router)
 
