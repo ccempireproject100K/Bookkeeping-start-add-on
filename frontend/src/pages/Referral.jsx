@@ -206,12 +206,9 @@ export default function Referral() {
         <p className="text-sm text-gray-300 mb-2">
           {t("referral.clearing", "Earnings become payable {{days}} days after they're earned, and payouts are made monthly.", { days: terms.clearing_days || 60 })}
         </p>
-        <ul className="text-sm text-gray-300 space-y-1">
-          <li><strong>Stripe</strong> — {t("referral.railStripe", "sent to your connected Stripe account in the monthly batch.")}</li>
-          <li><strong>{t("referral.railBank", "Bank transfer (Melio)")}</strong> — {t("referral.railBankBody", "sent to your bank account.")}</li>
-          <li><strong>{t("referral.railCheck", "Paper check by mail (Melio)")}</strong> — {t("referral.railCheckBody",
-            "a $2 fee is deducted from the payout. You'll always see the fee before you choose this option.")}</li>
-        </ul>
+        <p className="text-sm text-gray-300">
+          {t("referral.railsPending", "Payout methods aren't switched on yet — payment rails (bank transfer or Stripe) aren't connected, so payouts can't be sent today. Your earnings keep accruing and become payable on the schedule above; once the rails are connected, this section will name the methods you can choose.")}
+        </p>
         <p className="text-sm text-gray-400 mt-3" data-testid="referral-balances">
           {t("referral.balances", "Earned {{earned}} · Payable now {{payable}} · Paid out {{paid}}",
             { earned: money(books.earned_cents), payable: money(books.payable), paid: money(books.paid) })}
