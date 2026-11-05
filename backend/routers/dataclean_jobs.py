@@ -364,6 +364,17 @@ async def create_job(body: CreateJobIn,
         # On refusal the job doc is removed again — a refused job must
         # not linger in the queue for the sweep to run ungated.
         from fastapi import HTTPException
+        if body.kind == "verify":
+            # Honest-off: a verify job with no configured provider
+            # could only ever mark everything unavailable — refuse it
+            # here instead of billing the customer a no-op run.
+            from lib import dataclean_verify as verify_lib
+            wanted = (body.options or {}).get("kinds")
+            if not verify_lib.any_configured(wanted):
+                await jobs_lib.delete_job(actor, doc["id"])
+                raise _err(503, "not_configured",
+                           "no verification provider is configured on "
+                           "this deployment (provider keys not set)")
         try:
             await dca.enforce_limits(actor, "jobs/create",
                                      doc.get("rows_total", 0))
@@ -388,6 +399,69 @@ async def get_job(job_id: str,
     if not doc:
         raise _err(404, "job_not_found", "no such job")
     return {"job": _job_view(doc)}
+
+
+@router.post("/jobs/{job_id}/confirm")
+async def confirm_job(job_id: str,
+                      actor: dict = Depends(dca.get_dataclean_actor)):
+    """Confirm a verify job's pre-flight estimate and run its
+    lookups. Only verify jobs pause for confirmation; anything else
+    is a 409."""
+    from lib import dataclean_verify as verify_lib
+    counts, err = await verify_lib.confirm_verify_job(actor, job_id)
+    if err == "not_a_verify_job":
+        raise _err(409, "not_a_verify_job",
+                   "only verify jobs wait for confirmation")
+    if err:
+        raise _err(409, "job_not_awaiting_confirmation", err)
+    doc = await jobs_lib.get_job(actor, job_id)
+    return {"shape": RESULT_SHAPE, "api_version": "v1",
+            "job": _job_view(doc), "counts": counts}
+
+
+class VerifyIn(BaseModel):
+    list_id: str
+    kinds: Optional[list] = None
+    confirm_estimate: bool = False
+
+
+@router.post("/verify")
+async def verify(body: VerifyIn,
+                 actor: dict = Depends(dca.get_dataclean_actor)):
+    """Two-step verification for one list. Step 1 (default): the
+    pre-flight estimate — distinct uncached values x published rates,
+    no provider calls. Step 2 (confirm_estimate=true): creates a
+    verify job, runs it to its confirmation pause, and confirms it —
+    results land as evidence on the records. Large lists should use
+    POST /jobs + POST /jobs/{id}/confirm instead, asynchronously."""
+    from lib import dataclean_verify as verify_lib
+    if not await lists_lib.get_list(actor, body.list_id):
+        raise _err(404, "list_not_found", "no such list")
+    if not verify_lib.any_configured(body.kinds):
+        raise _err(503, "not_configured",
+                   "no verification provider is configured on this "
+                   "deployment (provider keys not set)")
+    if not body.confirm_estimate:
+        estimate = await verify_lib.estimate_for_list(
+            actor, body.list_id, body.kinds)
+        return {"shape": RESULT_SHAPE, "api_version": "v1",
+                "list_id": body.list_id, "estimate": estimate,
+                "confirm_required": True}
+    options = {"kinds": body.kinds} if body.kinds else {}
+    doc, err = await jobs_lib.create_job(actor, "verify", body.list_id,
+                                         options=options)
+    if err:
+        raise _err(400, err, "could not create the verify job")
+    doc = await jobs_lib.process_job(actor, doc["id"])
+    if doc.get("status") != "awaiting_confirmation":
+        return {"shape": RESULT_SHAPE, "api_version": "v1",
+                "job": _job_view(doc)}
+    counts, err = await verify_lib.confirm_verify_job(actor, doc["id"])
+    if err:
+        raise _err(409, "confirm_failed", err)
+    doc = await jobs_lib.get_job(actor, doc["id"])
+    return {"shape": RESULT_SHAPE, "api_version": "v1",
+            "job": _job_view(doc), "counts": counts}
 
 
 @router.get("/jobs/{job_id}/result")
