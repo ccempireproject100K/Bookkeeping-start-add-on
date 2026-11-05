@@ -5,8 +5,20 @@ import os
 import pytest
 import requests
 
-BASE_URL = (os.environ.get("REACT_APP_BACKEND_URL") or
-            open("/app/frontend/.env").read().split("REACT_APP_BACKEND_URL=")[1].split()[0]).rstrip("/")
+def _backend_url():
+    """REACT_APP_BACKEND_URL from the env, else from frontend/.env in this repo."""
+    url = os.environ.get("REACT_APP_BACKEND_URL")
+    if not url:
+        env_file = os.path.join(os.path.dirname(__file__), "..", "..", "frontend", ".env")
+        if os.path.exists(env_file):
+            for line in open(env_file):
+                if line.startswith("REACT_APP_BACKEND_URL="):
+                    url = line.split("=", 1)[1].strip()
+    assert url, "REACT_APP_BACKEND_URL not set (this suite needs a running backend)"
+    return url
+
+
+BASE_URL = _backend_url().rstrip("/")
 API = f"{BASE_URL}/api"
 
 OWNER = {"email": "owner@mindatease.example", "password": "Owner#Demo2026"}
