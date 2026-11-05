@@ -10,15 +10,15 @@ import base64
 import logging
 import os
 import uuid
-from pathlib import Path
 from typing import Optional
 
 import requests
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
-from fastapi.responses import FileResponse
+from fastapi.responses import Response
 from pydantic import BaseModel
 
 from db import db
+from lib import receipt_storage
 from lib.audit import audit
 from lib.auth import require, get_current_user
 from lib.pii import scrub_secrets
@@ -32,7 +32,6 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/receipts", tags=["receipts"])
 
-UPLOAD_ROOT = Path(__file__).parent / "uploads" / "receipts"
 ALLOWED_TYPES = {"image/jpeg", "image/png", "image/webp", "application/pdf"}
 MAX_BYTES = 10 * 1024 * 1024
 
@@ -41,10 +40,16 @@ def receipts(user):
     return Scoped(db.receipts, user["tenant_id"])
 
 
-def _upload_dir(user) -> Path:
-    d = UPLOAD_ROOT / user["tenant_id"]
-    d.mkdir(parents=True, exist_ok=True)
-    return d
+def _store():
+    """The receipt file store: local disk today, Cloudflare R2 when
+    BOOKS_STORAGE_BACKEND=r2 (lib/receipt_storage.py, STORAGE.md)."""
+    return receipt_storage.get_receipt_storage()
+
+
+def _key(user, stored: str) -> str:
+    """Storage key for a receipt file — the tenant-scoped shape the local
+    layout has always used (<tenant_id>/<stored>), on either backend."""
+    return f"{user['tenant_id']}/{stored}"
 
 
 async def _pack_for_user(user) -> dict:
@@ -85,7 +90,7 @@ async def ingest_receipt(user: dict, filename: str, content_type: str,
            "application/pdf": "pdf"}[content_type]
     rid = new_id()
     stored = f"{rid}.{ext}"
-    (_upload_dir(user) / stored).write_bytes(data)
+    _store().save(_key(user, stored), data, content_type)
     doc = {"id": rid, "filename": filename or stored, "stored": stored,
            "content_type": content_type, "size_bytes": len(data),
            "status": "uploaded", "extracted": None, "expense_id": None,
@@ -123,10 +128,15 @@ async def receipt_image(rid: str, user: dict = Depends(require("ledger:read"))):
     doc = await receipts(user).find_one({"id": rid})
     if not doc:
         raise HTTPException(404, "Receipt not found")
-    path = _upload_dir(user) / doc["stored"]
-    if not path.exists():
+    store = _store()
+    key = _key(user, doc["stored"])
+    if not store.exists(key):
         raise HTTPException(404, "Image file missing")
-    return FileResponse(path, media_type=doc["content_type"], filename=doc["filename"])
+    # Bytes are served by the app on either backend — the R2 bucket is
+    # never public (same pattern as Trade Circle's /media route).
+    filename = str(doc["filename"]).replace('"', "").replace("\r", "").replace("\n", "")
+    return Response(content=store.read(key), media_type=doc["content_type"],
+                    headers={"Content-Disposition": f'attachment; filename="{filename}"'})
 
 
 @router.delete("/{rid}")
@@ -136,10 +146,16 @@ async def delete_receipt(rid: str, user: dict = Depends(require("ops:manage"))):
         raise HTTPException(404, "Receipt not found")
     if doc.get("status") == "posted":
         raise HTTPException(409, "Already posted as an expense — reverse the expense instead.")
-    path = _upload_dir(user) / doc["stored"]
-    if path.exists():
-        path.unlink()
-    await receipts(user).delete({"id": rid})
+    store = _store()
+    key = _key(user, doc["stored"])
+    if store.exists(key):
+        store.delete(key)
+    # Scoped has no delete() method — the house idiom is .c.delete_one
+    # with an explicit tenant filter (cf. routers/banking.py). The old
+    # receipts(user).delete(...) call raised AttributeError, so this
+    # endpoint 500'd on main after removing the file; fixed here because
+    # the delete flow is part of the storage layer's surface.
+    await receipts(user).c.delete_one({"tenant_id": user["tenant_id"], "id": rid})
     await audit(user, "receipt.delete", "receipt", rid, {})
     return {"ok": True}
 
@@ -165,8 +181,7 @@ async def scan_receipt(rid: str, user: dict = Depends(require("ops:manage"))):
         # text layer (MIT library, our templates). Only when no template
         # matches do we fall back to the old manual-entry answer.
         from lib.pdf_intake import extract_pdf_invoice
-        path = _upload_dir(user) / doc["stored"]
-        found = extract_pdf_invoice(path.read_bytes())
+        found = extract_pdf_invoice(_store().read(_key(user, doc["stored"])))
         if not found:
             raise HTTPException(422, "No invoice template matched this PDF — enter the details manually, "
                                      "or upload a JPG/PNG photo for AI scan.")
@@ -186,8 +201,7 @@ async def scan_receipt(rid: str, user: dict = Depends(require("ops:manage"))):
     pack = await _pack_for_user(user)
     cats = _trade_categories(pack)
     trade = pack.get("name", "your trade")
-    path = _upload_dir(user) / doc["stored"]
-    b64 = base64.b64encode(path.read_bytes()).decode()
+    b64 = base64.b64encode(_store().read(_key(user, doc["stored"]))).decode()
     data_url = f"data:{doc['content_type']};base64,{b64}"
     prompt = (
         f"This is a business expense receipt for a {trade} business. Reply with ONLY compact JSON: "
