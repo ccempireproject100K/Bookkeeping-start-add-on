@@ -33,6 +33,8 @@ class CreateKeyBody(BaseModel):
     rate_limit_per_minute: Optional[int] = Field(default=None, ge=1)
     rate_limit_per_day: Optional[int] = Field(default=None, ge=1)
     monthly_row_quota: Optional[int] = Field(default=None, ge=0)
+    date_policy: Optional[str] = Field(default=None)
+    country: Optional[str] = Field(default=None, max_length=3)
 
 
 @router.post("/keys")
@@ -40,12 +42,19 @@ async def create_key(body: CreateKeyBody,
                      user: dict = Depends(require("ledger:admin"))):
     """Mint a DataClean API key for this workspace. The full key is
     returned ONCE in this response; only its hash is stored."""
+    if body.date_policy is not None and \
+            body.date_policy not in dca.DATE_POLICIES:
+        raise HTTPException(status_code=422, detail={
+            "code": "invalid_date_policy",
+            "message": f"date_policy must be one of {list(dca.DATE_POLICIES)}"})
     doc, full = dca.new_key_doc(
         tenant_id=user["tenant_id"], created_by=user.get("email", ""),
         label=body.label,
         rate_limit_per_minute=body.rate_limit_per_minute,
         rate_limit_per_day=body.rate_limit_per_day,
-        monthly_row_quota=body.monthly_row_quota)
+        monthly_row_quota=body.monthly_row_quota,
+        date_policy=body.date_policy,
+        country=(body.country.strip().upper() if body.country else None))
     await db.dataclean_api_keys.insert_one(doc)
     await audit(user, "dataclean.api_key_created", "dataclean_api_key",
                 doc["id"], {"label": doc["label"], "key_stub": doc["key_stub"]})

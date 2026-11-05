@@ -165,13 +165,14 @@ def key_stub(token: str) -> str:
 
 def new_key_doc(*, tenant_id: str, created_by: str, label: str,
                 rate_limit_per_minute=None, rate_limit_per_day=None,
-                monthly_row_quota=None):
+                monthly_row_quota=None, date_policy=None, country=None):
     """Build the stored document for a fresh DataClean key.
 
     Returns (doc, full_key). The full key exists only in the create
     response; the doc carries its hash + display stub, the key's limit
-    overrides (None = use the configured defaults), and denormalized
-    usage counters maintained by record_usage.
+    overrides (None = use the configured defaults), its tenant locale
+    defaults (date_policy / country — None = engine defaults), and
+    denormalized usage counters maintained by record_usage.
     """
     full = mint_key()
     doc = {
@@ -188,10 +189,29 @@ def new_key_doc(*, tenant_id: str, created_by: str, label: str,
         "rate_limit_per_minute": rate_limit_per_minute,
         "rate_limit_per_day": rate_limit_per_day,
         "monthly_row_quota": monthly_row_quota,
+        "date_policy": date_policy,
+        "country": country,
         "calls_total": 0,
         "rows_total": 0,
     }
     return doc, full
+
+
+# Date policies the engine understands (lib/dataclean/normalize.py).
+DATE_POLICIES = ("us_month_first", "day_first", "iso_only")
+
+
+def effective_defaults(actor: dict) -> dict:
+    """A key's tenant locale defaults: per-request values win over the
+    key's stored defaults, which win over the engine defaults. Called
+    by the routers to resolve (date_policy, country) for one call."""
+    doc = actor.get("_key_doc") or {}
+    policy = doc.get("date_policy")
+    if policy not in DATE_POLICIES:
+        policy = "us_month_first"
+    country = doc.get("country")
+    country = str(country).strip().upper() if country else None
+    return {"date_policy": policy, "country": country}
 
 
 def effective_limits(doc: dict) -> dict:
@@ -217,6 +237,8 @@ def public_key_view(doc: dict) -> dict:
         "revoked_at": doc.get("revoked_at"),
         "last_used_at": doc.get("last_used_at"),
         "limits": effective_limits(doc),
+        "date_policy": doc.get("date_policy"),
+        "country": doc.get("country"),
         "calls_total": doc.get("calls_total", 0),
         "rows_total": doc.get("rows_total", 0),
     }
