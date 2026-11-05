@@ -42,6 +42,19 @@ async def create_key(body: CreateKeyBody,
                      user: dict = Depends(require("ledger:admin"))):
     """Mint a DataClean API key for this workspace. The full key is
     returned ONCE in this response; only its hash is stored."""
+    # Entitlement gate: once a workspace is inside the DataClean
+    # billing system (or strict mode is on), key minting follows its
+    # subscription state — an inactive workspace cannot mint new keys
+    # (its existing keys stop at the API door itself; see
+    # lib/dataclean_api.authenticate_key).
+    from lib import dataclean_billing
+    if not await dataclean_billing.entitled_with_db(
+            db, user["tenant_id"]):
+        raise HTTPException(status_code=403, detail={
+            "code": "dataclean_subscription_inactive",
+            "message": "This workspace's DataClean subscription is not "
+                       "active — subscribe (or resolve the billing "
+                       "issue) to mint new API keys"})
     if body.date_policy is not None and \
             body.date_policy not in dca.DATE_POLICIES:
         raise HTTPException(status_code=422, detail={

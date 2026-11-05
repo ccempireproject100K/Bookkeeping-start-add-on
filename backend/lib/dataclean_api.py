@@ -13,10 +13,12 @@ every read/write a key triggers is tenant-scoped by construction.
 
 Metering is a FOUNDATION, not billing: every authenticated external
 call writes one row to `dataclean_api_usage` (tenant, key, endpoint,
-rows processed, status, timestamp). No code in this module — or in the
-routers built on it — charges anything, creates a Stripe object, or
-consults BILLING_ALLOW_LIVE. Pricing/quota values are config only
-(see pricing_config) and default to clearly-marked placeholders.
+rows processed, status, timestamp). This module never charges
+anything or creates a Stripe object — charging lives in
+lib/dataclean_billing.py (Stripe Checkout + webhook-driven
+entitlement), which reads its prices from the config below. The
+prices in pricing_config() are the owner's stamped ladder
+(2026-11-04), not placeholders.
 """
 import hashlib
 import hmac
@@ -75,73 +77,115 @@ def playground_caps() -> dict:
     }
 
 
-def bundle_config() -> list:
-    """Product bundles on the storefront, as CONFIG values only.
+# ------------------------------------------------------- product ladder
+# OWNER-STAMPED PRICES (2026-11-04, final — they supersede every
+# earlier placeholder, including the 2026-10-31 bundle figure of
+# $18.99, which was a placeholder the owner replaced): DataClean
+# $12.99/mo standalone, Security $18.99/mo standalone, the bundle
+# $27.99/mo (parts total $31.98 — the bundle saves $3.99, and the
+# storefront surfaces that saving). The env overrides below are an
+# ops escape hatch only; the defaults ARE the stamped ladder.
 
-    The DataClean + Security bundle is an OWNER DECISION (2026-10-31):
-    one product at $18.99/mo, aimed at the niche shops. Its price is a
-    real price — the bundle flags itself `placeholder: False` — unlike
-    the plan prices in pricing_config(), which stay placeholders until
-    the owner sets them. Nothing here is charged either: there is no
-    billing code path in the DataClean shell, in test mode or any
-    other mode.
+DATACLEAN_PRICE_CENTS = 1299
+SECURITY_PRICE_CENTS = 1899
+BUNDLE_PRICE_CENTS = 2799
 
-    Each half's availability is stated explicitly, in the status
-    vocabulary of lib/marketplace.py ("live" | "coming_soon") plus
-    built/available booleans. DataClean is live today. The security
-    half is NOT built — its build-out lives outside this product — so
-    it is honestly coming_soon / built False / available False, and
-    no security feature is named anywhere in this config: the half is
-    sold only as "included in this bundle when it ships".
+
+def security_built() -> bool:
+    """THE switch for the security product's built state.
+
+    The security engine is built outside this repo (its own
+    workstream); until that wiring ships, the product is honestly
+    coming_soon and NOT purchasable — alone or inside the bundle.
+    The wiring workstream flips the product live by setting
+    SECURITY_PRODUCT_BUILT=1 in the environment. Every availability /
+    sellable flag in this config derives from this single read, so
+    pricing, the storefront and the checkout gate can never disagree
+    about whether Security exists yet.
     """
+    return _env_bool("SECURITY_PRODUCT_BUILT", False)
+
+
+def billing_mode() -> str:
+    """"live" when the configured Stripe secret is a live key, else
+    "test". Display + honesty only — lib/dataclean_billing.py does
+    the actual key-gating before any Stripe call."""
+    key = (os.environ.get("STRIPE_SECRET_KEY") or "").strip()
+    return "live" if key.startswith("sk_live_") else "test"
+
+
+def products_config() -> list:
+    """The stamped product ladder, as CONFIG values. `sellable` is
+    what the checkout endpoint enforces: DataClean sells today;
+    Security sells only once security_built() flips — until then it
+    is flagged coming_soon and never shown as available, and no
+    security feature is named anywhere in this config (the product
+    is offered only as monitoring / protection / automated
+    remediation when it ships — never as guaranteed removal)."""
+    built = security_built()
+    return [
+        {"id": "dataclean", "name": "DataClean",
+         "monthly_price_cents": _env_int("DATACLEAN_PRICE_DATACLEAN_CENTS",
+                                         DATACLEAN_PRICE_CENTS),
+         "status": "live", "built": True, "available": True,
+         "sellable": True, "placeholder": False},
+        {"id": "security", "name": "Security",
+         "monthly_price_cents": _env_int("DATACLEAN_PRICE_SECURITY_CENTS",
+                                         SECURITY_PRICE_CENTS),
+         "status": "live" if built else "coming_soon",
+         "built": built, "available": built, "sellable": built,
+         "placeholder": False},
+    ]
+
+
+def bundle_config() -> list:
+    """The DataClean + Security bundle at the stamped $27.99/mo.
+
+    Sellable ONLY when both halves are available: DataClean is live,
+    but while the security half is unbuilt the bundle is honestly
+    coming_soon as a whole and the checkout endpoint refuses it —
+    nobody can pay for a product half of which doesn't exist yet.
+    The saving against the parts total is computed, never typed in,
+    so it cannot drift from the ladder.
+    """
+    halves = {p["id"]: p for p in products_config()}
+    dc, sec = halves["dataclean"], halves["security"]
+    price = _env_int("DATACLEAN_PRICE_BUNDLE_CENTS", BUNDLE_PRICE_CENTS)
+    parts = dc["monthly_price_cents"] + sec["monthly_price_cents"]
+    sellable = bool(dc["available"] and sec["available"])
     return [{
         "id": "dataclean-security",
         "name": "DataClean + Security",
-        "monthly_price_cents": _env_int("DATACLEAN_PRICE_BUNDLE_CENTS",
-                                        1899),
+        "monthly_price_cents": price,
+        "parts_total_cents": parts,
+        "savings_cents": parts - price,
         "placeholder": False,
+        "status": "live" if sellable else "coming_soon",
+        "sellable": sellable,
         "components": [
             {"id": "dataclean", "name": "DataClean",
-             "status": "live", "built": True, "available": True},
+             "status": dc["status"], "built": True, "available": True},
             {"id": "security", "name": "Security",
-             "status": "coming_soon", "built": False,
-             "available": False},
+             "status": sec["status"], "built": sec["built"],
+             "available": sec["available"]},
         ],
     }]
 
 
 def pricing_config() -> dict:
-    """Storefront pricing + plan quotas, as CONFIG values only.
+    """Storefront pricing: the owner's stamped ladder (2026-11-04).
 
-    Defaults are placeholders (flagged `placeholder: true` and rendered
-    as such by the storefront) — final prices are an owner decision.
-    Nothing here is ever charged: there is no billing code path in the
-    DataClean shell, in test mode or any other mode.
-
-    The one exception to the placeholder rule is `bundles` (see
-    bundle_config): the owner has set the bundle's price, so each
-    bundle carries its own `placeholder: False` while the top-level
-    flag keeps describing the plan prices.
+    Prices are real (`placeholder: False`) — the placeholder era
+    ended when the owner stamped the ladder. What can actually be
+    CHARGED is narrower than what is priced: lib/dataclean_billing.py
+    enforces each product's `sellable` flag at checkout, so Security
+    and the bundle stay unpurchasable until Security is built.
     """
-    plans = []
-    for pid, label, def_rows in (("starter", "Starter", 10000),
-                                 ("growth", "Growth", 50000),
-                                 ("scale", "Scale", 250000)):
-        plans.append({
-            "id": pid,
-            "name": label,
-            "monthly_price_cents": _env_int(
-                f"DATACLEAN_PRICE_{pid.upper()}_CENTS", 0),
-            "rows_included": _env_int(
-                f"DATACLEAN_PLAN_{pid.upper()}_ROWS", def_rows),
-            "overage_per_1000_rows_cents": _env_int(
-                f"DATACLEAN_PRICE_{pid.upper()}_OVERAGE_CENTS", 0),
-        })
     return {
         "currency": "USD",
-        "placeholder": _env_bool("DATACLEAN_PRICING_PLACEHOLDER", True),
-        "billing_mode": "test",  # display only — no charging exists
-        "plans": plans,
+        "placeholder": False,
+        "billing_mode": billing_mode(),
+        "products": products_config(),
         "bundles": bundle_config(),
         "rate_limits": rate_limit_defaults(),
         "playground": playground_caps(),
@@ -263,6 +307,18 @@ async def authenticate_key(token: str) -> dict:
     if doc.get("revoked_at"):
         raise HTTPException(status_code=401, detail={
             "code": "invalid_api_key", "message": "Invalid API key"})
+    # Entitlement: once a workspace is inside the DataClean billing
+    # system (or the owner switches global enforcement on), its API
+    # access follows its subscription state — a canceled workspace's
+    # keys stop working here, at the one door every DataClean surface
+    # (cleanup, jobs, connectors) authenticates through. The check
+    # lives in lib/dataclean_billing.py and is imported lazily: that
+    # module reads this one for the price ladder.
+    from lib import dataclean_billing
+    if not await dataclean_billing.entitled_with_db(db, doc["tenant_id"]):
+        raise HTTPException(status_code=403, detail={
+            "code": "subscription_inactive",
+            "message": "This workspace's DataClean subscription is not active"})
     return {
         "id": f"dataclean_key:{doc['id']}",
         "tenant_id": doc["tenant_id"],

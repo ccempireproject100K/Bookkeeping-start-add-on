@@ -1,6 +1,7 @@
 import {
   API_ENDPOINTS, ERROR_CODES, FALLBACK_CAPS, FALLBACK_PRICING, SAMPLE_CSV,
-  barFraction, bundleComponentState, keyStatus, priceLabel, usageSeries,
+  barFraction, bundleComponentState, keyStatus, priceLabel, productState,
+  usageSeries,
 } from "./datacleanApi";
 
 describe("keyStatus", () => {
@@ -49,7 +50,8 @@ describe("docs catalogs mirror the implemented surface", () => {
   });
   test("error codes cover the surface's failure vocabulary", () => {
     const codes = ERROR_CODES.map((e) => e.code);
-    for (const c of ["invalid_api_key", "rate_limited", "quota_exceeded",
+    for (const c of ["invalid_api_key", "subscription_inactive",
+                     "rate_limited", "quota_exceeded",
                      "payload_too_large", "playground_limit", "unknown_kind",
                      "unknown_field", "unknown_type", "invalid_payload"]) {
       expect(codes).toContain(c);
@@ -61,17 +63,30 @@ describe("docs catalogs mirror the implemented surface", () => {
   });
 });
 
-describe("fallback config is honestly placeholder", () => {
+describe("fallback config mirrors the stamped ladder", () => {
   test("caps match the backend defaults", () => {
     expect(FALLBACK_CAPS).toEqual({ max_file_bytes: 65536, max_rows: 200, max_columns: 24 });
   });
-  test("fallback pricing is flagged placeholder with zero prices", () => {
-    expect(FALLBACK_PRICING.placeholder).toBe(true);
+  test("fallback pricing carries the owner-stamped prices, not placeholders", () => {
+    expect(FALLBACK_PRICING.placeholder).toBe(false);
     expect(FALLBACK_PRICING.billing_mode).toBe("test");
-    for (const p of FALLBACK_PRICING.plans) {
-      expect(p.monthly_price_cents).toBe(0);
-      expect(p.rows_included).toBeGreaterThan(0);
-    }
+    const byId = Object.fromEntries(
+      FALLBACK_PRICING.products.map((p) => [p.id, p]));
+    // DataClean sells today at the stamped price.
+    expect(byId.dataclean.monthly_price_cents).toBe(1299);
+    expect(byId.dataclean.sellable).toBe(true);
+    expect(byId.dataclean.status).toBe("live");
+    // Security is priced but unbuilt: coming soon, never sellable.
+    expect(byId.security.monthly_price_cents).toBe(1899);
+    expect(byId.security.sellable).toBe(false);
+    expect(byId.security.status).toBe("coming_soon");
+    expect(byId.security.features).toBeUndefined();
+  });
+  test("productState follows the sellable flag, not the identity", () => {
+    expect(productState({ sellable: true })).toBe("available");
+    expect(productState({ sellable: false })).toBe("coming_soon");
+    expect(productState(null)).toBe("coming_soon");
+    expect(productState(undefined)).toBe("coming_soon");
   });
   test("priceLabel formats integer cents", () => {
     expect(priceLabel(0)).toBe("$0.00");
@@ -86,10 +101,15 @@ describe("fallback bundle mirrors the backend bundle config", () => {
     const b = FALLBACK_PRICING.bundles[0];
     expect(b.id).toBe("dataclean-security");
     expect(b.name).toBe("DataClean + Security");
-    // Real owner-set price (2026-10-31) — NOT a $0 placeholder, even
-    // though the plans above still are.
-    expect(b.monthly_price_cents).toBe(1899);
+    // The owner-stamped ladder (2026-11-04): $27.99 against $31.98 in
+    // parts — a computed $3.99 saving — and NOT sellable while the
+    // security half is unbuilt.
+    expect(b.monthly_price_cents).toBe(2799);
+    expect(b.parts_total_cents).toBe(3198);
+    expect(b.savings_cents).toBe(399);
     expect(b.placeholder).toBe(false);
+    expect(b.sellable).toBe(false);
+    expect(b.status).toBe("coming_soon");
     const halves = Object.fromEntries(b.components.map((c) => [c.id, c]));
     expect(Object.keys(halves).sort()).toEqual(["dataclean", "security"]);
     expect(halves.dataclean.status).toBe("live");

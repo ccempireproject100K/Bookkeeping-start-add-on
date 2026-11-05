@@ -4,8 +4,8 @@
 // without rendering. Anything that looks like a number here is either
 // a documented API fact (paths, error codes) or a fallback the pages
 // replace with the backend's config the moment it loads — the
-// fallback pricing is the backend's placeholder default, flagged as
-// placeholder exactly like the backend flags it.
+// fallback pricing mirrors the backend's owner-stamped ladder
+// (2026-11-04) with the same honesty flags the backend serves.
 
 /** The external surface, as implemented by routers/dataclean_api.py.
  * The docs tab renders from this catalog — if an endpoint is not
@@ -23,6 +23,7 @@ export const API_ENDPOINTS = [
 /** Error codes the surface can return, as implemented. */
 export const ERROR_CODES = [
   { code: "invalid_api_key", status: 401, descKey: "datacleanApi.errInvalidKey" },
+  { code: "subscription_inactive", status: 403, descKey: "datacleanApi.errSubscriptionInactive" },
   { code: "rate_limited", status: 429, descKey: "datacleanApi.errRateLimited" },
   { code: "quota_exceeded", status: 429, descKey: "datacleanApi.errQuota" },
   { code: "payload_too_large", status: 413, descKey: "datacleanApi.errTooLarge" },
@@ -70,25 +71,30 @@ export const SAMPLE_CSV = [
 export const FALLBACK_CAPS = { max_file_bytes: 65536, max_rows: 200, max_columns: 24 };
 
 /** Storefront pricing before the config loads — mirrors the
- * backend's config and carries the same flags: the plans are the
- * backend's placeholder defaults, and the bundle mirrors the
- * owner-set price with its per-half honesty flags (DataClean live,
- * Security not built — coming soon, never dressed up as available). */
+ * backend's pricing config exactly (the owner-stamped ladder,
+ * 2026-11-04): DataClean $12.99 and Security $18.99 standalone, the
+ * bundle $27.99 against $31.98 in parts. Prices are real
+ * (placeholder: false); what is NOT yet real is availability —
+ * Security is unbuilt, so it and the bundle carry coming_soon /
+ * sellable: false and are never dressed up as purchasable. */
 export const FALLBACK_PRICING = {
   currency: "USD",
-  placeholder: true,
+  placeholder: false,
   billing_mode: "test",
-  plans: [
-    { id: "starter", name: "Starter", monthly_price_cents: 0, rows_included: 10000, overage_per_1000_rows_cents: 0 },
-    { id: "growth", name: "Growth", monthly_price_cents: 0, rows_included: 50000, overage_per_1000_rows_cents: 0 },
-    { id: "scale", name: "Scale", monthly_price_cents: 0, rows_included: 250000, overage_per_1000_rows_cents: 0 },
+  products: [
+    { id: "dataclean", name: "DataClean", monthly_price_cents: 1299, status: "live", built: true, available: true, sellable: true, placeholder: false },
+    { id: "security", name: "Security", monthly_price_cents: 1899, status: "coming_soon", built: false, available: false, sellable: false, placeholder: false },
   ],
   bundles: [
     {
       id: "dataclean-security",
       name: "DataClean + Security",
-      monthly_price_cents: 1899,
+      monthly_price_cents: 2799,
+      parts_total_cents: 3198,
+      savings_cents: 399,
       placeholder: false,
+      status: "coming_soon",
+      sellable: false,
       components: [
         { id: "dataclean", name: "DataClean", status: "live", built: true, available: true },
         { id: "security", name: "Security", status: "coming_soon", built: false, available: false },
@@ -96,6 +102,12 @@ export const FALLBACK_PRICING = {
     },
   ],
 };
+
+/** A product's display state, derived from the config's own
+ * sellable flag — never from the product's identity. */
+export function productState(product) {
+  return product?.sellable ? "available" : "coming_soon";
+}
 
 /** A bundle half's display state, derived from the config's own
  * flags — never from the half's identity: "available" only when the

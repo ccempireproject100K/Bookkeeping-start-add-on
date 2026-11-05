@@ -27,7 +27,7 @@ from routers import (auth, ledger, products, pos, invoices, cashclose, dashboard
                      fx, market_packs, cfdi, integrations, marketplace,
                      developers, invoice_payments,
                      dataclean_api, dataclean_admin, dataclean_jobs,
-                     dataclean_connectors)
+                     dataclean_connectors, dataclean_billing)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("mindatease")
@@ -74,7 +74,7 @@ for r in (auth.router, password_reset.router, ledger.router, products.router, po
           taxpacket.router, dedupe.router,
           dataclean_api.router, dataclean_admin.router,
           dataclean_jobs.router,
-          dataclean_connectors.router):
+          dataclean_connectors.router, dataclean_billing.router):
     api_router.include_router(r)
 api_router.include_router(plans.router)
 
@@ -182,6 +182,12 @@ async def startup():
         (db.referral_payment_events, [("product", 1), ("payment_id", 1)], {"unique": True}),
         (db.tenants, "billing.subscription_id", {}),
         (db.tenants, "billing.stripe_customer_id", {}),
+        # DataClean billing (Stripe): webhook resolution reads the
+        # tenant by this flow's own ids; the product catalog mapping
+        # is keyed by product id.
+        (db.tenants, "dataclean_billing.subscription_id", {}),
+        (db.tenants, "dataclean_billing.stripe_customer_id", {}),
+        (db.dataclean_stripe_products, "product", {"unique": True}),
     ]
     for coll, keys, opts in indexes:
         try:

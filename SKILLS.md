@@ -28,6 +28,15 @@ works the skill inside this repo.
 |---|---|
 | `bookkeeping-bakeoff-buildout` | The parity/bake-off build discipline this codebase was built under: spec-first slices, baseline test deltas, no fake zeros. |
 | `github_target_verification` | Every push: exact repo/branch confirmed, landing verified from commit history (`list_commits`), never from the read snapshot. |
+
+## Checkout component adoptions (2026-11-04)
+
+The DataClean checkout's open-source adoptions (all MIT/ISC, screened in the
+checkout survey of 2026-11-04) are tracked with licenses and usage notes in
+`frontend/PROVENANCE.md`: Stripe's official `@stripe/stripe-js` +
+`@stripe/react-stripe-js` (embedded checkout), `canvas-confetti`,
+`lottie-web`, and the already-carried `framer-motion`. Patterns only (no
+code copied) from the Vercel subscription starter and stripe-samples.
 | `post_merge_deploy_verification` | Every ship: a merge is not a deploy — verify the live API + web services serve the new head before reporting shipped. |
 | `scope_stage_decision_readback` | Build → wiring → deploy are separate stages, each with its own go-ahead; a finished build is never read as a deploy approval. |
 | `coverage_census_before_complete` | Before any surface is reported complete: enumerate the universe independently and recount — e.g. the niche census (36 packs × subdomains × icons) behind the subdomain wiring. |

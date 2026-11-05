@@ -417,15 +417,23 @@ def test_admin_usage_aggregates_come_from_the_rows():
     assert agg2["tracking_since"] is None and agg2["by_key"] == []
 
 
-def test_pricing_config_is_placeholder_flagged_config_only():
+def test_pricing_config_carries_the_stamped_ladder():
     fake = FakeDB()
     DCA, API, _ADM = _patch_all(fake)
     cfg = run(API.pricing())
-    assert cfg["placeholder"] is True and cfg["billing_mode"] == "test"
+    # The owner's stamped ladder (2026-11-04) replaced the
+    # placeholders: prices are real and flagged as such.
+    assert cfg["placeholder"] is False and cfg["billing_mode"] == "test"
     assert cfg["currency"] == "USD"
-    assert [p["id"] for p in cfg["plans"]] == ["starter", "growth", "scale"]
-    for p in cfg["plans"]:
-        assert p["monthly_price_cents"] == 0 and p["rows_included"] > 0
+    products = {p["id"]: p for p in cfg["products"]}
+    assert set(products) == {"dataclean", "security"}
+    assert products["dataclean"]["monthly_price_cents"] == 1299
+    assert products["dataclean"]["sellable"] is True
+    assert products["dataclean"]["status"] == "live"
+    assert products["security"]["monthly_price_cents"] == 1899
+    # Security is not built yet: priced, but honestly unsellable.
+    assert products["security"]["sellable"] is False
+    assert products["security"]["status"] == "coming_soon"
     assert cfg["playground"]["max_rows"] == 200
 
 
@@ -433,16 +441,21 @@ def test_pricing_config_carries_the_bundle_with_honest_flags():
     fake = FakeDB()
     _DCA, API, _ADM = _patch_all(fake)
     cfg = run(API.pricing())
-    # The plan prices stay placeholders; the bundle rides alongside.
-    assert cfg["placeholder"] is True
+    assert cfg["placeholder"] is False
     assert len(cfg["bundles"]) == 1
     bundle = cfg["bundles"][0]
     assert bundle["id"] == "dataclean-security"
     assert bundle["name"] == "DataClean + Security"
-    # The price is the owner's 2026-10-31 decision — a real price,
-    # flagged as such, not a $0 placeholder.
-    assert bundle["monthly_price_cents"] == 1899
+    # The stamped bundle price (2026-11-04): $27.99 against parts of
+    # $31.98 — the $3.99 saving is computed from the ladder.
+    assert bundle["monthly_price_cents"] == 2799
+    assert bundle["parts_total_cents"] == 3198
+    assert bundle["savings_cents"] == 399
     assert bundle["placeholder"] is False
+    # Not sellable while a half is unbuilt — the checkout gate
+    # enforces the same flag (tests/test_dataclean_billing.py).
+    assert bundle["sellable"] is False
+    assert bundle["status"] == "coming_soon"
     halves = {c["id"]: c for c in bundle["components"]}
     assert set(halves) == {"dataclean", "security"}
     assert halves["dataclean"]["status"] == "live"
