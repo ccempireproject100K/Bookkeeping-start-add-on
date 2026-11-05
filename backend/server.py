@@ -96,6 +96,9 @@ app.add_middleware(ContentSecurityPolicyMiddleware)
 
 @app.on_event("startup")
 async def startup():
+    # Fail fast on a weak signing secret, before serving a single request.
+    from lib.auth import check_jwt_secret
+    check_jwt_secret()
     indexes = [
         # Empire referral ledger (B1-B3): person codes are globally
         # unique; raw events dedupe on their deterministic key;
