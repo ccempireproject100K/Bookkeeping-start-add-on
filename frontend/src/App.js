@@ -56,6 +56,7 @@ import DataCleanStudio from "@/pages/DataCleanStudio";
 import WelcomeGift from "@/pages/WelcomeGift";
 import SetupGuide from "@/pages/SetupGuide";
 import DataCleanDemo from "@/pages/DataCleanDemo";
+import DataCleanCheckout from "@/pages/DataCleanCheckout";
 import DataCleanLanding from "@/pages/DataCleanLanding";
 import PurchaseOrders from "@/pages/PurchaseOrders";
 import Estimates from "@/pages/Estimates";
@@ -152,6 +153,7 @@ function App() {
           <Route path="cleanup-console" element={<CleanupConsole />} />
               <Route path="dataclean-api" element={<DataCleanApi />} />
               <Route path="dataclean-studio" element={<DataCleanStudio />} />
+              <Route path="dataclean-checkout" element={<DataCleanCheckout />} />
             <Route path="welcome-gift" element={<WelcomeGift />} />
             <Route path="setup-guide" element={<SetupGuide />} />
               <Route path="purchase-orders" element={<PurchaseOrders />} />

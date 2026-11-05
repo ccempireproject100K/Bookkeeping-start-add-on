@@ -1,24 +1,59 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { animate, useInView } from "framer-motion";
 import {
   Sparkles, Copy, ShieldCheck, Gauge, ArrowRight, KeyRound, UploadCloud, Wand2,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
-import { FALLBACK_PRICING, bundleComponentState, priceLabel } from "@/lib/datacleanApi";
-import { num as _n } from "@/lib/format";
+import { FALLBACK_PRICING, bundleComponentState, priceLabel, productState } from "@/lib/datacleanApi";
+
+/** The bundle savings ticker (checkout-survey menu #3 — an animated
+ * number, MagicUI-style): when the bundle card scrolls into view the
+ * price counts DOWN from the parts total to the bundle price, so the
+ * saving is something you watch happen, then the save badge lands.
+ * Reduced-motion users get the final numbers immediately. */
+function SavingsTicker({ bundle }) {
+  const { t } = useTranslation();
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, margin: "-40px" });
+  const [cents, setCents] = useState(bundle.parts_total_cents);
+  useEffect(() => {
+    if (!inView) return;
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches) {
+      setCents(bundle.monthly_price_cents);
+      return;
+    }
+    const controls = animate(bundle.parts_total_cents, bundle.monthly_price_cents, {
+      duration: 1.1, ease: "easeOut",
+      onUpdate: (v) => setCents(Math.round(v)),
+    });
+    return () => controls.stop();
+  }, [inView, bundle]);
+  return (
+    <span ref={ref} className="inline-flex flex-wrap items-center gap-2">
+      <span>
+        {t("datacleanLanding.bundleSeparately", { parts: priceLabel(bundle.parts_total_cents) })}
+        {" → "}
+        <span className="font-mono text-gray-200">{priceLabel(cents)}</span>
+      </span>
+      <span className="inline-block text-xs text-emerald-300 bg-emerald-500/10 border border-emerald-500/30 rounded-full px-2.5 py-0.5 animate-shimmer motion-reduce:animate-none">
+        {t("datacleanLanding.bundleSave", { amount: priceLabel(bundle.savings_cents) })}
+      </span>
+    </span>
+  );
+}
 
 /** DataClean storefront / pricing page (Phase 3 shell). Built into the
  * app like every other page; it goes live only when the whole stack
  * is deployed on the owner's word — nothing here is published
  * anywhere else. Prices render from the backend's pricing CONFIG
- * (GET /api/v1/dataclean/pricing); the plan prices are still
- * placeholders and this page badges them exactly that way rather
- * than dressing them up as final. The bundle below the plans is the
- * exception: its price is owner-set (2026-10-31), and each half is
- * badged from the config's own flags — DataClean available now, the
- * security half coming soon and never shown as available. */
+ * (GET /api/v1/dataclean/pricing) — the owner's stamped ladder
+ * (2026-11-04): DataClean $12.99, Security $18.99, bundle $27.99
+ * against $31.98 in parts. Availability is badged from the config's
+ * own flags: DataClean sells today; Security is unbuilt, so it and
+ * the bundle read coming soon and are never shown as purchasable. */
 export default function DataCleanLanding() {
   const { t } = useTranslation();
   const [pricing, setPricing] = useState(FALLBACK_PRICING);
@@ -27,7 +62,7 @@ export default function DataCleanLanding() {
     document.title = `${t("datacleanLanding.name")} — Mind at Ease Solutions`;
     let live = true;
     api.get("/v1/dataclean/pricing")
-      .then((p) => { if (live && p?.plans) setPricing(p); })
+      .then((p) => { if (live && p?.products) setPricing(p); })
       .catch(() => {});
     return () => { live = false; };
   }, [t]);
@@ -106,31 +141,54 @@ export default function DataCleanLanding() {
               {t("datacleanLanding.placeholderNote")}
             </span>
           </p>)}
-        <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-          {(pricing.plans || []).map((p) => (
+        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4 max-w-3xl mx-auto">
+          {(pricing.products || []).map((p) => (
             <article key={p.id} className="card-surface p-6 flex flex-col" data-testid={`landing-plan-${p.id}`}>
-              <h3 className="font-display font-semibold">{p.name}</h3>
+              <div className="flex items-center justify-between gap-3">
+                <h3 className="font-display font-semibold">{p.name}</h3>
+                {productState(p) === "available" ? (
+                  <span className="inline-block text-xs text-emerald-300 bg-emerald-500/10 border border-emerald-500/30 rounded-full px-2.5 py-1">
+                    {t("datacleanLanding.statusAvailableNow")}
+                  </span>) : (
+                  <span className="inline-block text-xs text-amber-300 bg-amber-500/10 border border-amber-500/30 rounded-full px-2.5 py-1">
+                    {t("datacleanLanding.statusComingSoon")}
+                  </span>)}
+              </div>
               <div className="mt-3 font-mono text-3xl font-semibold">
                 {priceLabel(p.monthly_price_cents)}
                 <span className="text-sm text-gray-500"> {t("datacleanLanding.perMonth")}</span>
               </div>
-              <ul className="mt-4 space-y-2 text-sm text-gray-400 flex-1">
-                <li>{t("datacleanLanding.rowsIncluded", { rows: _n(p.rows_included) })}</li>
-                <li>{t("datacleanLanding.overage", { price: priceLabel(p.overage_per_1000_rows_cents) })}</li>
-              </ul>
-              <Link to="/dataclean-demo"
-                className="mt-5 inline-flex justify-center items-center gap-2 h-10 px-4 rounded-lg border border-amber-500/40 text-amber-300 text-sm hover:bg-amber-500/10 transition-colors motion-reduce:transition-none">
-                {t("datacleanLanding.tryDemo")}
-              </Link>
+              <p className="mt-4 text-sm text-gray-400 flex-1">
+                {t(p.id === "security" ? "datacleanLanding.productSecurityBody" : "datacleanLanding.productDatacleanBody")}
+              </p>
+              {productState(p) === "available" ? (
+                <Link to="/dataclean-checkout"
+                  className="mt-5 inline-flex justify-center items-center gap-2 h-10 px-4 rounded-lg bg-amber-500 text-black font-semibold text-sm hover:bg-amber-400 transition-colors motion-reduce:transition-none">
+                  {t("datacleanLanding.subscribe")} <ArrowRight size={15} />
+                </Link>) : (
+                <span className="mt-5 inline-flex justify-center items-center h-10 px-4 rounded-lg border border-[#2a3040] text-sm text-gray-500">
+                  {t("datacleanLanding.statusComingSoon")}
+                </span>)}
             </article>))}
         </div>
         {(pricing.bundles || []).map((b) => (
-          <article key={b.id} className="card-surface p-6 mt-4" data-testid={`landing-bundle-${b.id}`}>
+          <article key={b.id} className="card-surface p-6 mt-4 relative overflow-hidden border-amber-500/40" data-testid={`landing-bundle-${b.id}`}>
             <div className="flex flex-wrap items-baseline justify-between gap-3">
-              <h3 className="font-display font-semibold">{b.name}</h3>
-              <div className="font-mono text-3xl font-semibold">
-                {priceLabel(b.monthly_price_cents)}
-                <span className="text-sm text-gray-500"> {t("datacleanLanding.perMonth")}</span>
+              <h3 className="font-display font-semibold flex items-center gap-2">
+                {b.name}
+                <span className="inline-block text-xs text-amber-300 bg-amber-500/10 border border-amber-500/30 rounded-full px-2.5 py-1">
+                  {t("datacleanLanding.bestValue")}
+                </span>
+              </h3>
+              <div className="text-right">
+                <div className="font-mono text-3xl font-semibold">
+                  {priceLabel(b.monthly_price_cents)}
+                  <span className="text-sm text-gray-500"> {t("datacleanLanding.perMonth")}</span>
+                </div>
+                {b.savings_cents > 0 && (
+                  <p className="mt-1 text-xs text-gray-500">
+                    <SavingsTicker bundle={b} />
+                  </p>)}
               </div>
             </div>
             <p className="mt-2 text-sm text-gray-400">{t("datacleanLanding.bundleBody")}</p>
@@ -147,8 +205,17 @@ export default function DataCleanLanding() {
                     </span>)}
                 </li>))}
             </ul>
+            {b.sellable ? (
+              <Link to="/dataclean-checkout"
+                className="mt-5 inline-flex justify-center items-center gap-2 h-10 px-4 rounded-lg bg-amber-500 text-black font-semibold text-sm hover:bg-amber-400 transition-colors motion-reduce:transition-none">
+                {t("datacleanLanding.subscribe")} <ArrowRight size={15} />
+              </Link>) : (
+              <span className="mt-5 inline-flex justify-center items-center h-10 px-4 rounded-lg border border-[#2a3040] text-sm text-gray-500">
+                {t("datacleanLanding.statusComingSoon")}
+              </span>)}
           </article>))}
-        <p className="mt-4 text-center text-xs text-gray-600">{t("datacleanLanding.testModeNote")}</p>
+        {pricing.billing_mode === "test" && (
+          <p className="mt-4 text-center text-xs text-gray-600">{t("datacleanLanding.testModeNote")}</p>)}
       </section>
 
       <footer className="border-t border-[#1c212e] pt-6 pb-2 text-center text-xs text-gray-600">
