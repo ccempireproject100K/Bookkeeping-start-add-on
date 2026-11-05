@@ -29,6 +29,25 @@ design): NeverBounce $0.008/email (unknowns billed), ZeroBounce
 Twilio Lookup line-type $0.008, Smarty ~$0.017/lookup at entry
 ($17 per 1,000/mo). These are COST rates for the estimate, not
 retail prices — the retail shape is an owner decision.
+
+Provider roster (all env-gated, honest-off):
+  * email   — NeverBounce / ZeroBounce (DATACLEAN_EMAIL_VERIFY_
+              PROVIDER + the provider's DATACLEAN_* key), Bouncer
+              (same selector + BOUNCER_API_KEY; single + batch).
+  * phone   — Twilio Lookup (DATACLEAN_TWILIO_*).
+  * address — Smarty (DATACLEAN_SMARTY_*) or Google Address
+              Validation (GOOGLE_ADDRESS_VALIDATION_API_KEY),
+              selected by DATACLEAN_ADDRESS_VERIFY_PROVIDER.
+A provider outage / auth failure (including Bouncer's team-
+verification hold answering 401/403) marks lookups `unavailable` —
+never a faked verdict, never "clean".
+
+Markup: the owner's ruling is pass-through + a TINY markup on
+verification lookups. The mechanism lives here: DATACLEAN_VERIFY_
+MARKUP_BPS (basis points, integer >= 0) is applied on top of the
+provider cost rate in the estimate, and the estimate payload
+surfaces cost, markup and marked-up price side by side. DEFAULT 0
+— pure pass-through until the owner stamps a markup size.
 """
 import hashlib
 import os
@@ -47,12 +66,14 @@ RATES = {"email": 0.008, "phone": 0.008, "address": 0.017}
 CACHE_TTL_DAYS = 30
 
 
-def http_json(method, url, params=None, headers=None, auth=None):
+def http_json(method, url, params=None, headers=None, auth=None,
+              json_body=None):
     """Module-level HTTP seam (tests monkeypatch this; production
     uses requests). Returns (status, parsed_body_dict)."""
     import requests
     resp = requests.request(method, url, params=params,
-                            headers=headers, auth=auth, timeout=20)
+                            headers=headers, auth=auth, json=json_body,
+                            timeout=20)
     try:
         body = resp.json()
     except Exception:
@@ -75,6 +96,33 @@ def email_provider():
     if name == "zerobounce" and os.environ.get(
             "DATACLEAN_ZEROBOUNCE_API_KEY"):
         return "zerobounce"
+    if name == "bouncer" and os.environ.get("BOUNCER_API_KEY"):
+        return "bouncer"
+    return None
+
+
+def google_address_key():
+    return (os.environ.get("GOOGLE_ADDRESS_VALIDATION_API_KEY")
+            or os.environ.get(
+                "DATACLEAN_GOOGLE_ADDRESS_VALIDATION_API_KEY"))
+
+
+def address_provider():
+    sel = (os.environ.get("DATACLEAN_ADDRESS_VERIFY_PROVIDER")
+           or "").strip().lower()
+    smarty = bool(os.environ.get("DATACLEAN_SMARTY_AUTH_ID")
+                  and os.environ.get("DATACLEAN_SMARTY_AUTH_TOKEN"))
+    google = bool(google_address_key())
+    if sel in ("google", "google_address_validation"):
+        return "google_address_validation" if google else None
+    if sel == "smarty":
+        return "smarty" if smarty else None
+    if sel:
+        return None
+    if smarty:
+        return "smarty"
+    if google:
+        return "google_address_validation"
     return None
 
 
@@ -87,11 +135,27 @@ def provider_for(kind):
             return "twilio_lookup"
         return None
     if kind == "address":
-        if (os.environ.get("DATACLEAN_SMARTY_AUTH_ID")
-                and os.environ.get("DATACLEAN_SMARTY_AUTH_TOKEN")):
-            return "smarty"
-        return None
+        return address_provider()
     return None
+
+
+def markup_bps():
+    """Owner-ruled markup on verification lookups, in basis points
+    (DATACLEAN_VERIFY_MARKUP_BPS, integer >= 0). DEFAULT 0: pure
+    pass-through — the mechanism never invents a markup size; a
+    malformed or negative value is treated as 0, never an error."""
+    try:
+        bps = int((os.environ.get("DATACLEAN_VERIFY_MARKUP_BPS")
+                   or "0").strip())
+    except (TypeError, ValueError):
+        return 0
+    return max(bps, 0)
+
+
+def marked_up_rate(kind, bps=None):
+    """The customer-facing per-lookup rate: provider cost + markup."""
+    bps = markup_bps() if bps is None else bps
+    return RATES[kind] * (1 + bps / 10000.0)
 
 
 def configured_kinds(kinds=None):
@@ -165,8 +229,76 @@ _EMAIL_MAP = {
 }
 
 
+_BOUNCER_MAP = {"deliverable": "deliverable",
+                "undeliverable": "undeliverable",
+                "risky": "risky", "unknown": "unknown"}
+BOUNCER_BATCH_MIN = 2
+_BATCH_POLLS = 5
+_BATCH_POLL_SECONDS = 2
+
+
+def _bouncer_result(item):
+    raw = str(item.get("status") or "unknown").lower()
+    out = {"status": _BOUNCER_MAP.get(raw, "unknown"),
+           "provider_status": raw}
+    if item.get("reason"):
+        out["reason"] = str(item["reason"])
+    return out
+
+
+def _lookup_email_bouncer(normalized):
+    from urllib.parse import quote
+    status, body = http_json(
+        "GET", "https://api.usebouncer.com/v1.1/email/verify/"
+        + quote(normalized, safe=""),
+        headers={"x-api-key": os.environ["BOUNCER_API_KEY"]})
+    if status != 200:
+        # Auth failure, the account's team-verification hold, or an
+        # outage: surfaces as unavailable, NEVER as a verdict.
+        return None
+    return _bouncer_result(body)
+
+
+def _bouncer_batch_results(normalized_values):
+    """One Bouncer batch for many emails -> {normalized: result},
+    or None on any failure (the caller falls back to the ordinary
+    per-value path, which applies the same honesty rules)."""
+    import time
+    headers = {"x-api-key": os.environ["BOUNCER_API_KEY"]}
+    status, body = http_json(
+        "POST", "https://api.usebouncer.com/v1.1/email/verify/batch",
+        headers=headers,
+        json_body={"emails": list(normalized_values)})
+    if status not in (200, 201, 202):
+        return None
+    results = body.get("results")
+    batch_id = body.get("id") or body.get("batch_id")
+    polls = 0
+    while results is None and batch_id and polls < _BATCH_POLLS:
+        status, body = http_json(
+            "GET", "https://api.usebouncer.com/v1.1/email/verify/"
+            f"batch/{batch_id}", headers=headers)
+        if status != 200:
+            return None
+        results = body.get("results")
+        if results is None:
+            polls += 1
+            if polls < _BATCH_POLLS:
+                time.sleep(_BATCH_POLL_SECONDS)
+    if results is None:
+        return None
+    out = {}
+    for item in results:
+        em = normalize_value("email", item.get("email"))
+        if em:
+            out[em] = _bouncer_result(item)
+    return out
+
+
 def _lookup_email(normalized):
     provider = email_provider()
+    if provider == "bouncer":
+        return _lookup_email_bouncer(normalized)
     if provider == "neverbounce":
         status, body = http_json(
             "GET", "https://api.neverbounce.com/v4/single/check",
@@ -203,7 +335,45 @@ def _lookup_phone(normalized):
             "carrier": lti.get("carrier_name")}
 
 
+def _lookup_address_google(normalized, raw):
+    status, body = http_json(
+        "POST",
+        "https://addressvalidation.googleapis.com/v1:validateAddress",
+        params={"key": google_address_key()},
+        json_body={"address": {"regionCode": "US",
+                               "addressLines": [str(raw or "")]}})
+    if status != 200:
+        return None
+    result = body.get("result") or {}
+    address = result.get("address") or {}
+    if not address:
+        return {"status": "not_found", "validation_granularity": None}
+    verdict = result.get("verdict") or {}
+    granularity = verdict.get("validationGranularity")
+    if (granularity in ("PREMISE", "SUB_PREMISE")
+            and verdict.get("addressComplete")):
+        mapped = "deliverable"
+    elif granularity in ("PREMISE", "SUB_PREMISE", "ROUTE"):
+        mapped = "partial"
+    else:
+        mapped = "not_found"
+    out = {"status": mapped, "validation_granularity": granularity,
+           "address_complete": bool(verdict.get("addressComplete"))}
+    postal = (address.get("postalAddress") or {}).get("postalCode")
+    if postal:
+        # Same rule as Smarty's ZIP+4: a SUGGESTION riding as
+        # evidence, never written into the record's fields.
+        out["suggested_postal_code"] = postal
+    return out
+
+
 def _lookup_address(normalized, raw):
+    if provider_for("address") == "google_address_validation":
+        return _lookup_address_google(normalized, raw)
+    return _lookup_address_smarty(normalized, raw)
+
+
+def _lookup_address_smarty(normalized, raw):
     status, body = http_json(
         "GET", "https://us-street.api.smarty.com/street-address",
         params={"auth-id": os.environ["DATACLEAN_SMARTY_AUTH_ID"],
@@ -288,7 +458,8 @@ async def estimate_for_list(actor, list_id, kinds=None):
     at the published entry rate. NO provider calls are made here."""
     kinds = [k for k in (kinds or KINDS) if provider_for(k)]
     values = await _distinct_values(actor, list_id, kinds)
-    per_kind, total_lookups, total_cost = {}, 0, 0.0
+    bps = markup_bps()
+    per_kind, total_lookups, total_cost, total_markup = {}, 0, 0.0, 0.0
     for k in kinds:
         cached = 0
         for n in values[k]:
@@ -296,18 +467,30 @@ async def estimate_for_list(actor, list_id, kinds=None):
                 cached += 1
         lookups = len(values[k]) - cached
         cost = round(lookups * RATES[k], 4)
+        price = round(lookups * marked_up_rate(k, bps), 4)
+        markup = round(price - cost, 4)
         per_kind[k] = {"provider": provider_for(k),
                        "distinct_values": len(values[k]),
                        "cached": cached, "lookups": lookups,
-                       "rate_usd": RATES[k], "cost_usd": cost}
+                       "rate_usd": RATES[k], "cost_usd": cost,
+                       "markup_bps": bps,
+                       "price_rate_usd": round(marked_up_rate(k, bps), 6),
+                       "markup_usd": markup, "price_usd": price}
         total_lookups += lookups
         total_cost += cost
+        total_markup += markup
     return {"currency": "USD", "kinds": per_kind,
             "total_lookups": total_lookups,
             "total_cost_usd": round(total_cost, 4),
+            "markup_bps": bps,
+            "total_markup_usd": round(total_markup, 4),
+            "total_price_usd": round(total_cost + total_markup, 4),
             "note": ("Estimate at published entry rates; cached values "
                      "are never re-billed. Actual provider billing "
-                     "depends on the provider's unknowns policy.")}
+                     "depends on the provider's unknowns policy. "
+                     "total_cost_usd is the provider cost; "
+                     "total_price_usd adds the configured markup "
+                     f"({bps} bps; 0 = pure pass-through).")}
 
 
 # ------------------------------------------------------------------
@@ -330,6 +513,38 @@ async def prepare_verify_job(actor, job):
     return counts, {"kinds": kinds, "estimate": estimate}
 
 
+async def _prewarm_bouncer_batch(actor, rows, kinds):
+    """When the email lane runs on Bouncer, verify the distinct
+    uncached emails in ONE provider batch and seed the per-value
+    cache; the per-record pass then reads them back as ordinary
+    cache hits. Any batch failure simply leaves the per-value
+    single-lookup path to cope under the same honesty rules."""
+    if "email" not in kinds or email_provider() != "bouncer":
+        return
+    wanted = {}
+    for r in rows:
+        if r.get("status") in ("merged", "deleted"):
+            continue
+        raw = r.get(FIELD_FOR_KIND["email"])
+        if raw:
+            n = normalize_value("email", raw)
+            if n:
+                wanted.setdefault(n, raw)
+    pending = [n for n in wanted
+               if await _cache_get(actor, "email", n) is None]
+    if len(pending) < BOUNCER_BATCH_MIN:
+        return
+    try:
+        results = _bouncer_batch_results(pending)
+    except Exception:
+        results = None
+    if not results:
+        return
+    for n, raw_result in results.items():
+        result = {**raw_result, "source": "bouncer", "at": now_iso()}
+        await _cache_put(actor, "email", n, result, "bouncer")
+
+
 async def confirm_verify_job(actor, job_id):
     """Run the lookups for an awaiting_confirmation verify job:
     evidence onto each record (values never edited), one artifact per
@@ -344,6 +559,7 @@ async def confirm_verify_job(actor, job_id):
              if provider_for(k)]
     rows = await lists_lib.list_records(actor, job["list_id"],
                                         limit=1000000)
+    await _prewarm_bouncer_batch(actor, rows, kinds)
     records = lists_lib._records(actor)
     artifacts = jobs_lib._artifacts(actor)
     counts = {"records_verified": 0, "lookups_made": 0,
