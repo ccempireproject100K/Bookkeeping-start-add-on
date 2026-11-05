@@ -72,8 +72,15 @@ async def add_vehicle(body: VehicleBody, user: dict = Depends(require("ops:manag
 
 @router.delete("/vehicles/{vid}")
 async def delete_vehicle(vid: str, user: dict = Depends(require("ops:manage"))):
-    if not await vehicles(user).delete({"id": vid}):
+    # Scoped has no delete() method — the house idiom is .c.delete_one
+    # with an explicit tenant filter (cf. routers/combo.py, PR #206, and
+    # routers/receipts.py, PR #205). The old vehicles(user).delete(...)
+    # call raised AttributeError, so this endpoint 500'd on main.
+    res = await vehicles(user).c.delete_one(
+        {"tenant_id": user["tenant_id"], "id": vid})
+    if not res.deleted_count:
         raise HTTPException(404, "Vehicle not found")
+    await audit(user, "mileage.vehicle.delete", "vehicle", vid, {})
     return {"ok": True}
 
 
@@ -134,8 +141,14 @@ async def log_trip(body: TripBody, user: dict = Depends(require("ops:manage"))):
 
 @router.delete("/trips/{tid}")
 async def delete_trip(tid: str, user: dict = Depends(require("ops:manage"))):
-    if not await trips(user).delete({"id": tid}):
+    # Same Scoped.delete() AttributeError as delete_vehicle above (and
+    # combo.py PR #206 / receipts.py PR #205): use .c.delete_one with an
+    # explicit tenant filter.
+    res = await trips(user).c.delete_one(
+        {"tenant_id": user["tenant_id"], "id": tid})
+    if not res.deleted_count:
         raise HTTPException(404, "Trip not found")
+    await audit(user, "mileage.trip.delete", "trip", tid, {})
     return {"ok": True}
 
 
