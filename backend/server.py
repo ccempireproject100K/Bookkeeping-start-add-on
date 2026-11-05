@@ -101,6 +101,11 @@ async def startup():
     # Fail fast on a weak signing secret, before serving a single request.
     from lib.auth import check_jwt_secret
     check_jwt_secret()
+    # Fail fast on a half-configured receipt store: BOOKS_STORAGE_BACKEND=r2
+    # with any BOOKS_R2_* value missing must crash the boot loudly, never
+    # silently fall back to this host's ephemeral disk (STORAGE.md).
+    from lib.receipt_storage import build_receipt_storage
+    build_receipt_storage()
     indexes = [
         # Empire referral ledger (B1-B3): person codes are globally
         # unique; raw events dedupe on their deterministic key;
