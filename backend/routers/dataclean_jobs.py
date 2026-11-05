@@ -93,13 +93,9 @@ async def delete_list(list_id: str,
     doc = await lists_lib.get_list(actor, list_id)
     if not doc:
         raise _err(404, "list_not_found", "no such list")
-    from db import db
     from lib import dataclean_schedules as sched_lib
     await sched_lib.delete_schedule(actor, list_id)
     counts = await lists_lib.delete_list(actor, list_id)
-    drift = await db.dataclean_list_drift.delete_many(
-        {"tenant_id": actor["tenant_id"], "list_id": list_id})
-    counts["drift_reports"] = drift.deleted_count
     return {"deleted": True, "removed": counts}
 
 
@@ -294,8 +290,7 @@ async def put_schedule(list_id: str, body: ScheduleIn,
                    "cadence must be one of ['daily', 'weekly']")
     return {"schedule": {k: doc.get(k) for k in (
         "id", "list_id", "cadence", "webhook_url", "enabled",
-        "next_run_at", "last_run_at", "last_job_id")},
-        "retention": lists_lib.RETENTION_WORDING}
+        "next_run_at", "last_run_at", "last_job_id")}}
 
 
 @router.get("/lists/{list_id}/schedule")
@@ -307,8 +302,7 @@ async def get_schedule(list_id: str,
         raise _err(404, "schedule_not_found", "no schedule for this list")
     return {"schedule": {k: doc.get(k) for k in (
         "id", "list_id", "cadence", "webhook_url", "enabled",
-        "next_run_at", "last_run_at", "last_job_id")},
-        "retention": lists_lib.RETENTION_WORDING}
+        "next_run_at", "last_run_at", "last_job_id")}}
 
 
 @router.delete("/lists/{list_id}/schedule")
