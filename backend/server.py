@@ -26,8 +26,7 @@ from routers import (auth, ledger, products, pos, invoices, cashclose, dashboard
                      whitelabel, entities, cleanup, purchase_orders,
                      fx, market_packs, cfdi, integrations, marketplace,
                      developers, invoice_payments,
-                     dataclean_api, dataclean_admin, dataclean_jobs,
-                     dataclean_connectors)
+                     dataclean_api, dataclean_admin, dataclean_jobs)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("mindatease")
@@ -73,8 +72,7 @@ for r in (auth.router, password_reset.router, ledger.router, products.router, po
           pdftools.router, onboarding.router, welcome_gift.router, trial.router, guide.router, importer.router, autopay.router,
           taxpacket.router, dedupe.router,
           dataclean_api.router, dataclean_admin.router,
-          dataclean_jobs.router,
-          dataclean_connectors.router):
+          dataclean_jobs.router):
     api_router.include_router(r)
 api_router.include_router(plans.router)
 
@@ -98,6 +96,9 @@ app.add_middleware(ContentSecurityPolicyMiddleware)
 
 @app.on_event("startup")
 async def startup():
+    # Fail fast on a weak signing secret, before serving a single request.
+    from lib.auth import check_jwt_secret
+    check_jwt_secret()
     indexes = [
         # Empire referral ledger (B1-B3): person codes are globally
         # unique; raw events dedupe on their deterministic key;
