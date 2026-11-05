@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { api, errMsg } from "@/lib/api";
 import { money, fmtDate } from "@/lib/format";
 import { PageHeader, Card, Loading } from "@/components/Page";
@@ -60,6 +61,14 @@ export default function Receipts() {
     bank_transaction_id: ""
   });
   const fileRef = useRef(null);
+  // Pip File Door deep link: /receipts?receipt=<id> highlights the row
+  // Pip delivered (DESIGN §5.5 item 2 — the smallest routing addition).
+  const [searchParams] = useSearchParams();
+  const highlightId = searchParams.get("receipt");
+  useEffect(() => {
+    if (!highlightId || !receipts.length) return;
+    document.getElementById(`receipt-row-${highlightId}`)?.scrollIntoView({ block: "center" });
+  }, [highlightId, receipts]);
   const reload = () => {
     api.get("/receipts").then(setReceipts).catch(() => {});
     api.get("/ledger/accounts").then(setCoa).catch(() => {});
@@ -169,7 +178,7 @@ export default function Receipts() {
             <th className="px-4 py-3 font-medium">{t("receipts.status")}</th><th className="px-4 py-3"></th>
           </tr></thead>
           <tbody>
-            {receipts.map(r => <tr key={r.id} className="border-b border-[#1a2030] hover:bg-[#141926]">
+            {receipts.map(r => <tr key={r.id} id={`receipt-row-${r.id}`} data-highlighted={highlightId === r.id || undefined} className={`border-b border-[#1a2030] hover:bg-[#141926] ${highlightId === r.id ? "bg-amber-500/10 ring-1 ring-inset ring-amber-500/50" : ""}`}>
                 <td className="px-4 py-2">
                   {r.content_type?.startsWith("image/") ? <Thumb id={r.id} /> : <span className="text-xs text-gray-500">{t("receipts.pdf")}</span>}
                 </td>

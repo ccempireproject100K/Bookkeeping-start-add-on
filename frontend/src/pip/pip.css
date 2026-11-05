@@ -1,0 +1,124 @@
+/**
+ * Pip animation system — adapted from the owner's desktop Pip
+ * (ts-spaces/desktop-character theme.css, in-house; see PROVENANCE.md).
+ * Same keyframe language, renamed to pip-* and extended with the work
+ * poses the tray state machine drives: carrying / thinking / slumped /
+ * sleep. Transform/opacity only. Under prefers-reduced-motion every
+ * animation collapses to a single still frame (DESIGN §5.6).
+ */
+
+.pip-leg,
+.pip-arm {
+  transform-box: fill-box;
+}
+.pip-leg-l { transform-origin: 50% 8%; }
+.pip-leg-r { transform-origin: 50% 8%; }
+.pip-arm-l { transform-origin: 88% 18%; }
+.pip-arm-r { transform-origin: 12% 18%; }
+
+@keyframes pip-legSwing {
+  from { transform: rotate(20deg); }
+  to { transform: rotate(-20deg); }
+}
+@keyframes pip-armSwing {
+  from { transform: rotate(14deg); }
+  to { transform: rotate(-14deg); }
+}
+@keyframes pip-bodyBob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2.5px); }
+}
+@keyframes pip-idleSway {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-1.5px) rotate(1.2deg); }
+}
+@keyframes pip-bounceFast {
+  0%, 100% { transform: translateY(0) scale(1, 1); }
+  30% { transform: translateY(-7px) scale(0.97, 1.04); }
+  55% { transform: translateY(0) scale(1.05, 0.94); }
+  75% { transform: translateY(-3px) scale(1, 1.02); }
+}
+@keyframes pip-typeArm {
+  from { transform: rotate(16deg); }
+  to { transform: rotate(-10deg); }
+}
+@keyframes pip-celebrateJump {
+  0%, 100% { transform: translateY(0) scale(1, 1); }
+  22% { transform: translateY(1px) scale(1.07, 0.9); }
+  45% { transform: translateY(-20px) scale(0.96, 1.06) rotate(-3deg); }
+  65% { transform: translateY(-14px) scale(1, 1) rotate(3deg); }
+  82% { transform: translateY(0) scale(1.05, 0.95); }
+}
+@keyframes pip-thinkPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.12); opacity: 0.85; }
+}
+@keyframes pip-zeeFloat {
+  0% { transform: translateY(0); opacity: 0.9; }
+  100% { transform: translateY(-6px); opacity: 0.45; }
+}
+@keyframes pip-slump {
+  from { transform: translateY(0) rotate(0deg); }
+  to { transform: translateY(3px) rotate(-2deg); }
+}
+@keyframes pip-panelIn {
+  from { transform: translateY(14px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* walk — the patrol cycle */
+.pip-char[data-state="walk"] .pip-body-group { animation: pip-bodyBob 0.36s ease-in-out infinite; }
+.pip-char[data-state="walk"] .pip-leg-l { animation: pip-legSwing 0.36s ease-in-out infinite alternate; }
+.pip-char[data-state="walk"] .pip-leg-r { animation: pip-legSwing 0.36s ease-in-out infinite alternate-reverse; }
+.pip-char[data-state="walk"] .pip-arm-l { animation: pip-armSwing 0.36s ease-in-out infinite alternate-reverse; }
+.pip-char[data-state="walk"] .pip-arm-r { animation: pip-armSwing 0.36s ease-in-out infinite alternate; }
+
+/* idle — standing by */
+.pip-char[data-state="idle"] .pip-body-group { animation: pip-idleSway 2.6s ease-in-out infinite; }
+
+/* excited — a file is hovering over him: arms up, bouncing */
+.pip-char[data-state="excited"] .pip-body-group { animation: pip-bounceFast 0.55s ease-in-out infinite; }
+.pip-char[data-state="excited"] .pip-arm-l { transform: rotate(-125deg); }
+.pip-char[data-state="excited"] .pip-arm-r { transform: rotate(125deg); }
+
+/* thinking — a question is waiting for the human */
+.pip-char[data-state="thinking"] .pip-body-group { animation: pip-idleSway 2.2s ease-in-out infinite; }
+.pip-char[data-state="thinking"] .pip-think { transform-box: fill-box; transform-origin: center; animation: pip-thinkPulse 1.1s ease-in-out infinite; }
+
+/* carrying — a real upload is in flight: quick bob, arms busy */
+.pip-char[data-state="carrying"] .pip-body-group { animation: pip-bodyBob 0.22s ease-in-out infinite; }
+.pip-char[data-state="carrying"] .pip-arm-l { animation: pip-typeArm 0.18s ease-in-out infinite alternate; }
+.pip-char[data-state="carrying"] .pip-arm-r { animation: pip-typeArm 0.18s ease-in-out infinite alternate-reverse; }
+
+/* celebrate — fires only on a real DELIVER event */
+.pip-char[data-state="celebrate"] .pip-body-group { animation: pip-celebrateJump 0.9s ease-in-out infinite; }
+.pip-char[data-state="celebrate"] .pip-arm-l { transform: rotate(-140deg); }
+.pip-char[data-state="celebrate"] .pip-arm-r { transform: rotate(140deg); }
+.pip-char[data-state="celebrate"] .pip-leg-l { transform: rotate(16deg); }
+.pip-char[data-state="celebrate"] .pip-leg-r { transform: rotate(-16deg); }
+
+/* slumped — a real failure just landed */
+.pip-char[data-state="slumped"] .pip-body-group { animation: pip-slump 0.6s ease-out both; }
+.pip-char[data-state="slumped"] .pip-arm-l { transform: rotate(24deg); }
+.pip-char[data-state="slumped"] .pip-arm-r { transform: rotate(-24deg); }
+
+/* sleep — long idle: still, subtle */
+.pip-char[data-state="sleep"] .pip-body-group { animation: pip-idleSway 4.5s ease-in-out infinite; }
+.pip-char[data-state="sleep"] .pip-zee { animation: pip-zeeFloat 2.4s ease-in-out infinite alternate; }
+
+.pip-panel-in { animation: pip-panelIn 0.25s ease-out both; }
+
+/* CSS confetti fallback (used when canvas-confetti is unavailable) */
+@keyframes pip-confettiFall {
+  0% { transform: translateY(-6px) rotate(0deg); opacity: 1; }
+  85% { opacity: 1; }
+  100% { transform: translateY(150px) rotate(560deg); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pip-char *,
+  .pip-panel-in {
+    animation-duration: 0.01s !important;
+    animation-iteration-count: 1 !important;
+  }
+}

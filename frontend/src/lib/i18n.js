@@ -19,6 +19,14 @@ import voiceZhCN from "@/locales/zh-CN/voice.json";
 import voiceHi from "@/locales/hi/voice.json";
 import voiceAr from "@/locales/ar/voice.json";
 
+// Pip File Door strings follow the same per-feature file pattern.
+import pipEn from "@/locales/en/pip.json";
+import pipEs from "@/locales/es/pip.json";
+import pipFr from "@/locales/fr/pip.json";
+import pipZhCN from "@/locales/zh-CN/pip.json";
+import pipHi from "@/locales/hi/pip.json";
+import pipAr from "@/locales/ar/pip.json";
+
 export const SUPPORTED_LANGUAGES = [
   { code: "en", label: "English", flag: "🇺🇸" },
   { code: "es", label: "Español", flag: "🇪🇸" },
@@ -59,12 +67,12 @@ i18n
   .use(initReactI18next)
   .init({
     resources: {
-      en: { translation: { ...en, ...voiceEn } },
-      es: { translation: { ...es, ...voiceEs } },
-      fr: { translation: { ...fr, ...voiceFr } },
-      "zh-CN": { translation: { ...zhCN, ...voiceZhCN } },
-      hi: { translation: { ...hi, ...voiceHi } },
-      ar: { translation: { ...ar, ...voiceAr } },
+      en: { translation: { ...en, ...voiceEn, ...pipEn } },
+      es: { translation: { ...es, ...voiceEs, ...pipEs } },
+      fr: { translation: { ...fr, ...voiceFr, ...pipFr } },
+      "zh-CN": { translation: { ...zhCN, ...voiceZhCN, ...pipZhCN } },
+      hi: { translation: { ...hi, ...voiceHi, ...pipHi } },
+      ar: { translation: { ...ar, ...voiceAr, ...pipAr } },
     },
     supportedLngs: SUPPORTED_LANGUAGES.map((l) => l.code),
     fallbackLng: "en",

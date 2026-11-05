@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { LayoutDashboard, BookOpen, FileText, Scale, ScrollText, Landmark, TrendingUp, Lock, Scissors, Receipt, Wallet, Package, LogOut, ShieldCheck, Hourglass, Gift, Coins, Briefcase, PieChart, Users, Building2, FileSignature, Waves, Target, BarChart3, ReceiptText, Repeat, DatabaseBackup, Bot, Clock, FileCheck2, Camera, Car, HandCoins, Calculator, Activity, Tag, SlidersHorizontal, Rocket, Gauge, Mic, Layers, Sparkles, ClipboardList, Link2, Store, KeyRound } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
@@ -10,6 +10,10 @@ import WorkspaceSwitcher from "./WorkspaceSwitcher";
 import LanguageSwitcher from "./LanguageSwitcher";
 import { useNiche } from "@/context/NicheContext";
 import { useTranslation } from "react-i18next";
+// Pip File Door (Phase 1): lazy-loaded so the shell pays nothing for it
+// until first paint settles (DESIGN §6.3 performance budget); it renders
+// nothing at all when its feature flag is off.
+const PipDoorShell = lazy(() => import("@/pip/PipDoor"));
 const ALL = ["owner", "accountant", "bookkeeper"];
 const NAV = [{
   to: "/",
@@ -543,5 +547,8 @@ export default function Layout() {
         </main>
       </div>
       <MusicPlayer />
+      <Suspense fallback={null}>
+        <PipDoorShell />
+      </Suspense>
     </div>;
 }
