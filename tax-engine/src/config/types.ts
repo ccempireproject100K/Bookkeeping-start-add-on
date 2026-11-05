@@ -96,6 +96,17 @@ export interface StateConfig extends ConfigMeta {
      *  (married filing jointly = 2 — taxpayer + spouse; all others = 1),
      *  so the headline amounts are $158 single/MFS/HoH and $316 joint. */
     exemptions: Record<FilingStatus, number>;
+    /**
+     * Dependent exemption credit per dependent, in DOLLARS ($491 CA
+     * 2026). Optional — present when the state models the credit. The
+     * dependent count is a per-state input: profile.state[CODE].dependents.
+     * The FTB AGI Limitation Worksheet phases the dependent pool out
+     * SEPARATELY from the personal/blind/senior pool (2025 Form 540
+     * instructions, worksheet lines j–m): each dependent credit is
+     * reduced by the same `reductionPerStep` per whole step, and each
+     * pool is floored at $0 on its own.
+     */
+    perDependent?: number;
     /** FTB high-income phaseout (Form 540 AGI Limitation Worksheet):
      *  for each whole `step` of federal AGI over `agiThreshold` (any
      *  fraction of a step rounds up to a full step), EACH exemption

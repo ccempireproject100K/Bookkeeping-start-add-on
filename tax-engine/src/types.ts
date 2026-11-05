@@ -37,7 +37,11 @@ export interface TaxProfile {
   paymentsAlreadyMade?: number;
   /** Specified Service Trade or Business flag for the §199A phase-out. */
   isSSTB?: boolean;
-  /** State-specific inputs, namespaced by state code, e.g. { CA: {...} }. */
+  /** State-specific inputs, namespaced by state code, e.g. { CA: {...} }.
+   *  CA accepts { dependents: number } — the dependent count for the CA
+   *  dependent exemption credit (a non-negative integer; anything else
+   *  is ignored). Per-state payments / prior-year overrides also live
+   *  here (see the state engine). */
   state?: Record<string, Record<string, unknown>>;
 }
 

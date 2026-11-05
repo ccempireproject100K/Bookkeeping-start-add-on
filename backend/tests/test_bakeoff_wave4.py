@@ -365,3 +365,38 @@ def test_tax_packet_estimate_endpoint_activates(monkeypatch):
         assert packet["tax"]["estimate"]["result"]["totalLiabilityCents"] == 1664746
 
     asyncio.run(main())
+
+
+def test_tax_packet_estimate_ca_dependents(monkeypatch):
+    """CA dependent exemption credit flows endpoint → engine: the
+    $80,000 golden books with jurisdiction US-CA owe federal $16,647.46
+    + CA $2,612.97 with no dependents, and CA drops by exactly
+    2 × $491 = $982 when dependents=2 is supplied (engine config
+    2026.4.0, $491/dependent per FTB 2026 indexing)."""
+    import routers.taxpacket as TP
+    from fastapi import HTTPException
+    db = FakeDB()
+    monkeypatch.setattr(TP, "db", db)
+
+    async def main():
+        await db.seed("tenants", {"id": "t1", "name": "Maple HVAC", "niche_id": "hvac"})
+        await db.seed("journal_entries", {"id": "e1", "number": "JE-1",
+                                          "entry_date": "2026-03-01", "status": "posted"})
+        await db.seed("journal_lines", {"id": "l1", "entry_id": "e1", "account_code": "4010",
+                                        "debit": 0, "credit": 8000000, "status": "posted",
+                                        "entry_date": "2026-03-01"})
+        plain = await TP.compute_tax_estimate(
+            2026, TP.TaxEstimateIn(jurisdiction="US-CA"), USER)
+        assert plain["total_liability_cents"] == 1664746 + 261297
+        with_deps = await TP.compute_tax_estimate(
+            2026, TP.TaxEstimateIn(jurisdiction="US-CA", dependents=2), USER)
+        assert with_deps["total_liability_cents"] == 1664746 + 163097
+        assert plain["total_liability_cents"] - with_deps["total_liability_cents"] == 98200
+        try:
+            await TP.compute_tax_estimate(
+                2026, TP.TaxEstimateIn(jurisdiction="US-CA", dependents=-1), USER)
+            raise AssertionError("negative dependents must be rejected")
+        except HTTPException as exc:
+            assert exc.status_code == 422
+
+    asyncio.run(main())

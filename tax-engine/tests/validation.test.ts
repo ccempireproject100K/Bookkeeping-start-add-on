@@ -22,16 +22,17 @@ describe('validateJurisdictions — freshness', () => {
   it('fires on stale data at 91+ days', () => {
     const health = validateJurisdictions({ asOf: '2027-01-19' });
     // Every config verified 2026-10-20 is stale at 91 days — EXCEPT CA,
-    // whose config was re-verified 2026-11-01 when the personal
-    // exemption credit was modeled (config 2026.3.0); CA goes stale on
-    // its own 91st day, 2027-01-31.
+    // whose config was re-verified 2026-11-05 when the dependent
+    // exemption credit was modeled (config 2026.4.0; previously
+    // re-verified 2026-11-01 for the personal credit, config 2026.3.0);
+    // CA goes stale on its own 91st day, 2027-02-04.
     const ca = health.find((h) => h.jurisdiction === 'US-CA');
     expect(health.filter((h) => h.jurisdiction !== 'US-CA').every((h) => h.status === 'stale')).toBe(true);
     expect(ca?.status).toBe('ok');
-    expect(ca?.ageInDays).toBe(79);
+    expect(ca?.ageInDays).toBe(75);
     expect(health[0]?.ageInDays).toBe(91);
     expect(health[0]?.issues[0]).toContain('days old');
-    const later = validateJurisdictions({ asOf: '2027-01-31' });
+    const later = validateJurisdictions({ asOf: '2027-02-04' });
     expect(later.find((h) => h.jurisdiction === 'US-CA')?.status).toBe('stale');
   });
 
@@ -217,6 +218,17 @@ describe('validateJurisdictions — schema checks', () => {
     const health = validateJurisdictions({ asOf: '2026-11-01', configs: [broken] });
     expect(health[0]?.status).toBe('invalid');
     expect(health[0]?.issues.some((i) => i.includes('exemption credit'))).toBe(true);
+  });
+
+  it('rejects a non-positive dependent exemption credit amount', () => {
+    if (!CALIFORNIA_2026.exemptionCredit) throw new Error('CA exemption credit missing');
+    const broken = {
+      ...CALIFORNIA_2026,
+      exemptionCredit: { ...CALIFORNIA_2026.exemptionCredit, perDependent: 0 },
+    };
+    const health = validateJurisdictions({ asOf: '2026-11-05', configs: [broken] });
+    expect(health[0]?.status).toBe('invalid');
+    expect(health[0]?.issues.some((i) => i.includes('perDependent'))).toBe(true);
   });
 
   it('rejects an empty config version and an implausible tax year', () => {

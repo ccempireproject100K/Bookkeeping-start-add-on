@@ -38,10 +38,22 @@ import type { StateConfig } from './types.js';
  * phaseout mechanics were verified against FTB's Form 540 instructions
  * AGI Limitation Worksheet.
  *
+ * Dependent exemption credit — MODELED (added 2026-11-05, gap audit;
+ * config 2026.4.0): $491 per dependent (FTB 2026 indexing, per FTB's
+ * 2026 PIT Indexing Memo, R&TC §17054(d)(1): $475 for 2025 → $491 for
+ * 2026, corroborated by Spidell's California Taxletter, October 2026),
+ * claimed via the per-state input profile.state.CA.dependents. It sits
+ * on the same Form 540 line 32 and is nonrefundable against the bracket
+ * tax only, never against the Mental Health Services Tax. Its phaseout
+ * follows the SAME AGI Limitation Worksheet step count as the personal
+ * credit, but the worksheet phases the dependent pool out SEPARATELY
+ * from the personal/blind/senior pool (2025 Form 540 instructions,
+ * worksheet lines j–m): each dependent credit is reduced by $6 per
+ * whole step, and each pool is floored at $0 on its own.
+ *
  * Remaining known omission (documented, disclosed in every result via
- * `knownOmissions`): the dependent exemption credit ($491 per
- * dependent) and the blind / age-65 exemption credits ($158 each) are
- * NOT modeled — the tax profile carries no dependents / blind / senior
+ * `knownOmissions`): the blind / age-65 exemption credits ($158 each)
+ * are NOT modeled — the tax profile carries no blindness or age
  * inputs.
  */
 const SINGLE: StateConfig['brackets'] = {
@@ -98,10 +110,10 @@ export const CALIFORNIA_2026: StateConfig = {
   stateCode: 'CA',
   implementation: 'full',
   taxYear: 2026,
-  version: '2026.3.0',
+  version: '2026.4.0',
   source:
-    'FTB 2026 California Tax Rate Schedules (X, Y, Z) and standard deductions, verified directly against FTB Tax News, October 2026, "2026 Indexing" (ftb.ca.gov), checked 2026-10-20. Personal exemption credit ($158 per exemption; $316 joint) modeled since config 2026.3.0 (2026-11-01): amounts per FTB Tax News, October 2026; 2026 phaseout thresholds per FTB October 2026 indexing figures as published in Spidell California Taxletter, October 2026; phaseout mechanics per FTB Form 540 instructions, AGI Limitation Worksheet. Dependent exemption credit not modeled — see knownOmissions.',
-  lastVerified: '2026-11-01',
+    'FTB 2026 California Tax Rate Schedules (X, Y, Z) and standard deductions, verified directly against FTB Tax News, October 2026, "2026 Indexing" (ftb.ca.gov), checked 2026-10-20. Personal exemption credit ($158 per exemption; $316 joint) modeled since config 2026.3.0 (2026-11-01): amounts per FTB Tax News, October 2026; 2026 phaseout thresholds per FTB October 2026 indexing figures as published in Spidell California Taxletter, October 2026; phaseout mechanics per FTB Form 540 instructions, AGI Limitation Worksheet. Dependent exemption credit ($491 per dependent) modeled since config 2026.4.0 (2026-11-05): amount per FTB 2026 PIT Indexing Memo (R&TC §17054(d)(1)) and FTB Tax News, October 2026; separate-pool phaseout mechanics per the 2025 Form 540 instructions, AGI Limitation Worksheet lines j–m, re-verified 2026-11-05. Blind / age-65 exemption credits not modeled — see knownOmissions.',
+  lastVerified: '2026-11-05',
   provisional: false,
   standardDeduction: {
     single: 5900,
@@ -121,6 +133,9 @@ export const CALIFORNIA_2026: StateConfig = {
       married_filing_separately: 1,
       head_of_household: 1,
     },
+    // FTB 2026: $491 per dependent (R&TC §17054(d)(1); 2025: $475).
+    // Count arrives per state as profile.state.CA.dependents.
+    perDependent: 491,
     phaseout: {
       // FTB October 2026 indexing (see header note for sourcing).
       agiThreshold: {
@@ -140,9 +155,9 @@ export const CALIFORNIA_2026: StateConfig = {
   },
   knownOmissions: [
     {
-      label: 'Dependent exemption credit — NOT modeled',
+      label: 'Blind / age-65 exemption credits — NOT modeled',
       detail:
-        "California's dependent exemption credit is NOT modeled (documented simplification): $491 per dependent (2026, per FTB), and neither are the blind / age-65 exemption credits ($158 each) — the tax profile carries no dependents, blindness, or age inputs. The PERSONAL exemption credit IS modeled, including its high-income phaseout (see the 'Personal exemption credit' workpaper step). CA estimates for filers with dependents therefore overstate tax by up to $491 per dependent — review before relying on them.",
+        "California's blind and age-65 (senior) exemption credits are NOT modeled (documented simplification): $158 each (2026, per FTB) — the tax profile carries no blindness or age inputs. The PERSONAL exemption credit IS modeled, including its high-income phaseout (see the 'Personal exemption credit' workpaper step), and the DEPENDENT exemption credit IS modeled at $491 per dependent, including its own separately-phased-out pool (input: profile.state.CA.dependents; see the 'Dependent exemption credit' workpaper step when dependents are supplied). CA estimates for blind or age-65 filers therefore overstate tax by up to $158 per qualifying blind/senior exemption — review before relying on them.",
     },
   ],
   safeHarbor: {

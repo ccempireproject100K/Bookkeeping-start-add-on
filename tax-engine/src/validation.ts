@@ -146,6 +146,9 @@ export function validateJurisdictions(options: ValidateOptions = {}): Jurisdicti
           if (!(ec.phaseout.reductionPerStep > 0) || ec.phaseout.reductionPerStep > ec.perExemption) {
             issues.push(`${cfg.jurisdiction}: exemption credit phaseout reductionPerStep out of range`);
           }
+          if (ec.perDependent !== undefined && !(ec.perDependent > 0)) {
+            issues.push(`${cfg.jurisdiction}: exemption credit perDependent must be positive`);
+          }
           for (const s of Object.keys(cfg.brackets) as FilingStatus[]) {
             if (!Number.isInteger(ec.exemptions[s]) || ec.exemptions[s] < 1) {
               issues.push(`${cfg.jurisdiction}: exemption credit exemptions for ${s} must be a positive integer`);
