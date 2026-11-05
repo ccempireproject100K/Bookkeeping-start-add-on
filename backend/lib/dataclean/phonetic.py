@@ -1,18 +1,31 @@
 """Phonetic keys for BLOCKING ONLY (power-up P6).
 
-A compact in-house implementation of the Double Metaphone algorithm
-(Lawrence Philips, 1990/2000 — the algorithm is published; this code is
-an original implementation written for this codebase, no library code
-copied). Only the PRIMARY code is produced.
+Primary encoder: the `metaphone` package (oubiwann/metaphone,
+BSD-3-Clause, pure Python) — ADOPTED in the Phase 0 component survey
+(~/workspace/buildout/dataclean-powerup/PHASE0-SURVEY.md §B) for its
+Double Metaphone PRIMARY + SECONDARY codes: Schmidt (XMT/SMT) and
+Smith (SM0/XMT) share the XMT code, so blocking on either code lands
+variant surnames in the same block. Golden vectors pinned in
+tests/test_dataclean_phase_a.py (Smith, Schmidt, architect, bajador).
 
-The key is used exclusively to *generate candidate pairs* in linkage:
-it can propose that "Catherine" and "Katherine" be compared, but it
-contributes nothing to the score — pair_evidence judges the pair with
-the same field evidence as every other candidate. A phonetic key can
-therefore never create a suggestion by itself; it can only stop a real
-pair from being missed because the two spellings share no token.
+Fallback: if the package is not importable, a compact in-house
+implementation of the same published algorithm (Lawrence Philips,
+1990/2000 — original code written for this codebase) supplies the
+primary code only. Either way the contract is identical:
+
+Keys are used exclusively to *generate candidate pairs* in linkage.
+They contribute nothing to any score — pair_evidence judges the pair
+with the same field evidence as every other candidate. A phonetic
+key can therefore never create a suggestion by itself; it can only
+stop a real pair from being missed because the two spellings share
+no token.
 """
 import re
+
+try:  # the Phase 0 ADOPT
+    from metaphone import doublemetaphone as _dm_package
+except Exception:  # pragma: no cover - exercised only without the dep
+    _dm_package = None
 
 _VOWELS = set("AEIOUY")
 _NON_ALPHA = re.compile(r"[^A-Z]")
@@ -27,7 +40,7 @@ def _slavo_germanic(s):
 
 
 def double_metaphone_primary(word):
-    """Primary Double Metaphone code for a single token ('' if empty)."""
+    """Primary Double Metaphone code (in-house fallback implementation)."""
     s = _NON_ALPHA.sub("", str(word or "").upper())
     if not s:
         return ""
@@ -263,11 +276,31 @@ def double_metaphone_primary(word):
             else:
                 primary.append("S")
                 i += 2 if s_pad[i + 1] == "Z" else 1
-        else:  # Ç and friends already stripped; unknown char
+        else:  # unknown char (non-ASCII already stripped)
             i += 1
     return "".join(primary)[:6]
 
 
+def phonetic_keys(token):
+    """Blocking keys for one name token: [primary, secondary?] —
+    distinct, non-empty. With the adopted package both codes are
+    returned; the in-house fallback returns the primary only."""
+    if _dm_package is not None:
+        try:
+            primary, secondary = _dm_package(str(token or ""))
+        except Exception:
+            primary, secondary = "", ""
+        keys = []
+        for code in (primary, secondary):
+            if code and code not in keys:
+                keys.append(code)
+        if keys:
+            return keys
+    code = double_metaphone_primary(token)
+    return [code] if code else []
+
+
 def phonetic_key(token):
-    """Blocking key for one name token ('' when nothing usable)."""
-    return double_metaphone_primary(token)
+    """Single primary blocking key ('' when nothing usable)."""
+    keys = phonetic_keys(token)
+    return keys[0] if keys else ""
