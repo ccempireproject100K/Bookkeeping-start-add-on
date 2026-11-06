@@ -25,7 +25,7 @@ from routers import (auth, ledger, products, pos, invoices, cashclose, dashboard
                      playground, combo, kpis, benchmarks, voice, voice_transcribe, taxposture,
                      whitelabel, entities, cleanup, purchase_orders,
                      fx, market_packs, cfdi, integrations, marketplace,
-                     developers, invoice_payments,
+                     developers, invoice_payments, procurement_sync,
                      dataclean_api, dataclean_admin, dataclean_jobs,
                      dataclean_connectors, dataclean_billing)
 
@@ -70,6 +70,7 @@ for r in (auth.router, password_reset.router, ledger.router, products.router, po
           purchase_orders.router, fx.router, fx.currencies_router,
           market_packs.router, cfdi.router, integrations.router,
           marketplace.router, developers.router, invoice_payments.router,
+          procurement_sync.router,
           pdftools.router, onboarding.router, welcome_gift.router, trial.router, guide.router, importer.router, autopay.router,
           taxpacket.router, dedupe.router,
           dataclean_api.router, dataclean_admin.router,
@@ -149,6 +150,14 @@ async def startup():
         # sync_key stamps let an interrupted sync retry find its resource.
         (db.customers, [("tenant_id", 1), ("sync_key", 1)], {}),
         (db.invoices, [("tenant_id", 1), ("sync_key", 1)], {}),
+        # Procurement sync (contract addendum 2026-11-05, v1.1): bills
+        # carry the same sync_key stamp; (source, source_bill_id) is the
+        # natural dedupe anchor, and external_ref resolves vendors/jobs.
+        (db.bills, [("tenant_id", 1), ("sync_key", 1)], {}),
+        (db.bills, [("tenant_id", 1), ("source", 1), ("source_bill_id", 1)], {}),
+        (db.vendors, [("tenant_id", 1), ("external_ref", 1)], {}),
+        (db.jobs, [("tenant_id", 1), ("external_ref", 1)], {}),
+        (db.job_costs, [("tenant_id", 1), ("bill_id", 1)], {}),
         # Invoice payments (Stripe Connect): webhook reconciliation is
         # idempotent by event id — the unique index is the enforcement.
         (db.stripe_webhook_events, "id", {"unique": True}),

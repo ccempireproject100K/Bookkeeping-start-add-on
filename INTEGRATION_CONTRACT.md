@@ -198,3 +198,87 @@ without the header behave exactly as before (UI flows unaffected).
 - Sync payload shapes, money handling (dollars at the edge, cents
   inside), and the set of synced record types (customers, invoices,
   payments — no expenses) are unchanged.
+
+---
+
+## Addendum 2026-11-05 — procurement sync (v1.1)
+
+**Status: POST-FREEZE EXTENSION, flagged explicitly per this contract's
+own rule** (owner ruling 2026-11-05: orders and supplier bills from the
+AI Office parts system flow into Books as bills owed / AP, and the
+materials spend lands on the job's cost record). This addendum adds ONE
+endpoint to the sync surface; §§1–5 above are unchanged. Implemented in
+`backend/routers/procurement_sync.py`, tested by
+`backend/tests/test_procurement_sync.py`.
+
+### Endpoint
+
+`POST /api/integrations/procurement/bills` — sits alongside the existing
+sync surface, next to `GET /api/integrations/me` (the integrations
+router family).
+
+- **Auth:** the standard sync actor (`get_sync_actor`) — a dedicated
+  integration credential with the `books:sync` scope (§1), or a user
+  session with `ops:manage`. The tenant always comes from the
+  credential/session, never from the request. Missing/invalid
+  credentials are `401`; a valid credential without `books:sync`
+  (e.g. a `referrals:sync` platform credential) is `403`.
+- **Body** (dollars at the edge, integer cents in storage, as §5):
+
+  ```json
+  { "source": "aioffice",
+    "source_bill_id": "<AI Office supplier-bill id>",   // required
+    "source_po_id": "<AI Office PO id or null>",
+    "supplier_invoice_no": "<string or null>",
+    "vendor_name": "<string>",
+    "vendor_external_id": "<AI Office supplier id or null>",
+    "vendor_is_1099": false,
+    "bill_date": "YYYY-MM-DD or null", "due_date": "YYYY-MM-DD or null",
+    "lines": [{ "description": "...", "amount": 123.45,
+                "expense_code": "5700 or null",
+                "job_ref": "<AI Office job/appointment id or null>",
+                "job_number": "<or null>",
+                "customer_name": "<or null>" }] }
+  ```
+
+- **Effect — one entry per spend (hard rule):** the bill posts exactly
+  ONE journal entry, the bill's own, under the `create_bill`
+  discipline (Dr per-line expense / Cr `2010` Accounts payable,
+  source `"bill"`) and lands as an open AP bill (`status: "open"`,
+  `kind: "procurement"`). Per line, the expense code is the explicit
+  `expense_code` when given, else `5000` (job materials) when the line
+  carries a `job_ref`, else `5700`. Job-linked lines additionally
+  create `job_costs` rows (category `material`, grouped per `job_ref`)
+  that reference the bill (`bill_id`) and the bill's single entry
+  number — **no second journal entry is ever posted for the same
+  spend**, preserving the jobs module's one-entry rule, so the job's
+  profit/cost reads include the materials amount exactly once.
+- **Vendor resolution:** an existing non-deleted vendor matched by
+  `external_ref` (the stored `vendor_external_id`) first, else by
+  normalized name (trim / collapse whitespace / lowercase), else a new
+  vendor is created `{name, kind: "supplier", external_ref,
+  is_1099 + form_1099: vendor_is_1099, source:
+  "aioffice_procurement"}`. When a push asserts `vendor_is_1099`, the
+  flag is set on the matched/created vendor; it is never unset by a
+  later push that omits it.
+- **Job resolution:** a Books job matched by `jobs.external_ref ==
+  job_ref`, else a minimal shell is created `{job_number: payload
+  job_number or "EXT-" + short hash of job_ref, name/customer_name:
+  payload customer_name or "AI Office job", external_ref: job_ref,
+  source: "aioffice_procurement", status: "active",
+  contract_amount_cents: 0}`.
+- **Idempotency:** §3 applies unchanged — `Idempotency-Key` claims a
+  record under endpoint label `POST /integrations/procurement/bills`;
+  a duplicate delivery replays the stored response verbatim
+  (`Idempotency-Replayed: true`), and the created bill is stamped
+  `sync_key` so a crash-window retry returns the original bill.
+  Additionally, `(tenant, source, source_bill_id)` is a natural dedupe
+  anchor: a push with no idempotency key whose `source_bill_id` was
+  already received returns the original bill's response with
+  `"deduplicated": true` instead of creating a second bill.
+- **Response 200:** `{bill_id, entry_number, total_cents, vendor_id,
+  job_costs: [{job_id, job_cost_id, amount_cents}], deduplicated}`.
+- **Errors:** `422` for a missing `source_bill_id`, no lines, a
+  non-positive line amount, or a malformed date; ledger validation
+  (unknown/archived expense account) surfaces as its usual `422`.
+  Validation failures never post.
