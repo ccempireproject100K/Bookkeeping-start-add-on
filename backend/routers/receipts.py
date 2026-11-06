@@ -2,8 +2,18 @@
 trade's language, match to the bank feed, and post as expenses.
 
 Flow: POST /receipts/upload -> POST /receipts/{id}/scan -> review ->
-POST /receipts/{id}/post. The AI step needs OPENAI_API_KEY; everything else
-works without it (manual entry fallback).
+POST /receipts/{id}/post.
+
+Scan routing (intake-engine wiring, books_adapter/ADAPTER.md): when
+INTAKE_ENGINE_URL is set, scan sends the stored file to the Empire
+Intake Engine (local parse + rules mapper — works on PDFs and images,
+no API key, returns line_items[] + a reconciliation block). The
+gpt-4o-mini vision prompt survives only as optional enrichment over
+the engine's output when OPENAI_API_KEY exists. When INTAKE_ENGINE_URL
+is not set, the legacy paths below run unchanged (invoice2data
+templates for PDFs, vision for images) so an unconfigured deployment
+behaves exactly as before. Nothing ever auto-posts: scan persists a
+draft extraction for human review.
 """
 import asyncio
 import base64
@@ -169,36 +179,14 @@ def _vision_key() -> str:
     return key
 
 
-@router.post("/{rid}/scan")
-async def scan_receipt(rid: str, user: dict = Depends(require("ops:manage"))):
-    """Send the receipt image to a vision model; store vendor/date/total/category."""
+async def _vision_extract(user: dict, doc: dict, pack: dict) -> dict:
+    """The gpt-4o-mini vision prompt, unchanged from its days as the only
+    scan path. Raises 503 without OPENAI_API_KEY, 502 on any failure.
+    Callers: the legacy image path (where it is still the scan) and the
+    engine path (where it is optional enrichment — see _scan_via_engine).
+    """
     import json
-    doc = await receipts(user).find_one({"id": rid})
-    if not doc:
-        raise HTTPException(404, "Receipt not found")
-    if doc["content_type"] == "application/pdf":
-        # Standout extra A: invoice2data template extraction on the PDF
-        # text layer (MIT library, our templates). Only when no template
-        # matches do we fall back to the old manual-entry answer.
-        from lib.pdf_intake import extract_pdf_invoice
-        found = extract_pdf_invoice(_store().read(_key(user, doc["stored"])))
-        if not found:
-            raise HTTPException(422, "No invoice template matched this PDF — enter the details manually, "
-                                     "or upload a JPG/PNG photo for AI scan.")
-        extracted = {"vendor": found["vendor"], "date": found["date"],
-                     "amount": found["amount"], "tax": found["tax"],
-                     "category_code": "", "category_name": "",
-                     "description": f"PDF invoice {found['invoice_number']}".strip(),
-                     "trade": "", "extraction_source": "invoice2data",
-                     "needs_review": True}
-        await receipts(user).update_one({"id": rid},
-                                        {"$set": {"extracted": extracted, "status": "scanned"}})
-        await audit(user, "receipt.scan", "receipt", rid,
-                    {"vendor": extracted["vendor"], "amount": extracted["amount"],
-                     "source": "invoice2data"})
-        return extracted
     key = _vision_key()
-    pack = await _pack_for_user(user)
     cats = _trade_categories(pack)
     trade = pack.get("name", "your trade")
     b64 = base64.b64encode(_store().read(_key(user, doc["stored"]))).decode()
@@ -237,18 +225,194 @@ async def scan_receipt(rid: str, user: dict = Depends(require("ops:manage"))):
     except Exception:
         raise HTTPException(502, "Receipt read but could not be parsed — enter it manually.")
     code = (data.get("category") or "").split(" ")[0]
-    extracted = {"vendor": (data.get("vendor") or "").strip(),
-                 "date": (data.get("date") or "").strip(),
-                 "amount": float(data.get("amount") or 0),
-                 "tax": float(data.get("tax") or 0),
-                 "category_code": code if code in ACCOUNT_TYPE_OF else "",
-                 "category_name": NAME_OF.get(code, ""),
-                 "description": (data.get("description") or "").strip(),
-                 "trade": trade}
+    return {"vendor": (data.get("vendor") or "").strip(),
+            "date": (data.get("date") or "").strip(),
+            "amount": float(data.get("amount") or 0),
+            "tax": float(data.get("tax") or 0),
+            "category_code": code if code in ACCOUNT_TYPE_OF else "",
+            "category_name": NAME_OF.get(code, ""),
+            "description": (data.get("description") or "").strip(),
+            "trade": trade}
+
+
+# ---------------- Intake engine scan (ADAPTER.md) ----------------
+def _engine_url() -> str:
+    return os.environ.get("INTAKE_ENGINE_URL", "").strip().rstrip("/")
+
+
+async def _engine_extract(user: dict, doc: dict, data: bytes) -> dict:
+    """POST the stored file to the Empire Intake Engine and return its
+    record JSON. Any failure raises 502 — the caller marks the scan
+    failed; there is never a silent empty extraction (ADAPTER.md,
+    failure honesty). Scanned/photo pages are CPU-heavy: 150s budget.
+    """
+    url = f"{_engine_url()}/intake"
+
+    def _do():
+        return requests.post(
+            url,
+            headers={"X-Tenant-Id": user["tenant_id"]},
+            files={"file": (doc["filename"], data, doc["content_type"])},
+            data={"doc_class": "receipt"},
+            timeout=150,
+        )
+
+    try:
+        r = await asyncio.to_thread(_do)
+    except Exception as exc:
+        logger.error("intake engine request failed: %s", exc)
+        raise HTTPException(502, "The intake engine could not be reached — enter it manually.")
+    if r.status_code != 200:
+        logger.error("intake engine error %s: %s", r.status_code,
+                     scrub_secrets(r.text[:300]))
+        raise HTTPException(502, f"Intake engine error ({r.status_code}) — enter it manually.")
+    try:
+        record = r.json()
+    except Exception:
+        raise HTTPException(502, "Intake engine replied unreadably — enter it manually.")
+    if not isinstance(record, dict) or "line_items" not in record:
+        raise HTTPException(502, "Intake engine replied unreadably — enter it manually.")
+    return record
+
+
+def _map_engine_record(record: dict, trade: str) -> dict:
+    """Engine record -> Books `extracted` (ADAPTER.md field map).
+
+    The map's NEW fields (line_items[], *_cents, scan_flag, the full
+    reconciliation block) land alongside the legacy amount/tax floats
+    the review UI and the bank-feed matcher already read — those are
+    derived from the engine's cents, never a second source of truth.
+    """
+    recon = record.get("reconciliation") or {}
+    needs_review = bool(recon.get("needs_review"))
+    total_c = record.get("total_cents") or 0
+    tax_c = record.get("tax_cents") or 0
+    return {
+        "vendor": (record.get("vendor") or "").strip(),
+        "invoice_no": record.get("invoice_no"),
+        "date": (record.get("date") or "").strip(),
+        "due_date": record.get("due_date"),
+        "currency": record.get("currency"),
+        "line_items": record.get("line_items") or [],
+        "subtotal_cents": record.get("subtotal_cents"),
+        "discount_cents": record.get("discount_cents"),
+        "tax_cents": tax_c,
+        "total_cents": total_c,
+        "tax_label": record.get("tax_label"),
+        "reconciliation": recon,
+        "scan_flag": "needs_review" if needs_review else None,
+        "payment_terms": record.get("payment_terms"),
+        "vendor_tax_id": record.get("tax_id"),
+        "amount": total_c / 100.0,
+        "tax": tax_c / 100.0,
+        "category_code": "",
+        "category_name": "",
+        "description": "",
+        "trade": trade,
+        "extraction_source": "intake_engine",
+        "needs_review": needs_review,
+    }
+
+
+async def _scan_via_engine(user: dict, doc: dict) -> dict:
+    """The engine scan: every accepted upload type, no API key needed.
+    Bytes come through the existing receipt_storage layer — no second
+    file path. The extraction persists as a draft; nothing auto-posts.
+    """
+    rid = doc["id"]
+    data = _store().read(_key(user, doc["stored"]))
+    try:
+        record = await _engine_extract(user, doc, data)
+    except HTTPException as exc:
+        # Failure honesty: mark the scan failed on the receipt, keep
+        # the manual-entry path, and surface the error — never persist
+        # a silent empty extraction.
+        await receipts(user).update_one(
+            {"id": rid},
+            {"$set": {"scan_status": "failed", "scan_error": str(exc.detail)}})
+        await audit(user, "receipt.scan_failed", "receipt", rid,
+                    {"source": "intake_engine", "error": str(exc.detail)})
+        raise
+    pack = await _pack_for_user(user)
+    trade = pack.get("name", "your trade")
+    extracted = _map_engine_record(record, trade)
+    # Optional enrichment, demoted per ADAPTER.md: with OPENAI_API_KEY
+    # present, the vision prompt may add ONLY the fields the engine
+    # does not produce (trade category, description) over the engine's
+    # structured output, on image inputs. Engine money/vendor/date
+    # fields are authoritative; enrichment failure never fails a scan.
+    enriched = False
+    if doc["content_type"] != "application/pdf" and \
+            os.environ.get("OPENAI_API_KEY", "").strip():
+        try:
+            vision = await _vision_extract(user, doc, pack)
+        except HTTPException:
+            vision = None
+        if vision:
+            if vision.get("category_code"):
+                extracted["category_code"] = vision["category_code"]
+                extracted["category_name"] = vision.get("category_name", "")
+            if vision.get("description"):
+                extracted["description"] = vision["description"]
+            enriched = bool(extracted["category_code"] or extracted["description"])
+    await receipts(user).update_one(
+        {"id": rid},
+        {"$set": {"extracted": extracted, "status": "scanned",
+                  "scan_status": "ok", "scan_error": None}})
+    await audit(user, "receipt.scan", "receipt", rid,
+                {"vendor": extracted["vendor"], "amount": extracted["amount"],
+                 "source": "intake_engine", "enriched": enriched})
+    return extracted
+
+
+async def _scan_legacy(user: dict, doc: dict) -> dict:
+    """The pre-engine scan paths, byte-for-byte in behavior. They run
+    only when INTAKE_ENGINE_URL is not configured."""
+    rid = doc["id"]
+    if doc["content_type"] == "application/pdf":
+        # Standout extra A: invoice2data template extraction on the PDF
+        # text layer (MIT library, our templates). Only when no template
+        # matches do we fall back to the old manual-entry answer.
+        from lib.pdf_intake import extract_pdf_invoice
+        found = extract_pdf_invoice(_store().read(_key(user, doc["stored"])))
+        if not found:
+            raise HTTPException(422, "No invoice template matched this PDF — enter the details manually, "
+                                     "or upload a JPG/PNG photo for AI scan.")
+        extracted = {"vendor": found["vendor"], "date": found["date"],
+                     "amount": found["amount"], "tax": found["tax"],
+                     "category_code": "", "category_name": "",
+                     "description": f"PDF invoice {found['invoice_number']}".strip(),
+                     "trade": "", "extraction_source": "invoice2data",
+                     "needs_review": True}
+        await receipts(user).update_one({"id": rid},
+                                        {"$set": {"extracted": extracted, "status": "scanned"}})
+        await audit(user, "receipt.scan", "receipt", rid,
+                    {"vendor": extracted["vendor"], "amount": extracted["amount"],
+                     "source": "invoice2data"})
+        return extracted
+    pack = await _pack_for_user(user)
+    extracted = await _vision_extract(user, doc, pack)
     await receipts(user).update_one({"id": rid},
                                     {"$set": {"extracted": extracted, "status": "scanned"}})
     await audit(user, "receipt.scan", "receipt", rid, {"vendor": extracted["vendor"], "amount": extracted["amount"]})
     return extracted
+
+
+@router.post("/{rid}/scan")
+async def scan_receipt(rid: str, user: dict = Depends(require("ops:manage"))):
+    """Extract the receipt's details into a draft for review.
+
+    With INTAKE_ENGINE_URL set: the intake engine (PDFs and images,
+    line items + reconciliation). Without it: the legacy paths. Either
+    way the result is a draft — posting stays a separate human action,
+    and Pip's tray Scan action calls this same endpoint unchanged.
+    """
+    doc = await receipts(user).find_one({"id": rid})
+    if not doc:
+        raise HTTPException(404, "Receipt not found")
+    if _engine_url():
+        return await _scan_via_engine(user, doc)
+    return await _scan_legacy(user, doc)
 
 
 # ---------------- Bank-feed matching ----------------
