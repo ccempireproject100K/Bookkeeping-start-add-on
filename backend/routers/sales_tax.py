@@ -756,7 +756,11 @@ async def nexus_monitor(user: dict = Depends(require("tax:read"))):
     nexus also turns on physical presence and facts this app cannot
     see — this never presents a determination as fact."""
     tenant_id = user["tenant_id"]
-    today = date.today()
+    # The window must use the app's accounting-date basis (today_str,
+    # UTC) — the same basis invoice issue_date is stamped with. A bare
+    # local date.today() here excluded same-day invoices whenever the
+    # local date lagged the UTC date (e.g. evenings west of UTC).
+    today = date.fromisoformat(today_str())
     start = f"{today.year - 1}-01-01"
     end = (today + timedelta(days=1)).isoformat()
     inv_rows, pos_rows, _revs, truncated = await _activity_rows(
