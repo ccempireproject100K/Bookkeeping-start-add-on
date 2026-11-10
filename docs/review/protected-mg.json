@@ -1,0 +1,426 @@
+{
+  "_meta": {
+    "lang": "mg",
+    "status": "DRAFT for human review only. Do NOT copy into frontend/src/locales/mg/translation.json until a qualified reviewer (counsel/CPA where relevant) approves each string. Live locale keeps English for these keys.",
+    "source": "docs/TRANSLATION_PLAN.md flagged keys (legal/financial/tax/privacy/safety)",
+    "notice": "Approximate translation from English/Spanish, may not be accurate."
+  },
+  "strings": {
+    "salestaxtab.taxJurisdictions": {
+      "en": "Tax jurisdictions",
+      "draft": "Hetra jurisdictions"
+    },
+    "salestaxtab.everywhereYouCollectSalesTaxState": {
+      "en": "Everywhere you collect sales tax — state, county, city, special district.\n          Tag invoices with a jurisdiction and this page tells you what you owe, where.",
+      "draft": "Na aiza na aiza ianao collect fivarotana hetra — faritra, county, tanana, special district.\n  Marika faktiora miaraka fahefana sy ity pejy tells ianao inona ianao owe, aiza."
+    },
+    "salestaxtab.noJurisdictionsYetAddTheFirst": {
+      "en": "No jurisdictions yet. Add the first place you collect sales tax.",
+      "draft": "Tsia jurisdictions mbola. Ampio ny voalohany place ianao collect fivarotana hetra."
+    },
+    "salestaxtab.ofSalesTaxIsnTTagged": {
+      "en": "of sales tax isn't tagged to a jurisdiction yet.\n            Tag invoices with a jurisdiction so every dollar lands in the right bucket.",
+      "draft": "ny fivarotana hetra tsy tagged ho fahefana mbola.\n  Marika faktiora miaraka fahefana koa isaky dollar lands ao ny ankavanana sokajy."
+    },
+    "salestaxtab.taxCollected": {
+      "en": "Tax collected",
+      "draft": "Hetra voangona"
+    },
+    "teaminvites.inviteYourAccountantOrTaxPro": {
+      "en": "Invite your accountant or tax pro — they join with the right permissions\n        and can switch between all the workspaces they serve.",
+      "draft": "Fanasana nao mpitana boky na hetra matihanina — izy ireo midira miaraka ny ankavanana alalana\n  sy mahay ovay eo anelanelany rehetra ny toerana fiasana izy ireo serve."
+    },
+    "auditlog.eGTaxInvoiceLogin": {
+      "en": "e.g. tax, invoice, login",
+      "draft": "ohatra hetra, faktiora, hiditra"
+    },
+    "cpapackage.mileageLogWithIRSRatesApplied": {
+      "en": "Mileage log with IRS rates applied",
+      "draft": "Halavirana tahiry miaraka IRS taha applied"
+    },
+    "customers.delete": {
+      "en": "Delete",
+      "draft": "Fafao"
+    },
+    "customers.deleteConfirm": {
+      "en": "Delete customer \"{{name}}\"? Their invoices and statements stay on record.",
+      "draft": "Fafao mpanjifa \"{{name}}\"? Azy faktiora sy fanambarana mijanòna eo raketo."
+    },
+    "estimates.tax": {
+      "en": "Tax ($)",
+      "draft": "Hetra ($)"
+    },
+    "expenses.taxID": {
+      "en": "Tax ID",
+      "draft": "Hetra ID"
+    },
+    "expenses.taxYear": {
+      "en": "Tax year",
+      "draft": "Hetra taona"
+    },
+    "expenses.tax": {
+      "en": "Tax",
+      "draft": "Hetra"
+    },
+    "expenses.taxIDEIN": {
+      "en": "Tax ID / EIN",
+      "draft": "Hetra ID / EIN"
+    },
+    "invoices.refund": {
+      "en": "Refund",
+      "draft": "Famerenana"
+    },
+    "invoices.taxJurisdictionOptional": {
+      "en": "Tax jurisdiction (optional)",
+      "draft": "Hetra fahefana (tsy voatery)"
+    },
+    "invoices.tax": {
+      "en": "Tax ($)",
+      "draft": "Hetra ($)"
+    },
+    "invoices.refundCredit": {
+      "en": "Refund credit —",
+      "draft": "Famerenana trosa —"
+    },
+    "invoices.refundTheRemaining": {
+      "en": "Refund the remaining",
+      "draft": "Famerenana ny ambiny"
+    },
+    "mileage.irsLogCSV": {
+      "en": "IRS log CSV",
+      "draft": "IRS tahiry CSV"
+    },
+    "payroll.deleteDraft": {
+      "en": "Delete draft",
+      "draft": "Fafao volavola"
+    },
+    "payroll.partnershipStubWhenAProviderIs": {
+      "en": "Partnership stub: when a provider is connected, runs here will hand off tax filing and direct deposit automatically.",
+      "draft": "Fiaraha-miasa tapakila: oviana mpamatsy dia mifandray, mandeha eto ho tanana maty hetra fametrahana sy mivantana petra-bola mandeha ho azy."
+    },
+    "payroll.employerTaxEst": {
+      "en": "Employer payroll tax (est.)",
+      "draft": "Employer karama hetra (tombana.)"
+    },
+    "portalview.tax": {
+      "en": "Tax",
+      "draft": "Hetra"
+    },
+    "recurringinvoices.tax": {
+      "en": "Tax ($)",
+      "draft": "Hetra ($)"
+    },
+    "simulator.safetyFloor": {
+      "en": "Safety floor $",
+      "draft": "Safety floor $"
+    },
+    "tax.nameIsRequired": {
+      "en": "Name is required",
+      "draft": "Anarana dia takiana"
+    },
+    "tax.contractorAdded": {
+      "en": "Contractor added",
+      "draft": "Mpanao asa voampy"
+    },
+    "tax.w9StatusUpdated": {
+      "en": "W-9 status updated",
+      "draft": "W-9 toe-javatra novaina"
+    },
+    "tax.contractorRemoved": {
+      "en": "Contractor removed",
+      "draft": "Mpanao asa voaesotra"
+    },
+    "tax.enterAPositiveAmount": {
+      "en": "Enter a positive amount",
+      "draft": "Ampidiro tsara habetra"
+    },
+    "tax.paymentRecorded": {
+      "en": "Payment recorded",
+      "draft": "Fandoavana voarakitra"
+    },
+    "tax.paymentDeleted": {
+      "en": "Payment deleted",
+      "draft": "Fandoavana voafafa"
+    },
+    "tax.statusRefreshed": {
+      "en": "Status refreshed",
+      "draft": "Toe-javatra refreshed"
+    },
+    "tax.addContractor": {
+      "en": "Add contractor",
+      "draft": "Ampio mpanao asa"
+    },
+    "tax.contractors1099s": {
+      "en": "Contractors & 1099s",
+      "draft": "Mpanao asa & 1099s"
+    },
+    "tax.salesTax": {
+      "en": "Sales Tax",
+      "draft": "Fivarotana Hetra"
+    },
+    "tax.taxbanditsNotConnected": {
+      "en": "TaxBandits not connected.",
+      "draft": "TaxBandits tsy mifandray."
+    },
+    "tax.taxbanditsSETUPMd": {
+      "en": "TAXBANDITS_SETUP.md",
+      "draft": "TAXBANDITS_SETUP.md"
+    },
+    "tax.inTheRepoNoIRSFiling": {
+      "en": "in the repo. No IRS filing is ever done in-house.",
+      "draft": "ao ny repo. Tsia IRS fametrahana dia hatrizay vita in-house."
+    },
+    "tax.taxbanditsConnectedIn": {
+      "en": "TaxBandits connected in",
+      "draft": "TaxBandits mifandray ao"
+    },
+    "tax.sandbox": {
+      "en": "sandbox",
+      "draft": "sandbox"
+    },
+    "tax.modeNoRealFilingsFlip": {
+      "en": "mode — no real filings. Flip",
+      "draft": "mode — tsia real filings. Flip"
+    },
+    "tax.taxbanditsSANDBOXFalse": {
+      "en": "TAXBANDITS_SANDBOX=false",
+      "draft": "TAXBANDITS_SANDBOX=diso"
+    },
+    "tax.toGoLive": {
+      "en": "to go live.",
+      "draft": "ho andeha mivantana."
+    },
+    "tax.newContractor": {
+      "en": "New contractor",
+      "draft": "Vaovao mpanao asa"
+    },
+    "tax.name": {
+      "en": "Name *",
+      "draft": "Anarana *"
+    },
+    "tax.businessName": {
+      "en": "Business name",
+      "draft": "Raharaha anarana"
+    },
+    "tax.email": {
+      "en": "Email",
+      "draft": "Imelaka"
+    },
+    "tax.phone": {
+      "en": "Phone",
+      "draft": "Finday"
+    },
+    "tax.entityType": {
+      "en": "Entity type",
+      "draft": "Orinasa karazany"
+    },
+    "tax.ssnEIN": {
+      "en": "SSN / EIN",
+      "draft": "SSN / EIN"
+    },
+    "tax.storedSecurely": {
+      "en": "Stored securely",
+      "draft": "Stored securely"
+    },
+    "tax.street": {
+      "en": "Street",
+      "draft": "Street"
+    },
+    "tax.city": {
+      "en": "City",
+      "draft": "Tanana"
+    },
+    "tax.state": {
+      "en": "State",
+      "draft": "Faritra"
+    },
+    "tax.zip": {
+      "en": "ZIP",
+      "draft": "KAODY"
+    },
+    "tax.cancel": {
+      "en": "Cancel",
+      "draft": "Foanana"
+    },
+    "tax.contractor": {
+      "en": "Contractor",
+      "draft": "Mpanao asa"
+    },
+    "tax.paid": {
+      "en": "Paid",
+      "draft": "Voaloa"
+    },
+    "tax.w9": {
+      "en": "W-9",
+      "draft": "W-9"
+    },
+    "tax.NEC": {
+      "en": "1099-NEC",
+      "draft": "1099-NEC"
+    },
+    "tax.eFile": {
+      "en": "E-file",
+      "draft": "E-file"
+    },
+    "tax.actions": {
+      "en": "Actions",
+      "draft": "Hetsika"
+    },
+    "tax.viewPaymentHistory": {
+      "en": "View payment history",
+      "draft": "Jereo fandoavana tantara"
+    },
+    "tax.toggleW9Received": {
+      "en": "Toggle W-9 received",
+      "draft": "Toggle W-9 voaray"
+    },
+    "tax.required": {
+      "en": "Required",
+      "draft": "Takiana"
+    },
+    "tax.viewFilingStatus": {
+      "en": "View filing status",
+      "draft": "Jereo fametrahana toe-javatra"
+    },
+    "tax.notFiled": {
+      "en": "Not filed",
+      "draft": "Tsy filed"
+    },
+    "tax.recordPayment": {
+      "en": "Record payment",
+      "draft": "Raketo fandoavana"
+    },
+    "tax.noContractorsYet": {
+      "en": "No contractors yet.",
+      "draft": "Tsia mpanao asa mbola."
+    },
+    "tax.NECDataPreview": {
+      "en": "1099-NEC data preview",
+      "draft": "1099-NEC angona topi-maso"
+    },
+    "tax.recipientBox1DataShapedFor": {
+      "en": "Recipient + Box 1 data shaped for e-filing. Tax IDs stay masked — reveal needs PII access. Draft data only, nothing is filed in-house.",
+      "draft": "Mpandray + Box 1 angona shaped ho e-filing. Hetra IDs mijanòna masked — reveal needs PII fidirana. Volavola angona ihany, tsy misy na inona na inona dia filed in-house."
+    },
+    "tax.loadPreview": {
+      "en": "Load preview",
+      "draft": "Ampidiro topi-maso"
+    },
+    "tax.recipient": {
+      "en": "Recipient",
+      "draft": "Mpandray"
+    },
+    "tax.tin": {
+      "en": "TIN",
+      "draft": "TIN"
+    },
+    "tax.address": {
+      "en": "Address",
+      "draft": "Adiresy"
+    },
+    "tax.box1": {
+      "en": "Box 1",
+      "draft": "Box 1"
+    },
+    "tax.missing": {
+      "en": "missing",
+      "draft": "tsy hita"
+    },
+    "tax.reveal": {
+      "en": "reveal",
+      "draft": "reveal"
+    },
+    "tax.noContractorsMeetThe": {
+      "en": "No contractors meet the",
+      "draft": "Tsia mpanao asa meet ny"
+    },
+    "tax.reportingThresholdFor": {
+      "en": "reporting threshold for",
+      "draft": "fitaterana threshold ho"
+    },
+    "tax.recordPayment2": {
+      "en": "Record payment —",
+      "draft": "Raketo fandoavana —"
+    },
+    "tax.date": {
+      "en": "Date",
+      "draft": "Daty"
+    },
+    "tax.amount": {
+      "en": "Amount $",
+      "draft": "Habetra $"
+    },
+    "tax.description": {
+      "en": "Description",
+      "draft": "Fanazavana"
+    },
+    "tax.eGMarchBoothRentPayout": {
+      "en": "e.g. March booth rent payout",
+      "draft": "ohatra March trano kely himonjy trano fandoavana"
+    },
+    "tax.record": {
+      "en": "Record",
+      "draft": "Raketo"
+    },
+    "tax.paymentHistory": {
+      "en": "Payment history —",
+      "draft": "Fandoavana tantara —"
+    },
+    "tax.noPaymentsRecordedFor": {
+      "en": "No payments recorded for",
+      "draft": "Tsia fandoavana voarakitra ho"
+    },
+    "tax.amount2": {
+      "en": "Amount",
+      "draft": "Habetra"
+    },
+    "tax.deletePayment": {
+      "en": "Delete payment",
+      "draft": "Fafao fandoavana"
+    },
+    "tax.yearTotal": {
+      "en": "Year total:",
+      "draft": "Taona fitambarany:"
+    },
+    "tax.NECFiling": {
+      "en": "1099-NEC filing —",
+      "draft": "1099-NEC fametrahana —"
+    },
+    "tax.thisDraftLivesInTaxBanditsReview": {
+      "en": "This draft lives in TaxBandits — review and Transmit there to file with the IRS. This app never files in-house.",
+      "draft": "Ity volavola lives ao TaxBandits — jereo sy Transmit there ho rakitra miaraka ny IRS. Ity fampiharana tsy mbola rakitra in-house."
+    },
+    "tax.NECIsRequiredForNon": {
+      "en": "1099-NEC is required for non-corporate contractors paid ≥",
+      "draft": "1099-NEC dia takiana ho non-corporate mpanao asa voaloa ≥"
+    },
+    "tax.inTheYearEFilingCreates": {
+      "en": "in the year. E-filing creates a draft in TaxBandits — you review and transmit there. This app never files with the IRS directly.",
+      "draft": "ao ny taona. E-filing creates volavola ao TaxBandits — ianao jereo sy transmit there. Ity fampiharana tsy mbola rakitra miaraka ny IRS directly."
+    },
+    "taxforecast.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "Hetra Vinavina"
+    },
+    "taxforecast.OfPriorYearTax": {
+      "en": "100% of prior-year tax",
+      "draft": "100% ny prior-year hetra"
+    },
+    "taxforecast.irsDirectPay": {
+      "en": "IRS Direct Pay",
+      "draft": "IRS Mivantana Aloa"
+    },
+    "nav.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "Hetra Vinavina"
+    },
+    "nav.tax1099s": {
+      "en": "Tax & 1099s",
+      "draft": "Hetra & 1099s"
+    },
+    "teamInvites.accountantTaxPro": {
+      "en": "Accountant / Tax pro",
+      "draft": "Mpitana boky / Hetra matihanina"
+    }
+  }
+}

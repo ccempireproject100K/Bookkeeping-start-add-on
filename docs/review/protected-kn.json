@@ -1,0 +1,426 @@
+{
+  "_meta": {
+    "lang": "kn",
+    "status": "DRAFT for human review only. Do NOT copy into frontend/src/locales/kn/translation.json until a qualified reviewer (counsel/CPA where relevant) approves each string. Live locale keeps English for these keys.",
+    "source": "docs/TRANSLATION_PLAN.md flagged keys (legal/financial/tax/privacy/safety)",
+    "notice": "Approximate translation from English/Spanish, may not be accurate."
+  },
+  "strings": {
+    "salestaxtab.taxJurisdictions": {
+      "en": "Tax jurisdictions",
+      "draft": "ತೆರಿಗೆ jurisdictions"
+    },
+    "salestaxtab.everywhereYouCollectSalesTaxState": {
+      "en": "Everywhere you collect sales tax — state, county, city, special district.\n          Tag invoices with a jurisdiction and this page tells you what you owe, where.",
+      "draft": "ಎಲ್ಲೆಡೆ ನೀವು collect ಮಾರಾಟಗಳು ತೆರಿಗೆ — ರಾಜ್ಯ, county, ನಗರ, special district.\n  ಟ್ಯಾಗ್ ಇನ್‌ವಾಯ್ಸ್‌ಗಳು ಜೊತೆ ವ್ಯಾಪ್ತಿ ಮತ್ತು ಇದು ಪುಟ tells ನೀವು ಏನು ನೀವು owe, ಎಲ್ಲಿ."
+    },
+    "salestaxtab.noJurisdictionsYetAddTheFirst": {
+      "en": "No jurisdictions yet. Add the first place you collect sales tax.",
+      "draft": "ಇಲ್ಲ jurisdictions ಇನ್ನೂ. ಸೇರಿಸಿ ಮೊದಲ place ನೀವು collect ಮಾರಾಟಗಳು ತೆರಿಗೆ."
+    },
+    "salestaxtab.ofSalesTaxIsnTTagged": {
+      "en": "of sales tax isn't tagged to a jurisdiction yet.\n            Tag invoices with a jurisdiction so every dollar lands in the right bucket.",
+      "draft": "ನ ಮಾರಾಟಗಳು ತೆರಿಗೆ ಅಲ್ಲ tagged ಗೆ ವ್ಯಾಪ್ತಿ ಇನ್ನೂ.\n  ಟ್ಯಾಗ್ ಇನ್‌ವಾಯ್ಸ್‌ಗಳು ಜೊತೆ ವ್ಯಾಪ್ತಿ ಆದ್ದರಿಂದ ಪ್ರತಿ dollar lands ನಲ್ಲಿ ಬಲ ಗುಂಪು."
+    },
+    "salestaxtab.taxCollected": {
+      "en": "Tax collected",
+      "draft": "ತೆರಿಗೆ ಸಂಗ್ರಹಿಸಲಾಗಿದೆ"
+    },
+    "teaminvites.inviteYourAccountantOrTaxPro": {
+      "en": "Invite your accountant or tax pro — they join with the right permissions\n        and can switch between all the workspaces they serve.",
+      "draft": "ಆಹ್ವಾನ ನಿಮ್ಮ ಲೆಕ್ಕಿಗ ಅಥವಾ ತೆರಿಗೆ ಪ್ರೊ — ಅವರು ಸೇರಿ ಜೊತೆ ಬಲ ಅನುಮತಿಗಳು\n  ಮತ್ತು ಮಾಡಬಹುದು ಬದಲಾಯಿಸಿ ನಡುವೆ ಎಲ್ಲಾ ಕಾರ್ಯಕ್ಷೇತ್ರಗಳು ಅವರು serve."
+    },
+    "auditlog.eGTaxInvoiceLogin": {
+      "en": "e.g. tax, invoice, login",
+      "draft": "ಉದಾ. ತೆರಿಗೆ, ಇನ್‌ವಾಯ್ಸ್, ಲಾಗಿನ್"
+    },
+    "cpapackage.mileageLogWithIRSRatesApplied": {
+      "en": "Mileage log with IRS rates applied",
+      "draft": "ಮೈಲೇಜ್ ಲಾಗ್ ಜೊತೆ IRS ದರಗಳು applied"
+    },
+    "customers.delete": {
+      "en": "Delete",
+      "draft": "ಅಳಿಸಿ"
+    },
+    "customers.deleteConfirm": {
+      "en": "Delete customer \"{{name}}\"? Their invoices and statements stay on record.",
+      "draft": "ಅಳಿಸಿ ಗ್ರಾಹಕ \"{{name}}\"? ಅವರ ಇನ್‌ವಾಯ್ಸ್‌ಗಳು ಮತ್ತು ಹೇಳಿಕೆಗಳು ಇರಿ ಮೇಲೆ ದಾಖಲಿಸಿ."
+    },
+    "estimates.tax": {
+      "en": "Tax ($)",
+      "draft": "ತೆರಿಗೆ ($)"
+    },
+    "expenses.taxID": {
+      "en": "Tax ID",
+      "draft": "ತೆರಿಗೆ ID"
+    },
+    "expenses.taxYear": {
+      "en": "Tax year",
+      "draft": "ತೆರಿಗೆ ವರ್ಷ"
+    },
+    "expenses.tax": {
+      "en": "Tax",
+      "draft": "ತೆರಿಗೆ"
+    },
+    "expenses.taxIDEIN": {
+      "en": "Tax ID / EIN",
+      "draft": "ತೆರಿಗೆ ID / EIN"
+    },
+    "invoices.refund": {
+      "en": "Refund",
+      "draft": "ಮರುಪಾವತಿ"
+    },
+    "invoices.taxJurisdictionOptional": {
+      "en": "Tax jurisdiction (optional)",
+      "draft": "ತೆರಿಗೆ ವ್ಯಾಪ್ತಿ (ಐಚ್ಛಿಕ)"
+    },
+    "invoices.tax": {
+      "en": "Tax ($)",
+      "draft": "ತೆರಿಗೆ ($)"
+    },
+    "invoices.refundCredit": {
+      "en": "Refund credit —",
+      "draft": "ಮರುಪಾವತಿ ಜಮಾ —"
+    },
+    "invoices.refundTheRemaining": {
+      "en": "Refund the remaining",
+      "draft": "ಮರುಪಾವತಿ ಉಳಿದ"
+    },
+    "mileage.irsLogCSV": {
+      "en": "IRS log CSV",
+      "draft": "IRS ಲಾಗ್ CSV"
+    },
+    "payroll.deleteDraft": {
+      "en": "Delete draft",
+      "draft": "ಅಳಿಸಿ ಕರಡು"
+    },
+    "payroll.partnershipStubWhenAProviderIs": {
+      "en": "Partnership stub: when a provider is connected, runs here will hand off tax filing and direct deposit automatically.",
+      "draft": "ಪಾಲುದಾರಿಕೆ ಚೀಟಿ: ಯಾವಾಗ ಒದಗಿಸುವವರು ಇದೆ ಸಂಪರ್ಕಿಸಲಾಗಿದೆ, ಚಲಿಸುತ್ತದೆ ಇಲ್ಲಿ ಮಾಡಲಾಗುವುದು ಕೈ ಆಫ್ ತೆರಿಗೆ ಸಲ್ಲಿಕೆ ಮತ್ತು ನೇರ ಠೇವಣಿ ಸ್ವಯಂಚಾಲಿತವಾಗಿ."
+    },
+    "payroll.employerTaxEst": {
+      "en": "Employer payroll tax (est.)",
+      "draft": "Employer ವೇತನಪಟ್ಟಿ ತೆರಿಗೆ (ಅಂದಾಜು.)"
+    },
+    "portalview.tax": {
+      "en": "Tax",
+      "draft": "ತೆರಿಗೆ"
+    },
+    "recurringinvoices.tax": {
+      "en": "Tax ($)",
+      "draft": "ತೆರಿಗೆ ($)"
+    },
+    "simulator.safetyFloor": {
+      "en": "Safety floor $",
+      "draft": "Safety floor $"
+    },
+    "tax.nameIsRequired": {
+      "en": "Name is required",
+      "draft": "ಹೆಸರು ಇದೆ ಅಗತ್ಯವಿದೆ"
+    },
+    "tax.contractorAdded": {
+      "en": "Contractor added",
+      "draft": "ಗುತ್ತಿಗೆದಾರ ಸೇರಿಸಲಾಗಿದೆ"
+    },
+    "tax.w9StatusUpdated": {
+      "en": "W-9 status updated",
+      "draft": "W-9 ಸ್ಥಿತಿ ನವೀಕರಿಸಲಾಗಿದೆ"
+    },
+    "tax.contractorRemoved": {
+      "en": "Contractor removed",
+      "draft": "ಗುತ್ತಿಗೆದಾರ ತೆಗೆದುಹಾಕಲಾಗಿದೆ"
+    },
+    "tax.enterAPositiveAmount": {
+      "en": "Enter a positive amount",
+      "draft": "ನಮೂದಿಸಿ ಧನಾತ್ಮಕ ಮೊತ್ತ"
+    },
+    "tax.paymentRecorded": {
+      "en": "Payment recorded",
+      "draft": "ಪಾವತಿ ದಾಖಲಿಸಲಾಗಿದೆ"
+    },
+    "tax.paymentDeleted": {
+      "en": "Payment deleted",
+      "draft": "ಪಾವತಿ ಅಳಿಸಲಾಗಿದೆ"
+    },
+    "tax.statusRefreshed": {
+      "en": "Status refreshed",
+      "draft": "ಸ್ಥಿತಿ refreshed"
+    },
+    "tax.addContractor": {
+      "en": "Add contractor",
+      "draft": "ಸೇರಿಸಿ ಗುತ್ತಿಗೆದಾರ"
+    },
+    "tax.contractors1099s": {
+      "en": "Contractors & 1099s",
+      "draft": "ಗುತ್ತಿಗೆದಾರರು & 1099s"
+    },
+    "tax.salesTax": {
+      "en": "Sales Tax",
+      "draft": "ಮಾರಾಟಗಳು ತೆರಿಗೆ"
+    },
+    "tax.taxbanditsNotConnected": {
+      "en": "TaxBandits not connected.",
+      "draft": "TaxBandits ಅಲ್ಲ ಸಂಪರ್ಕಿಸಲಾಗಿದೆ."
+    },
+    "tax.taxbanditsSETUPMd": {
+      "en": "TAXBANDITS_SETUP.md",
+      "draft": "TAXBANDITS_SETUP.md"
+    },
+    "tax.inTheRepoNoIRSFiling": {
+      "en": "in the repo. No IRS filing is ever done in-house.",
+      "draft": "ನಲ್ಲಿ repo. ಇಲ್ಲ IRS ಸಲ್ಲಿಕೆ ಇದೆ ಎಂದಾದರೂ ಆಯಿತು in-house."
+    },
+    "tax.taxbanditsConnectedIn": {
+      "en": "TaxBandits connected in",
+      "draft": "TaxBandits ಸಂಪರ್ಕಿಸಲಾಗಿದೆ ನಲ್ಲಿ"
+    },
+    "tax.sandbox": {
+      "en": "sandbox",
+      "draft": "sandbox"
+    },
+    "tax.modeNoRealFilingsFlip": {
+      "en": "mode — no real filings. Flip",
+      "draft": "mode — ಇಲ್ಲ real filings. Flip"
+    },
+    "tax.taxbanditsSANDBOXFalse": {
+      "en": "TAXBANDITS_SANDBOX=false",
+      "draft": "TAXBANDITS_SANDBOX=ತಪ್ಪು"
+    },
+    "tax.toGoLive": {
+      "en": "to go live.",
+      "draft": "ಗೆ ಹೋಗಿ ಲೈವ್."
+    },
+    "tax.newContractor": {
+      "en": "New contractor",
+      "draft": "ಹೊಸ ಗುತ್ತಿಗೆದಾರ"
+    },
+    "tax.name": {
+      "en": "Name *",
+      "draft": "ಹೆಸರು *"
+    },
+    "tax.businessName": {
+      "en": "Business name",
+      "draft": "ವ್ಯಾಪಾರ ಹೆಸರು"
+    },
+    "tax.email": {
+      "en": "Email",
+      "draft": "ಇಮೇಲ್"
+    },
+    "tax.phone": {
+      "en": "Phone",
+      "draft": "ಫೋನ್"
+    },
+    "tax.entityType": {
+      "en": "Entity type",
+      "draft": "ಘಟಕ ರೀತಿ"
+    },
+    "tax.ssnEIN": {
+      "en": "SSN / EIN",
+      "draft": "SSN / EIN"
+    },
+    "tax.storedSecurely": {
+      "en": "Stored securely",
+      "draft": "Stored securely"
+    },
+    "tax.street": {
+      "en": "Street",
+      "draft": "Street"
+    },
+    "tax.city": {
+      "en": "City",
+      "draft": "ನಗರ"
+    },
+    "tax.state": {
+      "en": "State",
+      "draft": "ರಾಜ್ಯ"
+    },
+    "tax.zip": {
+      "en": "ZIP",
+      "draft": "ಪಿನ್‌ಕೋಡ್"
+    },
+    "tax.cancel": {
+      "en": "Cancel",
+      "draft": "ರದ್ದುಗೊಳಿಸಿ"
+    },
+    "tax.contractor": {
+      "en": "Contractor",
+      "draft": "ಗುತ್ತಿಗೆದಾರ"
+    },
+    "tax.paid": {
+      "en": "Paid",
+      "draft": "ಪಾವತಿಸಲಾಗಿದೆ"
+    },
+    "tax.w9": {
+      "en": "W-9",
+      "draft": "W-9"
+    },
+    "tax.NEC": {
+      "en": "1099-NEC",
+      "draft": "1099-NEC"
+    },
+    "tax.eFile": {
+      "en": "E-file",
+      "draft": "E-file"
+    },
+    "tax.actions": {
+      "en": "Actions",
+      "draft": "ಕ್ರಿಯೆಗಳು"
+    },
+    "tax.viewPaymentHistory": {
+      "en": "View payment history",
+      "draft": "ನೋಡಿ ಪಾವತಿ ಇತಿಹಾಸ"
+    },
+    "tax.toggleW9Received": {
+      "en": "Toggle W-9 received",
+      "draft": "Toggle W-9 ಸ್ವೀಕರಿಸಲಾಗಿದೆ"
+    },
+    "tax.required": {
+      "en": "Required",
+      "draft": "ಅಗತ್ಯವಿದೆ"
+    },
+    "tax.viewFilingStatus": {
+      "en": "View filing status",
+      "draft": "ನೋಡಿ ಸಲ್ಲಿಕೆ ಸ್ಥಿತಿ"
+    },
+    "tax.notFiled": {
+      "en": "Not filed",
+      "draft": "ಅಲ್ಲ filed"
+    },
+    "tax.recordPayment": {
+      "en": "Record payment",
+      "draft": "ದಾಖಲಿಸಿ ಪಾವತಿ"
+    },
+    "tax.noContractorsYet": {
+      "en": "No contractors yet.",
+      "draft": "ಇಲ್ಲ ಗುತ್ತಿಗೆದಾರರು ಇನ್ನೂ."
+    },
+    "tax.NECDataPreview": {
+      "en": "1099-NEC data preview",
+      "draft": "1099-NEC ಡೇಟಾ ಮುನ್ನೋಟ"
+    },
+    "tax.recipientBox1DataShapedFor": {
+      "en": "Recipient + Box 1 data shaped for e-filing. Tax IDs stay masked — reveal needs PII access. Draft data only, nothing is filed in-house.",
+      "draft": "ಸ್ವೀಕರಿಸುವವರು + Box 1 ಡೇಟಾ shaped ಗಾಗಿ e-filing. ತೆರಿಗೆ IDs ಇರಿ masked — reveal needs PII ಪ್ರವೇಶ. ಕರಡು ಡೇಟಾ ಮಾತ್ರ, ಏನೂ ಇಲ್ಲ ಇದೆ filed in-house."
+    },
+    "tax.loadPreview": {
+      "en": "Load preview",
+      "draft": "ಲೋಡ್ ಮಾಡಿ ಮುನ್ನೋಟ"
+    },
+    "tax.recipient": {
+      "en": "Recipient",
+      "draft": "ಸ್ವೀಕರಿಸುವವರು"
+    },
+    "tax.tin": {
+      "en": "TIN",
+      "draft": "TIN"
+    },
+    "tax.address": {
+      "en": "Address",
+      "draft": "ವಿಳಾಸ"
+    },
+    "tax.box1": {
+      "en": "Box 1",
+      "draft": "Box 1"
+    },
+    "tax.missing": {
+      "en": "missing",
+      "draft": "ಕಾಣೆಯಾಗಿದೆ"
+    },
+    "tax.reveal": {
+      "en": "reveal",
+      "draft": "reveal"
+    },
+    "tax.noContractorsMeetThe": {
+      "en": "No contractors meet the",
+      "draft": "ಇಲ್ಲ ಗುತ್ತಿಗೆದಾರರು meet "
+    },
+    "tax.reportingThresholdFor": {
+      "en": "reporting threshold for",
+      "draft": "ವರದಿ threshold ಗಾಗಿ"
+    },
+    "tax.recordPayment2": {
+      "en": "Record payment —",
+      "draft": "ದಾಖಲಿಸಿ ಪಾವತಿ —"
+    },
+    "tax.date": {
+      "en": "Date",
+      "draft": "ದಿನಾಂಕ"
+    },
+    "tax.amount": {
+      "en": "Amount $",
+      "draft": "ಮೊತ್ತ $"
+    },
+    "tax.description": {
+      "en": "Description",
+      "draft": "ವಿವರಣೆ"
+    },
+    "tax.eGMarchBoothRentPayout": {
+      "en": "e.g. March booth rent payout",
+      "draft": "ಉದಾ. March ಮಳಿಗೆ ಬಾಡಿಗೆ ಪಾವತಿ"
+    },
+    "tax.record": {
+      "en": "Record",
+      "draft": "ದಾಖಲಿಸಿ"
+    },
+    "tax.paymentHistory": {
+      "en": "Payment history —",
+      "draft": "ಪಾವತಿ ಇತಿಹಾಸ —"
+    },
+    "tax.noPaymentsRecordedFor": {
+      "en": "No payments recorded for",
+      "draft": "ಇಲ್ಲ ಪಾವತಿಗಳು ದಾಖಲಿಸಲಾಗಿದೆ ಗಾಗಿ"
+    },
+    "tax.amount2": {
+      "en": "Amount",
+      "draft": "ಮೊತ್ತ"
+    },
+    "tax.deletePayment": {
+      "en": "Delete payment",
+      "draft": "ಅಳಿಸಿ ಪಾವತಿ"
+    },
+    "tax.yearTotal": {
+      "en": "Year total:",
+      "draft": "ವರ್ಷ ಒಟ್ಟು:"
+    },
+    "tax.NECFiling": {
+      "en": "1099-NEC filing —",
+      "draft": "1099-NEC ಸಲ್ಲಿಕೆ —"
+    },
+    "tax.thisDraftLivesInTaxBanditsReview": {
+      "en": "This draft lives in TaxBandits — review and Transmit there to file with the IRS. This app never files in-house.",
+      "draft": "ಇದು ಕರಡು lives ನಲ್ಲಿ TaxBandits — ಪರಿಶೀಲನೆ ಮತ್ತು Transmit there ಗೆ ಫೈಲ್ ಜೊತೆ IRS. ಇದು ಅಪ್ಲಿಕೇಶನ್ ಎಂದಿಗೂ ಫೈಲ್‌ಗಳು in-house."
+    },
+    "tax.NECIsRequiredForNon": {
+      "en": "1099-NEC is required for non-corporate contractors paid ≥",
+      "draft": "1099-NEC ಇದೆ ಅಗತ್ಯವಿದೆ ಗಾಗಿ non-corporate ಗುತ್ತಿಗೆದಾರರು ಪಾವತಿಸಲಾಗಿದೆ ≥"
+    },
+    "tax.inTheYearEFilingCreates": {
+      "en": "in the year. E-filing creates a draft in TaxBandits — you review and transmit there. This app never files with the IRS directly.",
+      "draft": "ನಲ್ಲಿ ವರ್ಷ. E-filing creates ಕರಡು ನಲ್ಲಿ TaxBandits — ನೀವು ಪರಿಶೀಲನೆ ಮತ್ತು transmit there. ಇದು ಅಪ್ಲಿಕೇಶನ್ ಎಂದಿಗೂ ಫೈಲ್‌ಗಳು ಜೊತೆ IRS directly."
+    },
+    "taxforecast.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "ತೆರಿಗೆ ಮುನ್ಸೂಚನೆ"
+    },
+    "taxforecast.OfPriorYearTax": {
+      "en": "100% of prior-year tax",
+      "draft": "100% ನ prior-year ತೆರಿಗೆ"
+    },
+    "taxforecast.irsDirectPay": {
+      "en": "IRS Direct Pay",
+      "draft": "IRS ನೇರ ಪಾವತಿಸಿ"
+    },
+    "nav.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "ತೆರಿಗೆ ಮುನ್ಸೂಚನೆ"
+    },
+    "nav.tax1099s": {
+      "en": "Tax & 1099s",
+      "draft": "ತೆರಿಗೆ & 1099s"
+    },
+    "teamInvites.accountantTaxPro": {
+      "en": "Accountant / Tax pro",
+      "draft": "ಲೆಕ್ಕಿಗ / ತೆರಿಗೆ ಪ್ರೊ"
+    }
+  }
+}

@@ -1,0 +1,426 @@
+{
+  "_meta": {
+    "lang": "sq",
+    "status": "DRAFT for human review only. Do NOT copy into frontend/src/locales/sq/translation.json until a qualified reviewer (counsel/CPA where relevant) approves each string. Live locale keeps English for these keys.",
+    "source": "docs/TRANSLATION_PLAN.md flagged keys (legal/financial/tax/privacy/safety)",
+    "notice": "Approximate translation from English/Spanish, may not be accurate."
+  },
+  "strings": {
+    "salestaxtab.taxJurisdictions": {
+      "en": "Tax jurisdictions",
+      "draft": "Tatim jurisdictions"
+    },
+    "salestaxtab.everywhereYouCollectSalesTaxState": {
+      "en": "Everywhere you collect sales tax — state, county, city, special district.\n          Tag invoices with a jurisdiction and this page tells you what you owe, where.",
+      "draft": "Kudo mblidh shitje tatim — shtet, county, qytet, special district.\n  Etiketë fatura me juridiksion dhe kjo faqe tells çfarë owe, ku."
+    },
+    "salestaxtab.noJurisdictionsYetAddTheFirst": {
+      "en": "No jurisdictions yet. Add the first place you collect sales tax.",
+      "draft": "Jo jurisdictions ende. Shto i parë place mblidh shitje tatim."
+    },
+    "salestaxtab.ofSalesTaxIsnTTagged": {
+      "en": "of sales tax isn't tagged to a jurisdiction yet.\n            Tag invoices with a jurisdiction so every dollar lands in the right bucket.",
+      "draft": " shitje tatim nuk është tagged te juridiksion ende.\n  Etiketë fatura me juridiksion kështu çdo dollar lands në djathtë kategori."
+    },
+    "salestaxtab.taxCollected": {
+      "en": "Tax collected",
+      "draft": "Tatim mbledhur"
+    },
+    "teaminvites.inviteYourAccountantOrTaxPro": {
+      "en": "Invite your accountant or tax pro — they join with the right permissions\n        and can switch between all the workspaces they serve.",
+      "draft": "Ftesë kontabilist ose tatim pro — ata bashkohu me djathtë leje\n  dhe mund kalo ndërmjet të gjitha hapësira pune ata serve."
+    },
+    "auditlog.eGTaxInvoiceLogin": {
+      "en": "e.g. tax, invoice, login",
+      "draft": "p.sh. tatim, faturë, hyrje"
+    },
+    "cpapackage.mileageLogWithIRSRatesApplied": {
+      "en": "Mileage log with IRS rates applied",
+      "draft": "Kilometrazh regjistër me IRS norma aplikuar"
+    },
+    "customers.delete": {
+      "en": "Delete",
+      "draft": "Fshij"
+    },
+    "customers.deleteConfirm": {
+      "en": "Delete customer \"{{name}}\"? Their invoices and statements stay on record.",
+      "draft": "Fshij klient \"{{name}}\"? fatura dhe statements qëndro në regjistro."
+    },
+    "estimates.tax": {
+      "en": "Tax ($)",
+      "draft": "Tatim ($)"
+    },
+    "expenses.taxID": {
+      "en": "Tax ID",
+      "draft": "Tatim ID"
+    },
+    "expenses.taxYear": {
+      "en": "Tax year",
+      "draft": "Tatim vit"
+    },
+    "expenses.tax": {
+      "en": "Tax",
+      "draft": "Tatimi"
+    },
+    "expenses.taxIDEIN": {
+      "en": "Tax ID / EIN",
+      "draft": "Tatim ID / EIN"
+    },
+    "invoices.refund": {
+      "en": "Refund",
+      "draft": "Rimbursimi"
+    },
+    "invoices.taxJurisdictionOptional": {
+      "en": "Tax jurisdiction (optional)",
+      "draft": "Tatim juridiksion (opsional)"
+    },
+    "invoices.tax": {
+      "en": "Tax ($)",
+      "draft": "Tatim ($)"
+    },
+    "invoices.refundCredit": {
+      "en": "Refund credit —",
+      "draft": "Rimbursim kredi —"
+    },
+    "invoices.refundTheRemaining": {
+      "en": "Refund the remaining",
+      "draft": "Rimbursim i mbetur"
+    },
+    "mileage.irsLogCSV": {
+      "en": "IRS log CSV",
+      "draft": "IRS regjistër CSV"
+    },
+    "payroll.deleteDraft": {
+      "en": "Delete draft",
+      "draft": "Fshij draft"
+    },
+    "payroll.partnershipStubWhenAProviderIs": {
+      "en": "Partnership stub: when a provider is connected, runs here will hand off tax filing and direct deposit automatically.",
+      "draft": "Partneritet kunj: kur ofrues është lidhur, ekzekutime këtu do dorë fikur tatim dorëzim dhe direkt depozitë automatikisht."
+    },
+    "payroll.employerTaxEst": {
+      "en": "Employer payroll tax (est.)",
+      "draft": "Employer listëpagesa tatim (vler..)"
+    },
+    "portalview.tax": {
+      "en": "Tax",
+      "draft": "Tatimi"
+    },
+    "recurringinvoices.tax": {
+      "en": "Tax ($)",
+      "draft": "Tatim ($)"
+    },
+    "simulator.safetyFloor": {
+      "en": "Safety floor $",
+      "draft": "Safety dysheme $"
+    },
+    "tax.nameIsRequired": {
+      "en": "Name is required",
+      "draft": "Emër është i detyrueshëm"
+    },
+    "tax.contractorAdded": {
+      "en": "Contractor added",
+      "draft": "Kontraktor shtuar"
+    },
+    "tax.w9StatusUpdated": {
+      "en": "W-9 status updated",
+      "draft": "W-9 status përditësuar"
+    },
+    "tax.contractorRemoved": {
+      "en": "Contractor removed",
+      "draft": "Kontraktor hequr"
+    },
+    "tax.enterAPositiveAmount": {
+      "en": "Enter a positive amount",
+      "draft": "Futni pozitiv shuma"
+    },
+    "tax.paymentRecorded": {
+      "en": "Payment recorded",
+      "draft": "Pagesa regjistruar"
+    },
+    "tax.paymentDeleted": {
+      "en": "Payment deleted",
+      "draft": "Pagesa fshirë"
+    },
+    "tax.statusRefreshed": {
+      "en": "Status refreshed",
+      "draft": "Status refreshed"
+    },
+    "tax.addContractor": {
+      "en": "Add contractor",
+      "draft": "Shto kontraktor"
+    },
+    "tax.contractors1099s": {
+      "en": "Contractors & 1099s",
+      "draft": "Kontraktorë & 1099s"
+    },
+    "tax.salesTax": {
+      "en": "Sales Tax",
+      "draft": "Shitje Tatim"
+    },
+    "tax.taxbanditsNotConnected": {
+      "en": "TaxBandits not connected.",
+      "draft": "TaxBandits jo lidhur."
+    },
+    "tax.taxbanditsSETUPMd": {
+      "en": "TAXBANDITS_SETUP.md",
+      "draft": "TAXBANDITS_SETUP.md"
+    },
+    "tax.inTheRepoNoIRSFiling": {
+      "en": "in the repo. No IRS filing is ever done in-house.",
+      "draft": "në repo. Jo IRS dorëzim është ndonjëherë u krye in-house."
+    },
+    "tax.taxbanditsConnectedIn": {
+      "en": "TaxBandits connected in",
+      "draft": "TaxBandits lidhur në"
+    },
+    "tax.sandbox": {
+      "en": "sandbox",
+      "draft": "sandbox"
+    },
+    "tax.modeNoRealFilingsFlip": {
+      "en": "mode — no real filings. Flip",
+      "draft": "modalitet — jo real filings. Flip"
+    },
+    "tax.taxbanditsSANDBOXFalse": {
+      "en": "TAXBANDITS_SANDBOX=false",
+      "draft": "TAXBANDITS_SANDBOX=false"
+    },
+    "tax.toGoLive": {
+      "en": "to go live.",
+      "draft": "te shkoni aktual."
+    },
+    "tax.newContractor": {
+      "en": "New contractor",
+      "draft": "E re kontraktor"
+    },
+    "tax.name": {
+      "en": "Name *",
+      "draft": "Emri *"
+    },
+    "tax.businessName": {
+      "en": "Business name",
+      "draft": "Biznes emër"
+    },
+    "tax.email": {
+      "en": "Email",
+      "draft": "Email"
+    },
+    "tax.phone": {
+      "en": "Phone",
+      "draft": "Telefon"
+    },
+    "tax.entityType": {
+      "en": "Entity type",
+      "draft": "Subjekt lloj"
+    },
+    "tax.ssnEIN": {
+      "en": "SSN / EIN",
+      "draft": "SSN / EIN"
+    },
+    "tax.storedSecurely": {
+      "en": "Stored securely",
+      "draft": "Stored securely"
+    },
+    "tax.street": {
+      "en": "Street",
+      "draft": "Street"
+    },
+    "tax.city": {
+      "en": "City",
+      "draft": "Qytet"
+    },
+    "tax.state": {
+      "en": "State",
+      "draft": "Shtet"
+    },
+    "tax.zip": {
+      "en": "ZIP",
+      "draft": "KOD POSTAR"
+    },
+    "tax.cancel": {
+      "en": "Cancel",
+      "draft": "Anulo"
+    },
+    "tax.contractor": {
+      "en": "Contractor",
+      "draft": "Kontraktor"
+    },
+    "tax.paid": {
+      "en": "Paid",
+      "draft": "Paguar"
+    },
+    "tax.w9": {
+      "en": "W-9",
+      "draft": "W-9"
+    },
+    "tax.NEC": {
+      "en": "1099-NEC",
+      "draft": "1099-NEC"
+    },
+    "tax.eFile": {
+      "en": "E-file",
+      "draft": "E-file"
+    },
+    "tax.actions": {
+      "en": "Actions",
+      "draft": "Veprime"
+    },
+    "tax.viewPaymentHistory": {
+      "en": "View payment history",
+      "draft": "Shiko pagesa histori"
+    },
+    "tax.toggleW9Received": {
+      "en": "Toggle W-9 received",
+      "draft": "Ndërro W-9 marrë"
+    },
+    "tax.required": {
+      "en": "Required",
+      "draft": "I detyrueshëm"
+    },
+    "tax.viewFilingStatus": {
+      "en": "View filing status",
+      "draft": "Shiko dorëzim status"
+    },
+    "tax.notFiled": {
+      "en": "Not filed",
+      "draft": "Jo dorëzuar"
+    },
+    "tax.recordPayment": {
+      "en": "Record payment",
+      "draft": "Regjistro pagesën"
+    },
+    "tax.noContractorsYet": {
+      "en": "No contractors yet.",
+      "draft": "Jo kontraktorë ende."
+    },
+    "tax.NECDataPreview": {
+      "en": "1099-NEC data preview",
+      "draft": "1099-NEC të dhëna pamje paraprake"
+    },
+    "tax.recipientBox1DataShapedFor": {
+      "en": "Recipient + Box 1 data shaped for e-filing. Tax IDs stay masked — reveal needs PII access. Draft data only, nothing is filed in-house.",
+      "draft": "Marrës + Box 1 të dhëna shaped për e-filing. Tatim IDs qëndro masked — reveal needs PII qasje. Draft të dhëna vetëm, asgjë është dorëzuar in-house."
+    },
+    "tax.loadPreview": {
+      "en": "Load preview",
+      "draft": "Ngarko pamje paraprake"
+    },
+    "tax.recipient": {
+      "en": "Recipient",
+      "draft": "Marrës"
+    },
+    "tax.tin": {
+      "en": "TIN",
+      "draft": "TIN"
+    },
+    "tax.address": {
+      "en": "Address",
+      "draft": "Adresë"
+    },
+    "tax.box1": {
+      "en": "Box 1",
+      "draft": "Box 1"
+    },
+    "tax.missing": {
+      "en": "missing",
+      "draft": "mungon"
+    },
+    "tax.reveal": {
+      "en": "reveal",
+      "draft": "reveal"
+    },
+    "tax.noContractorsMeetThe": {
+      "en": "No contractors meet the",
+      "draft": "Jo kontraktorë meet "
+    },
+    "tax.reportingThresholdFor": {
+      "en": "reporting threshold for",
+      "draft": "raportim prag për"
+    },
+    "tax.recordPayment2": {
+      "en": "Record payment —",
+      "draft": "Regjistro pagesa —"
+    },
+    "tax.date": {
+      "en": "Date",
+      "draft": "Data"
+    },
+    "tax.amount": {
+      "en": "Amount $",
+      "draft": "Shuma $"
+    },
+    "tax.description": {
+      "en": "Description",
+      "draft": "Përshkrimi"
+    },
+    "tax.eGMarchBoothRentPayout": {
+      "en": "e.g. March booth rent payout",
+      "draft": "p.sh. Mars stendë qira pagesë"
+    },
+    "tax.record": {
+      "en": "Record",
+      "draft": "Regjistro"
+    },
+    "tax.paymentHistory": {
+      "en": "Payment history —",
+      "draft": "Pagesa histori —"
+    },
+    "tax.noPaymentsRecordedFor": {
+      "en": "No payments recorded for",
+      "draft": "Jo pagesa regjistruar për"
+    },
+    "tax.amount2": {
+      "en": "Amount",
+      "draft": "Shuma"
+    },
+    "tax.deletePayment": {
+      "en": "Delete payment",
+      "draft": "Fshij pagesa"
+    },
+    "tax.yearTotal": {
+      "en": "Year total:",
+      "draft": "Vit totali:"
+    },
+    "tax.NECFiling": {
+      "en": "1099-NEC filing —",
+      "draft": "1099-NEC dorëzim —"
+    },
+    "tax.thisDraftLivesInTaxBanditsReview": {
+      "en": "This draft lives in TaxBandits — review and Transmit there to file with the IRS. This app never files in-house.",
+      "draft": "Kjo draft lives në TaxBandits — rishikoni dhe Transmit there te skedar me IRS. Kjo aplikacion kurrë skedarë in-house."
+    },
+    "tax.NECIsRequiredForNon": {
+      "en": "1099-NEC is required for non-corporate contractors paid ≥",
+      "draft": "1099-NEC është i detyrueshëm për non-corporate kontraktorë paguar ≥"
+    },
+    "tax.inTheYearEFilingCreates": {
+      "en": "in the year. E-filing creates a draft in TaxBandits — you review and transmit there. This app never files with the IRS directly.",
+      "draft": "në vit. E-filing creates draft në TaxBandits — rishikoni dhe transmit there. Kjo aplikacion kurrë skedarë me IRS directly."
+    },
+    "taxforecast.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "Tatim Parashikim"
+    },
+    "taxforecast.OfPriorYearTax": {
+      "en": "100% of prior-year tax",
+      "draft": "100% i mëparshëm-vit tatim"
+    },
+    "taxforecast.irsDirectPay": {
+      "en": "IRS Direct Pay",
+      "draft": "IRS Direkt Paguaj"
+    },
+    "nav.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "Tatim Parashikim"
+    },
+    "nav.tax1099s": {
+      "en": "Tax & 1099s",
+      "draft": "Tatim & 1099s"
+    },
+    "teamInvites.accountantTaxPro": {
+      "en": "Accountant / Tax pro",
+      "draft": "Kontabilist / Tatim pro"
+    }
+  }
+}

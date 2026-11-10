@@ -1,0 +1,426 @@
+{
+  "_meta": {
+    "lang": "th",
+    "status": "DRAFT for human review only. Do NOT copy into frontend/src/locales/th/translation.json until a qualified reviewer (counsel/CPA where relevant) approves each string. Live locale keeps English for these keys.",
+    "source": "docs/TRANSLATION_PLAN.md flagged keys (legal/financial/tax/privacy/safety)",
+    "notice": "Approximate translation from English/Spanish, may not be accurate."
+  },
+  "strings": {
+    "salestaxtab.taxJurisdictions": {
+      "en": "Tax jurisdictions",
+      "draft": "ภาษี jurisdictions"
+    },
+    "salestaxtab.everywhereYouCollectSalesTaxState": {
+      "en": "Everywhere you collect sales tax — state, county, city, special district.\n          Tag invoices with a jurisdiction and this page tells you what you owe, where.",
+      "draft": "ทุกที่ collect การขาย ภาษี — รัฐ, county, เมือง, special district.\n  แท็ก ใบแจ้งหนี้ กับ เขตอำนาจ และ นี้ หน้า tells อะไร owe, ที่ไหน."
+    },
+    "salestaxtab.noJurisdictionsYetAddTheFirst": {
+      "en": "No jurisdictions yet. Add the first place you collect sales tax.",
+      "draft": "ไม่ jurisdictions ยัง. เพิ่ม แรก place collect การขาย ภาษี."
+    },
+    "salestaxtab.ofSalesTaxIsnTTagged": {
+      "en": "of sales tax isn't tagged to a jurisdiction yet.\n            Tag invoices with a jurisdiction so every dollar lands in the right bucket.",
+      "draft": "ของ การขาย ภาษี ไม่ใช่ tagged ถึง เขตอำนาจ ยัง.\n  แท็ก ใบแจ้งหนี้ กับ เขตอำนาจ ดังนั้น ทุก dollar lands ใน ขวา หมวด."
+    },
+    "salestaxtab.taxCollected": {
+      "en": "Tax collected",
+      "draft": "ภาษี เก็บแล้ว"
+    },
+    "teaminvites.inviteYourAccountantOrTaxPro": {
+      "en": "Invite your accountant or tax pro — they join with the right permissions\n        and can switch between all the workspaces they serve.",
+      "draft": "คำเชิญ นักบัญชี หรือ ภาษี โปร — พวกเขา เข้าร่วม กับ ขวา สิทธิ์\n  และ สามารถ สลับ ระหว่าง ทั้งหมด พื้นที่ทำงาน พวกเขา serve."
+    },
+    "auditlog.eGTaxInvoiceLogin": {
+      "en": "e.g. tax, invoice, login",
+      "draft": "เช่น ภาษี, ใบแจ้งหนี้, เข้าสู่ระบบ"
+    },
+    "cpapackage.mileageLogWithIRSRatesApplied": {
+      "en": "Mileage log with IRS rates applied",
+      "draft": "ระยะทาง บันทึก กับ IRS อัตรา applied"
+    },
+    "customers.delete": {
+      "en": "Delete",
+      "draft": "ลบ"
+    },
+    "customers.deleteConfirm": {
+      "en": "Delete customer \"{{name}}\"? Their invoices and statements stay on record.",
+      "draft": "ลบ ลูกค้า \"{{name}}\"? ใบแจ้งหนี้ และ ใบแจ้งยอด อยู่ เปิด บันทึก."
+    },
+    "estimates.tax": {
+      "en": "Tax ($)",
+      "draft": "ภาษี ($)"
+    },
+    "expenses.taxID": {
+      "en": "Tax ID",
+      "draft": "ภาษี ID"
+    },
+    "expenses.taxYear": {
+      "en": "Tax year",
+      "draft": "ภาษี ปี"
+    },
+    "expenses.tax": {
+      "en": "Tax",
+      "draft": "ภาษี"
+    },
+    "expenses.taxIDEIN": {
+      "en": "Tax ID / EIN",
+      "draft": "ภาษี ID / EIN"
+    },
+    "invoices.refund": {
+      "en": "Refund",
+      "draft": "คืนเงิน"
+    },
+    "invoices.taxJurisdictionOptional": {
+      "en": "Tax jurisdiction (optional)",
+      "draft": "ภาษี เขตอำนาจ (ไม่บังคับ)"
+    },
+    "invoices.tax": {
+      "en": "Tax ($)",
+      "draft": "ภาษี ($)"
+    },
+    "invoices.refundCredit": {
+      "en": "Refund credit —",
+      "draft": "คืนเงิน เครดิต —"
+    },
+    "invoices.refundTheRemaining": {
+      "en": "Refund the remaining",
+      "draft": "คืนเงิน คงเหลือ"
+    },
+    "mileage.irsLogCSV": {
+      "en": "IRS log CSV",
+      "draft": "IRS บันทึก CSV"
+    },
+    "payroll.deleteDraft": {
+      "en": "Delete draft",
+      "draft": "ลบ ฉบับร่าง"
+    },
+    "payroll.partnershipStubWhenAProviderIs": {
+      "en": "Partnership stub: when a provider is connected, runs here will hand off tax filing and direct deposit automatically.",
+      "draft": "พันธมิตร หางตั๋ว: เมื่อ ผู้ให้บริการ คือ เชื่อมต่อแล้ว, เรียกใช้ ที่นี่ จะ มือ ปิด ภาษี การยื่น และ โดยตรง เงินฝาก โดยอัตโนมัติ."
+    },
+    "payroll.employerTaxEst": {
+      "en": "Employer payroll tax (est.)",
+      "draft": "Employer บัญชีเงินเดือน ภาษี (ปม.)"
+    },
+    "portalview.tax": {
+      "en": "Tax",
+      "draft": "ภาษี"
+    },
+    "recurringinvoices.tax": {
+      "en": "Tax ($)",
+      "draft": "ภาษี ($)"
+    },
+    "simulator.safetyFloor": {
+      "en": "Safety floor $",
+      "draft": "Safety floor $"
+    },
+    "tax.nameIsRequired": {
+      "en": "Name is required",
+      "draft": "ชื่อ คือ จำเป็น"
+    },
+    "tax.contractorAdded": {
+      "en": "Contractor added",
+      "draft": "ผู้รับเหมา เพิ่มแล้ว"
+    },
+    "tax.w9StatusUpdated": {
+      "en": "W-9 status updated",
+      "draft": "W-9 สถานะ อัปเดตแล้ว"
+    },
+    "tax.contractorRemoved": {
+      "en": "Contractor removed",
+      "draft": "ผู้รับเหมา นำออกแล้ว"
+    },
+    "tax.enterAPositiveAmount": {
+      "en": "Enter a positive amount",
+      "draft": "ป้อน บวก จำนวน"
+    },
+    "tax.paymentRecorded": {
+      "en": "Payment recorded",
+      "draft": "การชำระเงิน บันทึกแล้ว"
+    },
+    "tax.paymentDeleted": {
+      "en": "Payment deleted",
+      "draft": "การชำระเงิน ลบแล้ว"
+    },
+    "tax.statusRefreshed": {
+      "en": "Status refreshed",
+      "draft": "สถานะ refreshed"
+    },
+    "tax.addContractor": {
+      "en": "Add contractor",
+      "draft": "เพิ่ม ผู้รับเหมา"
+    },
+    "tax.contractors1099s": {
+      "en": "Contractors & 1099s",
+      "draft": "ผู้รับเหมา & 1099"
+    },
+    "tax.salesTax": {
+      "en": "Sales Tax",
+      "draft": "การขาย ภาษี"
+    },
+    "tax.taxbanditsNotConnected": {
+      "en": "TaxBandits not connected.",
+      "draft": "TaxBandits ไม่ เชื่อมต่อแล้ว."
+    },
+    "tax.taxbanditsSETUPMd": {
+      "en": "TAXBANDITS_SETUP.md",
+      "draft": "TAXBANDITS_SETUP.md"
+    },
+    "tax.inTheRepoNoIRSFiling": {
+      "en": "in the repo. No IRS filing is ever done in-house.",
+      "draft": "ใน repo. ไม่ IRS การยื่น คือ เคย เสร็จ in-house."
+    },
+    "tax.taxbanditsConnectedIn": {
+      "en": "TaxBandits connected in",
+      "draft": "TaxBandits เชื่อมต่อแล้ว ใน"
+    },
+    "tax.sandbox": {
+      "en": "sandbox",
+      "draft": "sandbox"
+    },
+    "tax.modeNoRealFilingsFlip": {
+      "en": "mode — no real filings. Flip",
+      "draft": "mode — ไม่ real filings. Flip"
+    },
+    "tax.taxbanditsSANDBOXFalse": {
+      "en": "TAXBANDITS_SANDBOX=false",
+      "draft": "TAXBANDITS_SANDBOX=เท็จ"
+    },
+    "tax.toGoLive": {
+      "en": "to go live.",
+      "draft": "ถึง ไป สด."
+    },
+    "tax.newContractor": {
+      "en": "New contractor",
+      "draft": "ใหม่ ผู้รับเหมา"
+    },
+    "tax.name": {
+      "en": "Name *",
+      "draft": "ชื่อ *"
+    },
+    "tax.businessName": {
+      "en": "Business name",
+      "draft": "ธุรกิจ ชื่อ"
+    },
+    "tax.email": {
+      "en": "Email",
+      "draft": "อีเมล"
+    },
+    "tax.phone": {
+      "en": "Phone",
+      "draft": "โทรศัพท์"
+    },
+    "tax.entityType": {
+      "en": "Entity type",
+      "draft": "เอนทิตี ประเภท"
+    },
+    "tax.ssnEIN": {
+      "en": "SSN / EIN",
+      "draft": "SSN / EIN"
+    },
+    "tax.storedSecurely": {
+      "en": "Stored securely",
+      "draft": "Stored securely"
+    },
+    "tax.street": {
+      "en": "Street",
+      "draft": "Street"
+    },
+    "tax.city": {
+      "en": "City",
+      "draft": "เมือง"
+    },
+    "tax.state": {
+      "en": "State",
+      "draft": "รัฐ"
+    },
+    "tax.zip": {
+      "en": "ZIP",
+      "draft": "รหัสไปรษณีย์"
+    },
+    "tax.cancel": {
+      "en": "Cancel",
+      "draft": "ยกเลิก"
+    },
+    "tax.contractor": {
+      "en": "Contractor",
+      "draft": "ผู้รับเหมา"
+    },
+    "tax.paid": {
+      "en": "Paid",
+      "draft": "ชำระแล้ว"
+    },
+    "tax.w9": {
+      "en": "W-9",
+      "draft": "W-9"
+    },
+    "tax.NEC": {
+      "en": "1099-NEC",
+      "draft": "1099-NEC"
+    },
+    "tax.eFile": {
+      "en": "E-file",
+      "draft": "E-file"
+    },
+    "tax.actions": {
+      "en": "Actions",
+      "draft": "การดำเนินการ"
+    },
+    "tax.viewPaymentHistory": {
+      "en": "View payment history",
+      "draft": "ดู การชำระเงิน ประวัติ"
+    },
+    "tax.toggleW9Received": {
+      "en": "Toggle W-9 received",
+      "draft": "Toggle W-9 รับแล้ว"
+    },
+    "tax.required": {
+      "en": "Required",
+      "draft": "จำเป็น"
+    },
+    "tax.viewFilingStatus": {
+      "en": "View filing status",
+      "draft": "ดู การยื่น สถานะ"
+    },
+    "tax.notFiled": {
+      "en": "Not filed",
+      "draft": "ไม่ filed"
+    },
+    "tax.recordPayment": {
+      "en": "Record payment",
+      "draft": "บันทึก การชำระเงิน"
+    },
+    "tax.noContractorsYet": {
+      "en": "No contractors yet.",
+      "draft": "ไม่ ผู้รับเหมา ยัง."
+    },
+    "tax.NECDataPreview": {
+      "en": "1099-NEC data preview",
+      "draft": "1099-NEC ข้อมูล ดูตัวอย่าง"
+    },
+    "tax.recipientBox1DataShapedFor": {
+      "en": "Recipient + Box 1 data shaped for e-filing. Tax IDs stay masked — reveal needs PII access. Draft data only, nothing is filed in-house.",
+      "draft": "ผู้รับ + Box 1 ข้อมูล shaped สำหรับ e-filing. ภาษี IDs อยู่ masked — reveal needs PII การเข้าถึง. ฉบับร่าง ข้อมูล เท่านั้น, ไม่มี คือ filed in-house."
+    },
+    "tax.loadPreview": {
+      "en": "Load preview",
+      "draft": "โหลด ดูตัวอย่าง"
+    },
+    "tax.recipient": {
+      "en": "Recipient",
+      "draft": "ผู้รับ"
+    },
+    "tax.tin": {
+      "en": "TIN",
+      "draft": "TIN"
+    },
+    "tax.address": {
+      "en": "Address",
+      "draft": "ที่อยู่"
+    },
+    "tax.box1": {
+      "en": "Box 1",
+      "draft": "Box 1"
+    },
+    "tax.missing": {
+      "en": "missing",
+      "draft": "ขาดหาย"
+    },
+    "tax.reveal": {
+      "en": "reveal",
+      "draft": "reveal"
+    },
+    "tax.noContractorsMeetThe": {
+      "en": "No contractors meet the",
+      "draft": "ไม่ ผู้รับเหมา meet "
+    },
+    "tax.reportingThresholdFor": {
+      "en": "reporting threshold for",
+      "draft": "การรายงาน threshold สำหรับ"
+    },
+    "tax.recordPayment2": {
+      "en": "Record payment —",
+      "draft": "บันทึก การชำระเงิน —"
+    },
+    "tax.date": {
+      "en": "Date",
+      "draft": "วันที่"
+    },
+    "tax.amount": {
+      "en": "Amount $",
+      "draft": "จำนวน $"
+    },
+    "tax.description": {
+      "en": "Description",
+      "draft": "รายละเอียด"
+    },
+    "tax.eGMarchBoothRentPayout": {
+      "en": "e.g. March booth rent payout",
+      "draft": "เช่น March บูธ ค่าเช่า การจ่าย"
+    },
+    "tax.record": {
+      "en": "Record",
+      "draft": "บันทึก"
+    },
+    "tax.paymentHistory": {
+      "en": "Payment history —",
+      "draft": "การชำระเงิน ประวัติ —"
+    },
+    "tax.noPaymentsRecordedFor": {
+      "en": "No payments recorded for",
+      "draft": "ไม่ การชำระเงิน บันทึกแล้ว สำหรับ"
+    },
+    "tax.amount2": {
+      "en": "Amount",
+      "draft": "จำนวน"
+    },
+    "tax.deletePayment": {
+      "en": "Delete payment",
+      "draft": "ลบ การชำระเงิน"
+    },
+    "tax.yearTotal": {
+      "en": "Year total:",
+      "draft": "ปี รวม:"
+    },
+    "tax.NECFiling": {
+      "en": "1099-NEC filing —",
+      "draft": "1099-NEC การยื่น —"
+    },
+    "tax.thisDraftLivesInTaxBanditsReview": {
+      "en": "This draft lives in TaxBandits — review and Transmit there to file with the IRS. This app never files in-house.",
+      "draft": "นี้ ฉบับร่าง lives ใน TaxBandits — ตรวจสอบ และ Transmit there ถึง ไฟล์ กับ IRS. นี้ แอป ไม่เคย ไฟล์ in-house."
+    },
+    "tax.NECIsRequiredForNon": {
+      "en": "1099-NEC is required for non-corporate contractors paid ≥",
+      "draft": "1099-NEC คือ จำเป็น สำหรับ non-corporate ผู้รับเหมา ชำระแล้ว ≥"
+    },
+    "tax.inTheYearEFilingCreates": {
+      "en": "in the year. E-filing creates a draft in TaxBandits — you review and transmit there. This app never files with the IRS directly.",
+      "draft": "ใน ปี. E-filing creates ฉบับร่าง ใน TaxBandits — ตรวจสอบ และ transmit there. นี้ แอป ไม่เคย ไฟล์ กับ IRS directly."
+    },
+    "taxforecast.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "ภาษี พยากรณ์"
+    },
+    "taxforecast.OfPriorYearTax": {
+      "en": "100% of prior-year tax",
+      "draft": "100% ของ prior-year ภาษี"
+    },
+    "taxforecast.irsDirectPay": {
+      "en": "IRS Direct Pay",
+      "draft": "IRS โดยตรง ชำระ"
+    },
+    "nav.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "ภาษี พยากรณ์"
+    },
+    "nav.tax1099s": {
+      "en": "Tax & 1099s",
+      "draft": "ภาษี & 1099"
+    },
+    "teamInvites.accountantTaxPro": {
+      "en": "Accountant / Tax pro",
+      "draft": "นักบัญชี / ภาษี โปร"
+    }
+  }
+}

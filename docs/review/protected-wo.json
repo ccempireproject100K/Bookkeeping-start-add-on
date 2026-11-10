@@ -1,0 +1,426 @@
+{
+  "_meta": {
+    "lang": "wo",
+    "status": "DRAFT for human review only. Do NOT copy into frontend/src/locales/wo/translation.json until a qualified reviewer (counsel/CPA where relevant) approves each string. Live locale keeps English for these keys.",
+    "source": "docs/TRANSLATION_PLAN.md flagged keys (legal/financial/tax/privacy/safety)",
+    "notice": "Approximate translation from English/Spanish, may not be accurate."
+  },
+  "strings": {
+    "salestaxtab.taxJurisdictions": {
+      "en": "Tax jurisdictions",
+      "draft": "Lam jurisdictions"
+    },
+    "salestaxtab.everywhereYouCollectSalesTaxState": {
+      "en": "Everywhere you collect sales tax — state, county, city, special district.\n          Tag invoices with a jurisdiction and this page tells you what you owe, where.",
+      "draft": "Fëpp yaw collect jaay lam — rejion, county, dëkk, special district.\n  Etiqet faktir ak juridiksion ak lii paas tells yaw lan yaw owe, fan."
+    },
+    "salestaxtab.noJurisdictionsYetAddTheFirst": {
+      "en": "No jurisdictions yet. Add the first place you collect sales tax.",
+      "draft": "Déedéet jurisdictions pa. Yokku bu njëkk place yaw collect jaay lam."
+    },
+    "salestaxtab.ofSalesTaxIsnTTagged": {
+      "en": "of sales tax isn't tagged to a jurisdiction yet.\n            Tag invoices with a jurisdiction so every dollar lands in the right bucket.",
+      "draft": "u jaay lam du tagged ci juridiksion pa.\n  Etiqet faktir ak juridiksion kon bu nekk dollar lands ci ndeyjoor kategorie."
+    },
+    "salestaxtab.taxCollected": {
+      "en": "Tax collected",
+      "draft": "Lam dajale nañ ko"
+    },
+    "teaminvites.inviteYourAccountantOrTaxPro": {
+      "en": "Invite your accountant or tax pro — they join with the right permissions\n        and can switch between all the workspaces they serve.",
+      "draft": "Woote sa kontabilite walla lam pro — ñoom bokku ak ndeyjoor ndigal\n  ak mëna basule diggante yëp barabu liggeey ñoom serve."
+    },
+    "auditlog.eGTaxInvoiceLogin": {
+      "en": "e.g. tax, invoice, login",
+      "draft": "ni mu dajale lam, faktir, dugg"
+    },
+    "cpapackage.mileageLogWithIRSRatesApplied": {
+      "en": "Mileage log with IRS rates applied",
+      "draft": "Kilometraas surnal ak IRS taux applied"
+    },
+    "customers.delete": {
+      "en": "Delete",
+      "draft": "Far"
+    },
+    "customers.deleteConfirm": {
+      "en": "Delete customer \"{{name}}\"? Their invoices and statements stay on record.",
+      "draft": "Far kliyent \"{{name}}\"? Seen faktir ak relevé toog tëdd arsiiv."
+    },
+    "estimates.tax": {
+      "en": "Tax ($)",
+      "draft": "Lam ($)"
+    },
+    "expenses.taxID": {
+      "en": "Tax ID",
+      "draft": "Lam ID"
+    },
+    "expenses.taxYear": {
+      "en": "Tax year",
+      "draft": "Lam at"
+    },
+    "expenses.tax": {
+      "en": "Tax",
+      "draft": "Lam"
+    },
+    "expenses.taxIDEIN": {
+      "en": "Tax ID / EIN",
+      "draft": "Lam ID / EIN"
+    },
+    "invoices.refund": {
+      "en": "Refund",
+      "draft": "Delloo"
+    },
+    "invoices.taxJurisdictionOptional": {
+      "en": "Tax jurisdiction (optional)",
+      "draft": "Lam juridiksion (lu sa bopp)"
+    },
+    "invoices.tax": {
+      "en": "Tax ($)",
+      "draft": "Lam ($)"
+    },
+    "invoices.refundCredit": {
+      "en": "Refund credit —",
+      "draft": "Delloo kredi —"
+    },
+    "invoices.refundTheRemaining": {
+      "en": "Refund the remaining",
+      "draft": "Delloo des"
+    },
+    "mileage.irsLogCSV": {
+      "en": "IRS log CSV",
+      "draft": "IRS surnal CSV"
+    },
+    "payroll.deleteDraft": {
+      "en": "Delete draft",
+      "draft": "Far brouyon"
+    },
+    "payroll.partnershipStubWhenAProviderIs": {
+      "en": "Partnership stub: when a provider is connected, runs here will hand off tax filing and direct deposit automatically.",
+      "draft": "Partenaria talon: kañ fournisseur la lëkkale nañ ko, dox fii dina loxo tëddadi lam desoo ak jubbanti desoo boppam."
+    },
+    "payroll.employerTaxEst": {
+      "en": "Employer payroll tax (est.)",
+      "draft": "Employer pay lam (estimasion)"
+    },
+    "portalview.tax": {
+      "en": "Tax",
+      "draft": "Lam"
+    },
+    "recurringinvoices.tax": {
+      "en": "Tax ($)",
+      "draft": "Lam ($)"
+    },
+    "simulator.safetyFloor": {
+      "en": "Safety floor $",
+      "draft": "Safety floor $"
+    },
+    "tax.nameIsRequired": {
+      "en": "Name is required",
+      "draft": "Tur la war na"
+    },
+    "tax.contractorAdded": {
+      "en": "Contractor added",
+      "draft": "Tâcheron yokku nañ ko"
+    },
+    "tax.w9StatusUpdated": {
+      "en": "W-9 status updated",
+      "draft": "W-9 anam aktualise nañ ko"
+    },
+    "tax.contractorRemoved": {
+      "en": "Contractor removed",
+      "draft": "Tâcheron far nañ ko"
+    },
+    "tax.enterAPositiveAmount": {
+      "en": "Enter a positive amount",
+      "draft": "Dugg positif njég"
+    },
+    "tax.paymentRecorded": {
+      "en": "Payment recorded",
+      "draft": "Fay arsiive nañ ko"
+    },
+    "tax.paymentDeleted": {
+      "en": "Payment deleted",
+      "draft": "Fay far nañ ko"
+    },
+    "tax.statusRefreshed": {
+      "en": "Status refreshed",
+      "draft": "Anam refreshed"
+    },
+    "tax.addContractor": {
+      "en": "Add contractor",
+      "draft": "Yokku tâcheron"
+    },
+    "tax.contractors1099s": {
+      "en": "Contractors & 1099s",
+      "draft": "Tâcheron & 1099"
+    },
+    "tax.salesTax": {
+      "en": "Sales Tax",
+      "draft": "Jaay Lam"
+    },
+    "tax.taxbanditsNotConnected": {
+      "en": "TaxBandits not connected.",
+      "draft": "TaxBandits du lëkkale nañ ko."
+    },
+    "tax.taxbanditsSETUPMd": {
+      "en": "TAXBANDITS_SETUP.md",
+      "draft": "TAXBANDITS_SETUP.md"
+    },
+    "tax.inTheRepoNoIRSFiling": {
+      "en": "in the repo. No IRS filing is ever done in-house.",
+      "draft": "ci repo. Déedéet IRS desoo la mukku mat nañ ko in-house."
+    },
+    "tax.taxbanditsConnectedIn": {
+      "en": "TaxBandits connected in",
+      "draft": "TaxBandits lëkkale nañ ko ci"
+    },
+    "tax.sandbox": {
+      "en": "sandbox",
+      "draft": "sandbox"
+    },
+    "tax.modeNoRealFilingsFlip": {
+      "en": "mode — no real filings. Flip",
+      "draft": "mode — déedéet real filings. Flip"
+    },
+    "tax.taxbanditsSANDBOXFalse": {
+      "en": "TAXBANDITS_SANDBOX=false",
+      "draft": "TAXBANDITS_SANDBOX=dedet"
+    },
+    "tax.toGoLive": {
+      "en": "to go live.",
+      "draft": "ci dem live."
+    },
+    "tax.newContractor": {
+      "en": "New contractor",
+      "draft": "Bu bees tâcheron"
+    },
+    "tax.name": {
+      "en": "Name *",
+      "draft": "Tur *"
+    },
+    "tax.businessName": {
+      "en": "Business name",
+      "draft": "Komers tur"
+    },
+    "tax.email": {
+      "en": "Email",
+      "draft": "Imeel"
+    },
+    "tax.phone": {
+      "en": "Phone",
+      "draft": "Telefon"
+    },
+    "tax.entityType": {
+      "en": "Entity type",
+      "draft": "Entite xeet"
+    },
+    "tax.ssnEIN": {
+      "en": "SSN / EIN",
+      "draft": "SSN / EIN"
+    },
+    "tax.storedSecurely": {
+      "en": "Stored securely",
+      "draft": "Stored securely"
+    },
+    "tax.street": {
+      "en": "Street",
+      "draft": "Street"
+    },
+    "tax.city": {
+      "en": "City",
+      "draft": "Dëkk"
+    },
+    "tax.state": {
+      "en": "State",
+      "draft": "Rejion"
+    },
+    "tax.zip": {
+      "en": "ZIP",
+      "draft": "KODE"
+    },
+    "tax.cancel": {
+      "en": "Cancel",
+      "draft": "Baayi"
+    },
+    "tax.contractor": {
+      "en": "Contractor",
+      "draft": "Tâcheron"
+    },
+    "tax.paid": {
+      "en": "Paid",
+      "draft": "Fay nañ ko"
+    },
+    "tax.w9": {
+      "en": "W-9",
+      "draft": "W-9"
+    },
+    "tax.NEC": {
+      "en": "1099-NEC",
+      "draft": "1099-NEC"
+    },
+    "tax.eFile": {
+      "en": "E-file",
+      "draft": "E-file"
+    },
+    "tax.actions": {
+      "en": "Actions",
+      "draft": "Jëf"
+    },
+    "tax.viewPaymentHistory": {
+      "en": "View payment history",
+      "draft": "Xool fay taariix"
+    },
+    "tax.toggleW9Received": {
+      "en": "Toggle W-9 received",
+      "draft": "Toggle W-9 dal nañ ko"
+    },
+    "tax.required": {
+      "en": "Required",
+      "draft": "War na"
+    },
+    "tax.viewFilingStatus": {
+      "en": "View filing status",
+      "draft": "Xool desoo anam"
+    },
+    "tax.notFiled": {
+      "en": "Not filed",
+      "draft": "Du filed"
+    },
+    "tax.recordPayment": {
+      "en": "Record payment",
+      "draft": "Arsiiv fay"
+    },
+    "tax.noContractorsYet": {
+      "en": "No contractors yet.",
+      "draft": "Déedéet tâcheron pa."
+    },
+    "tax.NECDataPreview": {
+      "en": "1099-NEC data preview",
+      "draft": "1099-NEC njoxe xool bu jëkk"
+    },
+    "tax.recipientBox1DataShapedFor": {
+      "en": "Recipient + Box 1 data shaped for e-filing. Tax IDs stay masked — reveal needs PII access. Draft data only, nothing is filed in-house.",
+      "draft": "Kuy jot + Box 1 njoxe shaped ngir e-filing. Lam IDs toog masked — reveal needs PII akkse. Brouyon njoxe rekk, dara la filed in-house."
+    },
+    "tax.loadPreview": {
+      "en": "Load preview",
+      "draft": "Yëb xool bu jëkk"
+    },
+    "tax.recipient": {
+      "en": "Recipient",
+      "draft": "Kuy jot"
+    },
+    "tax.tin": {
+      "en": "TIN",
+      "draft": "TIN"
+    },
+    "tax.address": {
+      "en": "Address",
+      "draft": "Adres"
+    },
+    "tax.box1": {
+      "en": "Box 1",
+      "draft": "Box 1"
+    },
+    "tax.missing": {
+      "en": "missing",
+      "draft": "néew"
+    },
+    "tax.reveal": {
+      "en": "reveal",
+      "draft": "reveal"
+    },
+    "tax.noContractorsMeetThe": {
+      "en": "No contractors meet the",
+      "draft": "Déedéet tâcheron meet "
+    },
+    "tax.reportingThresholdFor": {
+      "en": "reporting threshold for",
+      "draft": "rapoor threshold ngir"
+    },
+    "tax.recordPayment2": {
+      "en": "Record payment —",
+      "draft": "Arsiiv fay —"
+    },
+    "tax.date": {
+      "en": "Date",
+      "draft": "Kañ"
+    },
+    "tax.amount": {
+      "en": "Amount $",
+      "draft": "Njég $"
+    },
+    "tax.description": {
+      "en": "Description",
+      "draft": "Leeral"
+    },
+    "tax.eGMarchBoothRentPayout": {
+      "en": "e.g. March booth rent payout",
+      "draft": "ni mu dajale March kiosque loyer pay"
+    },
+    "tax.record": {
+      "en": "Record",
+      "draft": "Arsiiv"
+    },
+    "tax.paymentHistory": {
+      "en": "Payment history —",
+      "draft": "Fay taariix —"
+    },
+    "tax.noPaymentsRecordedFor": {
+      "en": "No payments recorded for",
+      "draft": "Déedéet fay arsiive nañ ko ngir"
+    },
+    "tax.amount2": {
+      "en": "Amount",
+      "draft": "Njég"
+    },
+    "tax.deletePayment": {
+      "en": "Delete payment",
+      "draft": "Far fay"
+    },
+    "tax.yearTotal": {
+      "en": "Year total:",
+      "draft": "At lépp:"
+    },
+    "tax.NECFiling": {
+      "en": "1099-NEC filing —",
+      "draft": "1099-NEC desoo —"
+    },
+    "tax.thisDraftLivesInTaxBanditsReview": {
+      "en": "This draft lives in TaxBandits — review and Transmit there to file with the IRS. This app never files in-house.",
+      "draft": "Lii brouyon lives ci TaxBandits — xoolat ak Transmit there ci fisye ak IRS. Lii aplikasion mukku fisye in-house."
+    },
+    "tax.NECIsRequiredForNon": {
+      "en": "1099-NEC is required for non-corporate contractors paid ≥",
+      "draft": "1099-NEC la war na ngir non-corporate tâcheron fay nañ ko ≥"
+    },
+    "tax.inTheYearEFilingCreates": {
+      "en": "in the year. E-filing creates a draft in TaxBandits — you review and transmit there. This app never files with the IRS directly.",
+      "draft": "ci at. E-filing creates brouyon ci TaxBandits — yaw xoolat ak transmit there. Lii aplikasion mukku fisye ak IRS directly."
+    },
+    "taxforecast.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "Lam Xalaat"
+    },
+    "taxforecast.OfPriorYearTax": {
+      "en": "100% of prior-year tax",
+      "draft": "100% u prior-year lam"
+    },
+    "taxforecast.irsDirectPay": {
+      "en": "IRS Direct Pay",
+      "draft": "IRS Jubbanti Fay"
+    },
+    "nav.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "Lam Xalaat"
+    },
+    "nav.tax1099s": {
+      "en": "Tax & 1099s",
+      "draft": "Lam & 1099"
+    },
+    "teamInvites.accountantTaxPro": {
+      "en": "Accountant / Tax pro",
+      "draft": "Kontabilite / Lam pro"
+    }
+  }
+}

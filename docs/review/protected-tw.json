@@ -1,0 +1,426 @@
+{
+  "_meta": {
+    "lang": "tw",
+    "status": "DRAFT for human review only. Do NOT copy into frontend/src/locales/tw/translation.json until a qualified reviewer (counsel/CPA where relevant) approves each string. Live locale keeps English for these keys.",
+    "source": "docs/TRANSLATION_PLAN.md flagged keys (legal/financial/tax/privacy/safety)",
+    "notice": "Approximate translation from English/Spanish, may not be accurate."
+  },
+  "strings": {
+    "salestaxtab.taxJurisdictions": {
+      "en": "Tax jurisdictions",
+      "draft": "Tow jurisdictions"
+    },
+    "salestaxtab.everywhereYouCollectSalesTaxState": {
+      "en": "Everywhere you collect sales tax — state, county, city, special district.\n          Tag invoices with a jurisdiction and this page tells you what you owe, where.",
+      "draft": "Baabiara wo collect tɔn tow — mampɔn, county, kurow, special district.\n  Nsɔw invoice ne tumi ne eyi krataa tells wo dɛn wo owe, he."
+    },
+    "salestaxtab.noJurisdictionsYetAddTheFirst": {
+      "en": "No jurisdictions yet. Add the first place you collect sales tax.",
+      "draft": "Nn jurisdictions nnya. Fa ka ho edi kan place wo collect tɔn tow."
+    },
+    "salestaxtab.ofSalesTaxIsnTTagged": {
+      "en": "of sales tax isn't tagged to a jurisdiction yet.\n            Tag invoices with a jurisdiction so every dollar lands in the right bucket.",
+      "draft": "mu tɔn tow nnyɛ tagged kɔ tumi nnya.\n  Nsɔw invoice ne tumi enti biara dollar lands mu nifa fa."
+    },
+    "salestaxtab.taxCollected": {
+      "en": "Tax collected",
+      "draft": "Tow wɔaboaboa"
+    },
+    "teaminvites.inviteYourAccountantOrTaxPro": {
+      "en": "Invite your accountant or tax pro — they join with the right permissions\n        and can switch between all the workspaces they serve.",
+      "draft": "Frɛ wo akawntani anaa tow nimdeɛ — wɔn ka ho ne nifa kwanya\n  ne bɛtumi dane ntam nyinaa adwumabea wɔn serve."
+    },
+    "auditlog.eGTaxInvoiceLogin": {
+      "en": "e.g. tax, invoice, login",
+      "draft": "sɛ nhwɛsoɔ tow, invoice, kɔ mu"
+    },
+    "cpapackage.mileageLogWithIRSRatesApplied": {
+      "en": "Mileage log with IRS rates applied",
+      "draft": "Akwantu nsɛm ne IRS suss applied"
+    },
+    "customers.delete": {
+      "en": "Delete",
+      "draft": "Yi"
+    },
+    "customers.deleteConfirm": {
+      "en": "Delete customer \"{{name}}\"? Their invoices and statements stay on record.",
+      "draft": "Yi ɔtɔfoɔ \"{{name}}\"? Wɔn invoice ne kyerɛw tena sɔ kyerɛw."
+    },
+    "estimates.tax": {
+      "en": "Tax ($)",
+      "draft": "Tow ($)"
+    },
+    "expenses.taxID": {
+      "en": "Tax ID",
+      "draft": "Tow ID"
+    },
+    "expenses.taxYear": {
+      "en": "Tax year",
+      "draft": "Tow afe"
+    },
+    "expenses.tax": {
+      "en": "Tax",
+      "draft": "Tow"
+    },
+    "expenses.taxIDEIN": {
+      "en": "Tax ID / EIN",
+      "draft": "Tow ID / EIN"
+    },
+    "invoices.refund": {
+      "en": "Refund",
+      "draft": "San tua"
+    },
+    "invoices.taxJurisdictionOptional": {
+      "en": "Tax jurisdiction (optional)",
+      "draft": "Tow tumi (wopɛ a)"
+    },
+    "invoices.tax": {
+      "en": "Tax ($)",
+      "draft": "Tow ($)"
+    },
+    "invoices.refundCredit": {
+      "en": "Refund credit —",
+      "draft": "San tua bosea —"
+    },
+    "invoices.refundTheRemaining": {
+      "en": "Refund the remaining",
+      "draft": "San tua aka"
+    },
+    "mileage.irsLogCSV": {
+      "en": "IRS log CSV",
+      "draft": "IRS nsɛm CSV"
+    },
+    "payroll.deleteDraft": {
+      "en": "Delete draft",
+      "draft": "Yi nhyehyɛe"
+    },
+    "payroll.partnershipStubWhenAProviderIs": {
+      "en": "Partnership stub: when a provider is connected, runs here will hand off tax filing and direct deposit automatically.",
+      "draft": "Ayɔnko fa: bere bɛn ɔde mafoɔ ne abɔ mu, tu mmirika ha bɛ nsa dum tow kyerɛw ne tee sikakora ankasa."
+    },
+    "payroll.employerTaxEst": {
+      "en": "Employer payroll tax (est.)",
+      "draft": "Employer akatua tow (susupɛn)"
+    },
+    "portalview.tax": {
+      "en": "Tax",
+      "draft": "Tow"
+    },
+    "recurringinvoices.tax": {
+      "en": "Tax ($)",
+      "draft": "Tow ($)"
+    },
+    "simulator.safetyFloor": {
+      "en": "Safety floor $",
+      "draft": "Safety floor $"
+    },
+    "tax.nameIsRequired": {
+      "en": "Name is required",
+      "draft": "Din ne ɛhia"
+    },
+    "tax.contractorAdded": {
+      "en": "Contractor added",
+      "draft": "Kontrakta wɔde aka ho"
+    },
+    "tax.w9StatusUpdated": {
+      "en": "W-9 status updated",
+      "draft": "W-9 tebea wɔasesa"
+    },
+    "tax.contractorRemoved": {
+      "en": "Contractor removed",
+      "draft": "Kontrakta wɔayi"
+    },
+    "tax.enterAPositiveAmount": {
+      "en": "Enter a positive amount",
+      "draft": "Kɔ mu pa dodow"
+    },
+    "tax.paymentRecorded": {
+      "en": "Payment recorded",
+      "draft": "Akatua wɔatwerɛ"
+    },
+    "tax.paymentDeleted": {
+      "en": "Payment deleted",
+      "draft": "Akatua wɔayi"
+    },
+    "tax.statusRefreshed": {
+      "en": "Status refreshed",
+      "draft": "Tebea refreshed"
+    },
+    "tax.addContractor": {
+      "en": "Add contractor",
+      "draft": "Fa ka ho kontrakta"
+    },
+    "tax.contractors1099s": {
+      "en": "Contractors & 1099s",
+      "draft": "Kontrakta & 1099"
+    },
+    "tax.salesTax": {
+      "en": "Sales Tax",
+      "draft": "Tɔn Tow"
+    },
+    "tax.taxbanditsNotConnected": {
+      "en": "TaxBandits not connected.",
+      "draft": "TaxBandits nnyɛ abɔ mu."
+    },
+    "tax.taxbanditsSETUPMd": {
+      "en": "TAXBANDITS_SETUP.md",
+      "draft": "TAXBANDITS_SETUP.md"
+    },
+    "tax.inTheRepoNoIRSFiling": {
+      "en": "in the repo. No IRS filing is ever done in-house.",
+      "draft": "mu repo. Nn IRS kyerɛw ne pɛn awie in-house."
+    },
+    "tax.taxbanditsConnectedIn": {
+      "en": "TaxBandits connected in",
+      "draft": "TaxBandits abɔ mu mu"
+    },
+    "tax.sandbox": {
+      "en": "sandbox",
+      "draft": "sandbox"
+    },
+    "tax.modeNoRealFilingsFlip": {
+      "en": "mode — no real filings. Flip",
+      "draft": "mode — nn real filings. Flip"
+    },
+    "tax.taxbanditsSANDBOXFalse": {
+      "en": "TAXBANDITS_SANDBOX=false",
+      "draft": "TAXBANDITS_SANDBOX=ntorɔ"
+    },
+    "tax.toGoLive": {
+      "en": "to go live.",
+      "draft": "kɔ kɔ nkwa."
+    },
+    "tax.newContractor": {
+      "en": "New contractor",
+      "draft": "Foforo kontrakta"
+    },
+    "tax.name": {
+      "en": "Name *",
+      "draft": "Din *"
+    },
+    "tax.businessName": {
+      "en": "Business name",
+      "draft": "Adwuma din"
+    },
+    "tax.email": {
+      "en": "Email",
+      "draft": "Imeel"
+    },
+    "tax.phone": {
+      "en": "Phone",
+      "draft": "Fon"
+    },
+    "tax.entityType": {
+      "en": "Entity type",
+      "draft": "Deɛ ɔfa"
+    },
+    "tax.ssnEIN": {
+      "en": "SSN / EIN",
+      "draft": "SSN / EIN"
+    },
+    "tax.storedSecurely": {
+      "en": "Stored securely",
+      "draft": "Stored securely"
+    },
+    "tax.street": {
+      "en": "Street",
+      "draft": "Street"
+    },
+    "tax.city": {
+      "en": "City",
+      "draft": "Kurow"
+    },
+    "tax.state": {
+      "en": "State",
+      "draft": "Mampɔn"
+    },
+    "tax.zip": {
+      "en": "ZIP",
+      "draft": "SIP"
+    },
+    "tax.cancel": {
+      "en": "Cancel",
+      "draft": "Twa"
+    },
+    "tax.contractor": {
+      "en": "Contractor",
+      "draft": "Kontrakta"
+    },
+    "tax.paid": {
+      "en": "Paid",
+      "draft": "Wɔatua"
+    },
+    "tax.w9": {
+      "en": "W-9",
+      "draft": "W-9"
+    },
+    "tax.NEC": {
+      "en": "1099-NEC",
+      "draft": "1099-NEC"
+    },
+    "tax.eFile": {
+      "en": "E-file",
+      "draft": "E-file"
+    },
+    "tax.actions": {
+      "en": "Actions",
+      "draft": "Nneyɛe"
+    },
+    "tax.viewPaymentHistory": {
+      "en": "View payment history",
+      "draft": "Hwɛ akatua tete nsɛm"
+    },
+    "tax.toggleW9Received": {
+      "en": "Toggle W-9 received",
+      "draft": "Toggle W-9 wɔagye"
+    },
+    "tax.required": {
+      "en": "Required",
+      "draft": "Ɛhia"
+    },
+    "tax.viewFilingStatus": {
+      "en": "View filing status",
+      "draft": "Hwɛ kyerɛw tebea"
+    },
+    "tax.notFiled": {
+      "en": "Not filed",
+      "draft": "Nnyɛ filed"
+    },
+    "tax.recordPayment": {
+      "en": "Record payment",
+      "draft": "Kyerɛw akatua"
+    },
+    "tax.noContractorsYet": {
+      "en": "No contractors yet.",
+      "draft": "Nn kontrakta nnya."
+    },
+    "tax.NECDataPreview": {
+      "en": "1099-NEC data preview",
+      "draft": "1099-NEC nsɛm hwɛ kan"
+    },
+    "tax.recipientBox1DataShapedFor": {
+      "en": "Recipient + Box 1 data shaped for e-filing. Tax IDs stay masked — reveal needs PII access. Draft data only, nothing is filed in-house.",
+      "draft": "Ɔgyefoɔ + Box 1 nsɛm shaped ma e-filing. Tow IDs tena masked — reveal needs PII kwan. Nhyehyɛe nsɛm nko, hwee ne filed in-house."
+    },
+    "tax.loadPreview": {
+      "en": "Load preview",
+      "draft": "Fa hwɛ kan"
+    },
+    "tax.recipient": {
+      "en": "Recipient",
+      "draft": "Ɔgyefoɔ"
+    },
+    "tax.tin": {
+      "en": "TIN",
+      "draft": "TIN"
+    },
+    "tax.address": {
+      "en": "Address",
+      "draft": "Adres"
+    },
+    "tax.box1": {
+      "en": "Box 1",
+      "draft": "Box 1"
+    },
+    "tax.missing": {
+      "en": "missing",
+      "draft": "ayera"
+    },
+    "tax.reveal": {
+      "en": "reveal",
+      "draft": "reveal"
+    },
+    "tax.noContractorsMeetThe": {
+      "en": "No contractors meet the",
+      "draft": "Nn kontrakta meet "
+    },
+    "tax.reportingThresholdFor": {
+      "en": "reporting threshold for",
+      "draft": "bɔ amannɛ threshold ma"
+    },
+    "tax.recordPayment2": {
+      "en": "Record payment —",
+      "draft": "Kyerɛw akatua —"
+    },
+    "tax.date": {
+      "en": "Date",
+      "draft": "Da"
+    },
+    "tax.amount": {
+      "en": "Amount $",
+      "draft": "Dodow $"
+    },
+    "tax.description": {
+      "en": "Description",
+      "draft": "Nkyerɛmu"
+    },
+    "tax.eGMarchBoothRentPayout": {
+      "en": "e.g. March booth rent payout",
+      "draft": "sɛ nhwɛsoɔ March dan dan akatua"
+    },
+    "tax.record": {
+      "en": "Record",
+      "draft": "Kyerɛw"
+    },
+    "tax.paymentHistory": {
+      "en": "Payment history —",
+      "draft": "Akatua tete nsɛm —"
+    },
+    "tax.noPaymentsRecordedFor": {
+      "en": "No payments recorded for",
+      "draft": "Nn akatua wɔatwerɛ ma"
+    },
+    "tax.amount2": {
+      "en": "Amount",
+      "draft": "Dodow"
+    },
+    "tax.deletePayment": {
+      "en": "Delete payment",
+      "draft": "Yi akatua"
+    },
+    "tax.yearTotal": {
+      "en": "Year total:",
+      "draft": "Afe nyinaa:"
+    },
+    "tax.NECFiling": {
+      "en": "1099-NEC filing —",
+      "draft": "1099-NEC kyerɛw —"
+    },
+    "tax.thisDraftLivesInTaxBanditsReview": {
+      "en": "This draft lives in TaxBandits — review and Transmit there to file with the IRS. This app never files in-house.",
+      "draft": "Eyi nhyehyɛe lives mu TaxBandits — hwɛ bio ne Transmit there kɔ fael ne IRS. Eyi app da fael in-house."
+    },
+    "tax.NECIsRequiredForNon": {
+      "en": "1099-NEC is required for non-corporate contractors paid ≥",
+      "draft": "1099-NEC ne ɛhia ma non-corporate kontrakta wɔatua ≥"
+    },
+    "tax.inTheYearEFilingCreates": {
+      "en": "in the year. E-filing creates a draft in TaxBandits — you review and transmit there. This app never files with the IRS directly.",
+      "draft": "mu afe. E-filing creates nhyehyɛe mu TaxBandits — wo hwɛ bio ne transmit there. Eyi app da fael ne IRS directly."
+    },
+    "taxforecast.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "Tow Nhunu"
+    },
+    "taxforecast.OfPriorYearTax": {
+      "en": "100% of prior-year tax",
+      "draft": "100% mu prior-year tow"
+    },
+    "taxforecast.irsDirectPay": {
+      "en": "IRS Direct Pay",
+      "draft": "IRS Tee Tua"
+    },
+    "nav.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "Tow Nhunu"
+    },
+    "nav.tax1099s": {
+      "en": "Tax & 1099s",
+      "draft": "Tow & 1099"
+    },
+    "teamInvites.accountantTaxPro": {
+      "en": "Accountant / Tax pro",
+      "draft": "Akawntani / Tow nimdeɛ"
+    }
+  }
+}

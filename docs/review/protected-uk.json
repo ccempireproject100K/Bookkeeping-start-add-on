@@ -1,0 +1,426 @@
+{
+  "_meta": {
+    "lang": "uk",
+    "status": "DRAFT for human review only. Do NOT copy into frontend/src/locales/uk/translation.json until a qualified reviewer (counsel/CPA where relevant) approves each string. Live locale keeps English for these keys.",
+    "source": "docs/TRANSLATION_PLAN.md flagged keys (legal/financial/tax/privacy/safety)",
+    "notice": "Approximate translation from English/Spanish, may not be accurate."
+  },
+  "strings": {
+    "salestaxtab.taxJurisdictions": {
+      "en": "Tax jurisdictions",
+      "draft": "Податкові юрисдикції"
+    },
+    "salestaxtab.everywhereYouCollectSalesTaxState": {
+      "en": "Everywhere you collect sales tax — state, county, city, special district.\n          Tag invoices with a jurisdiction and this page tells you what you owe, where.",
+      "draft": "Усюди, де ви збираєте податок з продажів — штат, округ, місто, спеціальний район.\n          Позначайте рахунки юрисдикцією, і ця сторінка покаже, скільки й де ви винні."
+    },
+    "salestaxtab.noJurisdictionsYetAddTheFirst": {
+      "en": "No jurisdictions yet. Add the first place you collect sales tax.",
+      "draft": "Юрисдикцій поки немає. Додайте перше місце, де ви збираєте податок з продажів."
+    },
+    "salestaxtab.ofSalesTaxIsnTTagged": {
+      "en": "of sales tax isn't tagged to a jurisdiction yet.\n            Tag invoices with a jurisdiction so every dollar lands in the right bucket.",
+      "draft": "податку з продажів поки не прив'язано до юрисдикції.\n            Позначайте рахунки юрисдикцією, щоб кожен долар потрапляв у потрібний кошик."
+    },
+    "salestaxtab.taxCollected": {
+      "en": "Tax collected",
+      "draft": "Зібраний податок"
+    },
+    "teaminvites.inviteYourAccountantOrTaxPro": {
+      "en": "Invite your accountant or tax pro — they join with the right permissions\n        and can switch between all the workspaces they serve.",
+      "draft": "Запросіть свого бухгалтера або податкового фахівця — вони приєднаються з відповідними дозволами\n        і зможуть перемикатися між усіма робочими областями, які обслуговують."
+    },
+    "auditlog.eGTaxInvoiceLogin": {
+      "en": "e.g. tax, invoice, login",
+      "draft": "напр. податок, рахунок, вхід"
+    },
+    "cpapackage.mileageLogWithIRSRatesApplied": {
+      "en": "Mileage log with IRS rates applied",
+      "draft": "Журнал пробігу зі ставками IRS"
+    },
+    "customers.delete": {
+      "en": "Delete",
+      "draft": "Видалити"
+    },
+    "customers.deleteConfirm": {
+      "en": "Delete customer \"{{name}}\"? Their invoices and statements stay on record.",
+      "draft": "Видалити клієнта «{{name}}»? Його рахунки та виписки залишаються в обліку."
+    },
+    "estimates.tax": {
+      "en": "Tax ($)",
+      "draft": "Податок ($)"
+    },
+    "expenses.taxID": {
+      "en": "Tax ID",
+      "draft": "Податковий ID"
+    },
+    "expenses.taxYear": {
+      "en": "Tax year",
+      "draft": "Податковий рік"
+    },
+    "expenses.tax": {
+      "en": "Tax",
+      "draft": "Податок"
+    },
+    "expenses.taxIDEIN": {
+      "en": "Tax ID / EIN",
+      "draft": "Податковий ID / EIN"
+    },
+    "invoices.refund": {
+      "en": "Refund",
+      "draft": "Повернення"
+    },
+    "invoices.taxJurisdictionOptional": {
+      "en": "Tax jurisdiction (optional)",
+      "draft": "Податкова юрисдикція (необов'язково)"
+    },
+    "invoices.tax": {
+      "en": "Tax ($)",
+      "draft": "Податок ($)"
+    },
+    "invoices.refundCredit": {
+      "en": "Refund credit —",
+      "draft": "Повернення кредиту —"
+    },
+    "invoices.refundTheRemaining": {
+      "en": "Refund the remaining",
+      "draft": "Поверніть решту"
+    },
+    "mileage.irsLogCSV": {
+      "en": "IRS log CSV",
+      "draft": "Журнал IRS CSV"
+    },
+    "payroll.deleteDraft": {
+      "en": "Delete draft",
+      "draft": "Видалити чернетку"
+    },
+    "payroll.partnershipStubWhenAProviderIs": {
+      "en": "Partnership stub: when a provider is connected, runs here will hand off tax filing and direct deposit automatically.",
+      "draft": "Заглушка партнерства: коли провайдера підключено, розрахунки тут автоматично передаватимуть податкові декларації та прямі депозити."
+    },
+    "payroll.employerTaxEst": {
+      "en": "Employer payroll tax (est.)",
+      "draft": "Податок на зарплату роботодавця (оц.)"
+    },
+    "portalview.tax": {
+      "en": "Tax",
+      "draft": "Податок"
+    },
+    "recurringinvoices.tax": {
+      "en": "Tax ($)",
+      "draft": "Податок ($)"
+    },
+    "simulator.safetyFloor": {
+      "en": "Safety floor $",
+      "draft": "Мінімальний запас $"
+    },
+    "tax.nameIsRequired": {
+      "en": "Name is required",
+      "draft": "Назва обов'язкова"
+    },
+    "tax.contractorAdded": {
+      "en": "Contractor added",
+      "draft": "Підрядника додано"
+    },
+    "tax.w9StatusUpdated": {
+      "en": "W-9 status updated",
+      "draft": "Статус W-9 оновлено"
+    },
+    "tax.contractorRemoved": {
+      "en": "Contractor removed",
+      "draft": "Підрядника видалено"
+    },
+    "tax.enterAPositiveAmount": {
+      "en": "Enter a positive amount",
+      "draft": "Введіть додатну суму"
+    },
+    "tax.paymentRecorded": {
+      "en": "Payment recorded",
+      "draft": "Платіж записано"
+    },
+    "tax.paymentDeleted": {
+      "en": "Payment deleted",
+      "draft": "Платіж видалено"
+    },
+    "tax.statusRefreshed": {
+      "en": "Status refreshed",
+      "draft": "Статус оновлено"
+    },
+    "tax.addContractor": {
+      "en": "Add contractor",
+      "draft": "Додати підрядника"
+    },
+    "tax.contractors1099s": {
+      "en": "Contractors & 1099s",
+      "draft": "Підрядники та 1099"
+    },
+    "tax.salesTax": {
+      "en": "Sales Tax",
+      "draft": "Податок з продажів"
+    },
+    "tax.taxbanditsNotConnected": {
+      "en": "TaxBandits not connected.",
+      "draft": "TaxBandits не підключено."
+    },
+    "tax.taxbanditsSETUPMd": {
+      "en": "TAXBANDITS_SETUP.md",
+      "draft": "TAXBANDITS_SETUP.md"
+    },
+    "tax.inTheRepoNoIRSFiling": {
+      "en": "in the repo. No IRS filing is ever done in-house.",
+      "draft": "у репозиторії. Податкові декларації до IRS ніколи не подаються всередині."
+    },
+    "tax.taxbanditsConnectedIn": {
+      "en": "TaxBandits connected in",
+      "draft": "TaxBandits підключено в"
+    },
+    "tax.sandbox": {
+      "en": "sandbox",
+      "draft": "пісочниці"
+    },
+    "tax.modeNoRealFilingsFlip": {
+      "en": "mode — no real filings. Flip",
+      "draft": "режимі — жодних справжніх декларацій. Перемкніть"
+    },
+    "tax.taxbanditsSANDBOXFalse": {
+      "en": "TAXBANDITS_SANDBOX=false",
+      "draft": "TAXBANDITS_SANDBOX=false"
+    },
+    "tax.toGoLive": {
+      "en": "to go live.",
+      "draft": "щоб запустити."
+    },
+    "tax.newContractor": {
+      "en": "New contractor",
+      "draft": "Новий підрядник"
+    },
+    "tax.name": {
+      "en": "Name *",
+      "draft": "Назва *"
+    },
+    "tax.businessName": {
+      "en": "Business name",
+      "draft": "Назва компанії"
+    },
+    "tax.email": {
+      "en": "Email",
+      "draft": "Електронна пошта"
+    },
+    "tax.phone": {
+      "en": "Phone",
+      "draft": "Телефон"
+    },
+    "tax.entityType": {
+      "en": "Entity type",
+      "draft": "Тип сутності"
+    },
+    "tax.ssnEIN": {
+      "en": "SSN / EIN",
+      "draft": "SSN / EIN"
+    },
+    "tax.storedSecurely": {
+      "en": "Stored securely",
+      "draft": "Зберігається безпечно"
+    },
+    "tax.street": {
+      "en": "Street",
+      "draft": "Вулиця"
+    },
+    "tax.city": {
+      "en": "City",
+      "draft": "Місто"
+    },
+    "tax.state": {
+      "en": "State",
+      "draft": "Штат"
+    },
+    "tax.zip": {
+      "en": "ZIP",
+      "draft": "ZIP"
+    },
+    "tax.cancel": {
+      "en": "Cancel",
+      "draft": "Скасувати"
+    },
+    "tax.contractor": {
+      "en": "Contractor",
+      "draft": "Підрядник"
+    },
+    "tax.paid": {
+      "en": "Paid",
+      "draft": "Сплачено"
+    },
+    "tax.w9": {
+      "en": "W-9",
+      "draft": "W-9"
+    },
+    "tax.NEC": {
+      "en": "1099-NEC",
+      "draft": "1099-NEC"
+    },
+    "tax.eFile": {
+      "en": "E-file",
+      "draft": "Е-подання"
+    },
+    "tax.actions": {
+      "en": "Actions",
+      "draft": "Дії"
+    },
+    "tax.viewPaymentHistory": {
+      "en": "View payment history",
+      "draft": "Переглянути історію платежів"
+    },
+    "tax.toggleW9Received": {
+      "en": "Toggle W-9 received",
+      "draft": "Перемкнути отримання W-9"
+    },
+    "tax.required": {
+      "en": "Required",
+      "draft": "Обов'язково"
+    },
+    "tax.viewFilingStatus": {
+      "en": "View filing status",
+      "draft": "Переглянути статус подання"
+    },
+    "tax.notFiled": {
+      "en": "Not filed",
+      "draft": "Не подано"
+    },
+    "tax.recordPayment": {
+      "en": "Record payment",
+      "draft": "Записати платіж"
+    },
+    "tax.noContractorsYet": {
+      "en": "No contractors yet.",
+      "draft": "Підрядників поки немає."
+    },
+    "tax.NECDataPreview": {
+      "en": "1099-NEC data preview",
+      "draft": "Попередній перегляд даних 1099-NEC"
+    },
+    "tax.recipientBox1DataShapedFor": {
+      "en": "Recipient + Box 1 data shaped for e-filing. Tax IDs stay masked — reveal needs PII access. Draft data only, nothing is filed in-house.",
+      "draft": "Дані одержувача + поля 1, підготовлені для е-подання. Податкові ID залишаються прихованими — розкриття потребує доступу PII. Лише чорнеткові дані, нічого не подається всередині."
+    },
+    "tax.loadPreview": {
+      "en": "Load preview",
+      "draft": "Завантажити перегляд"
+    },
+    "tax.recipient": {
+      "en": "Recipient",
+      "draft": "Одержувач"
+    },
+    "tax.tin": {
+      "en": "TIN",
+      "draft": "TIN"
+    },
+    "tax.address": {
+      "en": "Address",
+      "draft": "Адреса"
+    },
+    "tax.box1": {
+      "en": "Box 1",
+      "draft": "Поле 1"
+    },
+    "tax.missing": {
+      "en": "missing",
+      "draft": "відсутній"
+    },
+    "tax.reveal": {
+      "en": "reveal",
+      "draft": "розкрити"
+    },
+    "tax.noContractorsMeetThe": {
+      "en": "No contractors meet the",
+      "draft": "Жоден підрядник не відповідає"
+    },
+    "tax.reportingThresholdFor": {
+      "en": "reporting threshold for",
+      "draft": "порогу звітування для"
+    },
+    "tax.recordPayment2": {
+      "en": "Record payment —",
+      "draft": "Записати платіж —"
+    },
+    "tax.date": {
+      "en": "Date",
+      "draft": "Дата"
+    },
+    "tax.amount": {
+      "en": "Amount $",
+      "draft": "Сума $"
+    },
+    "tax.description": {
+      "en": "Description",
+      "draft": "Опис"
+    },
+    "tax.eGMarchBoothRentPayout": {
+      "en": "e.g. March booth rent payout",
+      "draft": "напр. березнева виплата за оренду місця"
+    },
+    "tax.record": {
+      "en": "Record",
+      "draft": "Записати"
+    },
+    "tax.paymentHistory": {
+      "en": "Payment history —",
+      "draft": "Історія платежів —"
+    },
+    "tax.noPaymentsRecordedFor": {
+      "en": "No payments recorded for",
+      "draft": "Платежів не записано для"
+    },
+    "tax.amount2": {
+      "en": "Amount",
+      "draft": "Сума"
+    },
+    "tax.deletePayment": {
+      "en": "Delete payment",
+      "draft": "Видалити платіж"
+    },
+    "tax.yearTotal": {
+      "en": "Year total:",
+      "draft": "Усього за рік:"
+    },
+    "tax.NECFiling": {
+      "en": "1099-NEC filing —",
+      "draft": "Подання 1099-NEC —"
+    },
+    "tax.thisDraftLivesInTaxBanditsReview": {
+      "en": "This draft lives in TaxBandits — review and Transmit there to file with the IRS. This app never files in-house.",
+      "draft": "Ця чернетка знаходиться в TaxBandits — перевірте й передайте (Transmit) там, щоб подати до IRS. Цей застосунок ніколи не подає всередині."
+    },
+    "tax.NECIsRequiredForNon": {
+      "en": "1099-NEC is required for non-corporate contractors paid ≥",
+      "draft": "1099-NEC потрібен для некорпоративних підрядників, яким сплачено ≥"
+    },
+    "tax.inTheYearEFilingCreates": {
+      "en": "in the year. E-filing creates a draft in TaxBandits — you review and transmit there. This app never files with the IRS directly.",
+      "draft": "за рік. Е-подання створює чернетку в TaxBandits — ви перевіряєте й передаєте там. Цей застосунок ніколи не подає до IRS напряму."
+    },
+    "taxforecast.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "Податковий прогноз"
+    },
+    "taxforecast.OfPriorYearTax": {
+      "en": "100% of prior-year tax",
+      "draft": "100% податку за минулий рік"
+    },
+    "taxforecast.irsDirectPay": {
+      "en": "IRS Direct Pay",
+      "draft": "IRS Direct Pay"
+    },
+    "nav.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "Податковий прогноз"
+    },
+    "nav.tax1099s": {
+      "en": "Tax & 1099s",
+      "draft": "Податки та 1099"
+    },
+    "teamInvites.accountantTaxPro": {
+      "en": "Accountant / Tax pro",
+      "draft": "Бухгалтер / податковий фахівець"
+    }
+  }
+}

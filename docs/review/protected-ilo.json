@@ -1,0 +1,426 @@
+{
+  "_meta": {
+    "lang": "ilo",
+    "status": "DRAFT for human review only. Do NOT copy into frontend/src/locales/ilo/translation.json until a qualified reviewer (counsel/CPA where relevant) approves each string. Live locale keeps English for these keys.",
+    "source": "docs/TRANSLATION_PLAN.md flagged keys (legal/financial/tax/privacy/safety)",
+    "notice": "Approximate translation from English/Spanish, may not be accurate."
+  },
+  "strings": {
+    "salestaxtab.taxJurisdictions": {
+      "en": "Tax jurisdictions",
+      "draft": "Buis jurisdictions"
+    },
+    "salestaxtab.everywhereYouCollectSalesTaxState": {
+      "en": "Everywhere you collect sales tax — state, county, city, special district.\n          Tag invoices with a jurisdiction and this page tells you what you owe, where.",
+      "draft": "Sadinoman ka collect lako buis — estado, county, siudad, special district.\n  Tanda invoice ken turay ken daytoy pahina tells ka ania ka owe, sadino."
+    },
+    "salestaxtab.noJurisdictionsYetAddTheFirst": {
+      "en": "No jurisdictions yet. Add the first place you collect sales tax.",
+      "draft": "Saan jurisdictions pay. Nayonan umuna place ka collect lako buis."
+    },
+    "salestaxtab.ofSalesTaxIsnTTagged": {
+      "en": "of sales tax isn't tagged to a jurisdiction yet.\n            Tag invoices with a jurisdiction so every dollar lands in the right bucket.",
+      "draft": "ti lako buis saan tagged iti turay pay.\n  Tanda invoice ken turay isu nga tunggal dollar lands iti kanawan kategoria."
+    },
+    "salestaxtab.taxCollected": {
+      "en": "Tax collected",
+      "draft": "Buis naurnong"
+    },
+    "teaminvites.inviteYourAccountantOrTaxPro": {
+      "en": "Invite your accountant or tax pro — they join with the right permissions\n        and can switch between all the workspaces they serve.",
+      "draft": "Imbitasion mo kontador wenno buis propesyonal — isuda makikadua ken kanawan pammalubos\n  ken mabalin sukatan nagbaetan amin workspace isuda serve."
+    },
+    "auditlog.eGTaxInvoiceLogin": {
+      "en": "e.g. tax, invoice, login",
+      "draft": "a kas koma buis, singir, aglogin"
+    },
+    "cpapackage.mileageLogWithIRSRatesApplied": {
+      "en": "Mileage log with IRS rates applied",
+      "draft": "Miliahe talaan ken IRS rate applied"
+    },
+    "customers.delete": {
+      "en": "Delete",
+      "draft": "Ikkaten"
+    },
+    "customers.deleteConfirm": {
+      "en": "Delete customer \"{{name}}\"? Their invoices and statements stay on record.",
+      "draft": "Ikkaten kliyente \"{{name}}\"? Da invoice ken statement agtalinaed nakasindi ilista."
+    },
+    "estimates.tax": {
+      "en": "Tax ($)",
+      "draft": "Buis ($)"
+    },
+    "expenses.taxID": {
+      "en": "Tax ID",
+      "draft": "Buis ID"
+    },
+    "expenses.taxYear": {
+      "en": "Tax year",
+      "draft": "Buis tawen"
+    },
+    "expenses.tax": {
+      "en": "Tax",
+      "draft": "Buis"
+    },
+    "expenses.taxIDEIN": {
+      "en": "Tax ID / EIN",
+      "draft": "Buis ID / EIN"
+    },
+    "invoices.refund": {
+      "en": "Refund",
+      "draft": "Subli"
+    },
+    "invoices.taxJurisdictionOptional": {
+      "en": "Tax jurisdiction (optional)",
+      "draft": "Buis turay (opsiyonal)"
+    },
+    "invoices.tax": {
+      "en": "Tax ($)",
+      "draft": "Buis ($)"
+    },
+    "invoices.refundCredit": {
+      "en": "Refund credit —",
+      "draft": "Subli kredit —"
+    },
+    "invoices.refundTheRemaining": {
+      "en": "Refund the remaining",
+      "draft": "Subli nabati"
+    },
+    "mileage.irsLogCSV": {
+      "en": "IRS log CSV",
+      "draft": "IRS talaan CSV"
+    },
+    "payroll.deleteDraft": {
+      "en": "Delete draft",
+      "draft": "Ikkaten borrador"
+    },
+    "payroll.partnershipStubWhenAProviderIs": {
+      "en": "Partnership stub: when a provider is connected, runs here will hand off tax filing and direct deposit automatically.",
+      "draft": "Panagkadua pidaso: kaano mangted ket nakakonekta, patarayen ditoy to ima naseppang buis panagfile ken direkta deposito automatiko."
+    },
+    "payroll.employerTaxEst": {
+      "en": "Employer payroll tax (est.)",
+      "draft": "Employer panagsweldo buis (karkulo)"
+    },
+    "portalview.tax": {
+      "en": "Tax",
+      "draft": "Buis"
+    },
+    "recurringinvoices.tax": {
+      "en": "Tax ($)",
+      "draft": "Buis ($)"
+    },
+    "simulator.safetyFloor": {
+      "en": "Safety floor $",
+      "draft": "Safety floor $"
+    },
+    "tax.nameIsRequired": {
+      "en": "Name is required",
+      "draft": "Nagan ket masapul"
+    },
+    "tax.contractorAdded": {
+      "en": "Contractor added",
+      "draft": "Kontratista nayon"
+    },
+    "tax.w9StatusUpdated": {
+      "en": "W-9 status updated",
+      "draft": "W-9 kasasaad na-update"
+    },
+    "tax.contractorRemoved": {
+      "en": "Contractor removed",
+      "draft": "Kontratista naikkaten"
+    },
+    "tax.enterAPositiveAmount": {
+      "en": "Enter a positive amount",
+      "draft": "Sumrek positibo gatad"
+    },
+    "tax.paymentRecorded": {
+      "en": "Payment recorded",
+      "draft": "Bayad nailista"
+    },
+    "tax.paymentDeleted": {
+      "en": "Payment deleted",
+      "draft": "Bayad naikkaten"
+    },
+    "tax.statusRefreshed": {
+      "en": "Status refreshed",
+      "draft": "Kasasaad refreshed"
+    },
+    "tax.addContractor": {
+      "en": "Add contractor",
+      "draft": "Nayonan kontratista"
+    },
+    "tax.contractors1099s": {
+      "en": "Contractors & 1099s",
+      "draft": "Kontratista & 1099"
+    },
+    "tax.salesTax": {
+      "en": "Sales Tax",
+      "draft": "Lako Buis"
+    },
+    "tax.taxbanditsNotConnected": {
+      "en": "TaxBandits not connected.",
+      "draft": "TaxBandits saan nakakonekta."
+    },
+    "tax.taxbanditsSETUPMd": {
+      "en": "TAXBANDITS_SETUP.md",
+      "draft": "TAXBANDITS_SETUP.md"
+    },
+    "tax.inTheRepoNoIRSFiling": {
+      "en": "in the repo. No IRS filing is ever done in-house.",
+      "draft": "iti repo. Saan IRS panagfile ket nanipud nalpas in-house."
+    },
+    "tax.taxbanditsConnectedIn": {
+      "en": "TaxBandits connected in",
+      "draft": "TaxBandits nakakonekta iti"
+    },
+    "tax.sandbox": {
+      "en": "sandbox",
+      "draft": "sandbox"
+    },
+    "tax.modeNoRealFilingsFlip": {
+      "en": "mode — no real filings. Flip",
+      "draft": "mode — saan real filings. Flip"
+    },
+    "tax.taxbanditsSANDBOXFalse": {
+      "en": "TAXBANDITS_SANDBOX=false",
+      "draft": "TAXBANDITS_SANDBOX=saan a pudno"
+    },
+    "tax.toGoLive": {
+      "en": "to go live.",
+      "draft": "iti mapan sibibiag."
+    },
+    "tax.newContractor": {
+      "en": "New contractor",
+      "draft": "Baro kontratista"
+    },
+    "tax.name": {
+      "en": "Name *",
+      "draft": "Nagan *"
+    },
+    "tax.businessName": {
+      "en": "Business name",
+      "draft": "Negosyo nagan"
+    },
+    "tax.email": {
+      "en": "Email",
+      "draft": "Email"
+    },
+    "tax.phone": {
+      "en": "Phone",
+      "draft": "Telepono"
+    },
+    "tax.entityType": {
+      "en": "Entity type",
+      "draft": "Entidad kita"
+    },
+    "tax.ssnEIN": {
+      "en": "SSN / EIN",
+      "draft": "SSN / EIN"
+    },
+    "tax.storedSecurely": {
+      "en": "Stored securely",
+      "draft": "Stored securely"
+    },
+    "tax.street": {
+      "en": "Street",
+      "draft": "Street"
+    },
+    "tax.city": {
+      "en": "City",
+      "draft": "Siudad"
+    },
+    "tax.state": {
+      "en": "State",
+      "draft": "Estado"
+    },
+    "tax.zip": {
+      "en": "ZIP",
+      "draft": "KODIGO"
+    },
+    "tax.cancel": {
+      "en": "Cancel",
+      "draft": "Kanselahin"
+    },
+    "tax.contractor": {
+      "en": "Contractor",
+      "draft": "Kontratista"
+    },
+    "tax.paid": {
+      "en": "Paid",
+      "draft": "Nabayadan"
+    },
+    "tax.w9": {
+      "en": "W-9",
+      "draft": "W-9"
+    },
+    "tax.NEC": {
+      "en": "1099-NEC",
+      "draft": "1099-NEC"
+    },
+    "tax.eFile": {
+      "en": "E-file",
+      "draft": "E-file"
+    },
+    "tax.actions": {
+      "en": "Actions",
+      "draft": "Aramiden"
+    },
+    "tax.viewPaymentHistory": {
+      "en": "View payment history",
+      "draft": "Kitaen bayad pakasaritaan"
+    },
+    "tax.toggleW9Received": {
+      "en": "Toggle W-9 received",
+      "draft": "Toggle W-9 naawat"
+    },
+    "tax.required": {
+      "en": "Required",
+      "draft": "Masapul"
+    },
+    "tax.viewFilingStatus": {
+      "en": "View filing status",
+      "draft": "Kitaen panagfile kasasaad"
+    },
+    "tax.notFiled": {
+      "en": "Not filed",
+      "draft": "Saan filed"
+    },
+    "tax.recordPayment": {
+      "en": "Record payment",
+      "draft": "Ilista bayad"
+    },
+    "tax.noContractorsYet": {
+      "en": "No contractors yet.",
+      "draft": "Saan kontratista pay."
+    },
+    "tax.NECDataPreview": {
+      "en": "1099-NEC data preview",
+      "draft": "1099-NEC datos pasilip"
+    },
+    "tax.recipientBox1DataShapedFor": {
+      "en": "Recipient + Box 1 data shaped for e-filing. Tax IDs stay masked — reveal needs PII access. Draft data only, nothing is filed in-house.",
+      "draft": "Umawat + Box 1 datos shaped para e-filing. Buis IDs agtalinaed masked — reveal needs PII serrek. Borrador datos laeng, awan ket filed in-house."
+    },
+    "tax.loadPreview": {
+      "en": "Load preview",
+      "draft": "Ikarga pasilip"
+    },
+    "tax.recipient": {
+      "en": "Recipient",
+      "draft": "Umawat"
+    },
+    "tax.tin": {
+      "en": "TIN",
+      "draft": "TIN"
+    },
+    "tax.address": {
+      "en": "Address",
+      "draft": "Adres"
+    },
+    "tax.box1": {
+      "en": "Box 1",
+      "draft": "Box 1"
+    },
+    "tax.missing": {
+      "en": "missing",
+      "draft": "napukaw"
+    },
+    "tax.reveal": {
+      "en": "reveal",
+      "draft": "reveal"
+    },
+    "tax.noContractorsMeetThe": {
+      "en": "No contractors meet the",
+      "draft": "Saan kontratista meet "
+    },
+    "tax.reportingThresholdFor": {
+      "en": "reporting threshold for",
+      "draft": "panagreport threshold para"
+    },
+    "tax.recordPayment2": {
+      "en": "Record payment —",
+      "draft": "Ilista bayad —"
+    },
+    "tax.date": {
+      "en": "Date",
+      "draft": "Petsa"
+    },
+    "tax.amount": {
+      "en": "Amount $",
+      "draft": "Gatad $"
+    },
+    "tax.description": {
+      "en": "Description",
+      "draft": "Deskripsyon"
+    },
+    "tax.eGMarchBoothRentPayout": {
+      "en": "e.g. March booth rent payout",
+      "draft": "a kas koma March puesto abang bayad"
+    },
+    "tax.record": {
+      "en": "Record",
+      "draft": "Ilista"
+    },
+    "tax.paymentHistory": {
+      "en": "Payment history —",
+      "draft": "Bayad pakasaritaan —"
+    },
+    "tax.noPaymentsRecordedFor": {
+      "en": "No payments recorded for",
+      "draft": "Saan bayad nailista para"
+    },
+    "tax.amount2": {
+      "en": "Amount",
+      "draft": "Gatad"
+    },
+    "tax.deletePayment": {
+      "en": "Delete payment",
+      "draft": "Ikkaten bayad"
+    },
+    "tax.yearTotal": {
+      "en": "Year total:",
+      "draft": "Tawen dagup:"
+    },
+    "tax.NECFiling": {
+      "en": "1099-NEC filing —",
+      "draft": "1099-NEC panagfile —"
+    },
+    "tax.thisDraftLivesInTaxBanditsReview": {
+      "en": "This draft lives in TaxBandits — review and Transmit there to file with the IRS. This app never files in-house.",
+      "draft": "Daytoy borrador lives iti TaxBandits — repasoen ken Transmit there iti file ken IRS. Daytoy app dinto file in-house."
+    },
+    "tax.NECIsRequiredForNon": {
+      "en": "1099-NEC is required for non-corporate contractors paid ≥",
+      "draft": "1099-NEC ket masapul para non-corporate kontratista nabayadan ≥"
+    },
+    "tax.inTheYearEFilingCreates": {
+      "en": "in the year. E-filing creates a draft in TaxBandits — you review and transmit there. This app never files with the IRS directly.",
+      "draft": "iti tawen. E-filing creates borrador iti TaxBandits — ka repasoen ken transmit there. Daytoy app dinto file ken IRS directly."
+    },
+    "taxforecast.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "Buis Padto"
+    },
+    "taxforecast.OfPriorYearTax": {
+      "en": "100% of prior-year tax",
+      "draft": "100% ti prior-year buis"
+    },
+    "taxforecast.irsDirectPay": {
+      "en": "IRS Direct Pay",
+      "draft": "IRS Direkta Agbayad"
+    },
+    "nav.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "Buis Padto"
+    },
+    "nav.tax1099s": {
+      "en": "Tax & 1099s",
+      "draft": "Buis & 1099"
+    },
+    "teamInvites.accountantTaxPro": {
+      "en": "Accountant / Tax pro",
+      "draft": "Kontador / Buis propesyonal"
+    }
+  }
+}

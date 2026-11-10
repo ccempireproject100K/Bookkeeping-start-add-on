@@ -11,11 +11,11 @@ const flatten = (o, p = "", out = {}) => {
   });
   return out;
 };
-const EXPECTED = ["en","es","fr","zh-CN","ht","ar","vi","tl","hi","ko","pt","so","ur","bn","pa","fa","am","my","ne","sw","te"];
+const EXPECTED = ["am","ar","az","bg","bho","bn","bs","ca","ceb","cs","da","de","el","en","es","et","fa","ff","fi","fr","gu","ha","he","hi","hr","ht","hu","hy","id","ig","ilo","it","ja","jv","ka","kk","km","kn","ko","ku","ln","lo","lt","lv","mg","mk","ml","mr","ms","my","ne","nl","no","om","pa","pl","prs","ps","pt","qu","rn","ro","ru","rw","si","sk","sl","sm","so","sq","sr","sv","sw","ta","te","th","ti","tl","tr","tw","uk","ur","uz","vi","wo","yi","yo","yue","zh","zh-CN","zu"];
 const en = flatten(load("en"));
 const tokens = (s) => (typeof s === "string" ? (s.match(/\{\{[^}]+\}\}/g) || []).sort() : []);
 
-test("all 20 locales exist", () => {
+test("all 91 locales exist", () => {
   EXPECTED.forEach((c) => expect(fs.existsSync(path.join(dir, c, "translation.json"))).toBe(true));
 });
 

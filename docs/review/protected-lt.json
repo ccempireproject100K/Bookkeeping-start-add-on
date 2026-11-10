@@ -1,0 +1,426 @@
+{
+  "_meta": {
+    "lang": "lt",
+    "status": "DRAFT for human review only. Do NOT copy into frontend/src/locales/lt/translation.json until a qualified reviewer (counsel/CPA where relevant) approves each string. Live locale keeps English for these keys.",
+    "source": "docs/TRANSLATION_PLAN.md flagged keys (legal/financial/tax/privacy/safety)",
+    "notice": "Approximate translation from English/Spanish, may not be accurate."
+  },
+  "strings": {
+    "salestaxtab.taxJurisdictions": {
+      "en": "Tax jurisdictions",
+      "draft": "Mokestis jurisdictions"
+    },
+    "salestaxtab.everywhereYouCollectSalesTaxState": {
+      "en": "Everywhere you collect sales tax — state, county, city, special district.\n          Tag invoices with a jurisdiction and this page tells you what you owe, where.",
+      "draft": "Visur jūs collect pardavimai mokestis — valstija, county, miestas, special district.\n  Žyma sąskaitos su jurisdikcija ir šis puslapis tells jūs kas jūs owe, kur."
+    },
+    "salestaxtab.noJurisdictionsYetAddTheFirst": {
+      "en": "No jurisdictions yet. Add the first place you collect sales tax.",
+      "draft": "Ne jurisdictions dar. Pridėti pirmas place jūs collect pardavimai mokestis."
+    },
+    "salestaxtab.ofSalesTaxIsnTTagged": {
+      "en": "of sales tax isn't tagged to a jurisdiction yet.\n            Tag invoices with a jurisdiction so every dollar lands in the right bucket.",
+      "draft": "iš pardavimai mokestis nėra tagged iki jurisdikcija dar.\n  Žyma sąskaitos su jurisdikcija taigi kiekvienas dollar lands dešinė krepšelis."
+    },
+    "salestaxtab.taxCollected": {
+      "en": "Tax collected",
+      "draft": "Mokestis surinkta"
+    },
+    "teaminvites.inviteYourAccountantOrTaxPro": {
+      "en": "Invite your accountant or tax pro — they join with the right permissions\n        and can switch between all the workspaces they serve.",
+      "draft": "Kviesti jūsų buhalteris ar mokestis pro — jie prisijungti su dešinė leidimai\n  ir gali perjungti tarp visi darbo sritys jie serve."
+    },
+    "auditlog.eGTaxInvoiceLogin": {
+      "en": "e.g. tax, invoice, login",
+      "draft": "pvz. mokestis, sąskaita, prisijungimas"
+    },
+    "cpapackage.mileageLogWithIRSRatesApplied": {
+      "en": "Mileage log with IRS rates applied",
+      "draft": "Rida žurnalas su IRS normos applied"
+    },
+    "customers.delete": {
+      "en": "Delete",
+      "draft": "Ištrinti"
+    },
+    "customers.deleteConfirm": {
+      "en": "Delete customer \"{{name}}\"? Their invoices and statements stay on record.",
+      "draft": "Ištrinti klientas \"{{name}}\"? Jų sąskaitos ir išrašai likti įrašyti."
+    },
+    "estimates.tax": {
+      "en": "Tax ($)",
+      "draft": "Mokestis ($)"
+    },
+    "expenses.taxID": {
+      "en": "Tax ID",
+      "draft": "Mokestis ID"
+    },
+    "expenses.taxYear": {
+      "en": "Tax year",
+      "draft": "Mokestis metai"
+    },
+    "expenses.tax": {
+      "en": "Tax",
+      "draft": "Mokestis"
+    },
+    "expenses.taxIDEIN": {
+      "en": "Tax ID / EIN",
+      "draft": "Mokestis ID / EIN"
+    },
+    "invoices.refund": {
+      "en": "Refund",
+      "draft": "Grąžinimas"
+    },
+    "invoices.taxJurisdictionOptional": {
+      "en": "Tax jurisdiction (optional)",
+      "draft": "Mokestis jurisdikcija (neprivalomas)"
+    },
+    "invoices.tax": {
+      "en": "Tax ($)",
+      "draft": "Mokestis ($)"
+    },
+    "invoices.refundCredit": {
+      "en": "Refund credit —",
+      "draft": "Grąžinimas kreditas —"
+    },
+    "invoices.refundTheRemaining": {
+      "en": "Refund the remaining",
+      "draft": "Grąžinimas likęs"
+    },
+    "mileage.irsLogCSV": {
+      "en": "IRS log CSV",
+      "draft": "IRS žurnalas CSV"
+    },
+    "payroll.deleteDraft": {
+      "en": "Delete draft",
+      "draft": "Ištrinti juodraštis"
+    },
+    "payroll.partnershipStubWhenAProviderIs": {
+      "en": "Partnership stub: when a provider is connected, runs here will hand off tax filing and direct deposit automatically.",
+      "draft": "Partnerystė kvitas: kada teikėjas yra prisijungta, vykdo čia bus ranka išjungta mokestis pateikimas ir tiesioginis įnašas automatiškai."
+    },
+    "payroll.employerTaxEst": {
+      "en": "Employer payroll tax (est.)",
+      "draft": "Employer darbo užmokestis mokestis (apytiksliai.)"
+    },
+    "portalview.tax": {
+      "en": "Tax",
+      "draft": "Mokestis"
+    },
+    "recurringinvoices.tax": {
+      "en": "Tax ($)",
+      "draft": "Mokestis ($)"
+    },
+    "simulator.safetyFloor": {
+      "en": "Safety floor $",
+      "draft": "Safety floor $"
+    },
+    "tax.nameIsRequired": {
+      "en": "Name is required",
+      "draft": "Pavadinimas yra privaloma"
+    },
+    "tax.contractorAdded": {
+      "en": "Contractor added",
+      "draft": "Rangovas pridėta"
+    },
+    "tax.w9StatusUpdated": {
+      "en": "W-9 status updated",
+      "draft": "W-9 būsena atnaujinta"
+    },
+    "tax.contractorRemoved": {
+      "en": "Contractor removed",
+      "draft": "Rangovas pašalinta"
+    },
+    "tax.enterAPositiveAmount": {
+      "en": "Enter a positive amount",
+      "draft": "Įvesti teigiamas suma"
+    },
+    "tax.paymentRecorded": {
+      "en": "Payment recorded",
+      "draft": "Mokėjimas įrašyta"
+    },
+    "tax.paymentDeleted": {
+      "en": "Payment deleted",
+      "draft": "Mokėjimas ištrinta"
+    },
+    "tax.statusRefreshed": {
+      "en": "Status refreshed",
+      "draft": "Būsena refreshed"
+    },
+    "tax.addContractor": {
+      "en": "Add contractor",
+      "draft": "Pridėti rangovas"
+    },
+    "tax.contractors1099s": {
+      "en": "Contractors & 1099s",
+      "draft": "Rangovai & 1099s"
+    },
+    "tax.salesTax": {
+      "en": "Sales Tax",
+      "draft": "Pardavimai Mokestis"
+    },
+    "tax.taxbanditsNotConnected": {
+      "en": "TaxBandits not connected.",
+      "draft": "TaxBandits ne prisijungta."
+    },
+    "tax.taxbanditsSETUPMd": {
+      "en": "TAXBANDITS_SETUP.md",
+      "draft": "TAXBANDITS_SETUP.md"
+    },
+    "tax.inTheRepoNoIRSFiling": {
+      "en": "in the repo. No IRS filing is ever done in-house.",
+      "draft": " repo. Ne IRS pateikimas yra kada nors atlikta in-house."
+    },
+    "tax.taxbanditsConnectedIn": {
+      "en": "TaxBandits connected in",
+      "draft": "TaxBandits prisijungta "
+    },
+    "tax.sandbox": {
+      "en": "sandbox",
+      "draft": "sandbox"
+    },
+    "tax.modeNoRealFilingsFlip": {
+      "en": "mode — no real filings. Flip",
+      "draft": "mode — ne real filings. Flip"
+    },
+    "tax.taxbanditsSANDBOXFalse": {
+      "en": "TAXBANDITS_SANDBOX=false",
+      "draft": "TAXBANDITS_SANDBOX=klaidinga"
+    },
+    "tax.toGoLive": {
+      "en": "to go live.",
+      "draft": "iki eiti tiesioginis."
+    },
+    "tax.newContractor": {
+      "en": "New contractor",
+      "draft": "Naujas rangovas"
+    },
+    "tax.name": {
+      "en": "Name *",
+      "draft": "Pavadinimas *"
+    },
+    "tax.businessName": {
+      "en": "Business name",
+      "draft": "Verslas pavadinimas"
+    },
+    "tax.email": {
+      "en": "Email",
+      "draft": "El. paštas"
+    },
+    "tax.phone": {
+      "en": "Phone",
+      "draft": "Telefonas"
+    },
+    "tax.entityType": {
+      "en": "Entity type",
+      "draft": "Subjektas tipas"
+    },
+    "tax.ssnEIN": {
+      "en": "SSN / EIN",
+      "draft": "SSN / EIN"
+    },
+    "tax.storedSecurely": {
+      "en": "Stored securely",
+      "draft": "Stored securely"
+    },
+    "tax.street": {
+      "en": "Street",
+      "draft": "Street"
+    },
+    "tax.city": {
+      "en": "City",
+      "draft": "Miestas"
+    },
+    "tax.state": {
+      "en": "State",
+      "draft": "Valstija"
+    },
+    "tax.zip": {
+      "en": "ZIP",
+      "draft": "PAŠTO KODAS"
+    },
+    "tax.cancel": {
+      "en": "Cancel",
+      "draft": "Atšaukti"
+    },
+    "tax.contractor": {
+      "en": "Contractor",
+      "draft": "Rangovas"
+    },
+    "tax.paid": {
+      "en": "Paid",
+      "draft": "Apmokėta"
+    },
+    "tax.w9": {
+      "en": "W-9",
+      "draft": "W-9"
+    },
+    "tax.NEC": {
+      "en": "1099-NEC",
+      "draft": "1099-NEC"
+    },
+    "tax.eFile": {
+      "en": "E-file",
+      "draft": "E-file"
+    },
+    "tax.actions": {
+      "en": "Actions",
+      "draft": "Veiksmai"
+    },
+    "tax.viewPaymentHistory": {
+      "en": "View payment history",
+      "draft": "Peržiūrėti mokėjimas istorija"
+    },
+    "tax.toggleW9Received": {
+      "en": "Toggle W-9 received",
+      "draft": "Toggle W-9 gauta"
+    },
+    "tax.required": {
+      "en": "Required",
+      "draft": "Privaloma"
+    },
+    "tax.viewFilingStatus": {
+      "en": "View filing status",
+      "draft": "Peržiūrėti pateikimas būsena"
+    },
+    "tax.notFiled": {
+      "en": "Not filed",
+      "draft": "Ne filed"
+    },
+    "tax.recordPayment": {
+      "en": "Record payment",
+      "draft": "Įrašyti mokėjimas"
+    },
+    "tax.noContractorsYet": {
+      "en": "No contractors yet.",
+      "draft": "Ne rangovai dar."
+    },
+    "tax.NECDataPreview": {
+      "en": "1099-NEC data preview",
+      "draft": "1099-NEC duomenys peržiūra"
+    },
+    "tax.recipientBox1DataShapedFor": {
+      "en": "Recipient + Box 1 data shaped for e-filing. Tax IDs stay masked — reveal needs PII access. Draft data only, nothing is filed in-house.",
+      "draft": "Gavėjas + Box 1 duomenys shaped skirta e-filing. Mokestis IDs likti masked — reveal needs PII prieiga. Juodraštis duomenys tik, nieko yra filed in-house."
+    },
+    "tax.loadPreview": {
+      "en": "Load preview",
+      "draft": "Įkelti peržiūra"
+    },
+    "tax.recipient": {
+      "en": "Recipient",
+      "draft": "Gavėjas"
+    },
+    "tax.tin": {
+      "en": "TIN",
+      "draft": "TIN"
+    },
+    "tax.address": {
+      "en": "Address",
+      "draft": "Adresas"
+    },
+    "tax.box1": {
+      "en": "Box 1",
+      "draft": "Box 1"
+    },
+    "tax.missing": {
+      "en": "missing",
+      "draft": "trūkstama"
+    },
+    "tax.reveal": {
+      "en": "reveal",
+      "draft": "reveal"
+    },
+    "tax.noContractorsMeetThe": {
+      "en": "No contractors meet the",
+      "draft": "Ne rangovai meet "
+    },
+    "tax.reportingThresholdFor": {
+      "en": "reporting threshold for",
+      "draft": "ataskaitos threshold skirta"
+    },
+    "tax.recordPayment2": {
+      "en": "Record payment —",
+      "draft": "Įrašyti mokėjimas —"
+    },
+    "tax.date": {
+      "en": "Date",
+      "draft": "Data"
+    },
+    "tax.amount": {
+      "en": "Amount $",
+      "draft": "Suma $"
+    },
+    "tax.description": {
+      "en": "Description",
+      "draft": "Aprašymas"
+    },
+    "tax.eGMarchBoothRentPayout": {
+      "en": "e.g. March booth rent payout",
+      "draft": "pvz. March stendas nuoma išmoka"
+    },
+    "tax.record": {
+      "en": "Record",
+      "draft": "Įrašyti"
+    },
+    "tax.paymentHistory": {
+      "en": "Payment history —",
+      "draft": "Mokėjimas istorija —"
+    },
+    "tax.noPaymentsRecordedFor": {
+      "en": "No payments recorded for",
+      "draft": "Ne mokėjimai įrašyta skirta"
+    },
+    "tax.amount2": {
+      "en": "Amount",
+      "draft": "Suma"
+    },
+    "tax.deletePayment": {
+      "en": "Delete payment",
+      "draft": "Ištrinti mokėjimas"
+    },
+    "tax.yearTotal": {
+      "en": "Year total:",
+      "draft": "Metai iš viso:"
+    },
+    "tax.NECFiling": {
+      "en": "1099-NEC filing —",
+      "draft": "1099-NEC pateikimas —"
+    },
+    "tax.thisDraftLivesInTaxBanditsReview": {
+      "en": "This draft lives in TaxBandits — review and Transmit there to file with the IRS. This app never files in-house.",
+      "draft": "Šis juodraštis lives TaxBandits — peržiūra ir Transmit there iki failas su IRS. Šis programėlė niekada failai in-house."
+    },
+    "tax.NECIsRequiredForNon": {
+      "en": "1099-NEC is required for non-corporate contractors paid ≥",
+      "draft": "1099-NEC yra privaloma skirta non-corporate rangovai apmokėta ≥"
+    },
+    "tax.inTheYearEFilingCreates": {
+      "en": "in the year. E-filing creates a draft in TaxBandits — you review and transmit there. This app never files with the IRS directly.",
+      "draft": " metai. E-filing creates juodraštis TaxBandits — jūs peržiūra ir transmit there. Šis programėlė niekada failai su IRS directly."
+    },
+    "taxforecast.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "Mokestis Prognozė"
+    },
+    "taxforecast.OfPriorYearTax": {
+      "en": "100% of prior-year tax",
+      "draft": "100% iš prior-year mokestis"
+    },
+    "taxforecast.irsDirectPay": {
+      "en": "IRS Direct Pay",
+      "draft": "IRS Tiesioginis Mokėti"
+    },
+    "nav.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "Mokestis Prognozė"
+    },
+    "nav.tax1099s": {
+      "en": "Tax & 1099s",
+      "draft": "Mokestis & 1099s"
+    },
+    "teamInvites.accountantTaxPro": {
+      "en": "Accountant / Tax pro",
+      "draft": "Buhalteris / Mokestis pro"
+    }
+  }
+}

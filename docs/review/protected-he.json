@@ -1,0 +1,426 @@
+{
+  "_meta": {
+    "lang": "he",
+    "status": "DRAFT for human review only. Do NOT copy into frontend/src/locales/he/translation.json until a qualified reviewer (counsel/CPA where relevant) approves each string. Live locale keeps English for these keys.",
+    "source": "docs/TRANSLATION_PLAN.md flagged keys (legal/financial/tax/privacy/safety)",
+    "notice": "Approximate translation from English/Spanish, may not be accurate."
+  },
+  "strings": {
+    "salestaxtab.taxJurisdictions": {
+      "en": "Tax jurisdictions",
+      "draft": "מס jurisdictions"
+    },
+    "salestaxtab.everywhereYouCollectSalesTaxState": {
+      "en": "Everywhere you collect sales tax — state, county, city, special district.\n          Tag invoices with a jurisdiction and this page tells you what you owe, where.",
+      "draft": "בכל מקום אתה collect מכירות מס — מדינה, county, עיר, special district.\n  תגית חשבוניות עם סמכות ו זה עמוד tells אתה מה אתה owe, איפה."
+    },
+    "salestaxtab.noJurisdictionsYetAddTheFirst": {
+      "en": "No jurisdictions yet. Add the first place you collect sales tax.",
+      "draft": "לא jurisdictions עדיין. הוספה ראשון place אתה collect מכירות מס."
+    },
+    "salestaxtab.ofSalesTaxIsnTTagged": {
+      "en": "of sales tax isn't tagged to a jurisdiction yet.\n            Tag invoices with a jurisdiction so every dollar lands in the right bucket.",
+      "draft": "של מכירות מס לא tagged ל סמכות עדיין.\n  תגית חשבוניות עם סמכות לכן כל dollar lands ב ימין טווח."
+    },
+    "salestaxtab.taxCollected": {
+      "en": "Tax collected",
+      "draft": "מס נאסף"
+    },
+    "teaminvites.inviteYourAccountantOrTaxPro": {
+      "en": "Invite your accountant or tax pro — they join with the right permissions\n        and can switch between all the workspaces they serve.",
+      "draft": "הזמנה שלך רואה חשבון או מס מקצועי — הם הצטרפות עם ימין הרשאות\n  ו יכול מעבר בין כל סביבות עבודה הם serve."
+    },
+    "auditlog.eGTaxInvoiceLogin": {
+      "en": "e.g. tax, invoice, login",
+      "draft": "למשל מס, חשבונית, התחברות"
+    },
+    "cpapackage.mileageLogWithIRSRatesApplied": {
+      "en": "Mileage log with IRS rates applied",
+      "draft": "קילומטראז׳ יומן עם IRS שיעורים applied"
+    },
+    "customers.delete": {
+      "en": "Delete",
+      "draft": "מחיקה"
+    },
+    "customers.deleteConfirm": {
+      "en": "Delete customer \"{{name}}\"? Their invoices and statements stay on record.",
+      "draft": "מחיקה לקוח \"{{name}}\"? שלהם חשבוניות ו דפי חשבון שהייה פועל רשומה."
+    },
+    "estimates.tax": {
+      "en": "Tax ($)",
+      "draft": "מס ($)"
+    },
+    "expenses.taxID": {
+      "en": "Tax ID",
+      "draft": "מס ID"
+    },
+    "expenses.taxYear": {
+      "en": "Tax year",
+      "draft": "מס שנה"
+    },
+    "expenses.tax": {
+      "en": "Tax",
+      "draft": "מס"
+    },
+    "expenses.taxIDEIN": {
+      "en": "Tax ID / EIN",
+      "draft": "מס ID / EIN"
+    },
+    "invoices.refund": {
+      "en": "Refund",
+      "draft": "החזר"
+    },
+    "invoices.taxJurisdictionOptional": {
+      "en": "Tax jurisdiction (optional)",
+      "draft": "מס סמכות (אופציונלי)"
+    },
+    "invoices.tax": {
+      "en": "Tax ($)",
+      "draft": "מס ($)"
+    },
+    "invoices.refundCredit": {
+      "en": "Refund credit —",
+      "draft": "החזר זיכוי —"
+    },
+    "invoices.refundTheRemaining": {
+      "en": "Refund the remaining",
+      "draft": "החזר נותר"
+    },
+    "mileage.irsLogCSV": {
+      "en": "IRS log CSV",
+      "draft": "IRS יומן CSV"
+    },
+    "payroll.deleteDraft": {
+      "en": "Delete draft",
+      "draft": "מחיקה טיוטה"
+    },
+    "payroll.partnershipStubWhenAProviderIs": {
+      "en": "Partnership stub: when a provider is connected, runs here will hand off tax filing and direct deposit automatically.",
+      "draft": "שותפות ספח: מתי ספק הוא מחובר, הרצות כאן יהיה יד כבוי מס הגשה ו ישיר הפקדה אוטומטית."
+    },
+    "payroll.employerTaxEst": {
+      "en": "Employer payroll tax (est.)",
+      "draft": "Employer שכר מס (הערכה)"
+    },
+    "portalview.tax": {
+      "en": "Tax",
+      "draft": "מס"
+    },
+    "recurringinvoices.tax": {
+      "en": "Tax ($)",
+      "draft": "מס ($)"
+    },
+    "simulator.safetyFloor": {
+      "en": "Safety floor $",
+      "draft": "Safety floor $"
+    },
+    "tax.nameIsRequired": {
+      "en": "Name is required",
+      "draft": "שם הוא חובה"
+    },
+    "tax.contractorAdded": {
+      "en": "Contractor added",
+      "draft": "קבלן נוסף"
+    },
+    "tax.w9StatusUpdated": {
+      "en": "W-9 status updated",
+      "draft": "W-9 סטטוס עודכן"
+    },
+    "tax.contractorRemoved": {
+      "en": "Contractor removed",
+      "draft": "קבלן הוסר"
+    },
+    "tax.enterAPositiveAmount": {
+      "en": "Enter a positive amount",
+      "draft": "הזנה חיובי סכום"
+    },
+    "tax.paymentRecorded": {
+      "en": "Payment recorded",
+      "draft": "תשלום נרשם"
+    },
+    "tax.paymentDeleted": {
+      "en": "Payment deleted",
+      "draft": "תשלום נמחק"
+    },
+    "tax.statusRefreshed": {
+      "en": "Status refreshed",
+      "draft": "סטטוס refreshed"
+    },
+    "tax.addContractor": {
+      "en": "Add contractor",
+      "draft": "הוספה קבלן"
+    },
+    "tax.contractors1099s": {
+      "en": "Contractors & 1099s",
+      "draft": "קבלנים & 1099"
+    },
+    "tax.salesTax": {
+      "en": "Sales Tax",
+      "draft": "מכירות מס"
+    },
+    "tax.taxbanditsNotConnected": {
+      "en": "TaxBandits not connected.",
+      "draft": "TaxBandits לא מחובר."
+    },
+    "tax.taxbanditsSETUPMd": {
+      "en": "TAXBANDITS_SETUP.md",
+      "draft": "TAXBANDITS_SETUP.md"
+    },
+    "tax.inTheRepoNoIRSFiling": {
+      "en": "in the repo. No IRS filing is ever done in-house.",
+      "draft": "ב repo. לא IRS הגשה הוא אי פעם בוצע in-house."
+    },
+    "tax.taxbanditsConnectedIn": {
+      "en": "TaxBandits connected in",
+      "draft": "TaxBandits מחובר ב"
+    },
+    "tax.sandbox": {
+      "en": "sandbox",
+      "draft": "sandbox"
+    },
+    "tax.modeNoRealFilingsFlip": {
+      "en": "mode — no real filings. Flip",
+      "draft": "mode — לא real filings. Flip"
+    },
+    "tax.taxbanditsSANDBOXFalse": {
+      "en": "TAXBANDITS_SANDBOX=false",
+      "draft": "TAXBANDITS_SANDBOX=לא נכון"
+    },
+    "tax.toGoLive": {
+      "en": "to go live.",
+      "draft": "ל מעבר חי."
+    },
+    "tax.newContractor": {
+      "en": "New contractor",
+      "draft": "חדש קבלן"
+    },
+    "tax.name": {
+      "en": "Name *",
+      "draft": "שם *"
+    },
+    "tax.businessName": {
+      "en": "Business name",
+      "draft": "עסק שם"
+    },
+    "tax.email": {
+      "en": "Email",
+      "draft": "דוא״ל"
+    },
+    "tax.phone": {
+      "en": "Phone",
+      "draft": "טלפון"
+    },
+    "tax.entityType": {
+      "en": "Entity type",
+      "draft": "ישות סוג"
+    },
+    "tax.ssnEIN": {
+      "en": "SSN / EIN",
+      "draft": "SSN / EIN"
+    },
+    "tax.storedSecurely": {
+      "en": "Stored securely",
+      "draft": "Stored securely"
+    },
+    "tax.street": {
+      "en": "Street",
+      "draft": "Street"
+    },
+    "tax.city": {
+      "en": "City",
+      "draft": "עיר"
+    },
+    "tax.state": {
+      "en": "State",
+      "draft": "מדינה"
+    },
+    "tax.zip": {
+      "en": "ZIP",
+      "draft": "מיקוד"
+    },
+    "tax.cancel": {
+      "en": "Cancel",
+      "draft": "ביטול"
+    },
+    "tax.contractor": {
+      "en": "Contractor",
+      "draft": "קבלן"
+    },
+    "tax.paid": {
+      "en": "Paid",
+      "draft": "שולם"
+    },
+    "tax.w9": {
+      "en": "W-9",
+      "draft": "W-9"
+    },
+    "tax.NEC": {
+      "en": "1099-NEC",
+      "draft": "1099-NEC"
+    },
+    "tax.eFile": {
+      "en": "E-file",
+      "draft": "E-file"
+    },
+    "tax.actions": {
+      "en": "Actions",
+      "draft": "פעולות"
+    },
+    "tax.viewPaymentHistory": {
+      "en": "View payment history",
+      "draft": "הצגה תשלום היסטוריה"
+    },
+    "tax.toggleW9Received": {
+      "en": "Toggle W-9 received",
+      "draft": "Toggle W-9 התקבל"
+    },
+    "tax.required": {
+      "en": "Required",
+      "draft": "חובה"
+    },
+    "tax.viewFilingStatus": {
+      "en": "View filing status",
+      "draft": "הצגה הגשה סטטוס"
+    },
+    "tax.notFiled": {
+      "en": "Not filed",
+      "draft": "לא filed"
+    },
+    "tax.recordPayment": {
+      "en": "Record payment",
+      "draft": "רשומה תשלום"
+    },
+    "tax.noContractorsYet": {
+      "en": "No contractors yet.",
+      "draft": "לא קבלנים עדיין."
+    },
+    "tax.NECDataPreview": {
+      "en": "1099-NEC data preview",
+      "draft": "1099-NEC נתונים תצוגה מקדימה"
+    },
+    "tax.recipientBox1DataShapedFor": {
+      "en": "Recipient + Box 1 data shaped for e-filing. Tax IDs stay masked — reveal needs PII access. Draft data only, nothing is filed in-house.",
+      "draft": "נמען + Box 1 נתונים shaped עבור e-filing. מס IDs שהייה masked — reveal needs PII גישה. טיוטה נתונים רק, כלום הוא filed in-house."
+    },
+    "tax.loadPreview": {
+      "en": "Load preview",
+      "draft": "טעינה תצוגה מקדימה"
+    },
+    "tax.recipient": {
+      "en": "Recipient",
+      "draft": "נמען"
+    },
+    "tax.tin": {
+      "en": "TIN",
+      "draft": "TIN"
+    },
+    "tax.address": {
+      "en": "Address",
+      "draft": "כתובת"
+    },
+    "tax.box1": {
+      "en": "Box 1",
+      "draft": "Box 1"
+    },
+    "tax.missing": {
+      "en": "missing",
+      "draft": "חסר"
+    },
+    "tax.reveal": {
+      "en": "reveal",
+      "draft": "reveal"
+    },
+    "tax.noContractorsMeetThe": {
+      "en": "No contractors meet the",
+      "draft": "לא קבלנים meet "
+    },
+    "tax.reportingThresholdFor": {
+      "en": "reporting threshold for",
+      "draft": "דיווח threshold עבור"
+    },
+    "tax.recordPayment2": {
+      "en": "Record payment —",
+      "draft": "רשומה תשלום —"
+    },
+    "tax.date": {
+      "en": "Date",
+      "draft": "תאריך"
+    },
+    "tax.amount": {
+      "en": "Amount $",
+      "draft": "סכום $"
+    },
+    "tax.description": {
+      "en": "Description",
+      "draft": "תיאור"
+    },
+    "tax.eGMarchBoothRentPayout": {
+      "en": "e.g. March booth rent payout",
+      "draft": "למשל March דוכן שכירות תשלום"
+    },
+    "tax.record": {
+      "en": "Record",
+      "draft": "רשומה"
+    },
+    "tax.paymentHistory": {
+      "en": "Payment history —",
+      "draft": "תשלום היסטוריה —"
+    },
+    "tax.noPaymentsRecordedFor": {
+      "en": "No payments recorded for",
+      "draft": "לא תשלומים נרשם עבור"
+    },
+    "tax.amount2": {
+      "en": "Amount",
+      "draft": "סכום"
+    },
+    "tax.deletePayment": {
+      "en": "Delete payment",
+      "draft": "מחיקה תשלום"
+    },
+    "tax.yearTotal": {
+      "en": "Year total:",
+      "draft": "שנה סך הכל:"
+    },
+    "tax.NECFiling": {
+      "en": "1099-NEC filing —",
+      "draft": "1099-NEC הגשה —"
+    },
+    "tax.thisDraftLivesInTaxBanditsReview": {
+      "en": "This draft lives in TaxBandits — review and Transmit there to file with the IRS. This app never files in-house.",
+      "draft": "זה טיוטה lives ב TaxBandits — סקירה ו Transmit there ל קובץ עם IRS. זה אפליקציה אף פעם קבצים in-house."
+    },
+    "tax.NECIsRequiredForNon": {
+      "en": "1099-NEC is required for non-corporate contractors paid ≥",
+      "draft": "1099-NEC הוא חובה עבור non-corporate קבלנים שולם ≥"
+    },
+    "tax.inTheYearEFilingCreates": {
+      "en": "in the year. E-filing creates a draft in TaxBandits — you review and transmit there. This app never files with the IRS directly.",
+      "draft": "ב שנה. E-filing creates טיוטה ב TaxBandits — אתה סקירה ו transmit there. זה אפליקציה אף פעם קבצים עם IRS directly."
+    },
+    "taxforecast.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "מס תחזית"
+    },
+    "taxforecast.OfPriorYearTax": {
+      "en": "100% of prior-year tax",
+      "draft": "100% של prior-year מס"
+    },
+    "taxforecast.irsDirectPay": {
+      "en": "IRS Direct Pay",
+      "draft": "IRS ישיר שלם"
+    },
+    "nav.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "מס תחזית"
+    },
+    "nav.tax1099s": {
+      "en": "Tax & 1099s",
+      "draft": "מס & 1099"
+    },
+    "teamInvites.accountantTaxPro": {
+      "en": "Accountant / Tax pro",
+      "draft": "רואה חשבון / מס מקצועי"
+    }
+  }
+}

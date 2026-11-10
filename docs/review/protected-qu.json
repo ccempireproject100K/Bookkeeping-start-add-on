@@ -1,0 +1,426 @@
+{
+  "_meta": {
+    "lang": "qu",
+    "status": "DRAFT for human review only. Do NOT copy into frontend/src/locales/qu/translation.json until a qualified reviewer (counsel/CPA where relevant) approves each string. Live locale keeps English for these keys.",
+    "source": "docs/TRANSLATION_PLAN.md flagged keys (legal/financial/tax/privacy/safety)",
+    "notice": "Approximate translation from English/Spanish, may not be accurate."
+  },
+  "strings": {
+    "salestaxtab.taxJurisdictions": {
+      "en": "Tax jurisdictions",
+      "draft": "Impuesto impuesto suyukuna"
+    },
+    "salestaxtab.everywhereYouCollectSalesTaxState": {
+      "en": "Everywhere you collect sales tax — state, county, city, special district.\n          Tag invoices with a jurisdiction and this page tells you what you owe, where.",
+      "draft": "Maypipas qam collect qhatuy impuesto — suyu, county, llaqta, special district.\n          Etiqueta facturakuna huwan a impuesto suyu huwan kay página willaychikkuna qam ima qam deber, maypi."
+    },
+    "salestaxtab.noJurisdictionsYetAddTheFirst": {
+      "en": "No jurisdictions yet. Add the first place you collect sales tax.",
+      "draft": "Mana impuesto suyukuna raq. Yapaychik chay ñawpaq place qam collect qhatuy impuesto."
+    },
+    "salestaxtab.ofSalesTaxIsnTTagged": {
+      "en": "of sales tax isn't tagged to a jurisdiction yet.\n            Tag invoices with a jurisdiction so every dollar lands in the right bucket.",
+      "draft": "pa qhatuy impuesto mana tagged man a impuesto suyu raq.\n            Etiqueta facturakuna huwan a impuesto suyu chaymi sapa dollar allpakuna pi chay allin huñu."
+    },
+    "salestaxtab.taxCollected": {
+      "en": "Tax collected",
+      "draft": "Impuesto huñusqa"
+    },
+    "teaminvites.inviteYourAccountantOrTaxPro": {
+      "en": "Invite your accountant or tax pro — they join with the right permissions\n        and can switch between all the workspaces they serve.",
+      "draft": "Qayaychik qampa contador icha impuesto pro — paykuna huaririkuychik huwan chay allin permisokuna\n        huwan atipan tikraychik chawpipi tukuy chay llankanakuna paykuna serve."
+    },
+    "auditlog.eGTaxInvoiceLogin": {
+      "en": "e.g. tax, invoice, login",
+      "draft": "e.g. impuesto, factura, yaykuy"
+    },
+    "cpapackage.mileageLogWithIRSRatesApplied": {
+      "en": "Mileage log with IRS rates applied",
+      "draft": "Milla qillqa huwan IRS tasa applied"
+    },
+    "customers.delete": {
+      "en": "Delete",
+      "draft": "Qichuychik"
+    },
+    "customers.deleteConfirm": {
+      "en": "Delete customer \"{{name}}\"? Their invoices and statements stay on record.",
+      "draft": "Qichuychik rantikukuq \"{{name}}\"? Paykunapa facturakuna huwan extractokuna stay hawapi qillqaychik."
+    },
+    "estimates.tax": {
+      "en": "Tax ($)",
+      "draft": "Impuesto ($)"
+    },
+    "expenses.taxID": {
+      "en": "Tax ID",
+      "draft": "Impuesto ID"
+    },
+    "expenses.taxYear": {
+      "en": "Tax year",
+      "draft": "Impuesto wata"
+    },
+    "expenses.tax": {
+      "en": "Tax",
+      "draft": "Impuesto"
+    },
+    "expenses.taxIDEIN": {
+      "en": "Tax ID / EIN",
+      "draft": "Impuesto ID / EIN"
+    },
+    "invoices.refund": {
+      "en": "Refund",
+      "draft": "Kutichiy"
+    },
+    "invoices.taxJurisdictionOptional": {
+      "en": "Tax jurisdiction (optional)",
+      "draft": "Impuesto impuesto suyu (munaymanta)"
+    },
+    "invoices.tax": {
+      "en": "Tax ($)",
+      "draft": "Impuesto ($)"
+    },
+    "invoices.refundCredit": {
+      "en": "Refund credit —",
+      "draft": "Kutichiy kreditu —"
+    },
+    "invoices.refundTheRemaining": {
+      "en": "Refund the remaining",
+      "draft": "Kutichiy chay puchuq"
+    },
+    "mileage.irsLogCSV": {
+      "en": "IRS log CSV",
+      "draft": "IRS qillqa CSV"
+    },
+    "payroll.deleteDraft": {
+      "en": "Delete draft",
+      "draft": "Qichuychik borrador"
+    },
+    "payroll.partnershipStubWhenAProviderIs": {
+      "en": "Partnership stub: when a provider is connected, runs here will hand off tax filing and direct deposit automatically.",
+      "draft": "Alianza talón: haykappi a proveedor kan huaririsqa, purin kaypi qanqa hand off impuesto filing huwan derecho depósito automático."
+    },
+    "payroll.employerTaxEst": {
+      "en": "Employer payroll tax (est.)",
+      "draft": "Patrón sueldo impuesto (est.)"
+    },
+    "portalview.tax": {
+      "en": "Tax",
+      "draft": "Impuesto"
+    },
+    "recurringinvoices.tax": {
+      "en": "Tax ($)",
+      "draft": "Impuesto ($)"
+    },
+    "simulator.safetyFloor": {
+      "en": "Safety floor $",
+      "draft": "Safety floor $"
+    },
+    "tax.nameIsRequired": {
+      "en": "Name is required",
+      "draft": "Suti kan mañakusqa"
+    },
+    "tax.contractorAdded": {
+      "en": "Contractor added",
+      "draft": "Contratista yapasqa"
+    },
+    "tax.w9StatusUpdated": {
+      "en": "W-9 status updated",
+      "draft": "W-9 kaynin musuqyasqa"
+    },
+    "tax.contractorRemoved": {
+      "en": "Contractor removed",
+      "draft": "Contratista qichusqa"
+    },
+    "tax.enterAPositiveAmount": {
+      "en": "Enter a positive amount",
+      "draft": "Yaykuychik a positivo chani"
+    },
+    "tax.paymentRecorded": {
+      "en": "Payment recorded",
+      "draft": "Pago qillqasqa"
+    },
+    "tax.paymentDeleted": {
+      "en": "Payment deleted",
+      "draft": "Pago qichusqa"
+    },
+    "tax.statusRefreshed": {
+      "en": "Status refreshed",
+      "draft": "Kaynin musuqyasqa"
+    },
+    "tax.addContractor": {
+      "en": "Add contractor",
+      "draft": "Yapaychik contratista"
+    },
+    "tax.contractors1099s": {
+      "en": "Contractors & 1099s",
+      "draft": "Contratista & 1099s"
+    },
+    "tax.salesTax": {
+      "en": "Sales Tax",
+      "draft": "Qhatuy Impuesto"
+    },
+    "tax.taxbanditsNotConnected": {
+      "en": "TaxBandits not connected.",
+      "draft": "TaxBandits mana huaririsqa."
+    },
+    "tax.taxbanditsSETUPMd": {
+      "en": "TAXBANDITS_SETUP.md",
+      "draft": "TAXBANDITS_WAKICHIY.md"
+    },
+    "tax.inTheRepoNoIRSFiling": {
+      "en": "in the repo. No IRS filing is ever done in-house.",
+      "draft": "pi chay repo. Mana IRS filing kan haykapas tukusqa in-house."
+    },
+    "tax.taxbanditsConnectedIn": {
+      "en": "TaxBandits connected in",
+      "draft": "TaxBandits huaririsqa pi"
+    },
+    "tax.sandbox": {
+      "en": "sandbox",
+      "draft": "sandbox"
+    },
+    "tax.modeNoRealFilingsFlip": {
+      "en": "mode — no real filings. Flip",
+      "draft": "mode — mana real filings. Flip"
+    },
+    "tax.taxbanditsSANDBOXFalse": {
+      "en": "TAXBANDITS_SANDBOX=false",
+      "draft": "TAXBANDITS_SANDBOX=false"
+    },
+    "tax.toGoLive": {
+      "en": "to go live.",
+      "draft": "man riychik live."
+    },
+    "tax.newContractor": {
+      "en": "New contractor",
+      "draft": "Musuq contratista"
+    },
+    "tax.name": {
+      "en": "Name *",
+      "draft": "Suti *"
+    },
+    "tax.businessName": {
+      "en": "Business name",
+      "draft": "Negocio suti"
+    },
+    "tax.email": {
+      "en": "Email",
+      "draft": "Correo"
+    },
+    "tax.phone": {
+      "en": "Phone",
+      "draft": "Teléfono"
+    },
+    "tax.entityType": {
+      "en": "Entity type",
+      "draft": "Entidad laya"
+    },
+    "tax.ssnEIN": {
+      "en": "SSN / EIN",
+      "draft": "SSN / EIN"
+    },
+    "tax.storedSecurely": {
+      "en": "Stored securely",
+      "draft": "Stored securely"
+    },
+    "tax.street": {
+      "en": "Street",
+      "draft": "Calle"
+    },
+    "tax.city": {
+      "en": "City",
+      "draft": "Llaqta"
+    },
+    "tax.state": {
+      "en": "State",
+      "draft": "Suyu"
+    },
+    "tax.zip": {
+      "en": "ZIP",
+      "draft": "ZIP"
+    },
+    "tax.cancel": {
+      "en": "Cancel",
+      "draft": "Anulachik"
+    },
+    "tax.contractor": {
+      "en": "Contractor",
+      "draft": "Contratista"
+    },
+    "tax.paid": {
+      "en": "Paid",
+      "draft": "Pagasqa"
+    },
+    "tax.w9": {
+      "en": "W-9",
+      "draft": "W-9"
+    },
+    "tax.NEC": {
+      "en": "1099-NEC",
+      "draft": "1099-NEC"
+    },
+    "tax.eFile": {
+      "en": "E-file",
+      "draft": "E-file"
+    },
+    "tax.actions": {
+      "en": "Actions",
+      "draft": "Ruwaykuna"
+    },
+    "tax.viewPaymentHistory": {
+      "en": "View payment history",
+      "draft": "Qhawaychik pago historia"
+    },
+    "tax.toggleW9Received": {
+      "en": "Toggle W-9 received",
+      "draft": "Toggle W-9 chaskisqa"
+    },
+    "tax.required": {
+      "en": "Required",
+      "draft": "Mañakusqa"
+    },
+    "tax.viewFilingStatus": {
+      "en": "View filing status",
+      "draft": "Qhawaychik filing kaynin"
+    },
+    "tax.notFiled": {
+      "en": "Not filed",
+      "draft": "Mana filed"
+    },
+    "tax.recordPayment": {
+      "en": "Record payment",
+      "draft": "Qillqaychik pago"
+    },
+    "tax.noContractorsYet": {
+      "en": "No contractors yet.",
+      "draft": "Mana contratista raq."
+    },
+    "tax.NECDataPreview": {
+      "en": "1099-NEC data preview",
+      "draft": "1099-NEC data ñawpaq qhaway"
+    },
+    "tax.recipientBox1DataShapedFor": {
+      "en": "Recipient + Box 1 data shaped for e-filing. Tax IDs stay masked — reveal needs PII access. Draft data only, nothing is filed in-house.",
+      "draft": "Chaskiq + Caja 1 data shaped paq e-filing. Impuesto IDs stay masked — reveal munan PII yaykuy. Borrador data sapan, mana ima kan filed in-house."
+    },
+    "tax.loadPreview": {
+      "en": "Load preview",
+      "draft": "Chayachiychik ñawpaq qhaway"
+    },
+    "tax.recipient": {
+      "en": "Recipient",
+      "draft": "Chaskiq"
+    },
+    "tax.tin": {
+      "en": "TIN",
+      "draft": "TIN"
+    },
+    "tax.address": {
+      "en": "Address",
+      "draft": "Dirección"
+    },
+    "tax.box1": {
+      "en": "Box 1",
+      "draft": "Caja 1"
+    },
+    "tax.missing": {
+      "en": "missing",
+      "draft": "chinkasqa"
+    },
+    "tax.reveal": {
+      "en": "reveal",
+      "draft": "reveal"
+    },
+    "tax.noContractorsMeetThe": {
+      "en": "No contractors meet the",
+      "draft": "Mana contratista meet chay"
+    },
+    "tax.reportingThresholdFor": {
+      "en": "reporting threshold for",
+      "draft": "informe threshold paq"
+    },
+    "tax.recordPayment2": {
+      "en": "Record payment —",
+      "draft": "Qillqaychik pago —"
+    },
+    "tax.date": {
+      "en": "Date",
+      "draft": "Punchaw"
+    },
+    "tax.amount": {
+      "en": "Amount $",
+      "draft": "Chani $"
+    },
+    "tax.description": {
+      "en": "Description",
+      "draft": "Willay"
+    },
+    "tax.eGMarchBoothRentPayout": {
+      "en": "e.g. March booth rent payout",
+      "draft": "e.g. March booth alquiler pago"
+    },
+    "tax.record": {
+      "en": "Record",
+      "draft": "Qillqaychik"
+    },
+    "tax.paymentHistory": {
+      "en": "Payment history —",
+      "draft": "Pago historia —"
+    },
+    "tax.noPaymentsRecordedFor": {
+      "en": "No payments recorded for",
+      "draft": "Mana pagokuna qillqasqa paq"
+    },
+    "tax.amount2": {
+      "en": "Amount",
+      "draft": "Chani"
+    },
+    "tax.deletePayment": {
+      "en": "Delete payment",
+      "draft": "Qichuychik pago"
+    },
+    "tax.yearTotal": {
+      "en": "Year total:",
+      "draft": "Wata tukuy:"
+    },
+    "tax.NECFiling": {
+      "en": "1099-NEC filing —",
+      "draft": "1099-NEC filing —"
+    },
+    "tax.thisDraftLivesInTaxBanditsReview": {
+      "en": "This draft lives in TaxBandits — review and Transmit there to file with the IRS. This app never files in-house.",
+      "draft": "Kay borrador lives pi TaxBandits — qhawaychik huwan Transmit chaypi man willañiqi huwan chay IRS. Kay app mana willañiqi in-house."
+    },
+    "tax.NECIsRequiredForNon": {
+      "en": "1099-NEC is required for non-corporate contractors paid ≥",
+      "draft": "1099-NEC kan mañakusqa paq non-corporate contratista pagasqa ≥"
+    },
+    "tax.inTheYearEFilingCreates": {
+      "en": "in the year. E-filing creates a draft in TaxBandits — you review and transmit there. This app never files with the IRS directly.",
+      "draft": "pi chay wata. E-filing ruwaychikkuna a borrador pi TaxBandits — qam qhawaychik huwan transmit chaypi. Kay app mana willañiqi huwan chay IRS directly."
+    },
+    "taxforecast.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "Impuesto Watuy"
+    },
+    "taxforecast.OfPriorYearTax": {
+      "en": "100% of prior-year tax",
+      "draft": "100% pa prior-year impuesto"
+    },
+    "taxforecast.irsDirectPay": {
+      "en": "IRS Direct Pay",
+      "draft": "IRS Derecho Pagaychik"
+    },
+    "nav.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "Impuesto Watuy"
+    },
+    "nav.tax1099s": {
+      "en": "Tax & 1099s",
+      "draft": "Impuesto & 1099s"
+    },
+    "teamInvites.accountantTaxPro": {
+      "en": "Accountant / Tax pro",
+      "draft": "Contador / Impuesto pro"
+    }
+  }
+}

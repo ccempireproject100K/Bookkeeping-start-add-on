@@ -1,0 +1,426 @@
+{
+  "_meta": {
+    "lang": "nl",
+    "status": "DRAFT for human review only. Do NOT copy into frontend/src/locales/nl/translation.json until a qualified reviewer (counsel/CPA where relevant) approves each string. Live locale keeps English for these keys.",
+    "source": "docs/TRANSLATION_PLAN.md flagged keys (legal/financial/tax/privacy/safety)",
+    "notice": "Approximate translation from English/Spanish, may not be accurate."
+  },
+  "strings": {
+    "salestaxtab.taxJurisdictions": {
+      "en": "Tax jurisdictions",
+      "draft": "Belasting district"
+    },
+    "salestaxtab.everywhereYouCollectSalesTaxState": {
+      "en": "Everywhere you collect sales tax — state, county, city, special district.\n          Tag invoices with a jurisdiction and this page tells you what you owe, where.",
+      "draft": "Overal u innen verkoop belasting — staat, provincie, plaats, bijzonder district.\n          Labelen facturen met a district en this pagina vertelt u wat u verschuldigd, waar."
+    },
+    "salestaxtab.noJurisdictionsYetAddTheFirst": {
+      "en": "No jurisdictions yet. Add the first place you collect sales tax.",
+      "draft": "Geen district nog. Toevoegen the eerst place u innen verkoop belasting."
+    },
+    "salestaxtab.ofSalesTaxIsnTTagged": {
+      "en": "of sales tax isn't tagged to a jurisdiction yet.\n            Tag invoices with a jurisdiction so every dollar lands in the right bucket.",
+      "draft": "van verkoop belasting is niet tagged aan a district nog.\n            Labelen facturen met a district tot nu toe elke dollar komen in the nu pot."
+    },
+    "salestaxtab.taxCollected": {
+      "en": "Tax collected",
+      "draft": "Belasting geïnd"
+    },
+    "teaminvites.inviteYourAccountantOrTaxPro": {
+      "en": "Invite your accountant or tax pro — they join with the right permissions\n        and can switch between all the workspaces they serve.",
+      "draft": "Uitnodigen uw rekeningant of belasting professional — zij deelnemen met the nu toestemming\n        en can switch tussen alle the workspaces zij bedienen."
+    },
+    "auditlog.eGTaxInvoiceLogin": {
+      "en": "e.g. tax, invoice, login",
+      "draft": "e.g. belasting, factuur, login"
+    },
+    "cpapackage.mileageLogWithIRSRatesApplied": {
+      "en": "Mileage log with IRS rates applied",
+      "draft": "Kilometerregistratie logboek met IRS tarief toegepast"
+    },
+    "customers.delete": {
+      "en": "Delete",
+      "draft": "Verwijderen"
+    },
+    "customers.deleteConfirm": {
+      "en": "Delete customer \"{{name}}\"? Their invoices and statements stay on record.",
+      "draft": "Verwijderen klant \"{{name}}\"? Hun facturen en overzicht blijven op record."
+    },
+    "estimates.tax": {
+      "en": "Tax ($)",
+      "draft": "Belasting ($)"
+    },
+    "expenses.taxID": {
+      "en": "Tax ID",
+      "draft": "Belasting ID"
+    },
+    "expenses.taxYear": {
+      "en": "Tax year",
+      "draft": "Belasting jaar"
+    },
+    "expenses.tax": {
+      "en": "Tax",
+      "draft": "Belasting"
+    },
+    "expenses.taxIDEIN": {
+      "en": "Tax ID / EIN",
+      "draft": "Belasting ID / EIN"
+    },
+    "invoices.refund": {
+      "en": "Refund",
+      "draft": "Terugbetalen"
+    },
+    "invoices.taxJurisdictionOptional": {
+      "en": "Tax jurisdiction (optional)",
+      "draft": "Belasting district (optioneel)"
+    },
+    "invoices.tax": {
+      "en": "Tax ($)",
+      "draft": "Belasting ($)"
+    },
+    "invoices.refundCredit": {
+      "en": "Refund credit —",
+      "draft": "Terugbetalen credit —"
+    },
+    "invoices.refundTheRemaining": {
+      "en": "Refund the remaining",
+      "draft": "Terugbetalen the resterend"
+    },
+    "mileage.irsLogCSV": {
+      "en": "IRS log CSV",
+      "draft": "IRS logboek CSV"
+    },
+    "payroll.deleteDraft": {
+      "en": "Delete draft",
+      "draft": "Verwijderen concept"
+    },
+    "payroll.partnershipStubWhenAProviderIs": {
+      "en": "Partnership stub: when a provider is connected, runs here will hand off tax filing and direct deposit automatically.",
+      "draft": "Partnership strook: wanneer a aanbieder is gekoppeld, runs hier will hEn uit belasting aangifte en direct storting automatisch."
+    },
+    "payroll.employerTaxEst": {
+      "en": "Employer payroll tax (est.)",
+      "draft": "Werkgever salarisadministratie belasting (est.)"
+    },
+    "portalview.tax": {
+      "en": "Tax",
+      "draft": "Belasting"
+    },
+    "recurringinvoices.tax": {
+      "en": "Tax ($)",
+      "draft": "Belasting ($)"
+    },
+    "simulator.safetyFloor": {
+      "en": "Safety floor $",
+      "draft": "Safety floor $"
+    },
+    "tax.nameIsRequired": {
+      "en": "Name is required",
+      "draft": "Naam is vereist"
+    },
+    "tax.contractorAdded": {
+      "en": "Contractor added",
+      "draft": "Aannemer toegevoegd"
+    },
+    "tax.w9StatusUpdated": {
+      "en": "W-9 status updated",
+      "draft": "W-9 status bijgewerkt"
+    },
+    "tax.contractorRemoved": {
+      "en": "Contractor removed",
+      "draft": "Aannemer verwijderd"
+    },
+    "tax.enterAPositiveAmount": {
+      "en": "Enter a positive amount",
+      "draft": "Invoeren a positief bedrag"
+    },
+    "tax.paymentRecorded": {
+      "en": "Payment recorded",
+      "draft": "Betaling vastgelegd"
+    },
+    "tax.paymentDeleted": {
+      "en": "Payment deleted",
+      "draft": "Betaling verwijderd"
+    },
+    "tax.statusRefreshed": {
+      "en": "Status refreshed",
+      "draft": "Status refreshed"
+    },
+    "tax.addContractor": {
+      "en": "Add contractor",
+      "draft": "Toevoegen aannemer"
+    },
+    "tax.contractors1099s": {
+      "en": "Contractors & 1099s",
+      "draft": "Aannemers & 1099s"
+    },
+    "tax.salesTax": {
+      "en": "Sales Tax",
+      "draft": "Verkoop belasting"
+    },
+    "tax.taxbanditsNotConnected": {
+      "en": "TaxBandits not connected.",
+      "draft": "TaxBandits niet gekoppeld."
+    },
+    "tax.taxbanditsSETUPMd": {
+      "en": "TAXBANDITS_SETUP.md",
+      "draft": "TAXBANDITS_SETUP.md"
+    },
+    "tax.inTheRepoNoIRSFiling": {
+      "en": "in the repo. No IRS filing is ever done in-house.",
+      "draft": "in the repository. Geen IRS aangifte is ever klaar in-house."
+    },
+    "tax.taxbanditsConnectedIn": {
+      "en": "TaxBandits connected in",
+      "draft": "TaxBandits gekoppeld in"
+    },
+    "tax.sandbox": {
+      "en": "sandbox",
+      "draft": "sandbox"
+    },
+    "tax.modeNoRealFilingsFlip": {
+      "en": "mode — no real filings. Flip",
+      "draft": "modus — Geen echt aangiften. Omschakelen"
+    },
+    "tax.taxbanditsSANDBOXFalse": {
+      "en": "TAXBANDITS_SANDBOX=false",
+      "draft": "TAXBANDITS_SANDBOX=onwaar"
+    },
+    "tax.toGoLive": {
+      "en": "to go live.",
+      "draft": "aan gaan live."
+    },
+    "tax.newContractor": {
+      "en": "New contractor",
+      "draft": "Nieuw aannemer"
+    },
+    "tax.name": {
+      "en": "Name *",
+      "draft": "Naam *"
+    },
+    "tax.businessName": {
+      "en": "Business name",
+      "draft": "Bedrijf naam"
+    },
+    "tax.email": {
+      "en": "Email",
+      "draft": "E-mail"
+    },
+    "tax.phone": {
+      "en": "Phone",
+      "draft": "Telefoon"
+    },
+    "tax.entityType": {
+      "en": "Entity type",
+      "draft": "Entiteit type"
+    },
+    "tax.ssnEIN": {
+      "en": "SSN / EIN",
+      "draft": "SSN / EIN"
+    },
+    "tax.storedSecurely": {
+      "en": "Stored securely",
+      "draft": "Opgeslagen veilig"
+    },
+    "tax.street": {
+      "en": "Street",
+      "draft": "Straat"
+    },
+    "tax.city": {
+      "en": "City",
+      "draft": "Plaats"
+    },
+    "tax.state": {
+      "en": "State",
+      "draft": "Staat"
+    },
+    "tax.zip": {
+      "en": "ZIP",
+      "draft": "ZIP"
+    },
+    "tax.cancel": {
+      "en": "Cancel",
+      "draft": "Annuleren"
+    },
+    "tax.contractor": {
+      "en": "Contractor",
+      "draft": "Aannemer"
+    },
+    "tax.paid": {
+      "en": "Paid",
+      "draft": "Betaald"
+    },
+    "tax.w9": {
+      "en": "W-9",
+      "draft": "W-9"
+    },
+    "tax.NEC": {
+      "en": "1099-NEC",
+      "draft": "1099-NEC"
+    },
+    "tax.eFile": {
+      "en": "E-file",
+      "draft": "E-file"
+    },
+    "tax.actions": {
+      "en": "Actions",
+      "draft": "Acties"
+    },
+    "tax.viewPaymentHistory": {
+      "en": "View payment history",
+      "draft": "Betalingsgeschiedenis bekijken"
+    },
+    "tax.toggleW9Received": {
+      "en": "Toggle W-9 received",
+      "draft": "Toggle W-9 ontvangen"
+    },
+    "tax.required": {
+      "en": "Required",
+      "draft": "Vereist"
+    },
+    "tax.viewFilingStatus": {
+      "en": "View filing status",
+      "draft": "View aangifte status"
+    },
+    "tax.notFiled": {
+      "en": "Not filed",
+      "draft": "Niet ingediend"
+    },
+    "tax.recordPayment": {
+      "en": "Record payment",
+      "draft": "Record betaling"
+    },
+    "tax.noContractorsYet": {
+      "en": "No contractors yet.",
+      "draft": "Geen aannemers nog."
+    },
+    "tax.NECDataPreview": {
+      "en": "1099-NEC data preview",
+      "draft": "1099-NEC gegevens voorbeeld"
+    },
+    "tax.recipientBox1DataShapedFor": {
+      "en": "Recipient + Box 1 data shaped for e-filing. Tax IDs stay masked — reveal needs PII access. Draft data only, nothing is filed in-house.",
+      "draft": "Ontvanger + Vak 1 gegevens opgemaakt voor e-filing. belasting IDs blijven gemaskeerd — tonen heeft nodig PII toegang. Concept gegevens alleen, niets is filed in-house."
+    },
+    "tax.loadPreview": {
+      "en": "Load preview",
+      "draft": "Load voorbeeld"
+    },
+    "tax.recipient": {
+      "en": "Recipient",
+      "draft": "Ontvanger"
+    },
+    "tax.tin": {
+      "en": "TIN",
+      "draft": "TIN"
+    },
+    "tax.address": {
+      "en": "Address",
+      "draft": "Adres"
+    },
+    "tax.box1": {
+      "en": "Box 1",
+      "draft": "Vak 1"
+    },
+    "tax.missing": {
+      "en": "missing",
+      "draft": "ontbrekend"
+    },
+    "tax.reveal": {
+      "en": "reveal",
+      "draft": "tonen"
+    },
+    "tax.noContractorsMeetThe": {
+      "en": "No contractors meet the",
+      "draft": "Geen aannemers meet the"
+    },
+    "tax.reportingThresholdFor": {
+      "en": "reporting threshold for",
+      "draft": "rapporterings- drempel voor"
+    },
+    "tax.recordPayment2": {
+      "en": "Record payment —",
+      "draft": "Record betaling —"
+    },
+    "tax.date": {
+      "en": "Date",
+      "draft": "Datum"
+    },
+    "tax.amount": {
+      "en": "Amount $",
+      "draft": "Bedrag $"
+    },
+    "tax.description": {
+      "en": "Description",
+      "draft": "Omschrijving"
+    },
+    "tax.eGMarchBoothRentPayout": {
+      "en": "e.g. March booth rent payout",
+      "draft": "e.g. March stand huur uitbetaling"
+    },
+    "tax.record": {
+      "en": "Record",
+      "draft": "Vastleggen"
+    },
+    "tax.paymentHistory": {
+      "en": "Payment history —",
+      "draft": "Betaling geschiedenis —"
+    },
+    "tax.noPaymentsRecordedFor": {
+      "en": "No payments recorded for",
+      "draft": "Geen betalingen vastgelegd voor"
+    },
+    "tax.amount2": {
+      "en": "Amount",
+      "draft": "Bedrag"
+    },
+    "tax.deletePayment": {
+      "en": "Delete payment",
+      "draft": "Verwijderen betaling"
+    },
+    "tax.yearTotal": {
+      "en": "Year total:",
+      "draft": "Jaar totaal:"
+    },
+    "tax.NECFiling": {
+      "en": "1099-NEC filing —",
+      "draft": "1099-NEC aangifte —"
+    },
+    "tax.thisDraftLivesInTaxBanditsReview": {
+      "en": "This draft lives in TaxBandits — review and Transmit there to file with the IRS. This app never files in-house.",
+      "draft": "This concept live in belastingBandits — review en Transmit there aan bestand met the IRS. This app nooit bestand in-house."
+    },
+    "tax.NECIsRequiredForNon": {
+      "en": "1099-NEC is required for non-corporate contractors paid ≥",
+      "draft": "1099-NEC is vereist voor non-corporate aannemers betaald ≥"
+    },
+    "tax.inTheYearEFilingCreates": {
+      "en": "in the year. E-filing creates a draft in TaxBandits — you review and transmit there. This app never files with the IRS directly.",
+      "draft": "in the jaar. E-filing aanmaken a concept in belastingBandits — u review en transmit there. This app nooit bestand met the IRS direct."
+    },
+    "taxforecast.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "Belasting prognose"
+    },
+    "taxforecast.OfPriorYearTax": {
+      "en": "100% of prior-year tax",
+      "draft": "100% van prior-year belasting"
+    },
+    "taxforecast.irsDirectPay": {
+      "en": "IRS Direct Pay",
+      "draft": "IRS Direct Betalen"
+    },
+    "nav.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "Belasting prognose"
+    },
+    "nav.tax1099s": {
+      "en": "Tax & 1099s",
+      "draft": "Belasting & 1099s"
+    },
+    "teamInvites.accountantTaxPro": {
+      "en": "Accountant / Tax pro",
+      "draft": "Accountant / belasting professional"
+    }
+  }
+}

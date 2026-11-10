@@ -1,0 +1,426 @@
+{
+  "_meta": {
+    "lang": "hu",
+    "status": "DRAFT for human review only. Do NOT copy into frontend/src/locales/hu/translation.json until a qualified reviewer (counsel/CPA where relevant) approves each string. Live locale keeps English for these keys.",
+    "source": "docs/TRANSLATION_PLAN.md flagged keys (legal/financial/tax/privacy/safety)",
+    "notice": "Approximate translation from English/Spanish, may not be accurate."
+  },
+  "strings": {
+    "salestaxtab.taxJurisdictions": {
+      "en": "Tax jurisdictions",
+      "draft": "Adó jurisdictions"
+    },
+    "salestaxtab.everywhereYouCollectSalesTaxState": {
+      "en": "Everywhere you collect sales tax — state, county, city, special district.\n          Tag invoices with a jurisdiction and this page tells you what you owe, where.",
+      "draft": "Mindenhol Ön beszedés eladások adó — állam, county, város, special district.\n  Címke számlák joghatóság és ez oldal tells Ön mi Ön owe, ahol."
+    },
+    "salestaxtab.noJurisdictionsYetAddTheFirst": {
+      "en": "No jurisdictions yet. Add the first place you collect sales tax.",
+      "draft": "Nem jurisdictions még. Hozzáadás első place Ön beszedés eladások adó."
+    },
+    "salestaxtab.ofSalesTaxIsnTTagged": {
+      "en": "of sales tax isn't tagged to a jurisdiction yet.\n            Tag invoices with a jurisdiction so every dollar lands in the right bucket.",
+      "draft": " eladások adó nem tagged joghatóság még.\n  Címke számlák joghatóság tehát minden dollar lands jobbra kategória."
+    },
+    "salestaxtab.taxCollected": {
+      "en": "Tax collected",
+      "draft": "Adó beszedve"
+    },
+    "teaminvites.inviteYourAccountantOrTaxPro": {
+      "en": "Invite your accountant or tax pro — they join with the right permissions\n        and can switch between all the workspaces they serve.",
+      "draft": "Meghívó könyvelő vagy adó pro — ők csatlakozás jobbra engedélyek\n  és lehet váltás között összes munkaterületek ők serve."
+    },
+    "auditlog.eGTaxInvoiceLogin": {
+      "en": "e.g. tax, invoice, login",
+      "draft": "pl. adó, számla, bejelentkezés"
+    },
+    "cpapackage.mileageLogWithIRSRatesApplied": {
+      "en": "Mileage log with IRS rates applied",
+      "draft": "Futásteljesítmény napló IRS kulcsok alkalmazva"
+    },
+    "customers.delete": {
+      "en": "Delete",
+      "draft": "Törlés"
+    },
+    "customers.deleteConfirm": {
+      "en": "Delete customer \"{{name}}\"? Their invoices and statements stay on record.",
+      "draft": "Törlés ügyfél \"{{name}}\"? számlák és statements maradjon rögzítés."
+    },
+    "estimates.tax": {
+      "en": "Tax ($)",
+      "draft": "Adó ($)"
+    },
+    "expenses.taxID": {
+      "en": "Tax ID",
+      "draft": "Adó ID"
+    },
+    "expenses.taxYear": {
+      "en": "Tax year",
+      "draft": "Adó év"
+    },
+    "expenses.tax": {
+      "en": "Tax",
+      "draft": "Adó"
+    },
+    "expenses.taxIDEIN": {
+      "en": "Tax ID / EIN",
+      "draft": "Adó ID / EIN"
+    },
+    "invoices.refund": {
+      "en": "Refund",
+      "draft": "Visszatérítés"
+    },
+    "invoices.taxJurisdictionOptional": {
+      "en": "Tax jurisdiction (optional)",
+      "draft": "Adó joghatóság (opcionális)"
+    },
+    "invoices.tax": {
+      "en": "Tax ($)",
+      "draft": "Adó ($)"
+    },
+    "invoices.refundCredit": {
+      "en": "Refund credit —",
+      "draft": "Visszatérítés jóváírás —"
+    },
+    "invoices.refundTheRemaining": {
+      "en": "Refund the remaining",
+      "draft": "Visszatérítés fennmaradó"
+    },
+    "mileage.irsLogCSV": {
+      "en": "IRS log CSV",
+      "draft": "IRS napló CSV"
+    },
+    "payroll.deleteDraft": {
+      "en": "Delete draft",
+      "draft": "Törlés piszkozat"
+    },
+    "payroll.partnershipStubWhenAProviderIs": {
+      "en": "Partnership stub: when a provider is connected, runs here will hand off tax filing and direct deposit automatically.",
+      "draft": "Partnerség szelvény: amikor szolgáltató van csatlakoztatva, futtatások itt kéz ki adó bevallás és közvetlen letét automatikusan."
+    },
+    "payroll.employerTaxEst": {
+      "en": "Employer payroll tax (est.)",
+      "draft": "Employer bérszámfejtés adó (kb..)"
+    },
+    "portalview.tax": {
+      "en": "Tax",
+      "draft": "Adó"
+    },
+    "recurringinvoices.tax": {
+      "en": "Tax ($)",
+      "draft": "Adó ($)"
+    },
+    "simulator.safetyFloor": {
+      "en": "Safety floor $",
+      "draft": "Safety minimum $"
+    },
+    "tax.nameIsRequired": {
+      "en": "Name is required",
+      "draft": "Név van kötelező"
+    },
+    "tax.contractorAdded": {
+      "en": "Contractor added",
+      "draft": "Vállalkozó hozzáadva"
+    },
+    "tax.w9StatusUpdated": {
+      "en": "W-9 status updated",
+      "draft": "W-9 állapot frissítve"
+    },
+    "tax.contractorRemoved": {
+      "en": "Contractor removed",
+      "draft": "Vállalkozó eltávolítva"
+    },
+    "tax.enterAPositiveAmount": {
+      "en": "Enter a positive amount",
+      "draft": "Megadás pozitív összeg"
+    },
+    "tax.paymentRecorded": {
+      "en": "Payment recorded",
+      "draft": "Kifizetés rögzítve"
+    },
+    "tax.paymentDeleted": {
+      "en": "Payment deleted",
+      "draft": "Kifizetés törölve"
+    },
+    "tax.statusRefreshed": {
+      "en": "Status refreshed",
+      "draft": "Állapot refreshed"
+    },
+    "tax.addContractor": {
+      "en": "Add contractor",
+      "draft": "Hozzáadás vállalkozó"
+    },
+    "tax.contractors1099s": {
+      "en": "Contractors & 1099s",
+      "draft": "Vállalkozók & 1099s"
+    },
+    "tax.salesTax": {
+      "en": "Sales Tax",
+      "draft": "Eladások Adó"
+    },
+    "tax.taxbanditsNotConnected": {
+      "en": "TaxBandits not connected.",
+      "draft": "TaxBandits nem csatlakoztatva."
+    },
+    "tax.taxbanditsSETUPMd": {
+      "en": "TAXBANDITS_SETUP.md",
+      "draft": "TAXBANDITS_SETUP.md"
+    },
+    "tax.inTheRepoNoIRSFiling": {
+      "en": "in the repo. No IRS filing is ever done in-house.",
+      "draft": " repo. Nem IRS bevallás van valaha kész in-house."
+    },
+    "tax.taxbanditsConnectedIn": {
+      "en": "TaxBandits connected in",
+      "draft": "TaxBandits csatlakoztatva "
+    },
+    "tax.sandbox": {
+      "en": "sandbox",
+      "draft": "sandbox"
+    },
+    "tax.modeNoRealFilingsFlip": {
+      "en": "mode — no real filings. Flip",
+      "draft": "mód — nem real filings. Flip"
+    },
+    "tax.taxbanditsSANDBOXFalse": {
+      "en": "TAXBANDITS_SANDBOX=false",
+      "draft": "TAXBANDITS_SANDBOX=false"
+    },
+    "tax.toGoLive": {
+      "en": "to go live.",
+      "draft": " indulás élő."
+    },
+    "tax.newContractor": {
+      "en": "New contractor",
+      "draft": "Új vállalkozó"
+    },
+    "tax.name": {
+      "en": "Name *",
+      "draft": "Név *"
+    },
+    "tax.businessName": {
+      "en": "Business name",
+      "draft": "Vállalkozás név"
+    },
+    "tax.email": {
+      "en": "Email",
+      "draft": "E-mail"
+    },
+    "tax.phone": {
+      "en": "Phone",
+      "draft": "Telefon"
+    },
+    "tax.entityType": {
+      "en": "Entity type",
+      "draft": "Gazdasági egység típus"
+    },
+    "tax.ssnEIN": {
+      "en": "SSN / EIN",
+      "draft": "SSN / EIN"
+    },
+    "tax.storedSecurely": {
+      "en": "Stored securely",
+      "draft": "Stored securely"
+    },
+    "tax.street": {
+      "en": "Street",
+      "draft": "Street"
+    },
+    "tax.city": {
+      "en": "City",
+      "draft": "Város"
+    },
+    "tax.state": {
+      "en": "State",
+      "draft": "Állam"
+    },
+    "tax.zip": {
+      "en": "ZIP",
+      "draft": "IRÁNYÍTÓSZÁM"
+    },
+    "tax.cancel": {
+      "en": "Cancel",
+      "draft": "Mégse"
+    },
+    "tax.contractor": {
+      "en": "Contractor",
+      "draft": "Vállalkozó"
+    },
+    "tax.paid": {
+      "en": "Paid",
+      "draft": "Kifizetve"
+    },
+    "tax.w9": {
+      "en": "W-9",
+      "draft": "W-9"
+    },
+    "tax.NEC": {
+      "en": "1099-NEC",
+      "draft": "1099-NEC"
+    },
+    "tax.eFile": {
+      "en": "E-file",
+      "draft": "E-file"
+    },
+    "tax.actions": {
+      "en": "Actions",
+      "draft": "Műveletek"
+    },
+    "tax.viewPaymentHistory": {
+      "en": "View payment history",
+      "draft": "Megtekintés kifizetés előzmények"
+    },
+    "tax.toggleW9Received": {
+      "en": "Toggle W-9 received",
+      "draft": "Kapcsoló W-9 beérkezett"
+    },
+    "tax.required": {
+      "en": "Required",
+      "draft": "Kötelező"
+    },
+    "tax.viewFilingStatus": {
+      "en": "View filing status",
+      "draft": "Megtekintés bevallás állapot"
+    },
+    "tax.notFiled": {
+      "en": "Not filed",
+      "draft": "Nem beadva"
+    },
+    "tax.recordPayment": {
+      "en": "Record payment",
+      "draft": "Rögzítés kifizetés"
+    },
+    "tax.noContractorsYet": {
+      "en": "No contractors yet.",
+      "draft": "Nem vállalkozók még."
+    },
+    "tax.NECDataPreview": {
+      "en": "1099-NEC data preview",
+      "draft": "1099-NEC adatok előnézet"
+    },
+    "tax.recipientBox1DataShapedFor": {
+      "en": "Recipient + Box 1 data shaped for e-filing. Tax IDs stay masked — reveal needs PII access. Draft data only, nothing is filed in-house.",
+      "draft": "Címzett + Box 1 adatok shaped e-filing. Adó IDs maradjon masked — reveal needs PII hozzáférés. Piszkozat adatok csak, semmi van beadva in-house."
+    },
+    "tax.loadPreview": {
+      "en": "Load preview",
+      "draft": "Betöltés előnézet"
+    },
+    "tax.recipient": {
+      "en": "Recipient",
+      "draft": "Címzett"
+    },
+    "tax.tin": {
+      "en": "TIN",
+      "draft": "TIN"
+    },
+    "tax.address": {
+      "en": "Address",
+      "draft": "Cím"
+    },
+    "tax.box1": {
+      "en": "Box 1",
+      "draft": "Box 1"
+    },
+    "tax.missing": {
+      "en": "missing",
+      "draft": "hiányzó"
+    },
+    "tax.reveal": {
+      "en": "reveal",
+      "draft": "reveal"
+    },
+    "tax.noContractorsMeetThe": {
+      "en": "No contractors meet the",
+      "draft": "Nem vállalkozók meet "
+    },
+    "tax.reportingThresholdFor": {
+      "en": "reporting threshold for",
+      "draft": "jelentéskészítés küszöb "
+    },
+    "tax.recordPayment2": {
+      "en": "Record payment —",
+      "draft": "Rögzítés kifizetés —"
+    },
+    "tax.date": {
+      "en": "Date",
+      "draft": "Dátum"
+    },
+    "tax.amount": {
+      "en": "Amount $",
+      "draft": "Összeg $"
+    },
+    "tax.description": {
+      "en": "Description",
+      "draft": "Leírás"
+    },
+    "tax.eGMarchBoothRentPayout": {
+      "en": "e.g. March booth rent payout",
+      "draft": "pl. Március stand bérleti díj kifizetés"
+    },
+    "tax.record": {
+      "en": "Record",
+      "draft": "Rögzítés"
+    },
+    "tax.paymentHistory": {
+      "en": "Payment history —",
+      "draft": "Kifizetés előzmények —"
+    },
+    "tax.noPaymentsRecordedFor": {
+      "en": "No payments recorded for",
+      "draft": "Nem kifizetések rögzítve "
+    },
+    "tax.amount2": {
+      "en": "Amount",
+      "draft": "Összeg"
+    },
+    "tax.deletePayment": {
+      "en": "Delete payment",
+      "draft": "Törlés kifizetés"
+    },
+    "tax.yearTotal": {
+      "en": "Year total:",
+      "draft": "Év végösszeg:"
+    },
+    "tax.NECFiling": {
+      "en": "1099-NEC filing —",
+      "draft": "1099-NEC bevallás —"
+    },
+    "tax.thisDraftLivesInTaxBanditsReview": {
+      "en": "This draft lives in TaxBandits — review and Transmit there to file with the IRS. This app never files in-house.",
+      "draft": "Ez piszkozat lives TaxBandits — áttekintés és Transmit there fájl IRS. Ez alkalmazás soha fájlok in-house."
+    },
+    "tax.NECIsRequiredForNon": {
+      "en": "1099-NEC is required for non-corporate contractors paid ≥",
+      "draft": "1099-NEC van kötelező non-corporate vállalkozók kifizetett ≥"
+    },
+    "tax.inTheYearEFilingCreates": {
+      "en": "in the year. E-filing creates a draft in TaxBandits — you review and transmit there. This app never files with the IRS directly.",
+      "draft": " év. E-filing creates piszkozat TaxBandits — Ön áttekintés és transmit there. Ez alkalmazás soha fájlok IRS directly."
+    },
+    "taxforecast.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "Adó Előrejelzés"
+    },
+    "taxforecast.OfPriorYearTax": {
+      "en": "100% of prior-year tax",
+      "draft": "100% korábbi-év adó"
+    },
+    "taxforecast.irsDirectPay": {
+      "en": "IRS Direct Pay",
+      "draft": "IRS Közvetlen Fizessen"
+    },
+    "nav.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "Adó Előrejelzés"
+    },
+    "nav.tax1099s": {
+      "en": "Tax & 1099s",
+      "draft": "Adó & 1099s"
+    },
+    "teamInvites.accountantTaxPro": {
+      "en": "Accountant / Tax pro",
+      "draft": "Könyvelő / Adó pro"
+    }
+  }
+}

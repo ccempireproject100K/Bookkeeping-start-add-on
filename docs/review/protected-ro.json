@@ -1,0 +1,426 @@
+{
+  "_meta": {
+    "lang": "ro",
+    "status": "DRAFT for human review only. Do NOT copy into frontend/src/locales/ro/translation.json until a qualified reviewer (counsel/CPA where relevant) approves each string. Live locale keeps English for these keys.",
+    "source": "docs/TRANSLATION_PLAN.md flagged keys (legal/financial/tax/privacy/safety)",
+    "notice": "Approximate translation from English/Spanish, may not be accurate."
+  },
+  "strings": {
+    "salestaxtab.taxJurisdictions": {
+      "en": "Tax jurisdictions",
+      "draft": "Taxă jurisdictions"
+    },
+    "salestaxtab.everywhereYouCollectSalesTaxState": {
+      "en": "Everywhere you collect sales tax — state, county, city, special district.\n          Tag invoices with a jurisdiction and this page tells you what you owe, where.",
+      "draft": "Peste tot dvs. colectați vânzări taxă — stat, county, oraș, special district.\n  Etichetă facturi cu jurisdicție și acest pagină tells dvs. ce dvs. owe, unde."
+    },
+    "salestaxtab.noJurisdictionsYetAddTheFirst": {
+      "en": "No jurisdictions yet. Add the first place you collect sales tax.",
+      "draft": "Nicio jurisdictions încă. Adăugați primul place dvs. colectați vânzări taxă."
+    },
+    "salestaxtab.ofSalesTaxIsnTTagged": {
+      "en": "of sales tax isn't tagged to a jurisdiction yet.\n            Tag invoices with a jurisdiction so every dollar lands in the right bucket.",
+      "draft": "din vânzări taxă nu este tagged la jurisdicție încă.\n  Etichetă facturi cu jurisdicție astfel fiecare dollar lands în drept categorie."
+    },
+    "salestaxtab.taxCollected": {
+      "en": "Tax collected",
+      "draft": "Taxă colectat"
+    },
+    "teaminvites.inviteYourAccountantOrTaxPro": {
+      "en": "Invite your accountant or tax pro — they join with the right permissions\n        and can switch between all the workspaces they serve.",
+      "draft": "Invitație contabil sau taxă pro — ei alăturați-vă cu drept permisiuni\n  și poate comutați între toate spații de lucru ei serve."
+    },
+    "auditlog.eGTaxInvoiceLogin": {
+      "en": "e.g. tax, invoice, login",
+      "draft": "ex. taxă, factură, autentificare"
+    },
+    "cpapackage.mileageLogWithIRSRatesApplied": {
+      "en": "Mileage log with IRS rates applied",
+      "draft": "Kilometraj jurnal cu IRS tarife aplicat"
+    },
+    "customers.delete": {
+      "en": "Delete",
+      "draft": "Șterge"
+    },
+    "customers.deleteConfirm": {
+      "en": "Delete customer \"{{name}}\"? Their invoices and statements stay on record.",
+      "draft": "Ștergeți client \"{{name}}\"? Lor facturi și statements rămâneți pe înregistrați."
+    },
+    "estimates.tax": {
+      "en": "Tax ($)",
+      "draft": "Taxă ($)"
+    },
+    "expenses.taxID": {
+      "en": "Tax ID",
+      "draft": "Taxă ID"
+    },
+    "expenses.taxYear": {
+      "en": "Tax year",
+      "draft": "Taxă an"
+    },
+    "expenses.tax": {
+      "en": "Tax",
+      "draft": "Taxă"
+    },
+    "expenses.taxIDEIN": {
+      "en": "Tax ID / EIN",
+      "draft": "Taxă ID / EIN"
+    },
+    "invoices.refund": {
+      "en": "Refund",
+      "draft": "Rambursare"
+    },
+    "invoices.taxJurisdictionOptional": {
+      "en": "Tax jurisdiction (optional)",
+      "draft": "Taxă jurisdicție (opțional)"
+    },
+    "invoices.tax": {
+      "en": "Tax ($)",
+      "draft": "Taxă ($)"
+    },
+    "invoices.refundCredit": {
+      "en": "Refund credit —",
+      "draft": "Rambursare credit —"
+    },
+    "invoices.refundTheRemaining": {
+      "en": "Refund the remaining",
+      "draft": "Rambursare restant"
+    },
+    "mileage.irsLogCSV": {
+      "en": "IRS log CSV",
+      "draft": "IRS jurnal CSV"
+    },
+    "payroll.deleteDraft": {
+      "en": "Delete draft",
+      "draft": "Ștergeți ciornă"
+    },
+    "payroll.partnershipStubWhenAProviderIs": {
+      "en": "Partnership stub: when a provider is connected, runs here will hand off tax filing and direct deposit automatically.",
+      "draft": "Parteneriat matcă: când furnizor este conectat, rulări aici va mână scăzut taxă depunere și direct depunere automat."
+    },
+    "payroll.employerTaxEst": {
+      "en": "Employer payroll tax (est.)",
+      "draft": "Employer salarii taxă (est..)"
+    },
+    "portalview.tax": {
+      "en": "Tax",
+      "draft": "Taxă"
+    },
+    "recurringinvoices.tax": {
+      "en": "Tax ($)",
+      "draft": "Taxă ($)"
+    },
+    "simulator.safetyFloor": {
+      "en": "Safety floor $",
+      "draft": "Safety prag $"
+    },
+    "tax.nameIsRequired": {
+      "en": "Name is required",
+      "draft": "Nume este obligatoriu"
+    },
+    "tax.contractorAdded": {
+      "en": "Contractor added",
+      "draft": "Colaborator adăugat"
+    },
+    "tax.w9StatusUpdated": {
+      "en": "W-9 status updated",
+      "draft": "W-9 stare actualizat"
+    },
+    "tax.contractorRemoved": {
+      "en": "Contractor removed",
+      "draft": "Colaborator eliminat"
+    },
+    "tax.enterAPositiveAmount": {
+      "en": "Enter a positive amount",
+      "draft": "Introduceți pozitiv sumă"
+    },
+    "tax.paymentRecorded": {
+      "en": "Payment recorded",
+      "draft": "Plată înregistrat"
+    },
+    "tax.paymentDeleted": {
+      "en": "Payment deleted",
+      "draft": "Plată șters"
+    },
+    "tax.statusRefreshed": {
+      "en": "Status refreshed",
+      "draft": "Stare refreshed"
+    },
+    "tax.addContractor": {
+      "en": "Add contractor",
+      "draft": "Adăugați colaborator"
+    },
+    "tax.contractors1099s": {
+      "en": "Contractors & 1099s",
+      "draft": "Colaboratori și 1099"
+    },
+    "tax.salesTax": {
+      "en": "Sales Tax",
+      "draft": "Vânzări Taxă"
+    },
+    "tax.taxbanditsNotConnected": {
+      "en": "TaxBandits not connected.",
+      "draft": "TaxBandits nu conectat."
+    },
+    "tax.taxbanditsSETUPMd": {
+      "en": "TAXBANDITS_SETUP.md",
+      "draft": "TAXBANDITS_SETUP.md"
+    },
+    "tax.inTheRepoNoIRSFiling": {
+      "en": "in the repo. No IRS filing is ever done in-house.",
+      "draft": "în repo. Nicio IRS depunere este vreodată gata in-house."
+    },
+    "tax.taxbanditsConnectedIn": {
+      "en": "TaxBandits connected in",
+      "draft": "TaxBandits conectat în"
+    },
+    "tax.sandbox": {
+      "en": "sandbox",
+      "draft": "sandbox"
+    },
+    "tax.modeNoRealFilingsFlip": {
+      "en": "mode — no real filings. Flip",
+      "draft": "mod — nicio real filings. Flip"
+    },
+    "tax.taxbanditsSANDBOXFalse": {
+      "en": "TAXBANDITS_SANDBOX=false",
+      "draft": "TAXBANDITS_SANDBOX=fals"
+    },
+    "tax.toGoLive": {
+      "en": "to go live.",
+      "draft": "la mergeți live."
+    },
+    "tax.newContractor": {
+      "en": "New contractor",
+      "draft": "Nou colaborator"
+    },
+    "tax.name": {
+      "en": "Name *",
+      "draft": "Nume *"
+    },
+    "tax.businessName": {
+      "en": "Business name",
+      "draft": "Afacere nume"
+    },
+    "tax.email": {
+      "en": "Email",
+      "draft": "E-mail"
+    },
+    "tax.phone": {
+      "en": "Phone",
+      "draft": "Telefon"
+    },
+    "tax.entityType": {
+      "en": "Entity type",
+      "draft": "Entitate tip"
+    },
+    "tax.ssnEIN": {
+      "en": "SSN / EIN",
+      "draft": "SSN / EIN"
+    },
+    "tax.storedSecurely": {
+      "en": "Stored securely",
+      "draft": "Stored securely"
+    },
+    "tax.street": {
+      "en": "Street",
+      "draft": "Street"
+    },
+    "tax.city": {
+      "en": "City",
+      "draft": "Oraș"
+    },
+    "tax.state": {
+      "en": "State",
+      "draft": "Stat"
+    },
+    "tax.zip": {
+      "en": "ZIP",
+      "draft": "COD POȘTAL"
+    },
+    "tax.cancel": {
+      "en": "Cancel",
+      "draft": "Anulează"
+    },
+    "tax.contractor": {
+      "en": "Contractor",
+      "draft": "Colaborator"
+    },
+    "tax.paid": {
+      "en": "Paid",
+      "draft": "Plătit"
+    },
+    "tax.w9": {
+      "en": "W-9",
+      "draft": "W-9"
+    },
+    "tax.NEC": {
+      "en": "1099-NEC",
+      "draft": "1099-NEC"
+    },
+    "tax.eFile": {
+      "en": "E-file",
+      "draft": "Depunere electronică"
+    },
+    "tax.actions": {
+      "en": "Actions",
+      "draft": "Acțiuni"
+    },
+    "tax.viewPaymentHistory": {
+      "en": "View payment history",
+      "draft": "Vedeți plată istoric"
+    },
+    "tax.toggleW9Received": {
+      "en": "Toggle W-9 received",
+      "draft": "Comutați W-9 primit"
+    },
+    "tax.required": {
+      "en": "Required",
+      "draft": "Obligatoriu"
+    },
+    "tax.viewFilingStatus": {
+      "en": "View filing status",
+      "draft": "Vedeți depunere stare"
+    },
+    "tax.notFiled": {
+      "en": "Not filed",
+      "draft": "Nu depus"
+    },
+    "tax.recordPayment": {
+      "en": "Record payment",
+      "draft": "Înregistrează plata"
+    },
+    "tax.noContractorsYet": {
+      "en": "No contractors yet.",
+      "draft": "Nicio colaboratori încă."
+    },
+    "tax.NECDataPreview": {
+      "en": "1099-NEC data preview",
+      "draft": "Previzualizare date 1099-NEC"
+    },
+    "tax.recipientBox1DataShapedFor": {
+      "en": "Recipient + Box 1 data shaped for e-filing. Tax IDs stay masked — reveal needs PII access. Draft data only, nothing is filed in-house.",
+      "draft": "Destinatar + Cutie 1 date shaped pentru e-filing. Taxă IDs rămâneți masked — reveal needs PII acces. Ciornă date doar, nimic este depus in-house."
+    },
+    "tax.loadPreview": {
+      "en": "Load preview",
+      "draft": "Sarcină previzualizare"
+    },
+    "tax.recipient": {
+      "en": "Recipient",
+      "draft": "Destinatar"
+    },
+    "tax.tin": {
+      "en": "TIN",
+      "draft": "TIN"
+    },
+    "tax.address": {
+      "en": "Address",
+      "draft": "Adresă"
+    },
+    "tax.box1": {
+      "en": "Box 1",
+      "draft": "Cutie 1"
+    },
+    "tax.missing": {
+      "en": "missing",
+      "draft": "lipsă"
+    },
+    "tax.reveal": {
+      "en": "reveal",
+      "draft": "reveal"
+    },
+    "tax.noContractorsMeetThe": {
+      "en": "No contractors meet the",
+      "draft": "Nicio colaboratori meet "
+    },
+    "tax.reportingThresholdFor": {
+      "en": "reporting threshold for",
+      "draft": "raportare prag pentru"
+    },
+    "tax.recordPayment2": {
+      "en": "Record payment —",
+      "draft": "Înregistrați plată —"
+    },
+    "tax.date": {
+      "en": "Date",
+      "draft": "Dată"
+    },
+    "tax.amount": {
+      "en": "Amount $",
+      "draft": "Sumă $"
+    },
+    "tax.description": {
+      "en": "Description",
+      "draft": "Descriere"
+    },
+    "tax.eGMarchBoothRentPayout": {
+      "en": "e.g. March booth rent payout",
+      "draft": "ex. Martie stand chirie plată"
+    },
+    "tax.record": {
+      "en": "Record",
+      "draft": "Înregistrați"
+    },
+    "tax.paymentHistory": {
+      "en": "Payment history —",
+      "draft": "Plată istoric —"
+    },
+    "tax.noPaymentsRecordedFor": {
+      "en": "No payments recorded for",
+      "draft": "Nicio plăți înregistrat pentru"
+    },
+    "tax.amount2": {
+      "en": "Amount",
+      "draft": "Sumă"
+    },
+    "tax.deletePayment": {
+      "en": "Delete payment",
+      "draft": "Șterge plata"
+    },
+    "tax.yearTotal": {
+      "en": "Year total:",
+      "draft": "An total:"
+    },
+    "tax.NECFiling": {
+      "en": "1099-NEC filing —",
+      "draft": "1099-NEC depunere —"
+    },
+    "tax.thisDraftLivesInTaxBanditsReview": {
+      "en": "This draft lives in TaxBandits — review and Transmit there to file with the IRS. This app never files in-house.",
+      "draft": "Acest ciornă lives în TaxBandits — revizuiți și Transmit there la fișier cu IRS. Acest aplicație niciodată fișiere in-house."
+    },
+    "tax.NECIsRequiredForNon": {
+      "en": "1099-NEC is required for non-corporate contractors paid ≥",
+      "draft": "1099-NEC este obligatoriu pentru non-corporate colaboratori plătit ≥"
+    },
+    "tax.inTheYearEFilingCreates": {
+      "en": "in the year. E-filing creates a draft in TaxBandits — you review and transmit there. This app never files with the IRS directly.",
+      "draft": "în an. E-filing creates ciornă în TaxBandits — dvs. revizuiți și transmit there. Acest aplicație niciodată fișiere cu IRS directly."
+    },
+    "taxforecast.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "Taxă Prognoză"
+    },
+    "taxforecast.OfPriorYearTax": {
+      "en": "100% of prior-year tax",
+      "draft": "100% din anterior-an taxă"
+    },
+    "taxforecast.irsDirectPay": {
+      "en": "IRS Direct Pay",
+      "draft": "IRS Direct Plătiți"
+    },
+    "nav.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "Taxă Prognoză"
+    },
+    "nav.tax1099s": {
+      "en": "Tax & 1099s",
+      "draft": "Taxă & 1099s"
+    },
+    "teamInvites.accountantTaxPro": {
+      "en": "Accountant / Tax pro",
+      "draft": "Contabil / Taxă pro"
+    }
+  }
+}

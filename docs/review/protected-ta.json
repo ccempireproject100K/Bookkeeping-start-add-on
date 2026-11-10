@@ -1,0 +1,426 @@
+{
+  "_meta": {
+    "lang": "ta",
+    "status": "DRAFT for human review only. Do NOT copy into frontend/src/locales/ta/translation.json until a qualified reviewer (counsel/CPA where relevant) approves each string. Live locale keeps English for these keys.",
+    "source": "docs/TRANSLATION_PLAN.md flagged keys (legal/financial/tax/privacy/safety)",
+    "notice": "Approximate translation from English/Spanish, may not be accurate."
+  },
+  "strings": {
+    "salestaxtab.taxJurisdictions": {
+      "en": "Tax jurisdictions",
+      "draft": "வரி jurisdictions"
+    },
+    "salestaxtab.everywhereYouCollectSalesTaxState": {
+      "en": "Everywhere you collect sales tax — state, county, city, special district.\n          Tag invoices with a jurisdiction and this page tells you what you owe, where.",
+      "draft": "எங்கும் நீங்கள் collect விற்பனைகள் வரி — மாநிலம், county, நகரம், special district.\n  குறிச்சொல் இன்வாய்ஸ்கள் உடன் அதிகார வரம்பு மற்றும் இது பக்கம் tells நீங்கள் என்ன நீங்கள் owe, எங்கே."
+    },
+    "salestaxtab.noJurisdictionsYetAddTheFirst": {
+      "en": "No jurisdictions yet. Add the first place you collect sales tax.",
+      "draft": "இல்லை jurisdictions இன்னும். சேர்க்கவும் முதல் place நீங்கள் collect விற்பனைகள் வரி."
+    },
+    "salestaxtab.ofSalesTaxIsnTTagged": {
+      "en": "of sales tax isn't tagged to a jurisdiction yet.\n            Tag invoices with a jurisdiction so every dollar lands in the right bucket.",
+      "draft": "இன் விற்பனைகள் வரி இல்லை tagged க்கு அதிகார வரம்பு இன்னும்.\n  குறிச்சொல் இன்வாய்ஸ்கள் உடன் அதிகார வரம்பு எனவே ஒவ்வொரு dollar lands இல் வலது குழு."
+    },
+    "salestaxtab.taxCollected": {
+      "en": "Tax collected",
+      "draft": "வரி சேகரிக்கப்பட்டது"
+    },
+    "teaminvites.inviteYourAccountantOrTaxPro": {
+      "en": "Invite your accountant or tax pro — they join with the right permissions\n        and can switch between all the workspaces they serve.",
+      "draft": "அழைப்பு உங்கள் கணக்கர் அல்லது வரி புரோ — அவர்கள் சேரவும் உடன் வலது அனுமதிகள்\n  மற்றும் முடியும் மாற்றவும் இடையே அனைத்தும் பணியிடங்கள் அவர்கள் serve."
+    },
+    "auditlog.eGTaxInvoiceLogin": {
+      "en": "e.g. tax, invoice, login",
+      "draft": "எ.கா. வரி, இன்வாய்ஸ், உள்நுழைவு"
+    },
+    "cpapackage.mileageLogWithIRSRatesApplied": {
+      "en": "Mileage log with IRS rates applied",
+      "draft": "மைலேஜ் பதிவு உடன் IRS விகிதங்கள் applied"
+    },
+    "customers.delete": {
+      "en": "Delete",
+      "draft": "நீக்கவும்"
+    },
+    "customers.deleteConfirm": {
+      "en": "Delete customer \"{{name}}\"? Their invoices and statements stay on record.",
+      "draft": "நீக்கவும் வாடிக்கையாளர் \"{{name}}\"? அவர்களின் இன்வாய்ஸ்கள் மற்றும் அறிக்கைகள் இருக்கவும் மீது பதிவு செய்க."
+    },
+    "estimates.tax": {
+      "en": "Tax ($)",
+      "draft": "வரி ($)"
+    },
+    "expenses.taxID": {
+      "en": "Tax ID",
+      "draft": "வரி ID"
+    },
+    "expenses.taxYear": {
+      "en": "Tax year",
+      "draft": "வரி ஆண்டு"
+    },
+    "expenses.tax": {
+      "en": "Tax",
+      "draft": "வரி"
+    },
+    "expenses.taxIDEIN": {
+      "en": "Tax ID / EIN",
+      "draft": "வரி ID / EIN"
+    },
+    "invoices.refund": {
+      "en": "Refund",
+      "draft": "திருப்பிச் செலுத்துதல்"
+    },
+    "invoices.taxJurisdictionOptional": {
+      "en": "Tax jurisdiction (optional)",
+      "draft": "வரி அதிகார வரம்பு (விருப்பமான)"
+    },
+    "invoices.tax": {
+      "en": "Tax ($)",
+      "draft": "வரி ($)"
+    },
+    "invoices.refundCredit": {
+      "en": "Refund credit —",
+      "draft": "திருப்பிச் செலுத்துதல் வரவு —"
+    },
+    "invoices.refundTheRemaining": {
+      "en": "Refund the remaining",
+      "draft": "திருப்பிச் செலுத்துதல் மீதமுள்ள"
+    },
+    "mileage.irsLogCSV": {
+      "en": "IRS log CSV",
+      "draft": "IRS பதிவு CSV"
+    },
+    "payroll.deleteDraft": {
+      "en": "Delete draft",
+      "draft": "நீக்கவும் வரைவு"
+    },
+    "payroll.partnershipStubWhenAProviderIs": {
+      "en": "Partnership stub: when a provider is connected, runs here will hand off tax filing and direct deposit automatically.",
+      "draft": "கூட்டாண்மை சீட்டு: எப்போது வழங்குநர் உள்ளது இணைக்கப்பட்டது, இயங்குகிறது இங்கே செய்யும் கை அணை வரி தாக்கல் மற்றும் நேரடி வைப்பு தானாக."
+    },
+    "payroll.employerTaxEst": {
+      "en": "Employer payroll tax (est.)",
+      "draft": "Employer ஊதியப்பட்டியல் வரி (மதிப்பீடு.)"
+    },
+    "portalview.tax": {
+      "en": "Tax",
+      "draft": "வரி"
+    },
+    "recurringinvoices.tax": {
+      "en": "Tax ($)",
+      "draft": "வரி ($)"
+    },
+    "simulator.safetyFloor": {
+      "en": "Safety floor $",
+      "draft": "Safety floor $"
+    },
+    "tax.nameIsRequired": {
+      "en": "Name is required",
+      "draft": "பெயர் உள்ளது தேவையான"
+    },
+    "tax.contractorAdded": {
+      "en": "Contractor added",
+      "draft": "ஒப்பந்தக்காரர் சேர்க்கப்பட்டது"
+    },
+    "tax.w9StatusUpdated": {
+      "en": "W-9 status updated",
+      "draft": "W-9 நிலை புதுப்பிக்கப்பட்டது"
+    },
+    "tax.contractorRemoved": {
+      "en": "Contractor removed",
+      "draft": "ஒப்பந்தக்காரர் அகற்றப்பட்டது"
+    },
+    "tax.enterAPositiveAmount": {
+      "en": "Enter a positive amount",
+      "draft": "உள்ளிடவும் நேர்மறை தொகை"
+    },
+    "tax.paymentRecorded": {
+      "en": "Payment recorded",
+      "draft": "கட்டணம் பதிவு செய்யப்பட்டது"
+    },
+    "tax.paymentDeleted": {
+      "en": "Payment deleted",
+      "draft": "கட்டணம் நீக்கப்பட்டது"
+    },
+    "tax.statusRefreshed": {
+      "en": "Status refreshed",
+      "draft": "நிலை refreshed"
+    },
+    "tax.addContractor": {
+      "en": "Add contractor",
+      "draft": "சேர்க்கவும் ஒப்பந்தக்காரர்"
+    },
+    "tax.contractors1099s": {
+      "en": "Contractors & 1099s",
+      "draft": "ஒப்பந்தக்காரர்கள் & 1099s"
+    },
+    "tax.salesTax": {
+      "en": "Sales Tax",
+      "draft": "விற்பனைகள் வரி"
+    },
+    "tax.taxbanditsNotConnected": {
+      "en": "TaxBandits not connected.",
+      "draft": "TaxBandits இல்லை இணைக்கப்பட்டது."
+    },
+    "tax.taxbanditsSETUPMd": {
+      "en": "TAXBANDITS_SETUP.md",
+      "draft": "TAXBANDITS_SETUP.md"
+    },
+    "tax.inTheRepoNoIRSFiling": {
+      "en": "in the repo. No IRS filing is ever done in-house.",
+      "draft": "இல் repo. இல்லை IRS தாக்கல் உள்ளது எப்போதாவது முடிந்தது in-house."
+    },
+    "tax.taxbanditsConnectedIn": {
+      "en": "TaxBandits connected in",
+      "draft": "TaxBandits இணைக்கப்பட்டது இல்"
+    },
+    "tax.sandbox": {
+      "en": "sandbox",
+      "draft": "sandbox"
+    },
+    "tax.modeNoRealFilingsFlip": {
+      "en": "mode — no real filings. Flip",
+      "draft": "mode — இல்லை real filings. Flip"
+    },
+    "tax.taxbanditsSANDBOXFalse": {
+      "en": "TAXBANDITS_SANDBOX=false",
+      "draft": "TAXBANDITS_SANDBOX=தவறு"
+    },
+    "tax.toGoLive": {
+      "en": "to go live.",
+      "draft": "க்கு செல்லவும் நேரலை."
+    },
+    "tax.newContractor": {
+      "en": "New contractor",
+      "draft": "புதிய ஒப்பந்தக்காரர்"
+    },
+    "tax.name": {
+      "en": "Name *",
+      "draft": "பெயர் *"
+    },
+    "tax.businessName": {
+      "en": "Business name",
+      "draft": "வணிகம் பெயர்"
+    },
+    "tax.email": {
+      "en": "Email",
+      "draft": "மின்னஞ்சல்"
+    },
+    "tax.phone": {
+      "en": "Phone",
+      "draft": "தொலைபேசி"
+    },
+    "tax.entityType": {
+      "en": "Entity type",
+      "draft": "நிறுவனம் வகை"
+    },
+    "tax.ssnEIN": {
+      "en": "SSN / EIN",
+      "draft": "SSN / EIN"
+    },
+    "tax.storedSecurely": {
+      "en": "Stored securely",
+      "draft": "Stored securely"
+    },
+    "tax.street": {
+      "en": "Street",
+      "draft": "Street"
+    },
+    "tax.city": {
+      "en": "City",
+      "draft": "நகரம்"
+    },
+    "tax.state": {
+      "en": "State",
+      "draft": "மாநிலம்"
+    },
+    "tax.zip": {
+      "en": "ZIP",
+      "draft": "அஞ்சல் குறியீடு"
+    },
+    "tax.cancel": {
+      "en": "Cancel",
+      "draft": "ரத்து செய்க"
+    },
+    "tax.contractor": {
+      "en": "Contractor",
+      "draft": "ஒப்பந்தக்காரர்"
+    },
+    "tax.paid": {
+      "en": "Paid",
+      "draft": "செலுத்தப்பட்டது"
+    },
+    "tax.w9": {
+      "en": "W-9",
+      "draft": "W-9"
+    },
+    "tax.NEC": {
+      "en": "1099-NEC",
+      "draft": "1099-NEC"
+    },
+    "tax.eFile": {
+      "en": "E-file",
+      "draft": "E-file"
+    },
+    "tax.actions": {
+      "en": "Actions",
+      "draft": "செயல்கள்"
+    },
+    "tax.viewPaymentHistory": {
+      "en": "View payment history",
+      "draft": "காண்க கட்டணம் வரலாறு"
+    },
+    "tax.toggleW9Received": {
+      "en": "Toggle W-9 received",
+      "draft": "Toggle W-9 பெறப்பட்டது"
+    },
+    "tax.required": {
+      "en": "Required",
+      "draft": "தேவையான"
+    },
+    "tax.viewFilingStatus": {
+      "en": "View filing status",
+      "draft": "காண்க தாக்கல் நிலை"
+    },
+    "tax.notFiled": {
+      "en": "Not filed",
+      "draft": "இல்லை filed"
+    },
+    "tax.recordPayment": {
+      "en": "Record payment",
+      "draft": "பதிவு செய்க கட்டணம்"
+    },
+    "tax.noContractorsYet": {
+      "en": "No contractors yet.",
+      "draft": "இல்லை ஒப்பந்தக்காரர்கள் இன்னும்."
+    },
+    "tax.NECDataPreview": {
+      "en": "1099-NEC data preview",
+      "draft": "1099-NEC தரவு முன்னோட்டம்"
+    },
+    "tax.recipientBox1DataShapedFor": {
+      "en": "Recipient + Box 1 data shaped for e-filing. Tax IDs stay masked — reveal needs PII access. Draft data only, nothing is filed in-house.",
+      "draft": "பெறுநர் + Box 1 தரவு shaped க்காக e-filing. வரி IDs இருக்கவும் masked — reveal needs PII அணுகல். வரைவு தரவு மட்டும், ஒன்றும் இல்லை உள்ளது filed in-house."
+    },
+    "tax.loadPreview": {
+      "en": "Load preview",
+      "draft": "ஏற்றவும் முன்னோட்டம்"
+    },
+    "tax.recipient": {
+      "en": "Recipient",
+      "draft": "பெறுநர்"
+    },
+    "tax.tin": {
+      "en": "TIN",
+      "draft": "TIN"
+    },
+    "tax.address": {
+      "en": "Address",
+      "draft": "முகவரி"
+    },
+    "tax.box1": {
+      "en": "Box 1",
+      "draft": "Box 1"
+    },
+    "tax.missing": {
+      "en": "missing",
+      "draft": "காணவில்லை"
+    },
+    "tax.reveal": {
+      "en": "reveal",
+      "draft": "reveal"
+    },
+    "tax.noContractorsMeetThe": {
+      "en": "No contractors meet the",
+      "draft": "இல்லை ஒப்பந்தக்காரர்கள் meet "
+    },
+    "tax.reportingThresholdFor": {
+      "en": "reporting threshold for",
+      "draft": "அறிக்கையிடல் threshold க்காக"
+    },
+    "tax.recordPayment2": {
+      "en": "Record payment —",
+      "draft": "பதிவு செய்க கட்டணம் —"
+    },
+    "tax.date": {
+      "en": "Date",
+      "draft": "தேதி"
+    },
+    "tax.amount": {
+      "en": "Amount $",
+      "draft": "தொகை $"
+    },
+    "tax.description": {
+      "en": "Description",
+      "draft": "விளக்கம்"
+    },
+    "tax.eGMarchBoothRentPayout": {
+      "en": "e.g. March booth rent payout",
+      "draft": "எ.கா. March கடை வாடகை பட்டுவாடா"
+    },
+    "tax.record": {
+      "en": "Record",
+      "draft": "பதிவு செய்க"
+    },
+    "tax.paymentHistory": {
+      "en": "Payment history —",
+      "draft": "கட்டணம் வரலாறு —"
+    },
+    "tax.noPaymentsRecordedFor": {
+      "en": "No payments recorded for",
+      "draft": "இல்லை கட்டணங்கள் பதிவு செய்யப்பட்டது க்காக"
+    },
+    "tax.amount2": {
+      "en": "Amount",
+      "draft": "தொகை"
+    },
+    "tax.deletePayment": {
+      "en": "Delete payment",
+      "draft": "நீக்கவும் கட்டணம்"
+    },
+    "tax.yearTotal": {
+      "en": "Year total:",
+      "draft": "ஆண்டு மொத்தம்:"
+    },
+    "tax.NECFiling": {
+      "en": "1099-NEC filing —",
+      "draft": "1099-NEC தாக்கல் —"
+    },
+    "tax.thisDraftLivesInTaxBanditsReview": {
+      "en": "This draft lives in TaxBandits — review and Transmit there to file with the IRS. This app never files in-house.",
+      "draft": "இது வரைவு lives இல் TaxBandits — மதிப்பாய்வு மற்றும் Transmit there க்கு கோப்பு உடன் IRS. இது செயலி ஒருபோதும் கோப்புகள் in-house."
+    },
+    "tax.NECIsRequiredForNon": {
+      "en": "1099-NEC is required for non-corporate contractors paid ≥",
+      "draft": "1099-NEC உள்ளது தேவையான க்காக non-corporate ஒப்பந்தக்காரர்கள் செலுத்தப்பட்டது ≥"
+    },
+    "tax.inTheYearEFilingCreates": {
+      "en": "in the year. E-filing creates a draft in TaxBandits — you review and transmit there. This app never files with the IRS directly.",
+      "draft": "இல் ஆண்டு. E-filing creates வரைவு இல் TaxBandits — நீங்கள் மதிப்பாய்வு மற்றும் transmit there. இது செயலி ஒருபோதும் கோப்புகள் உடன் IRS directly."
+    },
+    "taxforecast.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "வரி முன்னறிவிப்பு"
+    },
+    "taxforecast.OfPriorYearTax": {
+      "en": "100% of prior-year tax",
+      "draft": "100% இன் prior-year வரி"
+    },
+    "taxforecast.irsDirectPay": {
+      "en": "IRS Direct Pay",
+      "draft": "IRS நேரடி செலுத்தவும்"
+    },
+    "nav.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "வரி முன்னறிவிப்பு"
+    },
+    "nav.tax1099s": {
+      "en": "Tax & 1099s",
+      "draft": "வரி & 1099s"
+    },
+    "teamInvites.accountantTaxPro": {
+      "en": "Accountant / Tax pro",
+      "draft": "கணக்கர் / வரி புரோ"
+    }
+  }
+}

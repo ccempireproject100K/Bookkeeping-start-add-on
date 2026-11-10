@@ -1,0 +1,426 @@
+{
+  "_meta": {
+    "lang": "bho",
+    "status": "DRAFT for human review only. Do NOT copy into frontend/src/locales/bho/translation.json until a qualified reviewer (counsel/CPA where relevant) approves each string. Live locale keeps English for these keys.",
+    "source": "docs/TRANSLATION_PLAN.md flagged keys (legal/financial/tax/privacy/safety)",
+    "notice": "Approximate translation from English/Spanish, may not be accurate."
+  },
+  "strings": {
+    "salestaxtab.taxJurisdictions": {
+      "en": "Tax jurisdictions",
+      "draft": "कर jurisdictions"
+    },
+    "salestaxtab.everywhereYouCollectSalesTaxState": {
+      "en": "Everywhere you collect sales tax — state, county, city, special district.\n          Tag invoices with a jurisdiction and this page tells you what you owe, where.",
+      "draft": "हर जगह रउआ collect बिक्री कर — राज्य, county, शहर, special district.\n  टैग इनवॉइस संगे अधिकार आ इ पन्ना tells रउआ का रउआ owe, कहाँ."
+    },
+    "salestaxtab.noJurisdictionsYetAddTheFirst": {
+      "en": "No jurisdictions yet. Add the first place you collect sales tax.",
+      "draft": "ना jurisdictions अभी. जोड़ीं पहिला place रउआ collect बिक्री कर."
+    },
+    "salestaxtab.ofSalesTaxIsnTTagged": {
+      "en": "of sales tax isn't tagged to a jurisdiction yet.\n            Tag invoices with a jurisdiction so every dollar lands in the right bucket.",
+      "draft": "के बिक्री कर न ह tagged के अधिकार अभी.\n  टैग इनवॉइस संगे अधिकार त हर dollar lands में दायाँ समूह."
+    },
+    "salestaxtab.taxCollected": {
+      "en": "Tax collected",
+      "draft": "कर इकट्ठा"
+    },
+    "teaminvites.inviteYourAccountantOrTaxPro": {
+      "en": "Invite your accountant or tax pro — they join with the right permissions\n        and can switch between all the workspaces they serve.",
+      "draft": "नेवता राउर मुंशी भा कर प्रो — उ जुड़ीं संगे दायाँ अनुमति\n  आ सकेनी बदलीं बीच में सब कार्यक्षेत्र उ serve."
+    },
+    "auditlog.eGTaxInvoiceLogin": {
+      "en": "e.g. tax, invoice, login",
+      "draft": "जइसे कर, इनवॉइस, लॉगिन"
+    },
+    "cpapackage.mileageLogWithIRSRatesApplied": {
+      "en": "Mileage log with IRS rates applied",
+      "draft": "माइलेज लॉग संगे IRS दर applied"
+    },
+    "customers.delete": {
+      "en": "Delete",
+      "draft": "हटाईं"
+    },
+    "customers.deleteConfirm": {
+      "en": "Delete customer \"{{name}}\"? Their invoices and statements stay on record.",
+      "draft": "हटाईं गाहक \"{{name}}\"? उनकर इनवॉइस आ विवरण रहीं पर दर्ज करीं."
+    },
+    "estimates.tax": {
+      "en": "Tax ($)",
+      "draft": "कर ($)"
+    },
+    "expenses.taxID": {
+      "en": "Tax ID",
+      "draft": "कर ID"
+    },
+    "expenses.taxYear": {
+      "en": "Tax year",
+      "draft": "कर साल"
+    },
+    "expenses.tax": {
+      "en": "Tax",
+      "draft": "कर"
+    },
+    "expenses.taxIDEIN": {
+      "en": "Tax ID / EIN",
+      "draft": "कर ID / EIN"
+    },
+    "invoices.refund": {
+      "en": "Refund",
+      "draft": "वापसी"
+    },
+    "invoices.taxJurisdictionOptional": {
+      "en": "Tax jurisdiction (optional)",
+      "draft": "कर अधिकार (मरजी)"
+    },
+    "invoices.tax": {
+      "en": "Tax ($)",
+      "draft": "कर ($)"
+    },
+    "invoices.refundCredit": {
+      "en": "Refund credit —",
+      "draft": "वापसी जमा —"
+    },
+    "invoices.refundTheRemaining": {
+      "en": "Refund the remaining",
+      "draft": "वापसी बाकी"
+    },
+    "mileage.irsLogCSV": {
+      "en": "IRS log CSV",
+      "draft": "IRS लॉग CSV"
+    },
+    "payroll.deleteDraft": {
+      "en": "Delete draft",
+      "draft": "हटाईं मसौदा"
+    },
+    "payroll.partnershipStubWhenAProviderIs": {
+      "en": "Partnership stub: when a provider is connected, runs here will hand off tax filing and direct deposit automatically.",
+      "draft": "साझेदारी पर्ची: कब देवे वाला बा जुड़ल, चलेला इहाँ करी हाथ बंद कर दाखिल आ सीधा जमा अपने-आप."
+    },
+    "payroll.employerTaxEst": {
+      "en": "Employer payroll tax (est.)",
+      "draft": "Employer पगार कर (अंदाज.)"
+    },
+    "portalview.tax": {
+      "en": "Tax",
+      "draft": "कर"
+    },
+    "recurringinvoices.tax": {
+      "en": "Tax ($)",
+      "draft": "कर ($)"
+    },
+    "simulator.safetyFloor": {
+      "en": "Safety floor $",
+      "draft": "Safety floor $"
+    },
+    "tax.nameIsRequired": {
+      "en": "Name is required",
+      "draft": "नाम बा जरूरी"
+    },
+    "tax.contractorAdded": {
+      "en": "Contractor added",
+      "draft": "ठेकेदार जोड़ल"
+    },
+    "tax.w9StatusUpdated": {
+      "en": "W-9 status updated",
+      "draft": "W-9 स्थिति अपडेट भइल"
+    },
+    "tax.contractorRemoved": {
+      "en": "Contractor removed",
+      "draft": "ठेकेदार हटावल"
+    },
+    "tax.enterAPositiveAmount": {
+      "en": "Enter a positive amount",
+      "draft": "डारीं सकारात्मक रकम"
+    },
+    "tax.paymentRecorded": {
+      "en": "Payment recorded",
+      "draft": "भुगतान दर्ज"
+    },
+    "tax.paymentDeleted": {
+      "en": "Payment deleted",
+      "draft": "भुगतान हटावल"
+    },
+    "tax.statusRefreshed": {
+      "en": "Status refreshed",
+      "draft": "स्थिति refreshed"
+    },
+    "tax.addContractor": {
+      "en": "Add contractor",
+      "draft": "जोड़ीं ठेकेदार"
+    },
+    "tax.contractors1099s": {
+      "en": "Contractors & 1099s",
+      "draft": "ठेकेदार & 1099s"
+    },
+    "tax.salesTax": {
+      "en": "Sales Tax",
+      "draft": "बिक्री कर"
+    },
+    "tax.taxbanditsNotConnected": {
+      "en": "TaxBandits not connected.",
+      "draft": "TaxBandits ना जुड़ल."
+    },
+    "tax.taxbanditsSETUPMd": {
+      "en": "TAXBANDITS_SETUP.md",
+      "draft": "TAXBANDITS_SETUP.md"
+    },
+    "tax.inTheRepoNoIRSFiling": {
+      "en": "in the repo. No IRS filing is ever done in-house.",
+      "draft": "में repo. ना IRS दाखिल बा कबो हो गइल in-house."
+    },
+    "tax.taxbanditsConnectedIn": {
+      "en": "TaxBandits connected in",
+      "draft": "TaxBandits जुड़ल में"
+    },
+    "tax.sandbox": {
+      "en": "sandbox",
+      "draft": "sandbox"
+    },
+    "tax.modeNoRealFilingsFlip": {
+      "en": "mode — no real filings. Flip",
+      "draft": "mode — ना real filings. Flip"
+    },
+    "tax.taxbanditsSANDBOXFalse": {
+      "en": "TAXBANDITS_SANDBOX=false",
+      "draft": "TAXBANDITS_SANDBOX=झूठ"
+    },
+    "tax.toGoLive": {
+      "en": "to go live.",
+      "draft": "के जाईं लाइव."
+    },
+    "tax.newContractor": {
+      "en": "New contractor",
+      "draft": "नया ठेकेदार"
+    },
+    "tax.name": {
+      "en": "Name *",
+      "draft": "नाम *"
+    },
+    "tax.businessName": {
+      "en": "Business name",
+      "draft": "धंधा नाम"
+    },
+    "tax.email": {
+      "en": "Email",
+      "draft": "ईमेल"
+    },
+    "tax.phone": {
+      "en": "Phone",
+      "draft": "फोन"
+    },
+    "tax.entityType": {
+      "en": "Entity type",
+      "draft": "इकाई प्रकार"
+    },
+    "tax.ssnEIN": {
+      "en": "SSN / EIN",
+      "draft": "SSN / EIN"
+    },
+    "tax.storedSecurely": {
+      "en": "Stored securely",
+      "draft": "Stored securely"
+    },
+    "tax.street": {
+      "en": "Street",
+      "draft": "Street"
+    },
+    "tax.city": {
+      "en": "City",
+      "draft": "शहर"
+    },
+    "tax.state": {
+      "en": "State",
+      "draft": "राज्य"
+    },
+    "tax.zip": {
+      "en": "ZIP",
+      "draft": "पिनकोड"
+    },
+    "tax.cancel": {
+      "en": "Cancel",
+      "draft": "रद्द करीं"
+    },
+    "tax.contractor": {
+      "en": "Contractor",
+      "draft": "ठेकेदार"
+    },
+    "tax.paid": {
+      "en": "Paid",
+      "draft": "चुकता"
+    },
+    "tax.w9": {
+      "en": "W-9",
+      "draft": "W-9"
+    },
+    "tax.NEC": {
+      "en": "1099-NEC",
+      "draft": "1099-NEC"
+    },
+    "tax.eFile": {
+      "en": "E-file",
+      "draft": "E-file"
+    },
+    "tax.actions": {
+      "en": "Actions",
+      "draft": "काम"
+    },
+    "tax.viewPaymentHistory": {
+      "en": "View payment history",
+      "draft": "देखीं भुगतान इतिहास"
+    },
+    "tax.toggleW9Received": {
+      "en": "Toggle W-9 received",
+      "draft": "Toggle W-9 मिलल"
+    },
+    "tax.required": {
+      "en": "Required",
+      "draft": "जरूरी"
+    },
+    "tax.viewFilingStatus": {
+      "en": "View filing status",
+      "draft": "देखीं दाखिल स्थिति"
+    },
+    "tax.notFiled": {
+      "en": "Not filed",
+      "draft": "ना filed"
+    },
+    "tax.recordPayment": {
+      "en": "Record payment",
+      "draft": "दर्ज करीं भुगतान"
+    },
+    "tax.noContractorsYet": {
+      "en": "No contractors yet.",
+      "draft": "ना ठेकेदार अभी."
+    },
+    "tax.NECDataPreview": {
+      "en": "1099-NEC data preview",
+      "draft": "1099-NEC डेटा झलक"
+    },
+    "tax.recipientBox1DataShapedFor": {
+      "en": "Recipient + Box 1 data shaped for e-filing. Tax IDs stay masked — reveal needs PII access. Draft data only, nothing is filed in-house.",
+      "draft": "पावे वाला + Box 1 डेटा shaped खातिर e-filing. कर IDs रहीं masked — reveal needs PII पहुँच. मसौदा डेटा सिर्फ, कुछ ना बा filed in-house."
+    },
+    "tax.loadPreview": {
+      "en": "Load preview",
+      "draft": "लोड करीं झलक"
+    },
+    "tax.recipient": {
+      "en": "Recipient",
+      "draft": "पावे वाला"
+    },
+    "tax.tin": {
+      "en": "TIN",
+      "draft": "TIN"
+    },
+    "tax.address": {
+      "en": "Address",
+      "draft": "पता"
+    },
+    "tax.box1": {
+      "en": "Box 1",
+      "draft": "Box 1"
+    },
+    "tax.missing": {
+      "en": "missing",
+      "draft": "गायब"
+    },
+    "tax.reveal": {
+      "en": "reveal",
+      "draft": "reveal"
+    },
+    "tax.noContractorsMeetThe": {
+      "en": "No contractors meet the",
+      "draft": "ना ठेकेदार meet "
+    },
+    "tax.reportingThresholdFor": {
+      "en": "reporting threshold for",
+      "draft": "रिपोर्ट threshold खातिर"
+    },
+    "tax.recordPayment2": {
+      "en": "Record payment —",
+      "draft": "दर्ज करीं भुगतान —"
+    },
+    "tax.date": {
+      "en": "Date",
+      "draft": "तारीख"
+    },
+    "tax.amount": {
+      "en": "Amount $",
+      "draft": "रकम $"
+    },
+    "tax.description": {
+      "en": "Description",
+      "draft": "विवरण"
+    },
+    "tax.eGMarchBoothRentPayout": {
+      "en": "e.g. March booth rent payout",
+      "draft": "जइसे March दुकान किराया भुगतान"
+    },
+    "tax.record": {
+      "en": "Record",
+      "draft": "दर्ज करीं"
+    },
+    "tax.paymentHistory": {
+      "en": "Payment history —",
+      "draft": "भुगतान इतिहास —"
+    },
+    "tax.noPaymentsRecordedFor": {
+      "en": "No payments recorded for",
+      "draft": "ना भुगतान दर्ज खातिर"
+    },
+    "tax.amount2": {
+      "en": "Amount",
+      "draft": "रकम"
+    },
+    "tax.deletePayment": {
+      "en": "Delete payment",
+      "draft": "हटाईं भुगतान"
+    },
+    "tax.yearTotal": {
+      "en": "Year total:",
+      "draft": "साल कुल:"
+    },
+    "tax.NECFiling": {
+      "en": "1099-NEC filing —",
+      "draft": "1099-NEC दाखिल —"
+    },
+    "tax.thisDraftLivesInTaxBanditsReview": {
+      "en": "This draft lives in TaxBandits — review and Transmit there to file with the IRS. This app never files in-house.",
+      "draft": "इ मसौदा lives में TaxBandits — समीक्षा आ Transmit there के फाइल संगे IRS. इ ऐप कबो ना फाइल in-house."
+    },
+    "tax.NECIsRequiredForNon": {
+      "en": "1099-NEC is required for non-corporate contractors paid ≥",
+      "draft": "1099-NEC बा जरूरी खातिर non-corporate ठेकेदार चुकता ≥"
+    },
+    "tax.inTheYearEFilingCreates": {
+      "en": "in the year. E-filing creates a draft in TaxBandits — you review and transmit there. This app never files with the IRS directly.",
+      "draft": "में साल. E-filing creates मसौदा में TaxBandits — रउआ समीक्षा आ transmit there. इ ऐप कबो ना फाइल संगे IRS directly."
+    },
+    "taxforecast.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "कर अनुमान"
+    },
+    "taxforecast.OfPriorYearTax": {
+      "en": "100% of prior-year tax",
+      "draft": "100% के prior-year कर"
+    },
+    "taxforecast.irsDirectPay": {
+      "en": "IRS Direct Pay",
+      "draft": "IRS सीधा चुकाईं"
+    },
+    "nav.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "कर अनुमान"
+    },
+    "nav.tax1099s": {
+      "en": "Tax & 1099s",
+      "draft": "कर & 1099s"
+    },
+    "teamInvites.accountantTaxPro": {
+      "en": "Accountant / Tax pro",
+      "draft": "मुंशी / कर प्रो"
+    }
+  }
+}

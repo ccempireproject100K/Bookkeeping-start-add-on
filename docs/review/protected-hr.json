@@ -1,0 +1,426 @@
+{
+  "_meta": {
+    "lang": "hr",
+    "status": "DRAFT for human review only. Do NOT copy into frontend/src/locales/hr/translation.json until a qualified reviewer (counsel/CPA where relevant) approves each string. Live locale keeps English for these keys.",
+    "source": "docs/TRANSLATION_PLAN.md flagged keys (legal/financial/tax/privacy/safety)",
+    "notice": "Approximate translation from English/Spanish, may not be accurate."
+  },
+  "strings": {
+    "salestaxtab.taxJurisdictions": {
+      "en": "Tax jurisdictions",
+      "draft": "Porezne jurisdikcije"
+    },
+    "salestaxtab.everywhereYouCollectSalesTaxState": {
+      "en": "Everywhere you collect sales tax — state, county, city, special district.\n          Tag invoices with a jurisdiction and this page tells you what you owe, where.",
+      "draft": "Svugdje gdje naplaćujete porez na promet — država, okrug, grad, posebni distrikt.\n          Označite fakture jurisdikcijom i ova stranica vam govori što dugujete i gdje."
+    },
+    "salestaxtab.noJurisdictionsYetAddTheFirst": {
+      "en": "No jurisdictions yet. Add the first place you collect sales tax.",
+      "draft": "Još nema jurisdikcija. Dodajte prvo mjesto gdje naplaćujete porez na promet."
+    },
+    "salestaxtab.ofSalesTaxIsnTTagged": {
+      "en": "of sales tax isn't tagged to a jurisdiction yet.\n            Tag invoices with a jurisdiction so every dollar lands in the right bucket.",
+      "draft": "poreza na promet još nije označeno jurisdikcijom.\n            Označite fakture jurisdikcijom kako bi svaki dolar završio u pravoj ladici."
+    },
+    "salestaxtab.taxCollected": {
+      "en": "Tax collected",
+      "draft": "Naplćeni porez"
+    },
+    "teaminvites.inviteYourAccountantOrTaxPro": {
+      "en": "Invite your accountant or tax pro — they join with the right permissions\n        and can switch between all the workspaces they serve.",
+      "draft": "Pozovite svog računovođu ili poreznog stručnjaka — pridružuje se s pravim dozvolama\n        i može se prebacivati između svih radnih prostora koje opslužuje."
+    },
+    "auditlog.eGTaxInvoiceLogin": {
+      "en": "e.g. tax, invoice, login",
+      "draft": "npr. porez, faktura, prijava"
+    },
+    "cpapackage.mileageLogWithIRSRatesApplied": {
+      "en": "Mileage log with IRS rates applied",
+      "draft": "Evidencija kilometraže s primijenjenim IRS stopama"
+    },
+    "customers.delete": {
+      "en": "Delete",
+      "draft": "Izbriši"
+    },
+    "customers.deleteConfirm": {
+      "en": "Delete customer \"{{name}}\"? Their invoices and statements stay on record.",
+      "draft": "Izbrisati kupca „{{name}}“? Njegove fakture i izvodi ostaju u evidenciji."
+    },
+    "estimates.tax": {
+      "en": "Tax ($)",
+      "draft": "Porez ($)"
+    },
+    "expenses.taxID": {
+      "en": "Tax ID",
+      "draft": "Porezni ID"
+    },
+    "expenses.taxYear": {
+      "en": "Tax year",
+      "draft": "Porezna godina"
+    },
+    "expenses.tax": {
+      "en": "Tax",
+      "draft": "Porez"
+    },
+    "expenses.taxIDEIN": {
+      "en": "Tax ID / EIN",
+      "draft": "Porezni ID / EIN"
+    },
+    "invoices.refund": {
+      "en": "Refund",
+      "draft": "Povrat"
+    },
+    "invoices.taxJurisdictionOptional": {
+      "en": "Tax jurisdiction (optional)",
+      "draft": "Porezna jurisdikcija (neobavezno)"
+    },
+    "invoices.tax": {
+      "en": "Tax ($)",
+      "draft": "Porez ($)"
+    },
+    "invoices.refundCredit": {
+      "en": "Refund credit —",
+      "draft": "Povrat odobrenja —"
+    },
+    "invoices.refundTheRemaining": {
+      "en": "Refund the remaining",
+      "draft": "Vratite preostalo"
+    },
+    "mileage.irsLogCSV": {
+      "en": "IRS log CSV",
+      "draft": "IRS evidencija CSV"
+    },
+    "payroll.deleteDraft": {
+      "en": "Delete draft",
+      "draft": "Izbriši nacrt"
+    },
+    "payroll.partnershipStubWhenAProviderIs": {
+      "en": "Partnership stub: when a provider is connected, runs here will hand off tax filing and direct deposit automatically.",
+      "draft": "Nacrt partnerstva: kada se poveže pružatelj, obračuni će ovdje automatski predavati porezne prijave i izravne uplate."
+    },
+    "payroll.employerTaxEst": {
+      "en": "Employer payroll tax (est.)",
+      "draft": "Poslodavčev porez na plaće (procj.)"
+    },
+    "portalview.tax": {
+      "en": "Tax",
+      "draft": "Porez"
+    },
+    "recurringinvoices.tax": {
+      "en": "Tax ($)",
+      "draft": "Porez ($)"
+    },
+    "simulator.safetyFloor": {
+      "en": "Safety floor $",
+      "draft": "Sigurnosni prag $"
+    },
+    "tax.nameIsRequired": {
+      "en": "Name is required",
+      "draft": "Naziv je obavezan"
+    },
+    "tax.contractorAdded": {
+      "en": "Contractor added",
+      "draft": "Izvođač dodan"
+    },
+    "tax.w9StatusUpdated": {
+      "en": "W-9 status updated",
+      "draft": "W-9 status ažuriran"
+    },
+    "tax.contractorRemoved": {
+      "en": "Contractor removed",
+      "draft": "Izvođač uklonjen"
+    },
+    "tax.enterAPositiveAmount": {
+      "en": "Enter a positive amount",
+      "draft": "Unesite pozitivan iznos"
+    },
+    "tax.paymentRecorded": {
+      "en": "Payment recorded",
+      "draft": "Plaćanje evidentirano"
+    },
+    "tax.paymentDeleted": {
+      "en": "Payment deleted",
+      "draft": "Plaćanje izbrisano"
+    },
+    "tax.statusRefreshed": {
+      "en": "Status refreshed",
+      "draft": "Status osvježen"
+    },
+    "tax.addContractor": {
+      "en": "Add contractor",
+      "draft": "Dodajte izvođača"
+    },
+    "tax.contractors1099s": {
+      "en": "Contractors & 1099s",
+      "draft": "Izvođači i 1099"
+    },
+    "tax.salesTax": {
+      "en": "Sales Tax",
+      "draft": "Porez na promet"
+    },
+    "tax.taxbanditsNotConnected": {
+      "en": "TaxBandits not connected.",
+      "draft": "TaxBandits nije povezan."
+    },
+    "tax.taxbanditsSETUPMd": {
+      "en": "TAXBANDITS_SETUP.md",
+      "draft": "TAXBANDITS_SETUP.md"
+    },
+    "tax.inTheRepoNoIRSFiling": {
+      "en": "in the repo. No IRS filing is ever done in-house.",
+      "draft": "u repozitoriju. IRS prijava se nikada ne podnosi interno."
+    },
+    "tax.taxbanditsConnectedIn": {
+      "en": "TaxBandits connected in",
+      "draft": "TaxBandits povezan u"
+    },
+    "tax.sandbox": {
+      "en": "sandbox",
+      "draft": "testnom"
+    },
+    "tax.modeNoRealFilingsFlip": {
+      "en": "mode — no real filings. Flip",
+      "draft": "načinu — bez pravih prijava. Prebacite"
+    },
+    "tax.taxbanditsSANDBOXFalse": {
+      "en": "TAXBANDITS_SANDBOX=false",
+      "draft": "TAXBANDITS_SANDBOX=false"
+    },
+    "tax.toGoLive": {
+      "en": "to go live.",
+      "draft": "za prelazak uživo."
+    },
+    "tax.newContractor": {
+      "en": "New contractor",
+      "draft": "Novi izvođač"
+    },
+    "tax.name": {
+      "en": "Name *",
+      "draft": "Ime *"
+    },
+    "tax.businessName": {
+      "en": "Business name",
+      "draft": "Naziv tvrtke"
+    },
+    "tax.email": {
+      "en": "Email",
+      "draft": "E-pošta"
+    },
+    "tax.phone": {
+      "en": "Phone",
+      "draft": "Telefon"
+    },
+    "tax.entityType": {
+      "en": "Entity type",
+      "draft": "Vrsta subjekta"
+    },
+    "tax.ssnEIN": {
+      "en": "SSN / EIN",
+      "draft": "SSN / EIN"
+    },
+    "tax.storedSecurely": {
+      "en": "Stored securely",
+      "draft": "Pohranjeno sigurno"
+    },
+    "tax.street": {
+      "en": "Street",
+      "draft": "Ulica"
+    },
+    "tax.city": {
+      "en": "City",
+      "draft": "Grad"
+    },
+    "tax.state": {
+      "en": "State",
+      "draft": "Država"
+    },
+    "tax.zip": {
+      "en": "ZIP",
+      "draft": "ZIP"
+    },
+    "tax.cancel": {
+      "en": "Cancel",
+      "draft": "Otkaži"
+    },
+    "tax.contractor": {
+      "en": "Contractor",
+      "draft": "Izvođač"
+    },
+    "tax.paid": {
+      "en": "Paid",
+      "draft": "Plaćeno"
+    },
+    "tax.w9": {
+      "en": "W-9",
+      "draft": "W-9"
+    },
+    "tax.NEC": {
+      "en": "1099-NEC",
+      "draft": "1099-NEC"
+    },
+    "tax.eFile": {
+      "en": "E-file",
+      "draft": "E-prijava"
+    },
+    "tax.actions": {
+      "en": "Actions",
+      "draft": "Radnje"
+    },
+    "tax.viewPaymentHistory": {
+      "en": "View payment history",
+      "draft": "Pregled povijesti plaćanja"
+    },
+    "tax.toggleW9Received": {
+      "en": "Toggle W-9 received",
+      "draft": "Prebaci primljeni W-9"
+    },
+    "tax.required": {
+      "en": "Required",
+      "draft": "Obavezno"
+    },
+    "tax.viewFilingStatus": {
+      "en": "View filing status",
+      "draft": "Pregled statusa prijave"
+    },
+    "tax.notFiled": {
+      "en": "Not filed",
+      "draft": "Nije prijavljeno"
+    },
+    "tax.recordPayment": {
+      "en": "Record payment",
+      "draft": "Evidentiraj plaćanje"
+    },
+    "tax.noContractorsYet": {
+      "en": "No contractors yet.",
+      "draft": "Još nema izvođača."
+    },
+    "tax.NECDataPreview": {
+      "en": "1099-NEC data preview",
+      "draft": "Pregled podataka 1099-NEC"
+    },
+    "tax.recipientBox1DataShapedFor": {
+      "en": "Recipient + Box 1 data shaped for e-filing. Tax IDs stay masked — reveal needs PII access. Draft data only, nothing is filed in-house.",
+      "draft": "Podaci o primatelju + polje 1 oblikovani za e-prijavu. Porezni ID-jevi ostaju maskirani — otkrivanje zahtijeva pristup osobnim podacima. Samo nacrt podataka, ništa se ne prijavljuje interno."
+    },
+    "tax.loadPreview": {
+      "en": "Load preview",
+      "draft": "Učitaj pregled"
+    },
+    "tax.recipient": {
+      "en": "Recipient",
+      "draft": "Primatelj"
+    },
+    "tax.tin": {
+      "en": "TIN",
+      "draft": "TIN"
+    },
+    "tax.address": {
+      "en": "Address",
+      "draft": "Adresa"
+    },
+    "tax.box1": {
+      "en": "Box 1",
+      "draft": "Polje 1"
+    },
+    "tax.missing": {
+      "en": "missing",
+      "draft": "nedostaje"
+    },
+    "tax.reveal": {
+      "en": "reveal",
+      "draft": "otkrij"
+    },
+    "tax.noContractorsMeetThe": {
+      "en": "No contractors meet the",
+      "draft": "Nijedan izvođač ne ispunjava"
+    },
+    "tax.reportingThresholdFor": {
+      "en": "reporting threshold for",
+      "draft": "prag za prijavu za"
+    },
+    "tax.recordPayment2": {
+      "en": "Record payment —",
+      "draft": "Evidentiraj plaćanje —"
+    },
+    "tax.date": {
+      "en": "Date",
+      "draft": "Datum"
+    },
+    "tax.amount": {
+      "en": "Amount $",
+      "draft": "Iznos $"
+    },
+    "tax.description": {
+      "en": "Description",
+      "draft": "Opis"
+    },
+    "tax.eGMarchBoothRentPayout": {
+      "en": "e.g. March booth rent payout",
+      "draft": "npr. Isplata najma mjesta za ožujak"
+    },
+    "tax.record": {
+      "en": "Record",
+      "draft": "Evidentiraj"
+    },
+    "tax.paymentHistory": {
+      "en": "Payment history —",
+      "draft": "Povijest plaćanja —"
+    },
+    "tax.noPaymentsRecordedFor": {
+      "en": "No payments recorded for",
+      "draft": "Nema evidentiranih plaćanja za"
+    },
+    "tax.amount2": {
+      "en": "Amount",
+      "draft": "Iznos"
+    },
+    "tax.deletePayment": {
+      "en": "Delete payment",
+      "draft": "Izbriši plaćanje"
+    },
+    "tax.yearTotal": {
+      "en": "Year total:",
+      "draft": "Ukupno za godinu:"
+    },
+    "tax.NECFiling": {
+      "en": "1099-NEC filing —",
+      "draft": "Prijava 1099-NEC —"
+    },
+    "tax.thisDraftLivesInTaxBanditsReview": {
+      "en": "This draft lives in TaxBandits — review and Transmit there to file with the IRS. This app never files in-house.",
+      "draft": "Ovaj nacrt živi u TaxBanditsu — pregledajte i prenesite tamo za prijavu IRS-u. Ova aplikacija nikada ne prijavljuje interno."
+    },
+    "tax.NECIsRequiredForNon": {
+      "en": "1099-NEC is required for non-corporate contractors paid ≥",
+      "draft": "1099-NEC je obavezan za nekorporativne izvođače plaćene ≥"
+    },
+    "tax.inTheYearEFilingCreates": {
+      "en": "in the year. E-filing creates a draft in TaxBandits — you review and transmit there. This app never files with the IRS directly.",
+      "draft": "u godini. E-prijava stvara nacrt u TaxBanditsu — pregledavate i prenosite tamo. Ova aplikacija nikada ne prijavljuje izravno IRS-u."
+    },
+    "taxforecast.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "Porezna prognoza"
+    },
+    "taxforecast.OfPriorYearTax": {
+      "en": "100% of prior-year tax",
+      "draft": "100% poreza prethodne godine"
+    },
+    "taxforecast.irsDirectPay": {
+      "en": "IRS Direct Pay",
+      "draft": "IRS izravno plaćanje"
+    },
+    "nav.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "Porezna prognoza"
+    },
+    "nav.tax1099s": {
+      "en": "Tax & 1099s",
+      "draft": "Porez i 1099"
+    },
+    "teamInvites.accountantTaxPro": {
+      "en": "Accountant / Tax pro",
+      "draft": "Račovođa / Porezni stručnjak"
+    }
+  }
+}

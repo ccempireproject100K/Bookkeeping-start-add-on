@@ -1,0 +1,426 @@
+{
+  "_meta": {
+    "lang": "ja",
+    "status": "DRAFT for human review only. Do NOT copy into frontend/src/locales/ja/translation.json until a qualified reviewer (counsel/CPA where relevant) approves each string. Live locale keeps English for these keys.",
+    "source": "docs/TRANSLATION_PLAN.md flagged keys (legal/financial/tax/privacy/safety)",
+    "notice": "Approximate translation from English/Spanish, may not be accurate."
+  },
+  "strings": {
+    "salestaxtab.taxJurisdictions": {
+      "en": "Tax jurisdictions",
+      "draft": "税金 jurisdictions"
+    },
+    "salestaxtab.everywhereYouCollectSalesTaxState": {
+      "en": "Everywhere you collect sales tax — state, county, city, special district.\n          Tag invoices with a jurisdiction and this page tells you what you owe, where.",
+      "draft": "どこでもあなた collect 売上税金 — 州, county, 市区町村, special district.\n  タグ請求書と管轄とこのページ tells あなた何あなた owe, どこ."
+    },
+    "salestaxtab.noJurisdictionsYetAddTheFirst": {
+      "en": "No jurisdictions yet. Add the first place you collect sales tax.",
+      "draft": "いいえ jurisdictions まだ. 追加最初 place あなた collect 売上税金."
+    },
+    "salestaxtab.ofSalesTaxIsnTTagged": {
+      "en": "of sales tax isn't tagged to a jurisdiction yet.\n            Tag invoices with a jurisdiction so every dollar lands in the right bucket.",
+      "draft": "の売上税金ではない tagged へ管轄まだ.\n  タグ請求書と管轄ので毎 dollar lands の右区分."
+    },
+    "salestaxtab.taxCollected": {
+      "en": "Tax collected",
+      "draft": "税金回収済み"
+    },
+    "teaminvites.inviteYourAccountantOrTaxPro": {
+      "en": "Invite your accountant or tax pro — they join with the right permissions\n        and can switch between all the workspaces they serve.",
+      "draft": "招待あなたの会計士または税金プロ — 彼ら参加と右権限\n  と可能切替間すべてワークスペース彼ら serve."
+    },
+    "auditlog.eGTaxInvoiceLogin": {
+      "en": "e.g. tax, invoice, login",
+      "draft": "例税金, 請求書, ログイン"
+    },
+    "cpapackage.mileageLogWithIRSRatesApplied": {
+      "en": "Mileage log with IRS rates applied",
+      "draft": "走行距離ログと IRS レート applied"
+    },
+    "customers.delete": {
+      "en": "Delete",
+      "draft": "削除"
+    },
+    "customers.deleteConfirm": {
+      "en": "Delete customer \"{{name}}\"? Their invoices and statements stay on record.",
+      "draft": "削除顧客 \"{{name}}\"? 彼らの請求書と明細書滞在オン記録."
+    },
+    "estimates.tax": {
+      "en": "Tax ($)",
+      "draft": "税金 ($)"
+    },
+    "expenses.taxID": {
+      "en": "Tax ID",
+      "draft": "税金 ID"
+    },
+    "expenses.taxYear": {
+      "en": "Tax year",
+      "draft": "税金年"
+    },
+    "expenses.tax": {
+      "en": "Tax",
+      "draft": "税金"
+    },
+    "expenses.taxIDEIN": {
+      "en": "Tax ID / EIN",
+      "draft": "税金 ID / EIN"
+    },
+    "invoices.refund": {
+      "en": "Refund",
+      "draft": "返金"
+    },
+    "invoices.taxJurisdictionOptional": {
+      "en": "Tax jurisdiction (optional)",
+      "draft": "税金管轄 (任意)"
+    },
+    "invoices.tax": {
+      "en": "Tax ($)",
+      "draft": "税金 ($)"
+    },
+    "invoices.refundCredit": {
+      "en": "Refund credit —",
+      "draft": "返金クレジット —"
+    },
+    "invoices.refundTheRemaining": {
+      "en": "Refund the remaining",
+      "draft": "返金残り"
+    },
+    "mileage.irsLogCSV": {
+      "en": "IRS log CSV",
+      "draft": "IRS ログ CSV"
+    },
+    "payroll.deleteDraft": {
+      "en": "Delete draft",
+      "draft": "削除下書き"
+    },
+    "payroll.partnershipStubWhenAProviderIs": {
+      "en": "Partnership stub: when a provider is connected, runs here will hand off tax filing and direct deposit automatically.",
+      "draft": "提携半券: いつ事業者です接続済み, 実行中ここ予定手オフ税金申告と直接入金自動的に."
+    },
+    "payroll.employerTaxEst": {
+      "en": "Employer payroll tax (est.)",
+      "draft": "Employer 給与税金 (推定)"
+    },
+    "portalview.tax": {
+      "en": "Tax",
+      "draft": "税金"
+    },
+    "recurringinvoices.tax": {
+      "en": "Tax ($)",
+      "draft": "税金 ($)"
+    },
+    "simulator.safetyFloor": {
+      "en": "Safety floor $",
+      "draft": "Safety floor $"
+    },
+    "tax.nameIsRequired": {
+      "en": "Name is required",
+      "draft": "名前です必須"
+    },
+    "tax.contractorAdded": {
+      "en": "Contractor added",
+      "draft": "外注先追加済み"
+    },
+    "tax.w9StatusUpdated": {
+      "en": "W-9 status updated",
+      "draft": "W-9 ステータス更新済み"
+    },
+    "tax.contractorRemoved": {
+      "en": "Contractor removed",
+      "draft": "外注先削除済み"
+    },
+    "tax.enterAPositiveAmount": {
+      "en": "Enter a positive amount",
+      "draft": "入力プラス金額"
+    },
+    "tax.paymentRecorded": {
+      "en": "Payment recorded",
+      "draft": "支払い記録済み"
+    },
+    "tax.paymentDeleted": {
+      "en": "Payment deleted",
+      "draft": "支払い削除済み"
+    },
+    "tax.statusRefreshed": {
+      "en": "Status refreshed",
+      "draft": "ステータス refreshed"
+    },
+    "tax.addContractor": {
+      "en": "Add contractor",
+      "draft": "追加外注先"
+    },
+    "tax.contractors1099s": {
+      "en": "Contractors & 1099s",
+      "draft": "外注先 & 1099"
+    },
+    "tax.salesTax": {
+      "en": "Sales Tax",
+      "draft": "売上税金"
+    },
+    "tax.taxbanditsNotConnected": {
+      "en": "TaxBandits not connected.",
+      "draft": "TaxBandits 未接続済み."
+    },
+    "tax.taxbanditsSETUPMd": {
+      "en": "TAXBANDITS_SETUP.md",
+      "draft": "TAXBANDITS_SETUP.md"
+    },
+    "tax.inTheRepoNoIRSFiling": {
+      "en": "in the repo. No IRS filing is ever done in-house.",
+      "draft": "の repo. いいえ IRS 申告ですこれまで完了 in-house."
+    },
+    "tax.taxbanditsConnectedIn": {
+      "en": "TaxBandits connected in",
+      "draft": "TaxBandits 接続済みの"
+    },
+    "tax.sandbox": {
+      "en": "sandbox",
+      "draft": "sandbox"
+    },
+    "tax.modeNoRealFilingsFlip": {
+      "en": "mode — no real filings. Flip",
+      "draft": "mode — いいえ real filings. Flip"
+    },
+    "tax.taxbanditsSANDBOXFalse": {
+      "en": "TAXBANDITS_SANDBOX=false",
+      "draft": "TAXBANDITS_SANDBOX=偽"
+    },
+    "tax.toGoLive": {
+      "en": "to go live.",
+      "draft": "へ移動ライブ."
+    },
+    "tax.newContractor": {
+      "en": "New contractor",
+      "draft": "新しい外注先"
+    },
+    "tax.name": {
+      "en": "Name *",
+      "draft": "名前 *"
+    },
+    "tax.businessName": {
+      "en": "Business name",
+      "draft": "事業名前"
+    },
+    "tax.email": {
+      "en": "Email",
+      "draft": "メール"
+    },
+    "tax.phone": {
+      "en": "Phone",
+      "draft": "電話"
+    },
+    "tax.entityType": {
+      "en": "Entity type",
+      "draft": "実体種類"
+    },
+    "tax.ssnEIN": {
+      "en": "SSN / EIN",
+      "draft": "SSN / EIN"
+    },
+    "tax.storedSecurely": {
+      "en": "Stored securely",
+      "draft": "Stored securely"
+    },
+    "tax.street": {
+      "en": "Street",
+      "draft": "Street"
+    },
+    "tax.city": {
+      "en": "City",
+      "draft": "市区町村"
+    },
+    "tax.state": {
+      "en": "State",
+      "draft": "州"
+    },
+    "tax.zip": {
+      "en": "ZIP",
+      "draft": "郵便番号"
+    },
+    "tax.cancel": {
+      "en": "Cancel",
+      "draft": "キャンセル"
+    },
+    "tax.contractor": {
+      "en": "Contractor",
+      "draft": "外注先"
+    },
+    "tax.paid": {
+      "en": "Paid",
+      "draft": "支払い済み"
+    },
+    "tax.w9": {
+      "en": "W-9",
+      "draft": "W-9"
+    },
+    "tax.NEC": {
+      "en": "1099-NEC",
+      "draft": "1099-NEC"
+    },
+    "tax.eFile": {
+      "en": "E-file",
+      "draft": "E-file"
+    },
+    "tax.actions": {
+      "en": "Actions",
+      "draft": "操作"
+    },
+    "tax.viewPaymentHistory": {
+      "en": "View payment history",
+      "draft": "表示支払い履歴"
+    },
+    "tax.toggleW9Received": {
+      "en": "Toggle W-9 received",
+      "draft": "Toggle W-9 受領済み"
+    },
+    "tax.required": {
+      "en": "Required",
+      "draft": "必須"
+    },
+    "tax.viewFilingStatus": {
+      "en": "View filing status",
+      "draft": "表示申告ステータス"
+    },
+    "tax.notFiled": {
+      "en": "Not filed",
+      "draft": "未 filed"
+    },
+    "tax.recordPayment": {
+      "en": "Record payment",
+      "draft": "記録支払い"
+    },
+    "tax.noContractorsYet": {
+      "en": "No contractors yet.",
+      "draft": "いいえ外注先まだ."
+    },
+    "tax.NECDataPreview": {
+      "en": "1099-NEC data preview",
+      "draft": "1099-NEC データプレビュー"
+    },
+    "tax.recipientBox1DataShapedFor": {
+      "en": "Recipient + Box 1 data shaped for e-filing. Tax IDs stay masked — reveal needs PII access. Draft data only, nothing is filed in-house.",
+      "draft": "受信者 + Box 1 データ shaped 用 e-filing. 税金 IDs 滞在 masked — reveal needs PII アクセス. 下書きデータのみ, 何もです filed in-house."
+    },
+    "tax.loadPreview": {
+      "en": "Load preview",
+      "draft": "読み込みプレビュー"
+    },
+    "tax.recipient": {
+      "en": "Recipient",
+      "draft": "受信者"
+    },
+    "tax.tin": {
+      "en": "TIN",
+      "draft": "TIN"
+    },
+    "tax.address": {
+      "en": "Address",
+      "draft": "住所"
+    },
+    "tax.box1": {
+      "en": "Box 1",
+      "draft": "Box 1"
+    },
+    "tax.missing": {
+      "en": "missing",
+      "draft": "不足"
+    },
+    "tax.reveal": {
+      "en": "reveal",
+      "draft": "reveal"
+    },
+    "tax.noContractorsMeetThe": {
+      "en": "No contractors meet the",
+      "draft": "いいえ外注先 meet "
+    },
+    "tax.reportingThresholdFor": {
+      "en": "reporting threshold for",
+      "draft": "報告 threshold 用"
+    },
+    "tax.recordPayment2": {
+      "en": "Record payment —",
+      "draft": "記録支払い —"
+    },
+    "tax.date": {
+      "en": "Date",
+      "draft": "日付"
+    },
+    "tax.amount": {
+      "en": "Amount $",
+      "draft": "金額 $"
+    },
+    "tax.description": {
+      "en": "Description",
+      "draft": "説明"
+    },
+    "tax.eGMarchBoothRentPayout": {
+      "en": "e.g. March booth rent payout",
+      "draft": "例 March ブース家賃支払い"
+    },
+    "tax.record": {
+      "en": "Record",
+      "draft": "記録"
+    },
+    "tax.paymentHistory": {
+      "en": "Payment history —",
+      "draft": "支払い履歴 —"
+    },
+    "tax.noPaymentsRecordedFor": {
+      "en": "No payments recorded for",
+      "draft": "いいえ支払い記録済み用"
+    },
+    "tax.amount2": {
+      "en": "Amount",
+      "draft": "金額"
+    },
+    "tax.deletePayment": {
+      "en": "Delete payment",
+      "draft": "削除支払い"
+    },
+    "tax.yearTotal": {
+      "en": "Year total:",
+      "draft": "年合計:"
+    },
+    "tax.NECFiling": {
+      "en": "1099-NEC filing —",
+      "draft": "1099-NEC 申告 —"
+    },
+    "tax.thisDraftLivesInTaxBanditsReview": {
+      "en": "This draft lives in TaxBandits — review and Transmit there to file with the IRS. This app never files in-house.",
+      "draft": "この下書き lives の TaxBandits — 確認と Transmit there へファイルと IRS. このアプリしないファイル in-house."
+    },
+    "tax.NECIsRequiredForNon": {
+      "en": "1099-NEC is required for non-corporate contractors paid ≥",
+      "draft": "1099-NEC です必須用 non-corporate 外注先支払い済み ≥"
+    },
+    "tax.inTheYearEFilingCreates": {
+      "en": "in the year. E-filing creates a draft in TaxBandits — you review and transmit there. This app never files with the IRS directly.",
+      "draft": "の年. E-filing creates 下書きの TaxBandits — あなた確認と transmit there. このアプリしないファイルと IRS directly."
+    },
+    "taxforecast.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "税金予測"
+    },
+    "taxforecast.OfPriorYearTax": {
+      "en": "100% of prior-year tax",
+      "draft": "100% の prior-year 税金"
+    },
+    "taxforecast.irsDirectPay": {
+      "en": "IRS Direct Pay",
+      "draft": "IRS 直接支払う"
+    },
+    "nav.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "税金予測"
+    },
+    "nav.tax1099s": {
+      "en": "Tax & 1099s",
+      "draft": "税金 & 1099"
+    },
+    "teamInvites.accountantTaxPro": {
+      "en": "Accountant / Tax pro",
+      "draft": "会計士 / 税金プロ"
+    }
+  }
+}

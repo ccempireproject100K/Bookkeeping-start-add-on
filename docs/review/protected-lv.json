@@ -1,0 +1,426 @@
+{
+  "_meta": {
+    "lang": "lv",
+    "status": "DRAFT for human review only. Do NOT copy into frontend/src/locales/lv/translation.json until a qualified reviewer (counsel/CPA where relevant) approves each string. Live locale keeps English for these keys.",
+    "source": "docs/TRANSLATION_PLAN.md flagged keys (legal/financial/tax/privacy/safety)",
+    "notice": "Approximate translation from English/Spanish, may not be accurate."
+  },
+  "strings": {
+    "salestaxtab.taxJurisdictions": {
+      "en": "Tax jurisdictions",
+      "draft": "Nodoklis jurisdictions"
+    },
+    "salestaxtab.everywhereYouCollectSalesTaxState": {
+      "en": "Everywhere you collect sales tax — state, county, city, special district.\n          Tag invoices with a jurisdiction and this page tells you what you owe, where.",
+      "draft": "Visur jūs collect pārdošana nodoklis — štats, county, pilsēta, special district.\n  Atzīme rēķini ar jurisdikcija un šis lapa tells jūs kas jūs owe, kur."
+    },
+    "salestaxtab.noJurisdictionsYetAddTheFirst": {
+      "en": "No jurisdictions yet. Add the first place you collect sales tax.",
+      "draft": "Nē jurisdictions vēl. Pievienot pirmais place jūs collect pārdošana nodoklis."
+    },
+    "salestaxtab.ofSalesTaxIsnTTagged": {
+      "en": "of sales tax isn't tagged to a jurisdiction yet.\n            Tag invoices with a jurisdiction so every dollar lands in the right bucket.",
+      "draft": "no pārdošana nodoklis nav tagged līdz jurisdikcija vēl.\n  Atzīme rēķini ar jurisdikcija tātad katrs dollar lands pa labi spainis."
+    },
+    "salestaxtab.taxCollected": {
+      "en": "Tax collected",
+      "draft": "Nodoklis iekasēts"
+    },
+    "teaminvites.inviteYourAccountantOrTaxPro": {
+      "en": "Invite your accountant or tax pro — they join with the right permissions\n        and can switch between all the workspaces they serve.",
+      "draft": "Uzaicināt jūsu grāmatvedis vai nodoklis pro — viņi pievienoties ar pa labi atļaujas\n  un var pārslēgt starp visi darbvietas viņi serve."
+    },
+    "auditlog.eGTaxInvoiceLogin": {
+      "en": "e.g. tax, invoice, login",
+      "draft": "piem. nodoklis, rēķins, pieteikšanās"
+    },
+    "cpapackage.mileageLogWithIRSRatesApplied": {
+      "en": "Mileage log with IRS rates applied",
+      "draft": "Nobraukums žurnāls ar IRS likmes applied"
+    },
+    "customers.delete": {
+      "en": "Delete",
+      "draft": "Dzēst"
+    },
+    "customers.deleteConfirm": {
+      "en": "Delete customer \"{{name}}\"? Their invoices and statements stay on record.",
+      "draft": "Dzēst klients \"{{name}}\"? Viņu rēķini un izraksti palikt ierakstīt."
+    },
+    "estimates.tax": {
+      "en": "Tax ($)",
+      "draft": "Nodoklis ($)"
+    },
+    "expenses.taxID": {
+      "en": "Tax ID",
+      "draft": "Nodoklis ID"
+    },
+    "expenses.taxYear": {
+      "en": "Tax year",
+      "draft": "Nodoklis gads"
+    },
+    "expenses.tax": {
+      "en": "Tax",
+      "draft": "Nodoklis"
+    },
+    "expenses.taxIDEIN": {
+      "en": "Tax ID / EIN",
+      "draft": "Nodoklis ID / EIN"
+    },
+    "invoices.refund": {
+      "en": "Refund",
+      "draft": "Atmaksa"
+    },
+    "invoices.taxJurisdictionOptional": {
+      "en": "Tax jurisdiction (optional)",
+      "draft": "Nodoklis jurisdikcija (neobligāts)"
+    },
+    "invoices.tax": {
+      "en": "Tax ($)",
+      "draft": "Nodoklis ($)"
+    },
+    "invoices.refundCredit": {
+      "en": "Refund credit —",
+      "draft": "Atmaksa kredīts —"
+    },
+    "invoices.refundTheRemaining": {
+      "en": "Refund the remaining",
+      "draft": "Atmaksa atlikušais"
+    },
+    "mileage.irsLogCSV": {
+      "en": "IRS log CSV",
+      "draft": "IRS žurnāls CSV"
+    },
+    "payroll.deleteDraft": {
+      "en": "Delete draft",
+      "draft": "Dzēst melnraksts"
+    },
+    "payroll.partnershipStubWhenAProviderIs": {
+      "en": "Partnership stub: when a provider is connected, runs here will hand off tax filing and direct deposit automatically.",
+      "draft": "Partnerība kvīts: kad pakalpojumu sniedzējs ir savienots, darbojas šeit būs roka izslēgts nodoklis iesniegšana un tiešs iemaksa automātiski."
+    },
+    "payroll.employerTaxEst": {
+      "en": "Employer payroll tax (est.)",
+      "draft": "Employer darba samaksa nodoklis (aptuveni.)"
+    },
+    "portalview.tax": {
+      "en": "Tax",
+      "draft": "Nodoklis"
+    },
+    "recurringinvoices.tax": {
+      "en": "Tax ($)",
+      "draft": "Nodoklis ($)"
+    },
+    "simulator.safetyFloor": {
+      "en": "Safety floor $",
+      "draft": "Safety floor $"
+    },
+    "tax.nameIsRequired": {
+      "en": "Name is required",
+      "draft": "Nosaukums ir obligāts"
+    },
+    "tax.contractorAdded": {
+      "en": "Contractor added",
+      "draft": "Uzņēmējs pievienots"
+    },
+    "tax.w9StatusUpdated": {
+      "en": "W-9 status updated",
+      "draft": "W-9 statuss atjaunināts"
+    },
+    "tax.contractorRemoved": {
+      "en": "Contractor removed",
+      "draft": "Uzņēmējs noņemts"
+    },
+    "tax.enterAPositiveAmount": {
+      "en": "Enter a positive amount",
+      "draft": "Ievadīt pozitīvs summa"
+    },
+    "tax.paymentRecorded": {
+      "en": "Payment recorded",
+      "draft": "Maksājums ierakstīts"
+    },
+    "tax.paymentDeleted": {
+      "en": "Payment deleted",
+      "draft": "Maksājums dzēsts"
+    },
+    "tax.statusRefreshed": {
+      "en": "Status refreshed",
+      "draft": "Statuss refreshed"
+    },
+    "tax.addContractor": {
+      "en": "Add contractor",
+      "draft": "Pievienot uzņēmējs"
+    },
+    "tax.contractors1099s": {
+      "en": "Contractors & 1099s",
+      "draft": "Uzņēmēji & 1099s"
+    },
+    "tax.salesTax": {
+      "en": "Sales Tax",
+      "draft": "Pārdošana Nodoklis"
+    },
+    "tax.taxbanditsNotConnected": {
+      "en": "TaxBandits not connected.",
+      "draft": "TaxBandits nav savienots."
+    },
+    "tax.taxbanditsSETUPMd": {
+      "en": "TAXBANDITS_SETUP.md",
+      "draft": "TAXBANDITS_SETUP.md"
+    },
+    "tax.inTheRepoNoIRSFiling": {
+      "en": "in the repo. No IRS filing is ever done in-house.",
+      "draft": " repo. Nē IRS iesniegšana ir kādreiz padarīts in-house."
+    },
+    "tax.taxbanditsConnectedIn": {
+      "en": "TaxBandits connected in",
+      "draft": "TaxBandits savienots "
+    },
+    "tax.sandbox": {
+      "en": "sandbox",
+      "draft": "sandbox"
+    },
+    "tax.modeNoRealFilingsFlip": {
+      "en": "mode — no real filings. Flip",
+      "draft": "mode — nē real filings. Flip"
+    },
+    "tax.taxbanditsSANDBOXFalse": {
+      "en": "TAXBANDITS_SANDBOX=false",
+      "draft": "TAXBANDITS_SANDBOX=nepatiess"
+    },
+    "tax.toGoLive": {
+      "en": "to go live.",
+      "draft": "līdz iet tiešraide."
+    },
+    "tax.newContractor": {
+      "en": "New contractor",
+      "draft": "Jauns uzņēmējs"
+    },
+    "tax.name": {
+      "en": "Name *",
+      "draft": "Nosaukums *"
+    },
+    "tax.businessName": {
+      "en": "Business name",
+      "draft": "Uzņēmums nosaukums"
+    },
+    "tax.email": {
+      "en": "Email",
+      "draft": "E-pasts"
+    },
+    "tax.phone": {
+      "en": "Phone",
+      "draft": "Tālrunis"
+    },
+    "tax.entityType": {
+      "en": "Entity type",
+      "draft": "Subjekts tips"
+    },
+    "tax.ssnEIN": {
+      "en": "SSN / EIN",
+      "draft": "SSN / EIN"
+    },
+    "tax.storedSecurely": {
+      "en": "Stored securely",
+      "draft": "Stored securely"
+    },
+    "tax.street": {
+      "en": "Street",
+      "draft": "Street"
+    },
+    "tax.city": {
+      "en": "City",
+      "draft": "Pilsēta"
+    },
+    "tax.state": {
+      "en": "State",
+      "draft": "Štats"
+    },
+    "tax.zip": {
+      "en": "ZIP",
+      "draft": "PASTA INDEKSS"
+    },
+    "tax.cancel": {
+      "en": "Cancel",
+      "draft": "Atcelt"
+    },
+    "tax.contractor": {
+      "en": "Contractor",
+      "draft": "Uzņēmējs"
+    },
+    "tax.paid": {
+      "en": "Paid",
+      "draft": "Apmaksāts"
+    },
+    "tax.w9": {
+      "en": "W-9",
+      "draft": "W-9"
+    },
+    "tax.NEC": {
+      "en": "1099-NEC",
+      "draft": "1099-NEC"
+    },
+    "tax.eFile": {
+      "en": "E-file",
+      "draft": "E-file"
+    },
+    "tax.actions": {
+      "en": "Actions",
+      "draft": "Darbības"
+    },
+    "tax.viewPaymentHistory": {
+      "en": "View payment history",
+      "draft": "Skatīt maksājums vēsture"
+    },
+    "tax.toggleW9Received": {
+      "en": "Toggle W-9 received",
+      "draft": "Toggle W-9 saņemts"
+    },
+    "tax.required": {
+      "en": "Required",
+      "draft": "Obligāts"
+    },
+    "tax.viewFilingStatus": {
+      "en": "View filing status",
+      "draft": "Skatīt iesniegšana statuss"
+    },
+    "tax.notFiled": {
+      "en": "Not filed",
+      "draft": "Nav filed"
+    },
+    "tax.recordPayment": {
+      "en": "Record payment",
+      "draft": "Ierakstīt maksājums"
+    },
+    "tax.noContractorsYet": {
+      "en": "No contractors yet.",
+      "draft": "Nē uzņēmēji vēl."
+    },
+    "tax.NECDataPreview": {
+      "en": "1099-NEC data preview",
+      "draft": "1099-NEC dati priekšskatījums"
+    },
+    "tax.recipientBox1DataShapedFor": {
+      "en": "Recipient + Box 1 data shaped for e-filing. Tax IDs stay masked — reveal needs PII access. Draft data only, nothing is filed in-house.",
+      "draft": "Saņēmējs + Box 1 dati shaped priekš e-filing. Nodoklis IDs palikt masked — reveal needs PII piekļuve. Melnraksts dati tikai, nekas ir filed in-house."
+    },
+    "tax.loadPreview": {
+      "en": "Load preview",
+      "draft": "Ielādēt priekšskatījums"
+    },
+    "tax.recipient": {
+      "en": "Recipient",
+      "draft": "Saņēmējs"
+    },
+    "tax.tin": {
+      "en": "TIN",
+      "draft": "TIN"
+    },
+    "tax.address": {
+      "en": "Address",
+      "draft": "Adrese"
+    },
+    "tax.box1": {
+      "en": "Box 1",
+      "draft": "Box 1"
+    },
+    "tax.missing": {
+      "en": "missing",
+      "draft": "trūkstošs"
+    },
+    "tax.reveal": {
+      "en": "reveal",
+      "draft": "reveal"
+    },
+    "tax.noContractorsMeetThe": {
+      "en": "No contractors meet the",
+      "draft": "Nē uzņēmēji meet "
+    },
+    "tax.reportingThresholdFor": {
+      "en": "reporting threshold for",
+      "draft": "pārskati threshold priekš"
+    },
+    "tax.recordPayment2": {
+      "en": "Record payment —",
+      "draft": "Ierakstīt maksājums —"
+    },
+    "tax.date": {
+      "en": "Date",
+      "draft": "Datums"
+    },
+    "tax.amount": {
+      "en": "Amount $",
+      "draft": "Summa $"
+    },
+    "tax.description": {
+      "en": "Description",
+      "draft": "Apraksts"
+    },
+    "tax.eGMarchBoothRentPayout": {
+      "en": "e.g. March booth rent payout",
+      "draft": "piem. March stends īre izmaksas"
+    },
+    "tax.record": {
+      "en": "Record",
+      "draft": "Ierakstīt"
+    },
+    "tax.paymentHistory": {
+      "en": "Payment history —",
+      "draft": "Maksājums vēsture —"
+    },
+    "tax.noPaymentsRecordedFor": {
+      "en": "No payments recorded for",
+      "draft": "Nē maksājumi ierakstīts priekš"
+    },
+    "tax.amount2": {
+      "en": "Amount",
+      "draft": "Summa"
+    },
+    "tax.deletePayment": {
+      "en": "Delete payment",
+      "draft": "Dzēst maksājums"
+    },
+    "tax.yearTotal": {
+      "en": "Year total:",
+      "draft": "Gads kopā:"
+    },
+    "tax.NECFiling": {
+      "en": "1099-NEC filing —",
+      "draft": "1099-NEC iesniegšana —"
+    },
+    "tax.thisDraftLivesInTaxBanditsReview": {
+      "en": "This draft lives in TaxBandits — review and Transmit there to file with the IRS. This app never files in-house.",
+      "draft": "Šis melnraksts lives TaxBandits — pārskats un Transmit there līdz fails ar IRS. Šis lietotne nekad faili in-house."
+    },
+    "tax.NECIsRequiredForNon": {
+      "en": "1099-NEC is required for non-corporate contractors paid ≥",
+      "draft": "1099-NEC ir obligāts priekš non-corporate uzņēmēji apmaksāts ≥"
+    },
+    "tax.inTheYearEFilingCreates": {
+      "en": "in the year. E-filing creates a draft in TaxBandits — you review and transmit there. This app never files with the IRS directly.",
+      "draft": " gads. E-filing creates melnraksts TaxBandits — jūs pārskats un transmit there. Šis lietotne nekad faili ar IRS directly."
+    },
+    "taxforecast.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "Nodoklis Prognoze"
+    },
+    "taxforecast.OfPriorYearTax": {
+      "en": "100% of prior-year tax",
+      "draft": "100% no prior-year nodoklis"
+    },
+    "taxforecast.irsDirectPay": {
+      "en": "IRS Direct Pay",
+      "draft": "IRS Tiešs Maksāt"
+    },
+    "nav.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "Nodoklis Prognoze"
+    },
+    "nav.tax1099s": {
+      "en": "Tax & 1099s",
+      "draft": "Nodoklis & 1099s"
+    },
+    "teamInvites.accountantTaxPro": {
+      "en": "Accountant / Tax pro",
+      "draft": "Grāmatvedis / Nodoklis pro"
+    }
+  }
+}

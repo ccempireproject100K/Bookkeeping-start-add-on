@@ -1,0 +1,426 @@
+{
+  "_meta": {
+    "lang": "om",
+    "status": "DRAFT for human review only. Do NOT copy into frontend/src/locales/om/translation.json until a qualified reviewer (counsel/CPA where relevant) approves each string. Live locale keeps English for these keys.",
+    "source": "docs/TRANSLATION_PLAN.md flagged keys (legal/financial/tax/privacy/safety)",
+    "notice": "Approximate translation from English/Spanish, may not be accurate."
+  },
+  "strings": {
+    "salestaxtab.taxJurisdictions": {
+      "en": "Tax jurisdictions",
+      "draft": "Gibira jurisdictions"
+    },
+    "salestaxtab.everywhereYouCollectSalesTaxState": {
+      "en": "Everywhere you collect sales tax — state, county, city, special district.\n          Tag invoices with a jurisdiction and this page tells you what you owe, where.",
+      "draft": "Bakka hunda ati collect gurgurtaa gibira — naannoo, county, magaalaa, special district.\n  Mallattoo invoisoota waliin murtee fi kun fuula tells ati maal ati owe, eessa."
+    },
+    "salestaxtab.noJurisdictionsYetAddTheFirst": {
+      "en": "No jurisdictions yet. Add the first place you collect sales tax.",
+      "draft": "Lakki jurisdictions amma. Dabali jalqabaa place ati collect gurgurtaa gibira."
+    },
+    "salestaxtab.ofSalesTaxIsnTTagged": {
+      "en": "of sales tax isn't tagged to a jurisdiction yet.\n            Tag invoices with a jurisdiction so every dollar lands in the right bucket.",
+      "draft": "kan gurgurtaa gibira miti tagged gara murtee amma.\n  Mallattoo invoisoota waliin murtee kanaaf hunda dollar lands keessa mirga gosa."
+    },
+    "salestaxtab.taxCollected": {
+      "en": "Tax collected",
+      "draft": "Gibira walitti qabameera"
+    },
+    "teaminvites.inviteYourAccountantOrTaxPro": {
+      "en": "Invite your accountant or tax pro — they join with the right permissions\n        and can switch between all the workspaces they serve.",
+      "draft": "Affeererraa kee herregaa yookiin gibira oogummaa — isaan hirmadhu waliin mirga heeyyamoota\n  fi danda’a geeddari gidduu hunda iddoowwan hojii isaan serve."
+    },
+    "auditlog.eGTaxInvoiceLogin": {
+      "en": "e.g. tax, invoice, login",
+      "draft": "fkn gibira, invoisii, seeni"
+    },
+    "cpapackage.mileageLogWithIRSRatesApplied": {
+      "en": "Mileage log with IRS rates applied",
+      "draft": "Fageenya galmee waliin IRS sadarkewwan applied"
+    },
+    "customers.delete": {
+      "en": "Delete",
+      "draft": "Balleessi"
+    },
+    "customers.deleteConfirm": {
+      "en": "Delete customer \"{{name}}\"? Their invoices and statements stay on record.",
+      "draft": "Balleessi maamila \"{{name}}\"? Isaanii invoisoota fi ibsoota turaa’i baneera galmee."
+    },
+    "estimates.tax": {
+      "en": "Tax ($)",
+      "draft": "Gibira ($)"
+    },
+    "expenses.taxID": {
+      "en": "Tax ID",
+      "draft": "Gibira ID"
+    },
+    "expenses.taxYear": {
+      "en": "Tax year",
+      "draft": "Gibira waggaa"
+    },
+    "expenses.tax": {
+      "en": "Tax",
+      "draft": "Gibira"
+    },
+    "expenses.taxIDEIN": {
+      "en": "Tax ID / EIN",
+      "draft": "Gibira ID / EIN"
+    },
+    "invoices.refund": {
+      "en": "Refund",
+      "draft": "Deebisuu"
+    },
+    "invoices.taxJurisdictionOptional": {
+      "en": "Tax jurisdiction (optional)",
+      "draft": "Gibira murtee (filannoo)"
+    },
+    "invoices.tax": {
+      "en": "Tax ($)",
+      "draft": "Gibira ($)"
+    },
+    "invoices.refundCredit": {
+      "en": "Refund credit —",
+      "draft": "Deebisuu liiqii —"
+    },
+    "invoices.refundTheRemaining": {
+      "en": "Refund the remaining",
+      "draft": "Deebisuu hafe"
+    },
+    "mileage.irsLogCSV": {
+      "en": "IRS log CSV",
+      "draft": "IRS galmee CSV"
+    },
+    "payroll.deleteDraft": {
+      "en": "Delete draft",
+      "draft": "Balleessi qarshi"
+    },
+    "payroll.partnershipStubWhenAProviderIs": {
+      "en": "Partnership stub: when a provider is connected, runs here will hand off tax filing and direct deposit automatically.",
+      "draft": "Michummaa hafe: yoom dhiyeessaa dha walqabateera, fiiga as ta’a harka cuqeera gibira galchuu fi kallattii kusaa ofumaan."
+    },
+    "payroll.employerTaxEst": {
+      "en": "Employer payroll tax (est.)",
+      "draft": "Employer mindaa gibira (tilmaama)"
+    },
+    "portalview.tax": {
+      "en": "Tax",
+      "draft": "Gibira"
+    },
+    "recurringinvoices.tax": {
+      "en": "Tax ($)",
+      "draft": "Gibira ($)"
+    },
+    "simulator.safetyFloor": {
+      "en": "Safety floor $",
+      "draft": "Safety floor $"
+    },
+    "tax.nameIsRequired": {
+      "en": "Name is required",
+      "draft": "Maqaa dha barbaachisaa"
+    },
+    "tax.contractorAdded": {
+      "en": "Contractor added",
+      "draft": "Kontiraaktera dabalamameera"
+    },
+    "tax.w9StatusUpdated": {
+      "en": "W-9 status updated",
+      "draft": "W-9 haala haaromfameera"
+    },
+    "tax.contractorRemoved": {
+      "en": "Contractor removed",
+      "draft": "Kontiraaktera kaafameera"
+    },
+    "tax.enterAPositiveAmount": {
+      "en": "Enter a positive amount",
+      "draft": "Seeni gaarii gatii"
+    },
+    "tax.paymentRecorded": {
+      "en": "Payment recorded",
+      "draft": "Kaffaltii galmaa’eera"
+    },
+    "tax.paymentDeleted": {
+      "en": "Payment deleted",
+      "draft": "Kaffaltii balleeffameera"
+    },
+    "tax.statusRefreshed": {
+      "en": "Status refreshed",
+      "draft": "Haala refreshed"
+    },
+    "tax.addContractor": {
+      "en": "Add contractor",
+      "draft": "Dabali kontiraaktera"
+    },
+    "tax.contractors1099s": {
+      "en": "Contractors & 1099s",
+      "draft": "Kontiraakteroota & 1099"
+    },
+    "tax.salesTax": {
+      "en": "Sales Tax",
+      "draft": "Gurgurtaa Gibira"
+    },
+    "tax.taxbanditsNotConnected": {
+      "en": "TaxBandits not connected.",
+      "draft": "TaxBandits hin walqabateera."
+    },
+    "tax.taxbanditsSETUPMd": {
+      "en": "TAXBANDITS_SETUP.md",
+      "draft": "TAXBANDITS_SETUP.md"
+    },
+    "tax.inTheRepoNoIRSFiling": {
+      "en": "in the repo. No IRS filing is ever done in-house.",
+      "draft": "keessa repo. Lakki IRS galchuu dha tasaa xumurameera in-house."
+    },
+    "tax.taxbanditsConnectedIn": {
+      "en": "TaxBandits connected in",
+      "draft": "TaxBandits walqabateera keessa"
+    },
+    "tax.sandbox": {
+      "en": "sandbox",
+      "draft": "sandbox"
+    },
+    "tax.modeNoRealFilingsFlip": {
+      "en": "mode — no real filings. Flip",
+      "draft": "mode — lakki real filings. Flip"
+    },
+    "tax.taxbanditsSANDBOXFalse": {
+      "en": "TAXBANDITS_SANDBOX=false",
+      "draft": "TAXBANDITS_SANDBOX=soba"
+    },
+    "tax.toGoLive": {
+      "en": "to go live.",
+      "draft": "gara deemi lubbuun jira."
+    },
+    "tax.newContractor": {
+      "en": "New contractor",
+      "draft": "Haaraa kontiraaktera"
+    },
+    "tax.name": {
+      "en": "Name *",
+      "draft": "Maqaa *"
+    },
+    "tax.businessName": {
+      "en": "Business name",
+      "draft": "Daldala maqaa"
+    },
+    "tax.email": {
+      "en": "Email",
+      "draft": "Imeelii"
+    },
+    "tax.phone": {
+      "en": "Phone",
+      "draft": "Bilbila"
+    },
+    "tax.entityType": {
+      "en": "Entity type",
+      "draft": "Uumama gosa"
+    },
+    "tax.ssnEIN": {
+      "en": "SSN / EIN",
+      "draft": "SSN / EIN"
+    },
+    "tax.storedSecurely": {
+      "en": "Stored securely",
+      "draft": "Stored securely"
+    },
+    "tax.street": {
+      "en": "Street",
+      "draft": "Street"
+    },
+    "tax.city": {
+      "en": "City",
+      "draft": "Magaalaa"
+    },
+    "tax.state": {
+      "en": "State",
+      "draft": "Naannoo"
+    },
+    "tax.zip": {
+      "en": "ZIP",
+      "draft": "KOODII"
+    },
+    "tax.cancel": {
+      "en": "Cancel",
+      "draft": "Haqxuu"
+    },
+    "tax.contractor": {
+      "en": "Contractor",
+      "draft": "Kontiraaktera"
+    },
+    "tax.paid": {
+      "en": "Paid",
+      "draft": "Kaffalameera"
+    },
+    "tax.w9": {
+      "en": "W-9",
+      "draft": "W-9"
+    },
+    "tax.NEC": {
+      "en": "1099-NEC",
+      "draft": "1099-NEC"
+    },
+    "tax.eFile": {
+      "en": "E-file",
+      "draft": "E-file"
+    },
+    "tax.actions": {
+      "en": "Actions",
+      "draft": "Hojiiwwan"
+    },
+    "tax.viewPaymentHistory": {
+      "en": "View payment history",
+      "draft": "Ilaali kaffaltii seenaa"
+    },
+    "tax.toggleW9Received": {
+      "en": "Toggle W-9 received",
+      "draft": "Toggle W-9 fudhatameera"
+    },
+    "tax.required": {
+      "en": "Required",
+      "draft": "Barbaachisaa"
+    },
+    "tax.viewFilingStatus": {
+      "en": "View filing status",
+      "draft": "Ilaali galchuu haala"
+    },
+    "tax.notFiled": {
+      "en": "Not filed",
+      "draft": "Hin filed"
+    },
+    "tax.recordPayment": {
+      "en": "Record payment",
+      "draft": "Galmee kaffaltii"
+    },
+    "tax.noContractorsYet": {
+      "en": "No contractors yet.",
+      "draft": "Lakki kontiraakteroota amma."
+    },
+    "tax.NECDataPreview": {
+      "en": "1099-NEC data preview",
+      "draft": "1099-NEC odeeffannoo dura ilaali"
+    },
+    "tax.recipientBox1DataShapedFor": {
+      "en": "Recipient + Box 1 data shaped for e-filing. Tax IDs stay masked — reveal needs PII access. Draft data only, nothing is filed in-house.",
+      "draft": "Fudhataa + Box 1 odeeffannoo shaped dhaaf e-filing. Gibira IDs turaa’i masked — reveal needs PII seensa. Qarshi odeeffannoo qofa, homtuu dha filed in-house."
+    },
+    "tax.loadPreview": {
+      "en": "Load preview",
+      "draft": "Fe’i dura ilaali"
+    },
+    "tax.recipient": {
+      "en": "Recipient",
+      "draft": "Fudhataa"
+    },
+    "tax.tin": {
+      "en": "TIN",
+      "draft": "TIN"
+    },
+    "tax.address": {
+      "en": "Address",
+      "draft": "Teessoo"
+    },
+    "tax.box1": {
+      "en": "Box 1",
+      "draft": "Box 1"
+    },
+    "tax.missing": {
+      "en": "missing",
+      "draft": "dhabameera"
+    },
+    "tax.reveal": {
+      "en": "reveal",
+      "draft": "reveal"
+    },
+    "tax.noContractorsMeetThe": {
+      "en": "No contractors meet the",
+      "draft": "Lakki kontiraakteroota meet "
+    },
+    "tax.reportingThresholdFor": {
+      "en": "reporting threshold for",
+      "draft": "gabaasuu threshold dhaaf"
+    },
+    "tax.recordPayment2": {
+      "en": "Record payment —",
+      "draft": "Galmee kaffaltii —"
+    },
+    "tax.date": {
+      "en": "Date",
+      "draft": "Guyyaa"
+    },
+    "tax.amount": {
+      "en": "Amount $",
+      "draft": "Gatii $"
+    },
+    "tax.description": {
+      "en": "Description",
+      "draft": "Ibsa"
+    },
+    "tax.eGMarchBoothRentPayout": {
+      "en": "e.g. March booth rent payout",
+      "draft": "fkn March goochaa kiree kaffaltii"
+    },
+    "tax.record": {
+      "en": "Record",
+      "draft": "Galmee"
+    },
+    "tax.paymentHistory": {
+      "en": "Payment history —",
+      "draft": "Kaffaltii seenaa —"
+    },
+    "tax.noPaymentsRecordedFor": {
+      "en": "No payments recorded for",
+      "draft": "Lakki kaffaltoota galmaa’eera dhaaf"
+    },
+    "tax.amount2": {
+      "en": "Amount",
+      "draft": "Gatii"
+    },
+    "tax.deletePayment": {
+      "en": "Delete payment",
+      "draft": "Balleessi kaffaltii"
+    },
+    "tax.yearTotal": {
+      "en": "Year total:",
+      "draft": "Waggaa waliigala:"
+    },
+    "tax.NECFiling": {
+      "en": "1099-NEC filing —",
+      "draft": "1099-NEC galchuu —"
+    },
+    "tax.thisDraftLivesInTaxBanditsReview": {
+      "en": "This draft lives in TaxBandits — review and Transmit there to file with the IRS. This app never files in-house.",
+      "draft": "Kun qarshi lives keessa TaxBandits — irra deebi’i ilaali fi Transmit there gara faayilii waliin IRS. Kun appii gonkumaa faayiloota in-house."
+    },
+    "tax.NECIsRequiredForNon": {
+      "en": "1099-NEC is required for non-corporate contractors paid ≥",
+      "draft": "1099-NEC dha barbaachisaa dhaaf non-corporate kontiraakteroota kaffalameera ≥"
+    },
+    "tax.inTheYearEFilingCreates": {
+      "en": "in the year. E-filing creates a draft in TaxBandits — you review and transmit there. This app never files with the IRS directly.",
+      "draft": "keessa waggaa. E-filing creates qarshi keessa TaxBandits — ati irra deebi’i ilaali fi transmit there. Kun appii gonkumaa faayiloota waliin IRS directly."
+    },
+    "taxforecast.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "Gibira Tilmaama"
+    },
+    "taxforecast.OfPriorYearTax": {
+      "en": "100% of prior-year tax",
+      "draft": "100% kan prior-year gibira"
+    },
+    "taxforecast.irsDirectPay": {
+      "en": "IRS Direct Pay",
+      "draft": "IRS Kallattii Kaffaluu"
+    },
+    "nav.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "Gibira Tilmaama"
+    },
+    "nav.tax1099s": {
+      "en": "Tax & 1099s",
+      "draft": "Gibira & 1099"
+    },
+    "teamInvites.accountantTaxPro": {
+      "en": "Accountant / Tax pro",
+      "draft": "Herregaa / Gibira oogummaa"
+    }
+  }
+}

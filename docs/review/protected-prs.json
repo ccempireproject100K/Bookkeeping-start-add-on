@@ -1,0 +1,426 @@
+{
+  "_meta": {
+    "lang": "prs",
+    "status": "DRAFT for human review only. Do NOT copy into frontend/src/locales/prs/translation.json until a qualified reviewer (counsel/CPA where relevant) approves each string. Live locale keeps English for these keys.",
+    "source": "docs/TRANSLATION_PLAN.md flagged keys (legal/financial/tax/privacy/safety)",
+    "notice": "Approximate translation from English/Spanish, may not be accurate."
+  },
+  "strings": {
+    "salestaxtab.taxJurisdictions": {
+      "en": "Tax jurisdictions",
+      "draft": "مالیه jurisdictions"
+    },
+    "salestaxtab.everywhereYouCollectSalesTaxState": {
+      "en": "Everywhere you collect sales tax — state, county, city, special district.\n          Tag invoices with a jurisdiction and this page tells you what you owe, where.",
+      "draft": "همه‌جا شما collect فروش مالیه — ایالت, county, شهر, special district.\n  برچسب فاکتورها با صلاحیت و این صفحه tells شما چه شما owe, کجا."
+    },
+    "salestaxtab.noJurisdictionsYetAddTheFirst": {
+      "en": "No jurisdictions yet. Add the first place you collect sales tax.",
+      "draft": "نه jurisdictions هنوز. افزودن اول place شما collect فروش مالیه."
+    },
+    "salestaxtab.ofSalesTaxIsnTTagged": {
+      "en": "of sales tax isn't tagged to a jurisdiction yet.\n            Tag invoices with a jurisdiction so every dollar lands in the right bucket.",
+      "draft": "از فروش مالیه نیست tagged به صلاحیت هنوز.\n  برچسب فاکتورها با صلاحیت پس هر dollar lands در راست بازه."
+    },
+    "salestaxtab.taxCollected": {
+      "en": "Tax collected",
+      "draft": "مالیه جمع‌آوری شد"
+    },
+    "teaminvites.inviteYourAccountantOrTaxPro": {
+      "en": "Invite your accountant or tax pro — they join with the right permissions\n        and can switch between all the workspaces they serve.",
+      "draft": "دعوت شما محاسب یا مالیه حرفه‌ای — آنها پیوستن با راست اجازه‌ها\n  و می‌تواند تغییر بین همه فضاهای کاری آنها serve."
+    },
+    "auditlog.eGTaxInvoiceLogin": {
+      "en": "e.g. tax, invoice, login",
+      "draft": "مثلا مالیه, فاکتور, ورود"
+    },
+    "cpapackage.mileageLogWithIRSRatesApplied": {
+      "en": "Mileage log with IRS rates applied",
+      "draft": "مسافت گزارش با IRS نرخ‌ها applied"
+    },
+    "customers.delete": {
+      "en": "Delete",
+      "draft": "حذف"
+    },
+    "customers.deleteConfirm": {
+      "en": "Delete customer \"{{name}}\"? Their invoices and statements stay on record.",
+      "draft": "حذف مشتری \"{{name}}\"? آنها فاکتورها و صورت حساب‌ها ماندن روشن ثبت."
+    },
+    "estimates.tax": {
+      "en": "Tax ($)",
+      "draft": "مالیه ($)"
+    },
+    "expenses.taxID": {
+      "en": "Tax ID",
+      "draft": "مالیه ID"
+    },
+    "expenses.taxYear": {
+      "en": "Tax year",
+      "draft": "مالیه سال"
+    },
+    "expenses.tax": {
+      "en": "Tax",
+      "draft": "مالیه"
+    },
+    "expenses.taxIDEIN": {
+      "en": "Tax ID / EIN",
+      "draft": "مالیه ID / EIN"
+    },
+    "invoices.refund": {
+      "en": "Refund",
+      "draft": "بازپرداخت"
+    },
+    "invoices.taxJurisdictionOptional": {
+      "en": "Tax jurisdiction (optional)",
+      "draft": "مالیه صلاحیت (اختیاری)"
+    },
+    "invoices.tax": {
+      "en": "Tax ($)",
+      "draft": "مالیه ($)"
+    },
+    "invoices.refundCredit": {
+      "en": "Refund credit —",
+      "draft": "بازپرداخت کردیت —"
+    },
+    "invoices.refundTheRemaining": {
+      "en": "Refund the remaining",
+      "draft": "بازپرداخت باقی"
+    },
+    "mileage.irsLogCSV": {
+      "en": "IRS log CSV",
+      "draft": "IRS گزارش CSV"
+    },
+    "payroll.deleteDraft": {
+      "en": "Delete draft",
+      "draft": "حذف مسوده"
+    },
+    "payroll.partnershipStubWhenAProviderIs": {
+      "en": "Partnership stub: when a provider is connected, runs here will hand off tax filing and direct deposit automatically.",
+      "draft": "مشارکت ته‌قبض: کی ارائه‌دهنده است متصل, اجراها اینجا خواهد دست خاموش مالیه ثبت و مستقیم سپرده به‌طور خودکار."
+    },
+    "payroll.employerTaxEst": {
+      "en": "Employer payroll tax (est.)",
+      "draft": "Employer معاشات مالیه (تخمین)"
+    },
+    "portalview.tax": {
+      "en": "Tax",
+      "draft": "مالیه"
+    },
+    "recurringinvoices.tax": {
+      "en": "Tax ($)",
+      "draft": "مالیه ($)"
+    },
+    "simulator.safetyFloor": {
+      "en": "Safety floor $",
+      "draft": "Safety floor $"
+    },
+    "tax.nameIsRequired": {
+      "en": "Name is required",
+      "draft": "نام است لازم"
+    },
+    "tax.contractorAdded": {
+      "en": "Contractor added",
+      "draft": "قراردادی افزوده شده"
+    },
+    "tax.w9StatusUpdated": {
+      "en": "W-9 status updated",
+      "draft": "W-9 وضعیت به‌روز شده"
+    },
+    "tax.contractorRemoved": {
+      "en": "Contractor removed",
+      "draft": "قراردادی حذف شده"
+    },
+    "tax.enterAPositiveAmount": {
+      "en": "Enter a positive amount",
+      "draft": "وارد کردن مثبت مبلغ"
+    },
+    "tax.paymentRecorded": {
+      "en": "Payment recorded",
+      "draft": "پرداخت ثبت شده"
+    },
+    "tax.paymentDeleted": {
+      "en": "Payment deleted",
+      "draft": "پرداخت حذف شده"
+    },
+    "tax.statusRefreshed": {
+      "en": "Status refreshed",
+      "draft": "وضعیت refreshed"
+    },
+    "tax.addContractor": {
+      "en": "Add contractor",
+      "draft": "افزودن قراردادی"
+    },
+    "tax.contractors1099s": {
+      "en": "Contractors & 1099s",
+      "draft": "قراردادی‌ها & 1099"
+    },
+    "tax.salesTax": {
+      "en": "Sales Tax",
+      "draft": "فروش مالیه"
+    },
+    "tax.taxbanditsNotConnected": {
+      "en": "TaxBandits not connected.",
+      "draft": "TaxBandits نه متصل."
+    },
+    "tax.taxbanditsSETUPMd": {
+      "en": "TAXBANDITS_SETUP.md",
+      "draft": "TAXBANDITS_SETUP.md"
+    },
+    "tax.inTheRepoNoIRSFiling": {
+      "en": "in the repo. No IRS filing is ever done in-house.",
+      "draft": "در repo. نه IRS ثبت است تا به حال انجام شد in-house."
+    },
+    "tax.taxbanditsConnectedIn": {
+      "en": "TaxBandits connected in",
+      "draft": "TaxBandits متصل در"
+    },
+    "tax.sandbox": {
+      "en": "sandbox",
+      "draft": "sandbox"
+    },
+    "tax.modeNoRealFilingsFlip": {
+      "en": "mode — no real filings. Flip",
+      "draft": "mode — نه real filings. Flip"
+    },
+    "tax.taxbanditsSANDBOXFalse": {
+      "en": "TAXBANDITS_SANDBOX=false",
+      "draft": "TAXBANDITS_SANDBOX=نادرست"
+    },
+    "tax.toGoLive": {
+      "en": "to go live.",
+      "draft": "به رفتن زنده."
+    },
+    "tax.newContractor": {
+      "en": "New contractor",
+      "draft": "جدید قراردادی"
+    },
+    "tax.name": {
+      "en": "Name *",
+      "draft": "نام *"
+    },
+    "tax.businessName": {
+      "en": "Business name",
+      "draft": "کسب‌وکار نام"
+    },
+    "tax.email": {
+      "en": "Email",
+      "draft": "ایمیل"
+    },
+    "tax.phone": {
+      "en": "Phone",
+      "draft": "تلفن"
+    },
+    "tax.entityType": {
+      "en": "Entity type",
+      "draft": "موجودیت نوع"
+    },
+    "tax.ssnEIN": {
+      "en": "SSN / EIN",
+      "draft": "SSN / EIN"
+    },
+    "tax.storedSecurely": {
+      "en": "Stored securely",
+      "draft": "Stored securely"
+    },
+    "tax.street": {
+      "en": "Street",
+      "draft": "Street"
+    },
+    "tax.city": {
+      "en": "City",
+      "draft": "شهر"
+    },
+    "tax.state": {
+      "en": "State",
+      "draft": "ایالت"
+    },
+    "tax.zip": {
+      "en": "ZIP",
+      "draft": "کد پستی"
+    },
+    "tax.cancel": {
+      "en": "Cancel",
+      "draft": "لغو"
+    },
+    "tax.contractor": {
+      "en": "Contractor",
+      "draft": "قراردادی"
+    },
+    "tax.paid": {
+      "en": "Paid",
+      "draft": "پرداخت شده"
+    },
+    "tax.w9": {
+      "en": "W-9",
+      "draft": "W-9"
+    },
+    "tax.NEC": {
+      "en": "1099-NEC",
+      "draft": "1099-NEC"
+    },
+    "tax.eFile": {
+      "en": "E-file",
+      "draft": "E-file"
+    },
+    "tax.actions": {
+      "en": "Actions",
+      "draft": "اقدامات"
+    },
+    "tax.viewPaymentHistory": {
+      "en": "View payment history",
+      "draft": "مشاهده پرداخت تاریخچه"
+    },
+    "tax.toggleW9Received": {
+      "en": "Toggle W-9 received",
+      "draft": "Toggle W-9 دریافت شده"
+    },
+    "tax.required": {
+      "en": "Required",
+      "draft": "لازم"
+    },
+    "tax.viewFilingStatus": {
+      "en": "View filing status",
+      "draft": "مشاهده ثبت وضعیت"
+    },
+    "tax.notFiled": {
+      "en": "Not filed",
+      "draft": "نه filed"
+    },
+    "tax.recordPayment": {
+      "en": "Record payment",
+      "draft": "ثبت پرداخت"
+    },
+    "tax.noContractorsYet": {
+      "en": "No contractors yet.",
+      "draft": "نه قراردادی‌ها هنوز."
+    },
+    "tax.NECDataPreview": {
+      "en": "1099-NEC data preview",
+      "draft": "1099-NEC معلومات پیش‌نمایش"
+    },
+    "tax.recipientBox1DataShapedFor": {
+      "en": "Recipient + Box 1 data shaped for e-filing. Tax IDs stay masked — reveal needs PII access. Draft data only, nothing is filed in-house.",
+      "draft": "گیرنده + Box 1 معلومات shaped برای e-filing. مالیه IDs ماندن masked — reveal needs PII دسترسی. مسوده معلومات فقط, هیچ است filed in-house."
+    },
+    "tax.loadPreview": {
+      "en": "Load preview",
+      "draft": "بارگیری پیش‌نمایش"
+    },
+    "tax.recipient": {
+      "en": "Recipient",
+      "draft": "گیرنده"
+    },
+    "tax.tin": {
+      "en": "TIN",
+      "draft": "TIN"
+    },
+    "tax.address": {
+      "en": "Address",
+      "draft": "آدرس"
+    },
+    "tax.box1": {
+      "en": "Box 1",
+      "draft": "Box 1"
+    },
+    "tax.missing": {
+      "en": "missing",
+      "draft": "مفقود"
+    },
+    "tax.reveal": {
+      "en": "reveal",
+      "draft": "reveal"
+    },
+    "tax.noContractorsMeetThe": {
+      "en": "No contractors meet the",
+      "draft": "نه قراردادی‌ها meet "
+    },
+    "tax.reportingThresholdFor": {
+      "en": "reporting threshold for",
+      "draft": "گزارش‌دهی threshold برای"
+    },
+    "tax.recordPayment2": {
+      "en": "Record payment —",
+      "draft": "ثبت پرداخت —"
+    },
+    "tax.date": {
+      "en": "Date",
+      "draft": "تاریخ"
+    },
+    "tax.amount": {
+      "en": "Amount $",
+      "draft": "مبلغ $"
+    },
+    "tax.description": {
+      "en": "Description",
+      "draft": "توضیحات"
+    },
+    "tax.eGMarchBoothRentPayout": {
+      "en": "e.g. March booth rent payout",
+      "draft": "مثلا March غرفه کرایه پرداخت"
+    },
+    "tax.record": {
+      "en": "Record",
+      "draft": "ثبت"
+    },
+    "tax.paymentHistory": {
+      "en": "Payment history —",
+      "draft": "پرداخت تاریخچه —"
+    },
+    "tax.noPaymentsRecordedFor": {
+      "en": "No payments recorded for",
+      "draft": "نه پرداخت‌ها ثبت شده برای"
+    },
+    "tax.amount2": {
+      "en": "Amount",
+      "draft": "مبلغ"
+    },
+    "tax.deletePayment": {
+      "en": "Delete payment",
+      "draft": "حذف پرداخت"
+    },
+    "tax.yearTotal": {
+      "en": "Year total:",
+      "draft": "سال مجموع:"
+    },
+    "tax.NECFiling": {
+      "en": "1099-NEC filing —",
+      "draft": "1099-NEC ثبت —"
+    },
+    "tax.thisDraftLivesInTaxBanditsReview": {
+      "en": "This draft lives in TaxBandits — review and Transmit there to file with the IRS. This app never files in-house.",
+      "draft": "این مسوده lives در TaxBandits — بازبینی و Transmit there به فایل با IRS. این اپ هرگز فایل‌ها in-house."
+    },
+    "tax.NECIsRequiredForNon": {
+      "en": "1099-NEC is required for non-corporate contractors paid ≥",
+      "draft": "1099-NEC است لازم برای non-corporate قراردادی‌ها پرداخت شده ≥"
+    },
+    "tax.inTheYearEFilingCreates": {
+      "en": "in the year. E-filing creates a draft in TaxBandits — you review and transmit there. This app never files with the IRS directly.",
+      "draft": "در سال. E-filing creates مسوده در TaxBandits — شما بازبینی و transmit there. این اپ هرگز فایل‌ها با IRS directly."
+    },
+    "taxforecast.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "مالیه پیش‌بینی"
+    },
+    "taxforecast.OfPriorYearTax": {
+      "en": "100% of prior-year tax",
+      "draft": "100% از prior-year مالیه"
+    },
+    "taxforecast.irsDirectPay": {
+      "en": "IRS Direct Pay",
+      "draft": "IRS مستقیم پرداخت"
+    },
+    "nav.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "مالیه پیش‌بینی"
+    },
+    "nav.tax1099s": {
+      "en": "Tax & 1099s",
+      "draft": "مالیه & 1099"
+    },
+    "teamInvites.accountantTaxPro": {
+      "en": "Accountant / Tax pro",
+      "draft": "محاسب / مالیه حرفه‌ای"
+    }
+  }
+}

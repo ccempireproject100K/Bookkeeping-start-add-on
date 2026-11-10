@@ -1,0 +1,426 @@
+{
+  "_meta": {
+    "lang": "ka",
+    "status": "DRAFT for human review only. Do NOT copy into frontend/src/locales/ka/translation.json until a qualified reviewer (counsel/CPA where relevant) approves each string. Live locale keeps English for these keys.",
+    "source": "docs/TRANSLATION_PLAN.md flagged keys (legal/financial/tax/privacy/safety)",
+    "notice": "Approximate translation from English/Spanish, may not be accurate."
+  },
+  "strings": {
+    "salestaxtab.taxJurisdictions": {
+      "en": "Tax jurisdictions",
+      "draft": "Გადასახადი jurisdictions"
+    },
+    "salestaxtab.everywhereYouCollectSalesTaxState": {
+      "en": "Everywhere you collect sales tax — state, county, city, special district.\n          Tag invoices with a jurisdiction and this page tells you what you owe, where.",
+      "draft": "Ყველგან შენ collect გაყიდვები გადასახადი — შტატი, county, ქალაქი, special district.\n  Თეგი ინვოისები თან იურისდიქცია და ეს გვერდი tells შენ რა შენ owe, სად."
+    },
+    "salestaxtab.noJurisdictionsYetAddTheFirst": {
+      "en": "No jurisdictions yet. Add the first place you collect sales tax.",
+      "draft": "Არა jurisdictions ჯერ. Დამატება პირველი place შენ collect გაყიდვები გადასახადი."
+    },
+    "salestaxtab.ofSalesTaxIsnTTagged": {
+      "en": "of sales tax isn't tagged to a jurisdiction yet.\n            Tag invoices with a jurisdiction so every dollar lands in the right bucket.",
+      "draft": "ის გაყიდვები გადასახადი არ არის tagged ზე იურისდიქცია ჯერ.\n  Თეგი ინვოისები თან იურისდიქცია ამიტომ თითოეული dollar lands ში მარჯვენა ჯგუფი."
+    },
+    "salestaxtab.taxCollected": {
+      "en": "Tax collected",
+      "draft": "Გადასახადი შეგროვებული"
+    },
+    "teaminvites.inviteYourAccountantOrTaxPro": {
+      "en": "Invite your accountant or tax pro — they join with the right permissions\n        and can switch between all the workspaces they serve.",
+      "draft": "Მოწვევა შენი ბუღალტერი ან გადასახადი პრო — ისინი შეერთება თან მარჯვენა ნებართვები\n  და შეუძლია გადართვა შორის ყველა სამუშაო სივრცეები ისინი serve."
+    },
+    "auditlog.eGTaxInvoiceLogin": {
+      "en": "e.g. tax, invoice, login",
+      "draft": "მაგ. გადასახადი, ინვოისი, შესვლა"
+    },
+    "cpapackage.mileageLogWithIRSRatesApplied": {
+      "en": "Mileage log with IRS rates applied",
+      "draft": "Გარბენი ჟურნალი თან IRS განაკვეთები applied"
+    },
+    "customers.delete": {
+      "en": "Delete",
+      "draft": "Წაშლა"
+    },
+    "customers.deleteConfirm": {
+      "en": "Delete customer \"{{name}}\"? Their invoices and statements stay on record.",
+      "draft": "Წაშლა კლიენტი \"{{name}}\"? Მათი ინვოისები და ამონაწერები დარჩენა ჩართული ჩაწერა."
+    },
+    "estimates.tax": {
+      "en": "Tax ($)",
+      "draft": "Გადასახადი ($)"
+    },
+    "expenses.taxID": {
+      "en": "Tax ID",
+      "draft": "Გადასახადი ID"
+    },
+    "expenses.taxYear": {
+      "en": "Tax year",
+      "draft": "Გადასახადი წელი"
+    },
+    "expenses.tax": {
+      "en": "Tax",
+      "draft": "Გადასახადი"
+    },
+    "expenses.taxIDEIN": {
+      "en": "Tax ID / EIN",
+      "draft": "Გადასახადი ID / EIN"
+    },
+    "invoices.refund": {
+      "en": "Refund",
+      "draft": "Დაბრუნება"
+    },
+    "invoices.taxJurisdictionOptional": {
+      "en": "Tax jurisdiction (optional)",
+      "draft": "Გადასახადი იურისდიქცია (არასავალდებულო)"
+    },
+    "invoices.tax": {
+      "en": "Tax ($)",
+      "draft": "Გადასახადი ($)"
+    },
+    "invoices.refundCredit": {
+      "en": "Refund credit —",
+      "draft": "Დაბრუნება კრედიტი —"
+    },
+    "invoices.refundTheRemaining": {
+      "en": "Refund the remaining",
+      "draft": "Დაბრუნება დარჩენილი"
+    },
+    "mileage.irsLogCSV": {
+      "en": "IRS log CSV",
+      "draft": "IRS ჟურნალი CSV"
+    },
+    "payroll.deleteDraft": {
+      "en": "Delete draft",
+      "draft": "Წაშლა მონახაზი"
+    },
+    "payroll.partnershipStubWhenAProviderIs": {
+      "en": "Partnership stub: when a provider is connected, runs here will hand off tax filing and direct deposit automatically.",
+      "draft": "Პარტნიორობა ქვითარი: როდის მომწოდებელი არის დაკავშირებული, მუშაობს აქ იქნება ხელი გამორთული გადასახადი შეტანა და პირდაპირი დეპოზიტი ავტომატურად."
+    },
+    "payroll.employerTaxEst": {
+      "en": "Employer payroll tax (est.)",
+      "draft": "Employer სახელფასო გადასახადი (დაახ..)"
+    },
+    "portalview.tax": {
+      "en": "Tax",
+      "draft": "Გადასახადი"
+    },
+    "recurringinvoices.tax": {
+      "en": "Tax ($)",
+      "draft": "Გადასახადი ($)"
+    },
+    "simulator.safetyFloor": {
+      "en": "Safety floor $",
+      "draft": "Safety floor $"
+    },
+    "tax.nameIsRequired": {
+      "en": "Name is required",
+      "draft": "Სახელი არის საჭირო"
+    },
+    "tax.contractorAdded": {
+      "en": "Contractor added",
+      "draft": "Კონტრაქტორი დამატებული"
+    },
+    "tax.w9StatusUpdated": {
+      "en": "W-9 status updated",
+      "draft": "W-9 სტატუსი განახლებული"
+    },
+    "tax.contractorRemoved": {
+      "en": "Contractor removed",
+      "draft": "Კონტრაქტორი წაშლილი"
+    },
+    "tax.enterAPositiveAmount": {
+      "en": "Enter a positive amount",
+      "draft": "Შეყვანა დადებითი თანხა"
+    },
+    "tax.paymentRecorded": {
+      "en": "Payment recorded",
+      "draft": "Გადახდა ჩაწერილი"
+    },
+    "tax.paymentDeleted": {
+      "en": "Payment deleted",
+      "draft": "Გადახდა წაშლილი"
+    },
+    "tax.statusRefreshed": {
+      "en": "Status refreshed",
+      "draft": "Სტატუსი refreshed"
+    },
+    "tax.addContractor": {
+      "en": "Add contractor",
+      "draft": "Დამატება კონტრაქტორი"
+    },
+    "tax.contractors1099s": {
+      "en": "Contractors & 1099s",
+      "draft": "Კონტრაქტორები & 1099s"
+    },
+    "tax.salesTax": {
+      "en": "Sales Tax",
+      "draft": "Გაყიდვები Გადასახადი"
+    },
+    "tax.taxbanditsNotConnected": {
+      "en": "TaxBandits not connected.",
+      "draft": "TaxBandits არა დაკავშირებული."
+    },
+    "tax.taxbanditsSETUPMd": {
+      "en": "TAXBANDITS_SETUP.md",
+      "draft": "TAXBANDITS_SETUP.md"
+    },
+    "tax.inTheRepoNoIRSFiling": {
+      "en": "in the repo. No IRS filing is ever done in-house.",
+      "draft": "ში repo. Არა IRS შეტანა არის ოდესმე შესრულებული in-house."
+    },
+    "tax.taxbanditsConnectedIn": {
+      "en": "TaxBandits connected in",
+      "draft": "TaxBandits დაკავშირებული ში"
+    },
+    "tax.sandbox": {
+      "en": "sandbox",
+      "draft": "sandbox"
+    },
+    "tax.modeNoRealFilingsFlip": {
+      "en": "mode — no real filings. Flip",
+      "draft": "mode — არა real filings. Flip"
+    },
+    "tax.taxbanditsSANDBOXFalse": {
+      "en": "TAXBANDITS_SANDBOX=false",
+      "draft": "TAXBANDITS_SANDBOX=მცდარი"
+    },
+    "tax.toGoLive": {
+      "en": "to go live.",
+      "draft": "ზე წასვლა პირდაპირი."
+    },
+    "tax.newContractor": {
+      "en": "New contractor",
+      "draft": "Ახალი კონტრაქტორი"
+    },
+    "tax.name": {
+      "en": "Name *",
+      "draft": "სახელი *"
+    },
+    "tax.businessName": {
+      "en": "Business name",
+      "draft": "Ბიზნესი სახელი"
+    },
+    "tax.email": {
+      "en": "Email",
+      "draft": "Ელფოსტა"
+    },
+    "tax.phone": {
+      "en": "Phone",
+      "draft": "Ტელეფონი"
+    },
+    "tax.entityType": {
+      "en": "Entity type",
+      "draft": "Სუბიექტი ტიპი"
+    },
+    "tax.ssnEIN": {
+      "en": "SSN / EIN",
+      "draft": "SSN / EIN"
+    },
+    "tax.storedSecurely": {
+      "en": "Stored securely",
+      "draft": "Stored securely"
+    },
+    "tax.street": {
+      "en": "Street",
+      "draft": "Street"
+    },
+    "tax.city": {
+      "en": "City",
+      "draft": "Ქალაქი"
+    },
+    "tax.state": {
+      "en": "State",
+      "draft": "Შტატი"
+    },
+    "tax.zip": {
+      "en": "ZIP",
+      "draft": "ᲡᲐᲤᲝᲡᲢᲝ ᲘᲜᲓᲔᲥᲡᲘ"
+    },
+    "tax.cancel": {
+      "en": "Cancel",
+      "draft": "Გაუქმება"
+    },
+    "tax.contractor": {
+      "en": "Contractor",
+      "draft": "Კონტრაქტორი"
+    },
+    "tax.paid": {
+      "en": "Paid",
+      "draft": "Გადახდილი"
+    },
+    "tax.w9": {
+      "en": "W-9",
+      "draft": "W-9"
+    },
+    "tax.NEC": {
+      "en": "1099-NEC",
+      "draft": "1099-NEC"
+    },
+    "tax.eFile": {
+      "en": "E-file",
+      "draft": "E-file"
+    },
+    "tax.actions": {
+      "en": "Actions",
+      "draft": "Მოქმედებები"
+    },
+    "tax.viewPaymentHistory": {
+      "en": "View payment history",
+      "draft": "Ნახვა გადახდა ისტორია"
+    },
+    "tax.toggleW9Received": {
+      "en": "Toggle W-9 received",
+      "draft": "Toggle W-9 მიღებული"
+    },
+    "tax.required": {
+      "en": "Required",
+      "draft": "Საჭირო"
+    },
+    "tax.viewFilingStatus": {
+      "en": "View filing status",
+      "draft": "Ნახვა შეტანა სტატუსი"
+    },
+    "tax.notFiled": {
+      "en": "Not filed",
+      "draft": "Არა filed"
+    },
+    "tax.recordPayment": {
+      "en": "Record payment",
+      "draft": "Ჩაწერა გადახდა"
+    },
+    "tax.noContractorsYet": {
+      "en": "No contractors yet.",
+      "draft": "Არა კონტრაქტორები ჯერ."
+    },
+    "tax.NECDataPreview": {
+      "en": "1099-NEC data preview",
+      "draft": "1099-NEC მონაცემები წინასწარი ნახვა"
+    },
+    "tax.recipientBox1DataShapedFor": {
+      "en": "Recipient + Box 1 data shaped for e-filing. Tax IDs stay masked — reveal needs PII access. Draft data only, nothing is filed in-house.",
+      "draft": "Მიმღები + Box 1 მონაცემები shaped თვის e-filing. Გადასახადი IDs დარჩენა masked — reveal needs PII წვდომა. Მონახაზი მონაცემები მხოლოდ, არაფერი არის filed in-house."
+    },
+    "tax.loadPreview": {
+      "en": "Load preview",
+      "draft": "Ჩატვირთვა წინასწარი ნახვა"
+    },
+    "tax.recipient": {
+      "en": "Recipient",
+      "draft": "Მიმღები"
+    },
+    "tax.tin": {
+      "en": "TIN",
+      "draft": "TIN"
+    },
+    "tax.address": {
+      "en": "Address",
+      "draft": "Მისამართი"
+    },
+    "tax.box1": {
+      "en": "Box 1",
+      "draft": "Box 1"
+    },
+    "tax.missing": {
+      "en": "missing",
+      "draft": "დაკარგული"
+    },
+    "tax.reveal": {
+      "en": "reveal",
+      "draft": "reveal"
+    },
+    "tax.noContractorsMeetThe": {
+      "en": "No contractors meet the",
+      "draft": "Არა კონტრაქტორები meet "
+    },
+    "tax.reportingThresholdFor": {
+      "en": "reporting threshold for",
+      "draft": "ანგარიშგება threshold თვის"
+    },
+    "tax.recordPayment2": {
+      "en": "Record payment —",
+      "draft": "Ჩაწერა გადახდა —"
+    },
+    "tax.date": {
+      "en": "Date",
+      "draft": "Თარიღი"
+    },
+    "tax.amount": {
+      "en": "Amount $",
+      "draft": "Თანხა $"
+    },
+    "tax.description": {
+      "en": "Description",
+      "draft": "Აღწერა"
+    },
+    "tax.eGMarchBoothRentPayout": {
+      "en": "e.g. March booth rent payout",
+      "draft": "მაგ. March ჯიხური ქირა გადახდა"
+    },
+    "tax.record": {
+      "en": "Record",
+      "draft": "Ჩაწერა"
+    },
+    "tax.paymentHistory": {
+      "en": "Payment history —",
+      "draft": "Გადახდა ისტორია —"
+    },
+    "tax.noPaymentsRecordedFor": {
+      "en": "No payments recorded for",
+      "draft": "Არა გადახდები ჩაწერილი თვის"
+    },
+    "tax.amount2": {
+      "en": "Amount",
+      "draft": "Თანხა"
+    },
+    "tax.deletePayment": {
+      "en": "Delete payment",
+      "draft": "Წაშლა გადახდა"
+    },
+    "tax.yearTotal": {
+      "en": "Year total:",
+      "draft": "Წელი ჯამი:"
+    },
+    "tax.NECFiling": {
+      "en": "1099-NEC filing —",
+      "draft": "1099-NEC შეტანა —"
+    },
+    "tax.thisDraftLivesInTaxBanditsReview": {
+      "en": "This draft lives in TaxBandits — review and Transmit there to file with the IRS. This app never files in-house.",
+      "draft": "Ეს მონახაზი lives ში TaxBandits — მიმოხილვა და Transmit there ზე ფაილი თან IRS. Ეს აპი არასდროს ფაილები in-house."
+    },
+    "tax.NECIsRequiredForNon": {
+      "en": "1099-NEC is required for non-corporate contractors paid ≥",
+      "draft": "1099-NEC არის საჭირო თვის non-corporate კონტრაქტორები გადახდილი ≥"
+    },
+    "tax.inTheYearEFilingCreates": {
+      "en": "in the year. E-filing creates a draft in TaxBandits — you review and transmit there. This app never files with the IRS directly.",
+      "draft": "ში წელი. E-filing creates მონახაზი ში TaxBandits — შენ მიმოხილვა და transmit there. Ეს აპი არასდროს ფაილები თან IRS directly."
+    },
+    "taxforecast.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "Გადასახადი Პროგნოზი"
+    },
+    "taxforecast.OfPriorYearTax": {
+      "en": "100% of prior-year tax",
+      "draft": "100% ის prior-year გადასახადი"
+    },
+    "taxforecast.irsDirectPay": {
+      "en": "IRS Direct Pay",
+      "draft": "IRS Პირდაპირი Გადახდა"
+    },
+    "nav.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "Გადასახადი Პროგნოზი"
+    },
+    "nav.tax1099s": {
+      "en": "Tax & 1099s",
+      "draft": "Გადასახადი & 1099s"
+    },
+    "teamInvites.accountantTaxPro": {
+      "en": "Accountant / Tax pro",
+      "draft": "Ბუღალტერი / Გადასახადი პრო"
+    }
+  }
+}

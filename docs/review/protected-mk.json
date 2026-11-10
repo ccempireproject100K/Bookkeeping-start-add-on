@@ -1,0 +1,426 @@
+{
+  "_meta": {
+    "lang": "mk",
+    "status": "DRAFT for human review only. Do NOT copy into frontend/src/locales/mk/translation.json until a qualified reviewer (counsel/CPA where relevant) approves each string. Live locale keeps English for these keys.",
+    "source": "docs/TRANSLATION_PLAN.md flagged keys (legal/financial/tax/privacy/safety)",
+    "notice": "Approximate translation from English/Spanish, may not be accurate."
+  },
+  "strings": {
+    "salestaxtab.taxJurisdictions": {
+      "en": "Tax jurisdictions",
+      "draft": "Данок jurisdictions"
+    },
+    "salestaxtab.everywhereYouCollectSalesTaxState": {
+      "en": "Everywhere you collect sales tax — state, county, city, special district.\n          Tag invoices with a jurisdiction and this page tells you what you owe, where.",
+      "draft": "Навсјакде собери продажби данок — сојузна држава, county, град, special district.\n  Ознака фактури со јурисдикција и овој страница tells што owe, каде."
+    },
+    "salestaxtab.noJurisdictionsYetAddTheFirst": {
+      "en": "No jurisdictions yet. Add the first place you collect sales tax.",
+      "draft": "Не jurisdictions сѐ уште. Додај прв place собери продажби данок."
+    },
+    "salestaxtab.ofSalesTaxIsnTTagged": {
+      "en": "of sales tax isn't tagged to a jurisdiction yet.\n            Tag invoices with a jurisdiction so every dollar lands in the right bucket.",
+      "draft": " продажби данок не е tagged до јурисдикција сѐ уште.\n  Ознака фактури со јурисдикција така секој dollar lands во десно категорија."
+    },
+    "salestaxtab.taxCollected": {
+      "en": "Tax collected",
+      "draft": "Данок сбрано"
+    },
+    "teaminvites.inviteYourAccountantOrTaxPro": {
+      "en": "Invite your accountant or tax pro — they join with the right permissions\n        and can switch between all the workspaces they serve.",
+      "draft": "Покана сметководител или данок pro — те придружи се со десно дозволи\n  и може префрли меѓу сите работни пространства те serve."
+    },
+    "auditlog.eGTaxInvoiceLogin": {
+      "en": "e.g. tax, invoice, login",
+      "draft": "на пр. данок, фактура, најава"
+    },
+    "cpapackage.mileageLogWithIRSRatesApplied": {
+      "en": "Mileage log with IRS rates applied",
+      "draft": "Километража дневник со IRS стапки применето"
+    },
+    "customers.delete": {
+      "en": "Delete",
+      "draft": "Избриши"
+    },
+    "customers.deleteConfirm": {
+      "en": "Delete customer \"{{name}}\"? Their invoices and statements stay on record.",
+      "draft": "Избриши клиент \"{{name}}\"? фактури и statements остани на запиши."
+    },
+    "estimates.tax": {
+      "en": "Tax ($)",
+      "draft": "Данок ($)"
+    },
+    "expenses.taxID": {
+      "en": "Tax ID",
+      "draft": "Данок ID"
+    },
+    "expenses.taxYear": {
+      "en": "Tax year",
+      "draft": "Данок година"
+    },
+    "expenses.tax": {
+      "en": "Tax",
+      "draft": "Данок"
+    },
+    "expenses.taxIDEIN": {
+      "en": "Tax ID / EIN",
+      "draft": "Данок ID / EIN"
+    },
+    "invoices.refund": {
+      "en": "Refund",
+      "draft": "Поврат"
+    },
+    "invoices.taxJurisdictionOptional": {
+      "en": "Tax jurisdiction (optional)",
+      "draft": "Данок јурисдикција (по избор)"
+    },
+    "invoices.tax": {
+      "en": "Tax ($)",
+      "draft": "Данок ($)"
+    },
+    "invoices.refundCredit": {
+      "en": "Refund credit —",
+      "draft": "Поврат кредит —"
+    },
+    "invoices.refundTheRemaining": {
+      "en": "Refund the remaining",
+      "draft": "Поврат преостанато"
+    },
+    "mileage.irsLogCSV": {
+      "en": "IRS log CSV",
+      "draft": "IRS дневник CSV"
+    },
+    "payroll.deleteDraft": {
+      "en": "Delete draft",
+      "draft": "Избриши нацрт"
+    },
+    "payroll.partnershipStubWhenAProviderIs": {
+      "en": "Partnership stub: when a provider is connected, runs here will hand off tax filing and direct deposit automatically.",
+      "draft": "Партнјорство зародиш: кога доставчик е поврзано, стартиранија тука ќе рака исклучено данок поднесување и директен депозит автоматично."
+    },
+    "payroll.employerTaxEst": {
+      "en": "Employer payroll tax (est.)",
+      "draft": "Employer плати данок (прибл..)"
+    },
+    "portalview.tax": {
+      "en": "Tax",
+      "draft": "Данок"
+    },
+    "recurringinvoices.tax": {
+      "en": "Tax ($)",
+      "draft": "Данок ($)"
+    },
+    "simulator.safetyFloor": {
+      "en": "Safety floor $",
+      "draft": "Safety под $"
+    },
+    "tax.nameIsRequired": {
+      "en": "Name is required",
+      "draft": "Име е задолжително"
+    },
+    "tax.contractorAdded": {
+      "en": "Contractor added",
+      "draft": "Изведувач добавено"
+    },
+    "tax.w9StatusUpdated": {
+      "en": "W-9 status updated",
+      "draft": "W-9 статус актуализирано"
+    },
+    "tax.contractorRemoved": {
+      "en": "Contractor removed",
+      "draft": "Изведувач премахнато"
+    },
+    "tax.enterAPositiveAmount": {
+      "en": "Enter a positive amount",
+      "draft": "Введи положителен износ"
+    },
+    "tax.paymentRecorded": {
+      "en": "Payment recorded",
+      "draft": "Плаќање записано"
+    },
+    "tax.paymentDeleted": {
+      "en": "Payment deleted",
+      "draft": "Плаќање изтрито"
+    },
+    "tax.statusRefreshed": {
+      "en": "Status refreshed",
+      "draft": "Статус refreshed"
+    },
+    "tax.addContractor": {
+      "en": "Add contractor",
+      "draft": "Додај изведувач"
+    },
+    "tax.contractors1099s": {
+      "en": "Contractors & 1099s",
+      "draft": "Изведувачи и 1099"
+    },
+    "tax.salesTax": {
+      "en": "Sales Tax",
+      "draft": "Продажби Данок"
+    },
+    "tax.taxbanditsNotConnected": {
+      "en": "TaxBandits not connected.",
+      "draft": "TaxBandits не поврзано."
+    },
+    "tax.taxbanditsSETUPMd": {
+      "en": "TAXBANDITS_SETUP.md",
+      "draft": "TAXBANDITS_SETUP.md"
+    },
+    "tax.inTheRepoNoIRSFiling": {
+      "en": "in the repo. No IRS filing is ever done in-house.",
+      "draft": "во repo. Не IRS поднесување е ever завршено in-house."
+    },
+    "tax.taxbanditsConnectedIn": {
+      "en": "TaxBandits connected in",
+      "draft": "TaxBandits поврзано во"
+    },
+    "tax.sandbox": {
+      "en": "sandbox",
+      "draft": "sandbox"
+    },
+    "tax.modeNoRealFilingsFlip": {
+      "en": "mode — no real filings. Flip",
+      "draft": "режим — не real filings. Flip"
+    },
+    "tax.taxbanditsSANDBOXFalse": {
+      "en": "TAXBANDITS_SANDBOX=false",
+      "draft": "TAXBANDITS_SANDBOX=false"
+    },
+    "tax.toGoLive": {
+      "en": "to go live.",
+      "draft": "до врви на живо."
+    },
+    "tax.newContractor": {
+      "en": "New contractor",
+      "draft": "Нов изведувач"
+    },
+    "tax.name": {
+      "en": "Name *",
+      "draft": "Име *"
+    },
+    "tax.businessName": {
+      "en": "Business name",
+      "draft": "Бизнис име"
+    },
+    "tax.email": {
+      "en": "Email",
+      "draft": "Е-пошта"
+    },
+    "tax.phone": {
+      "en": "Phone",
+      "draft": "Телефон"
+    },
+    "tax.entityType": {
+      "en": "Entity type",
+      "draft": "Субјект тип"
+    },
+    "tax.ssnEIN": {
+      "en": "SSN / EIN",
+      "draft": "SSN / EIN"
+    },
+    "tax.storedSecurely": {
+      "en": "Stored securely",
+      "draft": "Stored securely"
+    },
+    "tax.street": {
+      "en": "Street",
+      "draft": "Street"
+    },
+    "tax.city": {
+      "en": "City",
+      "draft": "Град"
+    },
+    "tax.state": {
+      "en": "State",
+      "draft": "Сојузна држава"
+    },
+    "tax.zip": {
+      "en": "ZIP",
+      "draft": "ПОШТЕНСКИ КОД"
+    },
+    "tax.cancel": {
+      "en": "Cancel",
+      "draft": "Откажи"
+    },
+    "tax.contractor": {
+      "en": "Contractor",
+      "draft": "Изведувач"
+    },
+    "tax.paid": {
+      "en": "Paid",
+      "draft": "Платено"
+    },
+    "tax.w9": {
+      "en": "W-9",
+      "draft": "W-9"
+    },
+    "tax.NEC": {
+      "en": "1099-NEC",
+      "draft": "1099-NEC"
+    },
+    "tax.eFile": {
+      "en": "E-file",
+      "draft": "E-file"
+    },
+    "tax.actions": {
+      "en": "Actions",
+      "draft": "Дејства"
+    },
+    "tax.viewPaymentHistory": {
+      "en": "View payment history",
+      "draft": "Види плаќање историја"
+    },
+    "tax.toggleW9Received": {
+      "en": "Toggle W-9 received",
+      "draft": "Вклучи W-9 примено"
+    },
+    "tax.required": {
+      "en": "Required",
+      "draft": "Задолжително"
+    },
+    "tax.viewFilingStatus": {
+      "en": "View filing status",
+      "draft": "Види поднесување статус"
+    },
+    "tax.notFiled": {
+      "en": "Not filed",
+      "draft": "Не поднесено"
+    },
+    "tax.recordPayment": {
+      "en": "Record payment",
+      "draft": "Евидентирај плаќање"
+    },
+    "tax.noContractorsYet": {
+      "en": "No contractors yet.",
+      "draft": "Не изведувачи сѐ уште."
+    },
+    "tax.NECDataPreview": {
+      "en": "1099-NEC data preview",
+      "draft": "Преглед на податоци 1099-NEC"
+    },
+    "tax.recipientBox1DataShapedFor": {
+      "en": "Recipient + Box 1 data shaped for e-filing. Tax IDs stay masked — reveal needs PII access. Draft data only, nothing is filed in-house.",
+      "draft": "Получател + Box 1 податоци shaped за e-filing. Данок IDs остани masked — reveal needs PII пристап. Нацрт податоци само, ништо е поднесено in-house."
+    },
+    "tax.loadPreview": {
+      "en": "Load preview",
+      "draft": "Зареди преглед"
+    },
+    "tax.recipient": {
+      "en": "Recipient",
+      "draft": "Получател"
+    },
+    "tax.tin": {
+      "en": "TIN",
+      "draft": "TIN"
+    },
+    "tax.address": {
+      "en": "Address",
+      "draft": "Адреса"
+    },
+    "tax.box1": {
+      "en": "Box 1",
+      "draft": "Box 1"
+    },
+    "tax.missing": {
+      "en": "missing",
+      "draft": "липсва"
+    },
+    "tax.reveal": {
+      "en": "reveal",
+      "draft": "reveal"
+    },
+    "tax.noContractorsMeetThe": {
+      "en": "No contractors meet the",
+      "draft": "Не изведувачи meet "
+    },
+    "tax.reportingThresholdFor": {
+      "en": "reporting threshold for",
+      "draft": "отчитане праг за"
+    },
+    "tax.recordPayment2": {
+      "en": "Record payment —",
+      "draft": "Запиши плаќање —"
+    },
+    "tax.date": {
+      "en": "Date",
+      "draft": "Датум"
+    },
+    "tax.amount": {
+      "en": "Amount $",
+      "draft": "Износ $"
+    },
+    "tax.description": {
+      "en": "Description",
+      "draft": "Опис"
+    },
+    "tax.eGMarchBoothRentPayout": {
+      "en": "e.g. March booth rent payout",
+      "draft": "на пр. Март штанд кирија исплата"
+    },
+    "tax.record": {
+      "en": "Record",
+      "draft": "Запиши"
+    },
+    "tax.paymentHistory": {
+      "en": "Payment history —",
+      "draft": "Плаќање историја —"
+    },
+    "tax.noPaymentsRecordedFor": {
+      "en": "No payments recorded for",
+      "draft": "Не плаќања записано за"
+    },
+    "tax.amount2": {
+      "en": "Amount",
+      "draft": "Износ"
+    },
+    "tax.deletePayment": {
+      "en": "Delete payment",
+      "draft": "Избриши го плаќањето"
+    },
+    "tax.yearTotal": {
+      "en": "Year total:",
+      "draft": "Година вкупно:"
+    },
+    "tax.NECFiling": {
+      "en": "1099-NEC filing —",
+      "draft": "1099-NEC поднесување —"
+    },
+    "tax.thisDraftLivesInTaxBanditsReview": {
+      "en": "This draft lives in TaxBandits — review and Transmit there to file with the IRS. This app never files in-house.",
+      "draft": "Овој нацрт lives во TaxBandits — преглед и Transmit there до датотека со IRS. Овој апликација никогаш датотеки in-house."
+    },
+    "tax.NECIsRequiredForNon": {
+      "en": "1099-NEC is required for non-corporate contractors paid ≥",
+      "draft": "1099-NEC е задолжително за non-corporate изведувачи платено ≥"
+    },
+    "tax.inTheYearEFilingCreates": {
+      "en": "in the year. E-filing creates a draft in TaxBandits — you review and transmit there. This app never files with the IRS directly.",
+      "draft": "во година. E-filing creates нацрт во TaxBandits — преглед и transmit there. Овој апликација никогаш датотеки со IRS directly."
+    },
+    "taxforecast.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "Данок Прогноза"
+    },
+    "taxforecast.OfPriorYearTax": {
+      "en": "100% of prior-year tax",
+      "draft": "100% претходен-година данок"
+    },
+    "taxforecast.irsDirectPay": {
+      "en": "IRS Direct Pay",
+      "draft": "IRS Директен Плати"
+    },
+    "nav.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "Данок Прогноза"
+    },
+    "nav.tax1099s": {
+      "en": "Tax & 1099s",
+      "draft": "Данок & 1099s"
+    },
+    "teamInvites.accountantTaxPro": {
+      "en": "Accountant / Tax pro",
+      "draft": "Сметководител / Данок pro"
+    }
+  }
+}

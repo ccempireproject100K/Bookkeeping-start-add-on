@@ -1,0 +1,426 @@
+{
+  "_meta": {
+    "lang": "zu",
+    "status": "DRAFT for human review only. Do NOT copy into frontend/src/locales/zu/translation.json until a qualified reviewer (counsel/CPA where relevant) approves each string. Live locale keeps English for these keys.",
+    "source": "docs/TRANSLATION_PLAN.md flagged keys (legal/financial/tax/privacy/safety)",
+    "notice": "Approximate translation from English/Spanish, may not be accurate."
+  },
+  "strings": {
+    "salestaxtab.taxJurisdictions": {
+      "en": "Tax jurisdictions",
+      "draft": "Intela jurisdictions"
+    },
+    "salestaxtab.everywhereYouCollectSalesTaxState": {
+      "en": "Everywhere you collect sales tax — state, county, city, special district.\n          Tag invoices with a jurisdiction and this page tells you what you owe, where.",
+      "draft": "Yonke indawo wena collect ukuthengisa intela — isifundazwe, county, idolobha, special district.\n  Ithegi ama-invoyisi ne igunya futhi lokhu ikhasi tells wena ini wena owe, kuphi."
+    },
+    "salestaxtab.noJurisdictionsYetAddTheFirst": {
+      "en": "No jurisdictions yet. Add the first place you collect sales tax.",
+      "draft": "Hhayi jurisdictions okwamanje. Nezela okuqala place wena collect ukuthengisa intela."
+    },
+    "salestaxtab.ofSalesTaxIsnTTagged": {
+      "en": "of sales tax isn't tagged to a jurisdiction yet.\n            Tag invoices with a jurisdiction so every dollar lands in the right bucket.",
+      "draft": "ka ukuthengisa intela akusi tagged kuya igunya okwamanje.\n  Ithegi ama-invoyisi ne igunya ngakho-ke njalo dollar lands ku kwesokudla isigaba."
+    },
+    "salestaxtab.taxCollected": {
+      "en": "Tax collected",
+      "draft": "Intela okuqoqwe"
+    },
+    "teaminvites.inviteYourAccountantOrTaxPro": {
+      "en": "Invite your accountant or tax pro — they join with the right permissions\n        and can switch between all the workspaces they serve.",
+      "draft": "Isimemo yakho umgcini mabhuku noma intela ochwepheshe — bona joyina ne kwesokudla izimvume\n  futhi ngakwazi shintsha phakathi konke izindawo zokusebenza bona serve."
+    },
+    "auditlog.eGTaxInvoiceLogin": {
+      "en": "e.g. tax, invoice, login",
+      "draft": "isib. intela, i-invoyisi, ngena"
+    },
+    "cpapackage.mileageLogWithIRSRatesApplied": {
+      "en": "Mileage log with IRS rates applied",
+      "draft": "Ibanga irekhodi ne IRS amanani applied"
+    },
+    "customers.delete": {
+      "en": "Delete",
+      "draft": "Susa"
+    },
+    "customers.deleteConfirm": {
+      "en": "Delete customer \"{{name}}\"? Their invoices and statements stay on record.",
+      "draft": "Susa ikhasimende \"{{name}}\"? Kubo ama-invoyisi futhi izitatimende hlala kuvuliwe rekhoda."
+    },
+    "estimates.tax": {
+      "en": "Tax ($)",
+      "draft": "Intela ($)"
+    },
+    "expenses.taxID": {
+      "en": "Tax ID",
+      "draft": "Intela ID"
+    },
+    "expenses.taxYear": {
+      "en": "Tax year",
+      "draft": "Intela unyaka"
+    },
+    "expenses.tax": {
+      "en": "Tax",
+      "draft": "Intela"
+    },
+    "expenses.taxIDEIN": {
+      "en": "Tax ID / EIN",
+      "draft": "Intela ID / EIN"
+    },
+    "invoices.refund": {
+      "en": "Refund",
+      "draft": "Imbuyiselo"
+    },
+    "invoices.taxJurisdictionOptional": {
+      "en": "Tax jurisdiction (optional)",
+      "draft": "Intela igunya (ongakhetha)"
+    },
+    "invoices.tax": {
+      "en": "Tax ($)",
+      "draft": "Intela ($)"
+    },
+    "invoices.refundCredit": {
+      "en": "Refund credit —",
+      "draft": "Imbuyiselo ikhredithi —"
+    },
+    "invoices.refundTheRemaining": {
+      "en": "Refund the remaining",
+      "draft": "Imbuyiselo okusele"
+    },
+    "mileage.irsLogCSV": {
+      "en": "IRS log CSV",
+      "draft": "IRS irekhodi CSV"
+    },
+    "payroll.deleteDraft": {
+      "en": "Delete draft",
+      "draft": "Susa okusalungiswa"
+    },
+    "payroll.partnershipStubWhenAProviderIs": {
+      "en": "Partnership stub: when a provider is connected, runs here will hand off tax filing and direct deposit automatically.",
+      "draft": "Ubudlelwano isiphunzi: nini umnikezeli ngu okuxhunyiwe, qhuba lapha zo isandla kuvaliwe intela ukufayila futhi ngqo idiphozithi ngokuzenzakalela."
+    },
+    "payroll.employerTaxEst": {
+      "en": "Employer payroll tax (est.)",
+      "draft": "Employer ipeyiroli intela (isilinganiso)"
+    },
+    "portalview.tax": {
+      "en": "Tax",
+      "draft": "Intela"
+    },
+    "recurringinvoices.tax": {
+      "en": "Tax ($)",
+      "draft": "Intela ($)"
+    },
+    "simulator.safetyFloor": {
+      "en": "Safety floor $",
+      "draft": "Safety floor $"
+    },
+    "tax.nameIsRequired": {
+      "en": "Name is required",
+      "draft": "Igama ngu okudingekayo"
+    },
+    "tax.contractorAdded": {
+      "en": "Contractor added",
+      "draft": "Usonkontileka okweneziwe"
+    },
+    "tax.w9StatusUpdated": {
+      "en": "W-9 status updated",
+      "draft": "W-9 isimo okubuyekeziwe"
+    },
+    "tax.contractorRemoved": {
+      "en": "Contractor removed",
+      "draft": "Usonkontileka okususiwe"
+    },
+    "tax.enterAPositiveAmount": {
+      "en": "Enter a positive amount",
+      "draft": "Faka okuhle inani"
+    },
+    "tax.paymentRecorded": {
+      "en": "Payment recorded",
+      "draft": "Inkokhelo okuqoshiwe"
+    },
+    "tax.paymentDeleted": {
+      "en": "Payment deleted",
+      "draft": "Inkokhelo okususiwe"
+    },
+    "tax.statusRefreshed": {
+      "en": "Status refreshed",
+      "draft": "Isimo refreshed"
+    },
+    "tax.addContractor": {
+      "en": "Add contractor",
+      "draft": "Nezela usonkontileka"
+    },
+    "tax.contractors1099s": {
+      "en": "Contractors & 1099s",
+      "draft": "Osonkontileka & 1099"
+    },
+    "tax.salesTax": {
+      "en": "Sales Tax",
+      "draft": "Ukuthengisa Intela"
+    },
+    "tax.taxbanditsNotConnected": {
+      "en": "TaxBandits not connected.",
+      "draft": "TaxBandits hhayi okuxhunyiwe."
+    },
+    "tax.taxbanditsSETUPMd": {
+      "en": "TAXBANDITS_SETUP.md",
+      "draft": "TAXBANDITS_SETUP.md"
+    },
+    "tax.inTheRepoNoIRSFiling": {
+      "en": "in the repo. No IRS filing is ever done in-house.",
+      "draft": "ku repo. Hhayi IRS ukufayila ngu ke okuqediwe in-house."
+    },
+    "tax.taxbanditsConnectedIn": {
+      "en": "TaxBandits connected in",
+      "draft": "TaxBandits okuxhunyiwe ku"
+    },
+    "tax.sandbox": {
+      "en": "sandbox",
+      "draft": "sandbox"
+    },
+    "tax.modeNoRealFilingsFlip": {
+      "en": "mode — no real filings. Flip",
+      "draft": "mode — hhayi real filings. Flip"
+    },
+    "tax.taxbanditsSANDBOXFalse": {
+      "en": "TAXBANDITS_SANDBOX=false",
+      "draft": "TAXBANDITS_SANDBOX=amanga"
+    },
+    "tax.toGoLive": {
+      "en": "to go live.",
+      "draft": "kuya hamba bukoma."
+    },
+    "tax.newContractor": {
+      "en": "New contractor",
+      "draft": "Okusha usonkontileka"
+    },
+    "tax.name": {
+      "en": "Name *",
+      "draft": "Igama *"
+    },
+    "tax.businessName": {
+      "en": "Business name",
+      "draft": "Ibhizinisi igama"
+    },
+    "tax.email": {
+      "en": "Email",
+      "draft": "I-imeyili"
+    },
+    "tax.phone": {
+      "en": "Phone",
+      "draft": "Ucingo"
+    },
+    "tax.entityType": {
+      "en": "Entity type",
+      "draft": "Inhlobo uhlobo"
+    },
+    "tax.ssnEIN": {
+      "en": "SSN / EIN",
+      "draft": "SSN / EIN"
+    },
+    "tax.storedSecurely": {
+      "en": "Stored securely",
+      "draft": "Stored securely"
+    },
+    "tax.street": {
+      "en": "Street",
+      "draft": "Street"
+    },
+    "tax.city": {
+      "en": "City",
+      "draft": "Idolobha"
+    },
+    "tax.state": {
+      "en": "State",
+      "draft": "Isifundazwe"
+    },
+    "tax.zip": {
+      "en": "ZIP",
+      "draft": "IKHODI"
+    },
+    "tax.cancel": {
+      "en": "Cancel",
+      "draft": "Khansela"
+    },
+    "tax.contractor": {
+      "en": "Contractor",
+      "draft": "Usonkontileka"
+    },
+    "tax.paid": {
+      "en": "Paid",
+      "draft": "Okukhokhiwe"
+    },
+    "tax.w9": {
+      "en": "W-9",
+      "draft": "W-9"
+    },
+    "tax.NEC": {
+      "en": "1099-NEC",
+      "draft": "1099-NEC"
+    },
+    "tax.eFile": {
+      "en": "E-file",
+      "draft": "E-file"
+    },
+    "tax.actions": {
+      "en": "Actions",
+      "draft": "Izenzo"
+    },
+    "tax.viewPaymentHistory": {
+      "en": "View payment history",
+      "draft": "Buka inkokhelo umlando"
+    },
+    "tax.toggleW9Received": {
+      "en": "Toggle W-9 received",
+      "draft": "Toggle W-9 okutholiwe"
+    },
+    "tax.required": {
+      "en": "Required",
+      "draft": "Okudingekayo"
+    },
+    "tax.viewFilingStatus": {
+      "en": "View filing status",
+      "draft": "Buka ukufayila isimo"
+    },
+    "tax.notFiled": {
+      "en": "Not filed",
+      "draft": "Hhayi filed"
+    },
+    "tax.recordPayment": {
+      "en": "Record payment",
+      "draft": "Rekhoda inkokhelo"
+    },
+    "tax.noContractorsYet": {
+      "en": "No contractors yet.",
+      "draft": "Hhayi osonkontileka okwamanje."
+    },
+    "tax.NECDataPreview": {
+      "en": "1099-NEC data preview",
+      "draft": "1099-NEC idatha buka kuqala"
+    },
+    "tax.recipientBox1DataShapedFor": {
+      "en": "Recipient + Box 1 data shaped for e-filing. Tax IDs stay masked — reveal needs PII access. Draft data only, nothing is filed in-house.",
+      "draft": "Ummukeli + Box 1 idatha shaped kwa e-filing. Intela IDs hlala masked — reveal needs PII ukufinyelela. Okusalungiswa idatha kuphela, lutho ngu filed in-house."
+    },
+    "tax.loadPreview": {
+      "en": "Load preview",
+      "draft": "Layisha buka kuqala"
+    },
+    "tax.recipient": {
+      "en": "Recipient",
+      "draft": "Ummukeli"
+    },
+    "tax.tin": {
+      "en": "TIN",
+      "draft": "TIN"
+    },
+    "tax.address": {
+      "en": "Address",
+      "draft": "Ikheli"
+    },
+    "tax.box1": {
+      "en": "Box 1",
+      "draft": "Box 1"
+    },
+    "tax.missing": {
+      "en": "missing",
+      "draft": "okulahlekile"
+    },
+    "tax.reveal": {
+      "en": "reveal",
+      "draft": "reveal"
+    },
+    "tax.noContractorsMeetThe": {
+      "en": "No contractors meet the",
+      "draft": "Hhayi osonkontileka meet "
+    },
+    "tax.reportingThresholdFor": {
+      "en": "reporting threshold for",
+      "draft": "ukubika threshold kwa"
+    },
+    "tax.recordPayment2": {
+      "en": "Record payment —",
+      "draft": "Rekhoda inkokhelo —"
+    },
+    "tax.date": {
+      "en": "Date",
+      "draft": "Usuku"
+    },
+    "tax.amount": {
+      "en": "Amount $",
+      "draft": "Inani $"
+    },
+    "tax.description": {
+      "en": "Description",
+      "draft": "Incazelo"
+    },
+    "tax.eGMarchBoothRentPayout": {
+      "en": "e.g. March booth rent payout",
+      "draft": "isib. March idokodo irenti inkokhelo"
+    },
+    "tax.record": {
+      "en": "Record",
+      "draft": "Rekhoda"
+    },
+    "tax.paymentHistory": {
+      "en": "Payment history —",
+      "draft": "Inkokhelo umlando —"
+    },
+    "tax.noPaymentsRecordedFor": {
+      "en": "No payments recorded for",
+      "draft": "Hhayi izinkokhelo okuqoshiwe kwa"
+    },
+    "tax.amount2": {
+      "en": "Amount",
+      "draft": "Inani"
+    },
+    "tax.deletePayment": {
+      "en": "Delete payment",
+      "draft": "Susa inkokhelo"
+    },
+    "tax.yearTotal": {
+      "en": "Year total:",
+      "draft": "Unyaka isamba:"
+    },
+    "tax.NECFiling": {
+      "en": "1099-NEC filing —",
+      "draft": "1099-NEC ukufayila —"
+    },
+    "tax.thisDraftLivesInTaxBanditsReview": {
+      "en": "This draft lives in TaxBandits — review and Transmit there to file with the IRS. This app never files in-house.",
+      "draft": "Lokhu okusalungiswa lives ku TaxBandits — buyekeza futhi Transmit there kuya ifayela ne IRS. Lokhu uhlelo angisoze amafayela in-house."
+    },
+    "tax.NECIsRequiredForNon": {
+      "en": "1099-NEC is required for non-corporate contractors paid ≥",
+      "draft": "1099-NEC ngu okudingekayo kwa non-corporate osonkontileka okukhokhiwe ≥"
+    },
+    "tax.inTheYearEFilingCreates": {
+      "en": "in the year. E-filing creates a draft in TaxBandits — you review and transmit there. This app never files with the IRS directly.",
+      "draft": "ku unyaka. E-filing creates okusalungiswa ku TaxBandits — wena buyekeza futhi transmit there. Lokhu uhlelo angisoze amafayela ne IRS directly."
+    },
+    "taxforecast.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "Intela Isibikezelo"
+    },
+    "taxforecast.OfPriorYearTax": {
+      "en": "100% of prior-year tax",
+      "draft": "100% ka prior-year intela"
+    },
+    "taxforecast.irsDirectPay": {
+      "en": "IRS Direct Pay",
+      "draft": "IRS Ngqo Khokha"
+    },
+    "nav.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "Intela Isibikezelo"
+    },
+    "nav.tax1099s": {
+      "en": "Tax & 1099s",
+      "draft": "Intela & 1099"
+    },
+    "teamInvites.accountantTaxPro": {
+      "en": "Accountant / Tax pro",
+      "draft": "Umgcini mabhuku / Intela ochwepheshe"
+    }
+  }
+}

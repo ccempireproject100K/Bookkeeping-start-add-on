@@ -1,0 +1,426 @@
+{
+  "_meta": {
+    "lang": "ti",
+    "status": "DRAFT for human review only. Do NOT copy into frontend/src/locales/ti/translation.json until a qualified reviewer (counsel/CPA where relevant) approves each string. Live locale keeps English for these keys.",
+    "source": "docs/TRANSLATION_PLAN.md flagged keys (legal/financial/tax/privacy/safety)",
+    "notice": "Approximate translation from English/Spanish, may not be accurate."
+  },
+  "strings": {
+    "salestaxtab.taxJurisdictions": {
+      "en": "Tax jurisdictions",
+      "draft": "ግብሪ jurisdictions"
+    },
+    "salestaxtab.everywhereYouCollectSalesTaxState": {
+      "en": "Everywhere you collect sales tax — state, county, city, special district.\n          Tag invoices with a jurisdiction and this page tells you what you owe, where.",
+      "draft": "ኵሉ ቦታ ንስኻ collect ሸይጣታት ግብሪ — ክልል, county, ከተማ, special district.\n  መለለዪ ኢንቮይስታት ምስ ስልጣን እን እዚ ገጽ tells ንስኻ እንታይ ንስኻ owe, ኣበይ."
+    },
+    "salestaxtab.noJurisdictionsYetAddTheFirst": {
+      "en": "No jurisdictions yet. Add the first place you collect sales tax.",
+      "draft": "የለን jurisdictions ዃን. ወስኽ ቀዳማይ place ንስኻ collect ሸይጣታት ግብሪ."
+    },
+    "salestaxtab.ofSalesTaxIsnTTagged": {
+      "en": "of sales tax isn't tagged to a jurisdiction yet.\n            Tag invoices with a jurisdiction so every dollar lands in the right bucket.",
+      "draft": "ናይ ሸይጣታት ግብሪ ኣይኮነን tagged ናብ ስልጣን ዃን.\n  መለለዪ ኢንቮይስታት ምስ ስልጣን እምብኣር ነፍሲ dollar lands ኣብ የማን ኩርኩር."
+    },
+    "salestaxtab.taxCollected": {
+      "en": "Tax collected",
+      "draft": "ግብሪ ዝተኣኻኸበ"
+    },
+    "teaminvites.inviteYourAccountantOrTaxPro": {
+      "en": "Invite your accountant or tax pro — they join with the right permissions\n        and can switch between all the workspaces they serve.",
+      "draft": "ዕድመት ናትካ ሒሳብ ሠራሒ ወይ ግብሪ ፕሮ — ንሳቶም ተጸንብር ምስ የማን ፍቓዳት\n  እን ይኽእል ቕይር ማእከል ኩሉ ቦታታት ስርሓ ንሳቶም serve."
+    },
+    "auditlog.eGTaxInvoiceLogin": {
+      "en": "e.g. tax, invoice, login",
+      "draft": "ንኣብነት ግብሪ, ኢንቮይስ, መእተዊ"
+    },
+    "cpapackage.mileageLogWithIRSRatesApplied": {
+      "en": "Mileage log with IRS rates applied",
+      "draft": "ርሕቐት ጉዕዞ መዝገብ ምስ IRS ተመናት applied"
+    },
+    "customers.delete": {
+      "en": "Delete",
+      "draft": "ደምስስ"
+    },
+    "customers.deleteConfirm": {
+      "en": "Delete customer \"{{name}}\"? Their invoices and statements stay on record.",
+      "draft": "ደምስስ ዓማዊል \"{{name}}\"? ናቶም ኢንቮይስታት እን መግለጺታት ኩን ልዑል መዝግብ."
+    },
+    "estimates.tax": {
+      "en": "Tax ($)",
+      "draft": "ግብሪ ($)"
+    },
+    "expenses.taxID": {
+      "en": "Tax ID",
+      "draft": "ግብሪ ID"
+    },
+    "expenses.taxYear": {
+      "en": "Tax year",
+      "draft": "ግብሪ ዓመት"
+    },
+    "expenses.tax": {
+      "en": "Tax",
+      "draft": "ግብሪ"
+    },
+    "expenses.taxIDEIN": {
+      "en": "Tax ID / EIN",
+      "draft": "ግብሪ ID / EIN"
+    },
+    "invoices.refund": {
+      "en": "Refund",
+      "draft": "ምምላስ"
+    },
+    "invoices.taxJurisdictionOptional": {
+      "en": "Tax jurisdiction (optional)",
+      "draft": "ግብሪ ስልጣን (ኻልእ)"
+    },
+    "invoices.tax": {
+      "en": "Tax ($)",
+      "draft": "ግብሪ ($)"
+    },
+    "invoices.refundCredit": {
+      "en": "Refund credit —",
+      "draft": "ምምላስ ክሬዲት —"
+    },
+    "invoices.refundTheRemaining": {
+      "en": "Refund the remaining",
+      "draft": "ምምላስ ዝተረፈ"
+    },
+    "mileage.irsLogCSV": {
+      "en": "IRS log CSV",
+      "draft": "IRS መዝገብ CSV"
+    },
+    "payroll.deleteDraft": {
+      "en": "Delete draft",
+      "draft": "ደምስስ ረቂቅ"
+    },
+    "payroll.partnershipStubWhenAProviderIs": {
+      "en": "Partnership stub: when a provider is connected, runs here will hand off tax filing and direct deposit automatically.",
+      "draft": "ሽርክና ዝርዝር: መዓስ ሃባይ ዩ ዝተራኸበ, ይስደድ ኣብዚ ይገብር ኢድ ጠፊኡ ግብሪ ምምዝጋብ እን ቕንዕ ሓዘን ብኣረኣያ."
+    },
+    "payroll.employerTaxEst": {
+      "en": "Employer payroll tax (est.)",
+      "draft": "Employer ደመወዝ ግብሪ (ግምት.)"
+    },
+    "portalview.tax": {
+      "en": "Tax",
+      "draft": "ግብሪ"
+    },
+    "recurringinvoices.tax": {
+      "en": "Tax ($)",
+      "draft": "ግብሪ ($)"
+    },
+    "simulator.safetyFloor": {
+      "en": "Safety floor $",
+      "draft": "Safety floor $"
+    },
+    "tax.nameIsRequired": {
+      "en": "Name is required",
+      "draft": "ስም ዩ ዝድለ"
+    },
+    "tax.contractorAdded": {
+      "en": "Contractor added",
+      "draft": "ኮንትራክተር ዝተወስኸ"
+    },
+    "tax.w9StatusUpdated": {
+      "en": "W-9 status updated",
+      "draft": "W-9 ኩነታት ዝተሐደሰ"
+    },
+    "tax.contractorRemoved": {
+      "en": "Contractor removed",
+      "draft": "ኮንትራክተር ዝተኣልየ"
+    },
+    "tax.enterAPositiveAmount": {
+      "en": "Enter a positive amount",
+      "draft": "እተው ኣወንታዊ መጠን"
+    },
+    "tax.paymentRecorded": {
+      "en": "Payment recorded",
+      "draft": "ኽፍሊት ዝተመዝገበ"
+    },
+    "tax.paymentDeleted": {
+      "en": "Payment deleted",
+      "draft": "ኽፍሊት ዝተደምሰሰ"
+    },
+    "tax.statusRefreshed": {
+      "en": "Status refreshed",
+      "draft": "ኩነታት refreshed"
+    },
+    "tax.addContractor": {
+      "en": "Add contractor",
+      "draft": "ወስኽ ኮንትራክተር"
+    },
+    "tax.contractors1099s": {
+      "en": "Contractors & 1099s",
+      "draft": "ኮንትራክተራት & 1099s"
+    },
+    "tax.salesTax": {
+      "en": "Sales Tax",
+      "draft": "ሸይጣታት ግብሪ"
+    },
+    "tax.taxbanditsNotConnected": {
+      "en": "TaxBandits not connected.",
+      "draft": "TaxBandits ኣይ ዝተራኸበ."
+    },
+    "tax.taxbanditsSETUPMd": {
+      "en": "TAXBANDITS_SETUP.md",
+      "draft": "TAXBANDITS_SETUP.md"
+    },
+    "tax.inTheRepoNoIRSFiling": {
+      "en": "in the repo. No IRS filing is ever done in-house.",
+      "draft": "ኣብ repo. የለን IRS ምምዝጋብ ዩ እኳ ተወዲኡ in-house."
+    },
+    "tax.taxbanditsConnectedIn": {
+      "en": "TaxBandits connected in",
+      "draft": "TaxBandits ዝተራኸበ ኣብ"
+    },
+    "tax.sandbox": {
+      "en": "sandbox",
+      "draft": "sandbox"
+    },
+    "tax.modeNoRealFilingsFlip": {
+      "en": "mode — no real filings. Flip",
+      "draft": "mode — የለን real filings. Flip"
+    },
+    "tax.taxbanditsSANDBOXFalse": {
+      "en": "TAXBANDITS_SANDBOX=false",
+      "draft": "TAXBANDITS_SANDBOX=ሓሶት"
+    },
+    "tax.toGoLive": {
+      "en": "to go live.",
+      "draft": "ናብ ኪድ ቀጥታ."
+    },
+    "tax.newContractor": {
+      "en": "New contractor",
+      "draft": "ሓድሽ ኮንትራክተር"
+    },
+    "tax.name": {
+      "en": "Name *",
+      "draft": "ስም *"
+    },
+    "tax.businessName": {
+      "en": "Business name",
+      "draft": "ንግዲ ስም"
+    },
+    "tax.email": {
+      "en": "Email",
+      "draft": "ኢመይል"
+    },
+    "tax.phone": {
+      "en": "Phone",
+      "draft": "ተሌፎን"
+    },
+    "tax.entityType": {
+      "en": "Entity type",
+      "draft": "ትካል ዓይነት"
+    },
+    "tax.ssnEIN": {
+      "en": "SSN / EIN",
+      "draft": "SSN / EIN"
+    },
+    "tax.storedSecurely": {
+      "en": "Stored securely",
+      "draft": "Stored securely"
+    },
+    "tax.street": {
+      "en": "Street",
+      "draft": "Street"
+    },
+    "tax.city": {
+      "en": "City",
+      "draft": "ከተማ"
+    },
+    "tax.state": {
+      "en": "State",
+      "draft": "ክልል"
+    },
+    "tax.zip": {
+      "en": "ZIP",
+      "draft": "ዚፕ"
+    },
+    "tax.cancel": {
+      "en": "Cancel",
+      "draft": "ሰርዝ"
+    },
+    "tax.contractor": {
+      "en": "Contractor",
+      "draft": "ኮንትራክተር"
+    },
+    "tax.paid": {
+      "en": "Paid",
+      "draft": "ተኸፊሉ"
+    },
+    "tax.w9": {
+      "en": "W-9",
+      "draft": "W-9"
+    },
+    "tax.NEC": {
+      "en": "1099-NEC",
+      "draft": "1099-NEC"
+    },
+    "tax.eFile": {
+      "en": "E-file",
+      "draft": "E-file"
+    },
+    "tax.actions": {
+      "en": "Actions",
+      "draft": "ተግባራት"
+    },
+    "tax.viewPaymentHistory": {
+      "en": "View payment history",
+      "draft": "ርኣይ ኽፍሊት ታሪኽ"
+    },
+    "tax.toggleW9Received": {
+      "en": "Toggle W-9 received",
+      "draft": "Toggle W-9 ዝተቕበለ"
+    },
+    "tax.required": {
+      "en": "Required",
+      "draft": "ዝድለ"
+    },
+    "tax.viewFilingStatus": {
+      "en": "View filing status",
+      "draft": "ርኣይ ምምዝጋብ ኩነታት"
+    },
+    "tax.notFiled": {
+      "en": "Not filed",
+      "draft": "ኣይ filed"
+    },
+    "tax.recordPayment": {
+      "en": "Record payment",
+      "draft": "መዝግብ ኽፍሊት"
+    },
+    "tax.noContractorsYet": {
+      "en": "No contractors yet.",
+      "draft": "የለን ኮንትራክተራት ዃን."
+    },
+    "tax.NECDataPreview": {
+      "en": "1099-NEC data preview",
+      "draft": "1099-NEC መረዳእታ ቅድመ ርእይ"
+    },
+    "tax.recipientBox1DataShapedFor": {
+      "en": "Recipient + Box 1 data shaped for e-filing. Tax IDs stay masked — reveal needs PII access. Draft data only, nothing is filed in-house.",
+      "draft": "ተቐባሊ + Box 1 መረዳእታ shaped ን e-filing. ግብሪ IDs ኩን masked — reveal needs PII መእተዊ. ረቂቅ መረዳእታ ብቻ, ምንም የለን ዩ filed in-house."
+    },
+    "tax.loadPreview": {
+      "en": "Load preview",
+      "draft": "ጽዒን ቅድመ ርእይ"
+    },
+    "tax.recipient": {
+      "en": "Recipient",
+      "draft": "ተቐባሊ"
+    },
+    "tax.tin": {
+      "en": "TIN",
+      "draft": "TIN"
+    },
+    "tax.address": {
+      "en": "Address",
+      "draft": "ኣድራሻ"
+    },
+    "tax.box1": {
+      "en": "Box 1",
+      "draft": "Box 1"
+    },
+    "tax.missing": {
+      "en": "missing",
+      "draft": "ዝጠፍአ"
+    },
+    "tax.reveal": {
+      "en": "reveal",
+      "draft": "reveal"
+    },
+    "tax.noContractorsMeetThe": {
+      "en": "No contractors meet the",
+      "draft": "የለን ኮንትራክተራት meet "
+    },
+    "tax.reportingThresholdFor": {
+      "en": "reporting threshold for",
+      "draft": "ሪፖርት threshold ን"
+    },
+    "tax.recordPayment2": {
+      "en": "Record payment —",
+      "draft": "መዝግብ ኽፍሊት —"
+    },
+    "tax.date": {
+      "en": "Date",
+      "draft": "ዕለት"
+    },
+    "tax.amount": {
+      "en": "Amount $",
+      "draft": "መጠን $"
+    },
+    "tax.description": {
+      "en": "Description",
+      "draft": "መግለጺ"
+    },
+    "tax.eGMarchBoothRentPayout": {
+      "en": "e.g. March booth rent payout",
+      "draft": "ንኣብነት March ሱቕ ኪራይ ኽፍሊት"
+    },
+    "tax.record": {
+      "en": "Record",
+      "draft": "መዝግብ"
+    },
+    "tax.paymentHistory": {
+      "en": "Payment history —",
+      "draft": "ኽፍሊት ታሪኽ —"
+    },
+    "tax.noPaymentsRecordedFor": {
+      "en": "No payments recorded for",
+      "draft": "የለን ኽፍሊታት ዝተመዝገበ ን"
+    },
+    "tax.amount2": {
+      "en": "Amount",
+      "draft": "መጠን"
+    },
+    "tax.deletePayment": {
+      "en": "Delete payment",
+      "draft": "ደምስስ ኽፍሊት"
+    },
+    "tax.yearTotal": {
+      "en": "Year total:",
+      "draft": "ዓመት ድምር:"
+    },
+    "tax.NECFiling": {
+      "en": "1099-NEC filing —",
+      "draft": "1099-NEC ምምዝጋብ —"
+    },
+    "tax.thisDraftLivesInTaxBanditsReview": {
+      "en": "This draft lives in TaxBandits — review and Transmit there to file with the IRS. This app never files in-house.",
+      "draft": "እዚ ረቂቅ lives ኣብ TaxBandits — ግምገማ እን Transmit there ናብ ፋይል ምስ IRS. እዚ መተግበሪ ነብሲ ፋይልታት in-house."
+    },
+    "tax.NECIsRequiredForNon": {
+      "en": "1099-NEC is required for non-corporate contractors paid ≥",
+      "draft": "1099-NEC ዩ ዝድለ ን non-corporate ኮንትራክተራት ተኸፊሉ ≥"
+    },
+    "tax.inTheYearEFilingCreates": {
+      "en": "in the year. E-filing creates a draft in TaxBandits — you review and transmit there. This app never files with the IRS directly.",
+      "draft": "ኣብ ዓመት. E-filing creates ረቂቅ ኣብ TaxBandits — ንስኻ ግምገማ እን transmit there. እዚ መተግበሪ ነብሲ ፋይልታት ምስ IRS directly."
+    },
+    "taxforecast.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "ግብሪ ትንብይት"
+    },
+    "taxforecast.OfPriorYearTax": {
+      "en": "100% of prior-year tax",
+      "draft": "100% ናይ prior-year ግብሪ"
+    },
+    "taxforecast.irsDirectPay": {
+      "en": "IRS Direct Pay",
+      "draft": "IRS ቕንዕ ኽፈል"
+    },
+    "nav.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "ግብሪ ትንብይት"
+    },
+    "nav.tax1099s": {
+      "en": "Tax & 1099s",
+      "draft": "ግብሪ & 1099s"
+    },
+    "teamInvites.accountantTaxPro": {
+      "en": "Accountant / Tax pro",
+      "draft": "ሒሳብ ሠራሒ / ግብሪ ፕሮ"
+    }
+  }
+}

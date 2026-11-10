@@ -1,0 +1,426 @@
+{
+  "_meta": {
+    "lang": "ig",
+    "status": "DRAFT for human review only. Do NOT copy into frontend/src/locales/ig/translation.json until a qualified reviewer (counsel/CPA where relevant) approves each string. Live locale keeps English for these keys.",
+    "source": "docs/TRANSLATION_PLAN.md flagged keys (legal/financial/tax/privacy/safety)",
+    "notice": "Approximate translation from English/Spanish, may not be accurate."
+  },
+  "strings": {
+    "salestaxtab.taxJurisdictions": {
+      "en": "Tax jurisdictions",
+      "draft": "Mpaghara ụtụ"
+    },
+    "salestaxtab.everywhereYouCollectSalesTaxState": {
+      "en": "Everywhere you collect sales tax — state, county, city, special district.\n          Tag invoices with a jurisdiction and this page tells you what you owe, where.",
+      "draft": "Ebe ọ bụla ị na-anakọta ụtụ ire — steeti, kọntị, obodo, mpaghara pụrụ iche.\n          Jiri mpaghara ụtụ kaa akwụkwọ ụgwọ ibe a na-agwa gị ihe ị ji, ebe."
+    },
+    "salestaxtab.noJurisdictionsYetAddTheFirst": {
+      "en": "No jurisdictions yet. Add the first place you collect sales tax.",
+      "draft": "Enweghị mpaghara ụtụ. Tinye ebe mbụ ị na-anakọta ụtụ ire."
+    },
+    "salestaxtab.ofSalesTaxIsnTTagged": {
+      "en": "of sales tax isn't tagged to a jurisdiction yet.\n            Tag invoices with a jurisdiction so every dollar lands in the right bucket.",
+      "draft": "nke ụtụ ire akābeghị mpaghara ụtụ.\n            Jiri mpaghara ụtụ kaa akwụkwọ ụgwọ ka dollar ọ bụla daba na nkata kwesịrị ekwesị."
+    },
+    "salestaxtab.taxCollected": {
+      "en": "Tax collected",
+      "draft": "Ụtụ anakọtara"
+    },
+    "teaminvites.inviteYourAccountantOrTaxPro": {
+      "en": "Invite your accountant or tax pro — they join with the right permissions\n        and can switch between all the workspaces they serve.",
+      "draft": "Kpọọ akaụntụ gị ma ọ bụ ọkachamara ụtụ — ha na-esonye na ikike kwesịrị ekwesị\n        ha nwekwara ike ịgbanwe n'etiti oghere ọrụ niile ha na-ejere."
+    },
+    "auditlog.eGTaxInvoiceLogin": {
+      "en": "e.g. tax, invoice, login",
+      "draft": "dịka ụtụ, akwụkwọ ụgwọ, nbanye"
+    },
+    "cpapackage.mileageLogWithIRSRatesApplied": {
+      "en": "Mileage log with IRS rates applied",
+      "draft": "Ndekọ njem na ọnụego IRS etinyere"
+    },
+    "customers.delete": {
+      "en": "Delete",
+      "draft": "Hichapụ"
+    },
+    "customers.deleteConfirm": {
+      "en": "Delete customer \"{{name}}\"? Their invoices and statements stay on record.",
+      "draft": "Hichapụ onye ahịa “{{name}}”? Akwụkwọ ụgwọ ya na nkwupụta na-adị na ndekọ."
+    },
+    "estimates.tax": {
+      "en": "Tax ($)",
+      "draft": "Ụtụ ($)"
+    },
+    "expenses.taxID": {
+      "en": "Tax ID",
+      "draft": "ID Ụtụ"
+    },
+    "expenses.taxYear": {
+      "en": "Tax year",
+      "draft": "Afọ ụtụ"
+    },
+    "expenses.tax": {
+      "en": "Tax",
+      "draft": "Ụtụ"
+    },
+    "expenses.taxIDEIN": {
+      "en": "Tax ID / EIN",
+      "draft": "ID Ụtụ / EIN"
+    },
+    "invoices.refund": {
+      "en": "Refund",
+      "draft": "Nkwụghachi"
+    },
+    "invoices.taxJurisdictionOptional": {
+      "en": "Tax jurisdiction (optional)",
+      "draft": "Mpaghara ụtụ (nhọrọ)"
+    },
+    "invoices.tax": {
+      "en": "Tax ($)",
+      "draft": "Ụtụ ($)"
+    },
+    "invoices.refundCredit": {
+      "en": "Refund credit —",
+      "draft": "Kwụghachi kredit —"
+    },
+    "invoices.refundTheRemaining": {
+      "en": "Refund the remaining",
+      "draft": "Kwụghachi nke fọdụrụ"
+    },
+    "mileage.irsLogCSV": {
+      "en": "IRS log CSV",
+      "draft": "CSV ndekọ IRS"
+    },
+    "payroll.deleteDraft": {
+      "en": "Delete draft",
+      "draft": "Hichapụ mpempe"
+    },
+    "payroll.partnershipStubWhenAProviderIs": {
+      "en": "Partnership stub: when a provider is connected, runs here will hand off tax filing and direct deposit automatically.",
+      "draft": "Stub mmekọrịta: mgbe ejikọrọ onye na-enye, ịgba ebe a ga-enyefe ntinye ụtụ na nkwụnye kpọmkwem na-akpaghị aka."
+    },
+    "payroll.employerTaxEst": {
+      "en": "Employer payroll tax (est.)",
+      "draft": "Ụtụ ịkwụ ụgwọ ọnwa onye were ọrụ (atụ.)"
+    },
+    "portalview.tax": {
+      "en": "Tax",
+      "draft": "Ụtụ"
+    },
+    "recurringinvoices.tax": {
+      "en": "Tax ($)",
+      "draft": "Ụtụ ($)"
+    },
+    "simulator.safetyFloor": {
+      "en": "Safety floor $",
+      "draft": "Ala nchekwa $"
+    },
+    "tax.nameIsRequired": {
+      "en": "Name is required",
+      "draft": "Achọrọ aha"
+    },
+    "tax.contractorAdded": {
+      "en": "Contractor added",
+      "draft": "Atinyela onye ọrụ nkwekọrịta"
+    },
+    "tax.w9StatusUpdated": {
+      "en": "W-9 status updated",
+      "draft": "Emelitela ọnọdụ W-9"
+    },
+    "tax.contractorRemoved": {
+      "en": "Contractor removed",
+      "draft": "Ewepụla onye ọrụ nkwekọrịta"
+    },
+    "tax.enterAPositiveAmount": {
+      "en": "Enter a positive amount",
+      "draft": "Tinye ọnụọgụ dị mma"
+    },
+    "tax.paymentRecorded": {
+      "en": "Payment recorded",
+      "draft": "Edekọola ịkwụ ụgwọ"
+    },
+    "tax.paymentDeleted": {
+      "en": "Payment deleted",
+      "draft": "Ehichapụla ịkwụ ụgwọ"
+    },
+    "tax.statusRefreshed": {
+      "en": "Status refreshed",
+      "draft": "Emegharịala ọnọdụ"
+    },
+    "tax.addContractor": {
+      "en": "Add contractor",
+      "draft": "Tinye onye ọrụ nkwekọrịta"
+    },
+    "tax.contractors1099s": {
+      "en": "Contractors & 1099s",
+      "draft": "Ndị Ọrụ Nkwekọrịta & 1099s"
+    },
+    "tax.salesTax": {
+      "en": "Sales Tax",
+      "draft": "Ụtụ Ire"
+    },
+    "tax.taxbanditsNotConnected": {
+      "en": "TaxBandits not connected.",
+      "draft": "Ejikọtaghị TaxBandits."
+    },
+    "tax.taxbanditsSETUPMd": {
+      "en": "TAXBANDITS_SETUP.md",
+      "draft": "TAXBANDITS_SETUP.md"
+    },
+    "tax.inTheRepoNoIRSFiling": {
+      "en": "in the repo. No IRS filing is ever done in-house.",
+      "draft": "na repo. Emeghị ntinye IRS n'ụlọ ma ọlị."
+    },
+    "tax.taxbanditsConnectedIn": {
+      "en": "TaxBandits connected in",
+      "draft": "Ejikọrọ TaxBandits na"
+    },
+    "tax.sandbox": {
+      "en": "sandbox",
+      "draft": "sandbox"
+    },
+    "tax.modeNoRealFilingsFlip": {
+      "en": "mode — no real filings. Flip",
+      "draft": "ọnọdụ — enweghị ntinye ezigbo. Gbanwee"
+    },
+    "tax.taxbanditsSANDBOXFalse": {
+      "en": "TAXBANDITS_SANDBOX=false",
+      "draft": "TAXBANDITS_SANDBOX=false"
+    },
+    "tax.toGoLive": {
+      "en": "to go live.",
+      "draft": "ịga ndụ."
+    },
+    "tax.newContractor": {
+      "en": "New contractor",
+      "draft": "Onye ọrụ nkwekọrịta ọhụrụ"
+    },
+    "tax.name": {
+      "en": "Name *",
+      "draft": "Aha *"
+    },
+    "tax.businessName": {
+      "en": "Business name",
+      "draft": "Aha azụmahịa"
+    },
+    "tax.email": {
+      "en": "Email",
+      "draft": "email"
+    },
+    "tax.phone": {
+      "en": "Phone",
+      "draft": "Ekwentị"
+    },
+    "tax.entityType": {
+      "en": "Entity type",
+      "draft": "Ụdị ihe"
+    },
+    "tax.ssnEIN": {
+      "en": "SSN / EIN",
+      "draft": "SSN / EIN"
+    },
+    "tax.storedSecurely": {
+      "en": "Stored securely",
+      "draft": "Echekwara na nchekwa"
+    },
+    "tax.street": {
+      "en": "Street",
+      "draft": "Okporo ụzọ"
+    },
+    "tax.city": {
+      "en": "City",
+      "draft": "Obodo"
+    },
+    "tax.state": {
+      "en": "State",
+      "draft": "Steeti"
+    },
+    "tax.zip": {
+      "en": "ZIP",
+      "draft": "ZIP"
+    },
+    "tax.cancel": {
+      "en": "Cancel",
+      "draft": "Kagbuo"
+    },
+    "tax.contractor": {
+      "en": "Contractor",
+      "draft": "Onye ọrụ nkwekọrịta"
+    },
+    "tax.paid": {
+      "en": "Paid",
+      "draft": "Akwụola"
+    },
+    "tax.w9": {
+      "en": "W-9",
+      "draft": "W-9"
+    },
+    "tax.NEC": {
+      "en": "1099-NEC",
+      "draft": "1099-NEC"
+    },
+    "tax.eFile": {
+      "en": "E-file",
+      "draft": "E-file"
+    },
+    "tax.actions": {
+      "en": "Actions",
+      "draft": "Omume"
+    },
+    "tax.viewPaymentHistory": {
+      "en": "View payment history",
+      "draft": "Lee akụkọ ịkwụ ụgwọ"
+    },
+    "tax.toggleW9Received": {
+      "en": "Toggle W-9 received",
+      "draft": "Gbanwee W-9 anatara"
+    },
+    "tax.required": {
+      "en": "Required",
+      "draft": "Achọrọ"
+    },
+    "tax.viewFilingStatus": {
+      "en": "View filing status",
+      "draft": "Lee ọnọdụ ntinye"
+    },
+    "tax.notFiled": {
+      "en": "Not filed",
+      "draft": "Etinyeghị"
+    },
+    "tax.recordPayment": {
+      "en": "Record payment",
+      "draft": "Dekọọ ịkwụ ụgwọ"
+    },
+    "tax.noContractorsYet": {
+      "en": "No contractors yet.",
+      "draft": "Enweghị ndị ọrụ nkwekọrịta."
+    },
+    "tax.NECDataPreview": {
+      "en": "1099-NEC data preview",
+      "draft": "Lee anya data 1099-NEC"
+    },
+    "tax.recipientBox1DataShapedFor": {
+      "en": "Recipient + Box 1 data shaped for e-filing. Tax IDs stay masked — reveal needs PII access. Draft data only, nothing is filed in-house.",
+      "draft": "Data Onye nnata + Igbe 1 ahaziri maka e-filing. ID Ụtụ na-adị zoro ezo — ikpughe chọrọ nnweta PII. Data mpempe naanị, etinyeghị ihe ọ bụla n'ụlọ."
+    },
+    "tax.loadPreview": {
+      "en": "Load preview",
+      "draft": "Bunye anya"
+    },
+    "tax.recipient": {
+      "en": "Recipient",
+      "draft": "Onye nnata"
+    },
+    "tax.tin": {
+      "en": "TIN",
+      "draft": "TIN"
+    },
+    "tax.address": {
+      "en": "Address",
+      "draft": "Adreesị"
+    },
+    "tax.box1": {
+      "en": "Box 1",
+      "draft": "Igbe 1"
+    },
+    "tax.missing": {
+      "en": "missing",
+      "draft": "na-efu"
+    },
+    "tax.reveal": {
+      "en": "reveal",
+      "draft": "kpughee"
+    },
+    "tax.noContractorsMeetThe": {
+      "en": "No contractors meet the",
+      "draft": "Enweghị ndị ọrụ nkwekọrịta mezuru"
+    },
+    "tax.reportingThresholdFor": {
+      "en": "reporting threshold for",
+      "draft": "oke ịkọ maka"
+    },
+    "tax.recordPayment2": {
+      "en": "Record payment —",
+      "draft": "Dekọọ ịkwụ ụgwọ —"
+    },
+    "tax.date": {
+      "en": "Date",
+      "draft": "Ụbọchị"
+    },
+    "tax.amount": {
+      "en": "Amount $",
+      "draft": "Ọnụọgụ $"
+    },
+    "tax.description": {
+      "en": "Description",
+      "draft": "Nkọwa"
+    },
+    "tax.eGMarchBoothRentPayout": {
+      "en": "e.g. March booth rent payout",
+      "draft": "dịka Ịkwụ ụgwọ ụlọ ntu Machị"
+    },
+    "tax.record": {
+      "en": "Record",
+      "draft": "Ndekọ"
+    },
+    "tax.paymentHistory": {
+      "en": "Payment history —",
+      "draft": "Akụkọ ịkwụ ụgwọ —"
+    },
+    "tax.noPaymentsRecordedFor": {
+      "en": "No payments recorded for",
+      "draft": "Enweghị ịkwụ ụgwọ edekọrọ maka"
+    },
+    "tax.amount2": {
+      "en": "Amount",
+      "draft": "Ọnụọgụ"
+    },
+    "tax.deletePayment": {
+      "en": "Delete payment",
+      "draft": "Hichapụ ịkwụ ụgwọ"
+    },
+    "tax.yearTotal": {
+      "en": "Year total:",
+      "draft": "Ngụkọta afọ:"
+    },
+    "tax.NECFiling": {
+      "en": "1099-NEC filing —",
+      "draft": "Ntinye 1099-NEC —"
+    },
+    "tax.thisDraftLivesInTaxBanditsReview": {
+      "en": "This draft lives in TaxBandits — review and Transmit there to file with the IRS. This app never files in-house.",
+      "draft": "Mpempe a dị na TaxBandits — nyochaa ma Nyefee ebe ahụ ka ị tinye na IRS. Ngwa a anaghị etinye n'ụlọ ma ọlị."
+    },
+    "tax.NECIsRequiredForNon": {
+      "en": "1099-NEC is required for non-corporate contractors paid ≥",
+      "draft": "Achọrọ 1099-NEC maka ndị ọrụ nkwekọrịta na-abụghị ụlọ ọrụ akwụrụ ≥"
+    },
+    "tax.inTheYearEFilingCreates": {
+      "en": "in the year. E-filing creates a draft in TaxBandits — you review and transmit there. This app never files with the IRS directly.",
+      "draft": "n'afọ. E-filing na-emepụta mpempe na TaxBandits — ị na-enyocha ma nyefee ebe ahụ. Ngwa a anaghị etinye na IRS ozugbo ma ọlị."
+    },
+    "taxforecast.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "Amụma Ụtụ"
+    },
+    "taxforecast.OfPriorYearTax": {
+      "en": "100% of prior-year tax",
+      "draft": "100% nke ụtụ afọ gara aga"
+    },
+    "taxforecast.irsDirectPay": {
+      "en": "IRS Direct Pay",
+      "draft": "IRS Direct Pay"
+    },
+    "nav.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "Amụma Ụtụ"
+    },
+    "nav.tax1099s": {
+      "en": "Tax & 1099s",
+      "draft": "Ụtụ & 1099s"
+    },
+    "teamInvites.accountantTaxPro": {
+      "en": "Accountant / Tax pro",
+      "draft": "Akaụntụ / Ọkachamara ụtụ"
+    }
+  }
+}

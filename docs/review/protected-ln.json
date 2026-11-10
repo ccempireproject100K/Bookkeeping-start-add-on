@@ -1,0 +1,426 @@
+{
+  "_meta": {
+    "lang": "ln",
+    "status": "DRAFT for human review only. Do NOT copy into frontend/src/locales/ln/translation.json until a qualified reviewer (counsel/CPA where relevant) approves each string. Live locale keeps English for these keys.",
+    "source": "docs/TRANSLATION_PLAN.md flagged keys (legal/financial/tax/privacy/safety)",
+    "notice": "Approximate translation from English/Spanish, may not be accurate."
+  },
+  "strings": {
+    "salestaxtab.taxJurisdictions": {
+      "en": "Tax jurisdictions",
+      "draft": "Taksi jurisdictions"
+    },
+    "salestaxtab.everywhereYouCollectSalesTaxState": {
+      "en": "Everywhere you collect sales tax — state, county, city, special district.\n          Tag invoices with a jurisdiction and this page tells you what you owe, where.",
+      "draft": "Bisika banso yo collect koteka taksi — etuka, county, engumba, special district.\n  Elembo facture na bokonzi na oyo loka sa tells yo nini yo owe, wapi."
+    },
+    "salestaxtab.noJurisdictionsYetAddTheFirst": {
+      "en": "No jurisdictions yet. Add the first place you collect sales tax.",
+      "draft": "Te jurisdictions nanu. Bakisa ya liboso place yo collect koteka taksi."
+    },
+    "salestaxtab.ofSalesTaxIsnTTagged": {
+      "en": "of sales tax isn't tagged to a jurisdiction yet.\n            Tag invoices with a jurisdiction so every dollar lands in the right bucket.",
+      "draft": "ya koteka taksi ezali te tagged kino bokonzi nanu.\n  Elembo facture na bokonzi mpe mokoko dollar lands na loboko ya mobali eteni."
+    },
+    "salestaxtab.taxCollected": {
+      "en": "Tax collected",
+      "draft": "Taksi eyanganaki"
+    },
+    "teaminvites.inviteYourAccountantOrTaxPro": {
+      "en": "Invite your accountant or tax pro — they join with the right permissions\n        and can switch between all the workspaces they serve.",
+      "draft": "Kobenga na yo mosangisi to taksi profesionele — bango kota na loboko ya mobali nzimya\n  na kokoka bongola kati nanso bisika ya mosala bango serve."
+    },
+    "auditlog.eGTaxInvoiceLogin": {
+      "en": "e.g. tax, invoice, login",
+      "draft": "ndakisa taksi, facture, kota"
+    },
+    "cpapackage.mileageLogWithIRSRatesApplied": {
+      "en": "Mileage log with IRS rates applied",
+      "draft": "Kilometele liste na IRS taux applied"
+    },
+    "customers.delete": {
+      "en": "Delete",
+      "draft": "Longola"
+    },
+    "customers.deleteConfirm": {
+      "en": "Delete customer \"{{name}}\"? Their invoices and statements stay on record.",
+      "draft": "Longola kliyent \"{{name}}\"? Na bango facture na bikomi wumela na koma."
+    },
+    "estimates.tax": {
+      "en": "Tax ($)",
+      "draft": "Taksi ($)"
+    },
+    "expenses.taxID": {
+      "en": "Tax ID",
+      "draft": "Taksi ID"
+    },
+    "expenses.taxYear": {
+      "en": "Tax year",
+      "draft": "Taksi mobu"
+    },
+    "expenses.tax": {
+      "en": "Tax",
+      "draft": "Taksi"
+    },
+    "expenses.taxIDEIN": {
+      "en": "Tax ID / EIN",
+      "draft": "Taksi ID / EIN"
+    },
+    "invoices.refund": {
+      "en": "Refund",
+      "draft": "Kozongisa"
+    },
+    "invoices.taxJurisdictionOptional": {
+      "en": "Tax jurisdiction (optional)",
+      "draft": "Taksi bokonzi (soki olingi)"
+    },
+    "invoices.tax": {
+      "en": "Tax ($)",
+      "draft": "Taksi ($)"
+    },
+    "invoices.refundCredit": {
+      "en": "Refund credit —",
+      "draft": "Kozongisa kredi —"
+    },
+    "invoices.refundTheRemaining": {
+      "en": "Refund the remaining",
+      "draft": "Kozongisa etikali"
+    },
+    "mileage.irsLogCSV": {
+      "en": "IRS log CSV",
+      "draft": "IRS liste CSV"
+    },
+    "payroll.deleteDraft": {
+      "en": "Delete draft",
+      "draft": "Longola brouyon"
+    },
+    "payroll.partnershipStubWhenAProviderIs": {
+      "en": "Partnership stub: when a provider is connected, runs here will hand off tax filing and direct deposit automatically.",
+      "draft": "Bondimi papie: nini mopesi ezali ekangisami, etambolaka awa koko loboko ekangami taksi botiami na mbala moko kobomba yango moko."
+    },
+    "payroll.employerTaxEst": {
+      "en": "Employer payroll tax (est.)",
+      "draft": "Employer kofuta taksi (pene.)"
+    },
+    "portalview.tax": {
+      "en": "Tax",
+      "draft": "Taksi"
+    },
+    "recurringinvoices.tax": {
+      "en": "Tax ($)",
+      "draft": "Taksi ($)"
+    },
+    "simulator.safetyFloor": {
+      "en": "Safety floor $",
+      "draft": "Safety floor $"
+    },
+    "tax.nameIsRequired": {
+      "en": "Name is required",
+      "draft": "Nkombo ezali esengeli"
+    },
+    "tax.contractorAdded": {
+      "en": "Contractor added",
+      "draft": "Moteki ya kontra ebakisami"
+    },
+    "tax.w9StatusUpdated": {
+      "en": "W-9 status updated",
+      "draft": "W-9 ndenge ebongisami"
+    },
+    "tax.contractorRemoved": {
+      "en": "Contractor removed",
+      "draft": "Moteki ya kontra elongwami"
+    },
+    "tax.enterAPositiveAmount": {
+      "en": "Enter a positive amount",
+      "draft": "Kota malamu motango"
+    },
+    "tax.paymentRecorded": {
+      "en": "Payment recorded",
+      "draft": "Kofuta ekomiami"
+    },
+    "tax.paymentDeleted": {
+      "en": "Payment deleted",
+      "draft": "Kofuta elongwami"
+    },
+    "tax.statusRefreshed": {
+      "en": "Status refreshed",
+      "draft": "Ndenge refreshed"
+    },
+    "tax.addContractor": {
+      "en": "Add contractor",
+      "draft": "Bakisa moteki ya kontra"
+    },
+    "tax.contractors1099s": {
+      "en": "Contractors & 1099s",
+      "draft": "Bateki ya kontra & 1099s"
+    },
+    "tax.salesTax": {
+      "en": "Sales Tax",
+      "draft": "Koteka Taksi"
+    },
+    "tax.taxbanditsNotConnected": {
+      "en": "TaxBandits not connected.",
+      "draft": "TaxBandits te ekangisami."
+    },
+    "tax.taxbanditsSETUPMd": {
+      "en": "TAXBANDITS_SETUP.md",
+      "draft": "TAXBANDITS_SETUP.md"
+    },
+    "tax.inTheRepoNoIRSFiling": {
+      "en": "in the repo. No IRS filing is ever done in-house.",
+      "draft": "na repo. Te IRS botiami ezali moko esili in-house."
+    },
+    "tax.taxbanditsConnectedIn": {
+      "en": "TaxBandits connected in",
+      "draft": "TaxBandits ekangisami na"
+    },
+    "tax.sandbox": {
+      "en": "sandbox",
+      "draft": "sandbox"
+    },
+    "tax.modeNoRealFilingsFlip": {
+      "en": "mode — no real filings. Flip",
+      "draft": "mode — te real filings. Flip"
+    },
+    "tax.taxbanditsSANDBOXFalse": {
+      "en": "TAXBANDITS_SANDBOX=false",
+      "draft": "TAXBANDITS_SANDBOX=lokuta"
+    },
+    "tax.toGoLive": {
+      "en": "to go live.",
+      "draft": "kino kende mbala moko."
+    },
+    "tax.newContractor": {
+      "en": "New contractor",
+      "draft": "Sika moteki ya kontra"
+    },
+    "tax.name": {
+      "en": "Name *",
+      "draft": "Nkombo *"
+    },
+    "tax.businessName": {
+      "en": "Business name",
+      "draft": "Mombongo nkombo"
+    },
+    "tax.email": {
+      "en": "Email",
+      "draft": "Imel"
+    },
+    "tax.phone": {
+      "en": "Phone",
+      "draft": "Telefon"
+    },
+    "tax.entityType": {
+      "en": "Entity type",
+      "draft": "Kampani lolenge"
+    },
+    "tax.ssnEIN": {
+      "en": "SSN / EIN",
+      "draft": "SSN / EIN"
+    },
+    "tax.storedSecurely": {
+      "en": "Stored securely",
+      "draft": "Stored securely"
+    },
+    "tax.street": {
+      "en": "Street",
+      "draft": "Street"
+    },
+    "tax.city": {
+      "en": "City",
+      "draft": "Engumba"
+    },
+    "tax.state": {
+      "en": "State",
+      "draft": "Etuka"
+    },
+    "tax.zip": {
+      "en": "ZIP",
+      "draft": "KODE"
+    },
+    "tax.cancel": {
+      "en": "Cancel",
+      "draft": "Longola"
+    },
+    "tax.contractor": {
+      "en": "Contractor",
+      "draft": "Moteki ya kontra"
+    },
+    "tax.paid": {
+      "en": "Paid",
+      "draft": "Bafuti"
+    },
+    "tax.w9": {
+      "en": "W-9",
+      "draft": "W-9"
+    },
+    "tax.NEC": {
+      "en": "1099-NEC",
+      "draft": "1099-NEC"
+    },
+    "tax.eFile": {
+      "en": "E-file",
+      "draft": "E-file"
+    },
+    "tax.actions": {
+      "en": "Actions",
+      "draft": "Misala"
+    },
+    "tax.viewPaymentHistory": {
+      "en": "View payment history",
+      "draft": "Tala kofuta lisolo"
+    },
+    "tax.toggleW9Received": {
+      "en": "Toggle W-9 received",
+      "draft": "Toggle W-9 ezwami"
+    },
+    "tax.required": {
+      "en": "Required",
+      "draft": "Esengeli"
+    },
+    "tax.viewFilingStatus": {
+      "en": "View filing status",
+      "draft": "Tala botiami ndenge"
+    },
+    "tax.notFiled": {
+      "en": "Not filed",
+      "draft": "Te filed"
+    },
+    "tax.recordPayment": {
+      "en": "Record payment",
+      "draft": "Koma kofuta"
+    },
+    "tax.noContractorsYet": {
+      "en": "No contractors yet.",
+      "draft": "Te bateki ya kontra nanu."
+    },
+    "tax.NECDataPreview": {
+      "en": "1099-NEC data preview",
+      "draft": "1099-NEC doné tala liboso"
+    },
+    "tax.recipientBox1DataShapedFor": {
+      "en": "Recipient + Box 1 data shaped for e-filing. Tax IDs stay masked — reveal needs PII access. Draft data only, nothing is filed in-house.",
+      "draft": "Mozwi + Box 1 doné shaped mpo na e-filing. Taksi IDs wumela masked — reveal needs PII bokoteli. Brouyon doné kaka, eloko te ezali filed in-house."
+    },
+    "tax.loadPreview": {
+      "en": "Load preview",
+      "draft": "Kotisa tala liboso"
+    },
+    "tax.recipient": {
+      "en": "Recipient",
+      "draft": "Mozwi"
+    },
+    "tax.tin": {
+      "en": "TIN",
+      "draft": "TIN"
+    },
+    "tax.address": {
+      "en": "Address",
+      "draft": "Adres"
+    },
+    "tax.box1": {
+      "en": "Box 1",
+      "draft": "Box 1"
+    },
+    "tax.missing": {
+      "en": "missing",
+      "draft": "ezangi"
+    },
+    "tax.reveal": {
+      "en": "reveal",
+      "draft": "reveal"
+    },
+    "tax.noContractorsMeetThe": {
+      "en": "No contractors meet the",
+      "draft": "Te bateki ya kontra meet "
+    },
+    "tax.reportingThresholdFor": {
+      "en": "reporting threshold for",
+      "draft": "korapora threshold mpo na"
+    },
+    "tax.recordPayment2": {
+      "en": "Record payment —",
+      "draft": "Koma kofuta —"
+    },
+    "tax.date": {
+      "en": "Date",
+      "draft": "Mokolo"
+    },
+    "tax.amount": {
+      "en": "Amount $",
+      "draft": "Motango $"
+    },
+    "tax.description": {
+      "en": "Description",
+      "draft": "Ndimbola"
+    },
+    "tax.eGMarchBoothRentPayout": {
+      "en": "e.g. March booth rent payout",
+      "draft": "ndakisa March ndako moke lofase kofuta"
+    },
+    "tax.record": {
+      "en": "Record",
+      "draft": "Koma"
+    },
+    "tax.paymentHistory": {
+      "en": "Payment history —",
+      "draft": "Kofuta lisolo —"
+    },
+    "tax.noPaymentsRecordedFor": {
+      "en": "No payments recorded for",
+      "draft": "Te kofuta ekomiami mpo na"
+    },
+    "tax.amount2": {
+      "en": "Amount",
+      "draft": "Motango"
+    },
+    "tax.deletePayment": {
+      "en": "Delete payment",
+      "draft": "Longola kofuta"
+    },
+    "tax.yearTotal": {
+      "en": "Year total:",
+      "draft": "Mobu mobimba:"
+    },
+    "tax.NECFiling": {
+      "en": "1099-NEC filing —",
+      "draft": "1099-NEC botiami —"
+    },
+    "tax.thisDraftLivesInTaxBanditsReview": {
+      "en": "This draft lives in TaxBandits — review and Transmit there to file with the IRS. This app never files in-house.",
+      "draft": "Oyo brouyon lives na TaxBandits — tala na Transmit there kino fisye na IRS. Oyo aplikasion mokolo te fisye in-house."
+    },
+    "tax.NECIsRequiredForNon": {
+      "en": "1099-NEC is required for non-corporate contractors paid ≥",
+      "draft": "1099-NEC ezali esengeli mpo na non-corporate bateki ya kontra bafuti ≥"
+    },
+    "tax.inTheYearEFilingCreates": {
+      "en": "in the year. E-filing creates a draft in TaxBandits — you review and transmit there. This app never files with the IRS directly.",
+      "draft": "na mobu. E-filing creates brouyon na TaxBandits — yo tala na transmit there. Oyo aplikasion mokolo te fisye na IRS directly."
+    },
+    "taxforecast.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "Taksi Kokana"
+    },
+    "taxforecast.OfPriorYearTax": {
+      "en": "100% of prior-year tax",
+      "draft": "100% ya prior-year taksi"
+    },
+    "taxforecast.irsDirectPay": {
+      "en": "IRS Direct Pay",
+      "draft": "IRS Mbala moko Futa"
+    },
+    "nav.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "Taksi Kokana"
+    },
+    "nav.tax1099s": {
+      "en": "Tax & 1099s",
+      "draft": "Taksi & 1099s"
+    },
+    "teamInvites.accountantTaxPro": {
+      "en": "Accountant / Tax pro",
+      "draft": "Mosangisi / Taksi profesionele"
+    }
+  }
+}

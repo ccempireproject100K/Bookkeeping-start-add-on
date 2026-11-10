@@ -1,0 +1,426 @@
+{
+  "_meta": {
+    "lang": "ml",
+    "status": "DRAFT for human review only. Do NOT copy into frontend/src/locales/ml/translation.json until a qualified reviewer (counsel/CPA where relevant) approves each string. Live locale keeps English for these keys.",
+    "source": "docs/TRANSLATION_PLAN.md flagged keys (legal/financial/tax/privacy/safety)",
+    "notice": "Approximate translation from English/Spanish, may not be accurate."
+  },
+  "strings": {
+    "salestaxtab.taxJurisdictions": {
+      "en": "Tax jurisdictions",
+      "draft": "നികുതി jurisdictions"
+    },
+    "salestaxtab.everywhereYouCollectSalesTaxState": {
+      "en": "Everywhere you collect sales tax — state, county, city, special district.\n          Tag invoices with a jurisdiction and this page tells you what you owe, where.",
+      "draft": "എല്ലായിടത്തും നിങ്ങൾ collect വിൽപ്പനകൾ നികുതി — സംസ്ഥാനം, county, നഗരം, special district.\n  ടാഗ് ഇൻവോയ്സുകൾ ഒപ്പം അധികാരപരിധി ഒപ്പം ഇത് പേജ് tells നിങ്ങൾ എന്ത് നിങ്ങൾ owe, എവിടെ."
+    },
+    "salestaxtab.noJurisdictionsYetAddTheFirst": {
+      "en": "No jurisdictions yet. Add the first place you collect sales tax.",
+      "draft": "ഇല്ല jurisdictions ഇതുവരെ. ചേർക്കുക ആദ്യം place നിങ്ങൾ collect വിൽപ്പനകൾ നികുതി."
+    },
+    "salestaxtab.ofSalesTaxIsnTTagged": {
+      "en": "of sales tax isn't tagged to a jurisdiction yet.\n            Tag invoices with a jurisdiction so every dollar lands in the right bucket.",
+      "draft": "ന്റെ വിൽപ്പനകൾ നികുതി അല്ല tagged ലേക്ക് അധികാരപരിധി ഇതുവരെ.\n  ടാഗ് ഇൻവോയ്സുകൾ ഒപ്പം അധികാരപരിധി അതിനാൽ ഓരോ dollar lands ൽ വലത് ഗണം."
+    },
+    "salestaxtab.taxCollected": {
+      "en": "Tax collected",
+      "draft": "നികുതി ശേഖരിച്ചു"
+    },
+    "teaminvites.inviteYourAccountantOrTaxPro": {
+      "en": "Invite your accountant or tax pro — they join with the right permissions\n        and can switch between all the workspaces they serve.",
+      "draft": "ക്ഷണം നിങ്ങളുടെ അക്കൗണ്ടന്റ് അല്ലെങ്കിൽ നികുതി പ്രോ — അവർ ചേരുക ഒപ്പം വലത് അനുമതികൾ\n  ഒപ്പം കഴിയും മാറുക ഇടയിൽ എല്ലാം ജോലിസ്ഥലങ്ങൾ അവർ serve."
+    },
+    "auditlog.eGTaxInvoiceLogin": {
+      "en": "e.g. tax, invoice, login",
+      "draft": "ഉദാ. നികുതി, ഇൻവോയ്സ്, ലോഗിൻ"
+    },
+    "cpapackage.mileageLogWithIRSRatesApplied": {
+      "en": "Mileage log with IRS rates applied",
+      "draft": "മൈലേജ് ലോഗ് ഒപ്പം IRS നിരക്കുകൾ applied"
+    },
+    "customers.delete": {
+      "en": "Delete",
+      "draft": "ഇല്ലാതാക്കുക"
+    },
+    "customers.deleteConfirm": {
+      "en": "Delete customer \"{{name}}\"? Their invoices and statements stay on record.",
+      "draft": "ഇല്ലാതാക്കുക ഉപഭോക്താവ് \"{{name}}\"? അവരുടെ ഇൻവോയ്സുകൾ ഒപ്പം പ്രസ്താവനകൾ തുടരുക ൽ രേഖപ്പെടുത്തുക."
+    },
+    "estimates.tax": {
+      "en": "Tax ($)",
+      "draft": "നികുതി ($)"
+    },
+    "expenses.taxID": {
+      "en": "Tax ID",
+      "draft": "നികുതി ID"
+    },
+    "expenses.taxYear": {
+      "en": "Tax year",
+      "draft": "നികുതി വർഷം"
+    },
+    "expenses.tax": {
+      "en": "Tax",
+      "draft": "നികുതി"
+    },
+    "expenses.taxIDEIN": {
+      "en": "Tax ID / EIN",
+      "draft": "നികുതി ID / EIN"
+    },
+    "invoices.refund": {
+      "en": "Refund",
+      "draft": "തിരിച്ചുനൽകൽ"
+    },
+    "invoices.taxJurisdictionOptional": {
+      "en": "Tax jurisdiction (optional)",
+      "draft": "നികുതി അധികാരപരിധി (ഓപ്ഷണൽ)"
+    },
+    "invoices.tax": {
+      "en": "Tax ($)",
+      "draft": "നികുതി ($)"
+    },
+    "invoices.refundCredit": {
+      "en": "Refund credit —",
+      "draft": "തിരിച്ചുനൽകൽ ക്രെഡിറ്റ് —"
+    },
+    "invoices.refundTheRemaining": {
+      "en": "Refund the remaining",
+      "draft": "തിരിച്ചുനൽകൽ ശേഷിക്കുന്ന"
+    },
+    "mileage.irsLogCSV": {
+      "en": "IRS log CSV",
+      "draft": "IRS ലോഗ് CSV"
+    },
+    "payroll.deleteDraft": {
+      "en": "Delete draft",
+      "draft": "ഇല്ലാതാക്കുക കരട്"
+    },
+    "payroll.partnershipStubWhenAProviderIs": {
+      "en": "Partnership stub: when a provider is connected, runs here will hand off tax filing and direct deposit automatically.",
+      "draft": "പങ്കാളിത്തം കുറിപ്പ്: എപ്പോൾ ദാതാവ് ആണ് ബന്ധിപ്പിച്ചു, പ്രവർത്തിക്കുന്നു ഇവിടെ ചെയ്യും കൈ ഓഫ് നികുതി ഫയലിംഗ് ഒപ്പം നേരിട്ട് നിക്ഷേപം സ്വയമേ."
+    },
+    "payroll.employerTaxEst": {
+      "en": "Employer payroll tax (est.)",
+      "draft": "Employer ശമ്പളപ്പട്ടിക നികുതി (ഏകദേശം.)"
+    },
+    "portalview.tax": {
+      "en": "Tax",
+      "draft": "നികുതി"
+    },
+    "recurringinvoices.tax": {
+      "en": "Tax ($)",
+      "draft": "നികുതി ($)"
+    },
+    "simulator.safetyFloor": {
+      "en": "Safety floor $",
+      "draft": "Safety floor $"
+    },
+    "tax.nameIsRequired": {
+      "en": "Name is required",
+      "draft": "പേര് ആണ് ആവശ്യമാണ്"
+    },
+    "tax.contractorAdded": {
+      "en": "Contractor added",
+      "draft": "കരാറുകാരൻ ചേർത്തു"
+    },
+    "tax.w9StatusUpdated": {
+      "en": "W-9 status updated",
+      "draft": "W-9 സ്ഥിതി പരിഷ്കരിച്ചു"
+    },
+    "tax.contractorRemoved": {
+      "en": "Contractor removed",
+      "draft": "കരാറുകാരൻ നീക്കം ചെയ്തു"
+    },
+    "tax.enterAPositiveAmount": {
+      "en": "Enter a positive amount",
+      "draft": "നൽകുക പോസിറ്റീവ് തുക"
+    },
+    "tax.paymentRecorded": {
+      "en": "Payment recorded",
+      "draft": "പണമടയ്ക്കൽ രേഖപ്പെടുത്തി"
+    },
+    "tax.paymentDeleted": {
+      "en": "Payment deleted",
+      "draft": "പണമടയ്ക്കൽ ഇല്ലാതാക്കി"
+    },
+    "tax.statusRefreshed": {
+      "en": "Status refreshed",
+      "draft": "സ്ഥിതി refreshed"
+    },
+    "tax.addContractor": {
+      "en": "Add contractor",
+      "draft": "ചേർക്കുക കരാറുകാരൻ"
+    },
+    "tax.contractors1099s": {
+      "en": "Contractors & 1099s",
+      "draft": "കരാറുകാർ & 1099s"
+    },
+    "tax.salesTax": {
+      "en": "Sales Tax",
+      "draft": "വിൽപ്പനകൾ നികുതി"
+    },
+    "tax.taxbanditsNotConnected": {
+      "en": "TaxBandits not connected.",
+      "draft": "TaxBandits അല്ല ബന്ധിപ്പിച്ചു."
+    },
+    "tax.taxbanditsSETUPMd": {
+      "en": "TAXBANDITS_SETUP.md",
+      "draft": "TAXBANDITS_SETUP.md"
+    },
+    "tax.inTheRepoNoIRSFiling": {
+      "en": "in the repo. No IRS filing is ever done in-house.",
+      "draft": "ൽ repo. ഇല്ല IRS ഫയലിംഗ് ആണ് എപ്പോഴെങ്കിലും കഴിഞ്ഞു in-house."
+    },
+    "tax.taxbanditsConnectedIn": {
+      "en": "TaxBandits connected in",
+      "draft": "TaxBandits ബന്ധിപ്പിച്ചു ൽ"
+    },
+    "tax.sandbox": {
+      "en": "sandbox",
+      "draft": "sandbox"
+    },
+    "tax.modeNoRealFilingsFlip": {
+      "en": "mode — no real filings. Flip",
+      "draft": "mode — ഇല്ല real filings. Flip"
+    },
+    "tax.taxbanditsSANDBOXFalse": {
+      "en": "TAXBANDITS_SANDBOX=false",
+      "draft": "TAXBANDITS_SANDBOX=തെറ്റ്"
+    },
+    "tax.toGoLive": {
+      "en": "to go live.",
+      "draft": "ലേക്ക് പോകുക തത്സമയം."
+    },
+    "tax.newContractor": {
+      "en": "New contractor",
+      "draft": "പുതിയ കരാറുകാരൻ"
+    },
+    "tax.name": {
+      "en": "Name *",
+      "draft": "പേര് *"
+    },
+    "tax.businessName": {
+      "en": "Business name",
+      "draft": "ബിസിനസ് പേര്"
+    },
+    "tax.email": {
+      "en": "Email",
+      "draft": "ഇമെയിൽ"
+    },
+    "tax.phone": {
+      "en": "Phone",
+      "draft": "ഫോൺ"
+    },
+    "tax.entityType": {
+      "en": "Entity type",
+      "draft": "സ്ഥാപനം തരം"
+    },
+    "tax.ssnEIN": {
+      "en": "SSN / EIN",
+      "draft": "SSN / EIN"
+    },
+    "tax.storedSecurely": {
+      "en": "Stored securely",
+      "draft": "Stored securely"
+    },
+    "tax.street": {
+      "en": "Street",
+      "draft": "Street"
+    },
+    "tax.city": {
+      "en": "City",
+      "draft": "നഗരം"
+    },
+    "tax.state": {
+      "en": "State",
+      "draft": "സംസ്ഥാനം"
+    },
+    "tax.zip": {
+      "en": "ZIP",
+      "draft": "പിൻകോഡ്"
+    },
+    "tax.cancel": {
+      "en": "Cancel",
+      "draft": "റദ്ദാക്കുക"
+    },
+    "tax.contractor": {
+      "en": "Contractor",
+      "draft": "കരാറുകാരൻ"
+    },
+    "tax.paid": {
+      "en": "Paid",
+      "draft": "അടച്ചു"
+    },
+    "tax.w9": {
+      "en": "W-9",
+      "draft": "W-9"
+    },
+    "tax.NEC": {
+      "en": "1099-NEC",
+      "draft": "1099-NEC"
+    },
+    "tax.eFile": {
+      "en": "E-file",
+      "draft": "E-file"
+    },
+    "tax.actions": {
+      "en": "Actions",
+      "draft": "നടപടികൾ"
+    },
+    "tax.viewPaymentHistory": {
+      "en": "View payment history",
+      "draft": "കാണുക പണമടയ്ക്കൽ ചരിത്രം"
+    },
+    "tax.toggleW9Received": {
+      "en": "Toggle W-9 received",
+      "draft": "Toggle W-9 സ്വീകരിച്ചു"
+    },
+    "tax.required": {
+      "en": "Required",
+      "draft": "ആവശ്യമാണ്"
+    },
+    "tax.viewFilingStatus": {
+      "en": "View filing status",
+      "draft": "കാണുക ഫയലിംഗ് സ്ഥിതി"
+    },
+    "tax.notFiled": {
+      "en": "Not filed",
+      "draft": "അല്ല filed"
+    },
+    "tax.recordPayment": {
+      "en": "Record payment",
+      "draft": "രേഖപ്പെടുത്തുക പണമടയ്ക്കൽ"
+    },
+    "tax.noContractorsYet": {
+      "en": "No contractors yet.",
+      "draft": "ഇല്ല കരാറുകാർ ഇതുവരെ."
+    },
+    "tax.NECDataPreview": {
+      "en": "1099-NEC data preview",
+      "draft": "1099-NEC ഡാറ്റ പ്രിവ്യൂ"
+    },
+    "tax.recipientBox1DataShapedFor": {
+      "en": "Recipient + Box 1 data shaped for e-filing. Tax IDs stay masked — reveal needs PII access. Draft data only, nothing is filed in-house.",
+      "draft": "സ്വീകർത്താവ് + Box 1 ഡാറ്റ shaped വേണ്ടി e-filing. നികുതി IDs തുടരുക masked — reveal needs PII പ്രവേശനം. കരട് ഡാറ്റ മാത്രം, ഒന്നുമില്ല ആണ് filed in-house."
+    },
+    "tax.loadPreview": {
+      "en": "Load preview",
+      "draft": "ലോഡ് ചെയ്യുക പ്രിവ്യൂ"
+    },
+    "tax.recipient": {
+      "en": "Recipient",
+      "draft": "സ്വീകർത്താവ്"
+    },
+    "tax.tin": {
+      "en": "TIN",
+      "draft": "TIN"
+    },
+    "tax.address": {
+      "en": "Address",
+      "draft": "വിലാസം"
+    },
+    "tax.box1": {
+      "en": "Box 1",
+      "draft": "Box 1"
+    },
+    "tax.missing": {
+      "en": "missing",
+      "draft": "കാണാതായ"
+    },
+    "tax.reveal": {
+      "en": "reveal",
+      "draft": "reveal"
+    },
+    "tax.noContractorsMeetThe": {
+      "en": "No contractors meet the",
+      "draft": "ഇല്ല കരാറുകാർ meet "
+    },
+    "tax.reportingThresholdFor": {
+      "en": "reporting threshold for",
+      "draft": "റിപ്പോർട്ടിംഗ് threshold വേണ്ടി"
+    },
+    "tax.recordPayment2": {
+      "en": "Record payment —",
+      "draft": "രേഖപ്പെടുത്തുക പണമടയ്ക്കൽ —"
+    },
+    "tax.date": {
+      "en": "Date",
+      "draft": "തീയതി"
+    },
+    "tax.amount": {
+      "en": "Amount $",
+      "draft": "തുക $"
+    },
+    "tax.description": {
+      "en": "Description",
+      "draft": "വിവരണം"
+    },
+    "tax.eGMarchBoothRentPayout": {
+      "en": "e.g. March booth rent payout",
+      "draft": "ഉദാ. March സ്റ്റാൾ വാടക വിതരണം"
+    },
+    "tax.record": {
+      "en": "Record",
+      "draft": "രേഖപ്പെടുത്തുക"
+    },
+    "tax.paymentHistory": {
+      "en": "Payment history —",
+      "draft": "പണമടയ്ക്കൽ ചരിത്രം —"
+    },
+    "tax.noPaymentsRecordedFor": {
+      "en": "No payments recorded for",
+      "draft": "ഇല്ല പണമടയ്ക്കലുകൾ രേഖപ്പെടുത്തി വേണ്ടി"
+    },
+    "tax.amount2": {
+      "en": "Amount",
+      "draft": "തുക"
+    },
+    "tax.deletePayment": {
+      "en": "Delete payment",
+      "draft": "ഇല്ലാതാക്കുക പണമടയ്ക്കൽ"
+    },
+    "tax.yearTotal": {
+      "en": "Year total:",
+      "draft": "വർഷം ആകെ:"
+    },
+    "tax.NECFiling": {
+      "en": "1099-NEC filing —",
+      "draft": "1099-NEC ഫയലിംഗ് —"
+    },
+    "tax.thisDraftLivesInTaxBanditsReview": {
+      "en": "This draft lives in TaxBandits — review and Transmit there to file with the IRS. This app never files in-house.",
+      "draft": "ഇത് കരട് lives ൽ TaxBandits — അവലോകനം ഒപ്പം Transmit there ലേക്ക് ഫയൽ ഒപ്പം IRS. ഇത് ആപ്പ് ഒരിക്കലും ഫയലുകൾ in-house."
+    },
+    "tax.NECIsRequiredForNon": {
+      "en": "1099-NEC is required for non-corporate contractors paid ≥",
+      "draft": "1099-NEC ആണ് ആവശ്യമാണ് വേണ്ടി non-corporate കരാറുകാർ അടച്ചു ≥"
+    },
+    "tax.inTheYearEFilingCreates": {
+      "en": "in the year. E-filing creates a draft in TaxBandits — you review and transmit there. This app never files with the IRS directly.",
+      "draft": "ൽ വർഷം. E-filing creates കരട് ൽ TaxBandits — നിങ്ങൾ അവലോകനം ഒപ്പം transmit there. ഇത് ആപ്പ് ഒരിക്കലും ഫയലുകൾ ഒപ്പം IRS directly."
+    },
+    "taxforecast.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "നികുതി പ്രവചനം"
+    },
+    "taxforecast.OfPriorYearTax": {
+      "en": "100% of prior-year tax",
+      "draft": "100% ന്റെ prior-year നികുതി"
+    },
+    "taxforecast.irsDirectPay": {
+      "en": "IRS Direct Pay",
+      "draft": "IRS നേരിട്ട് അടയ്ക്കുക"
+    },
+    "nav.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "നികുതി പ്രവചനം"
+    },
+    "nav.tax1099s": {
+      "en": "Tax & 1099s",
+      "draft": "നികുതി & 1099s"
+    },
+    "teamInvites.accountantTaxPro": {
+      "en": "Accountant / Tax pro",
+      "draft": "അക്കൗണ്ടന്റ് / നികുതി പ്രോ"
+    }
+  }
+}

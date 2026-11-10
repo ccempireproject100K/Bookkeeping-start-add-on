@@ -1,0 +1,426 @@
+{
+  "_meta": {
+    "lang": "lo",
+    "status": "DRAFT for human review only. Do NOT copy into frontend/src/locales/lo/translation.json until a qualified reviewer (counsel/CPA where relevant) approves each string. Live locale keeps English for these keys.",
+    "source": "docs/TRANSLATION_PLAN.md flagged keys (legal/financial/tax/privacy/safety)",
+    "notice": "Approximate translation from English/Spanish, may not be accurate."
+  },
+  "strings": {
+    "salestaxtab.taxJurisdictions": {
+      "en": "Tax jurisdictions",
+      "draft": "ພາສີ jurisdictions"
+    },
+    "salestaxtab.everywhereYouCollectSalesTaxState": {
+      "en": "Everywhere you collect sales tax — state, county, city, special district.\n          Tag invoices with a jurisdiction and this page tells you what you owe, where.",
+      "draft": "ທຸກບ່ອນ ເກັບກຳ ການຂາຍ ພາສີ — ລັດ, county, ເມືອງ, special district.\n  ປ້າຍ ໃບບິນ ກັບ ເຂດອຳນາດ ແລະ ນີ້ ໜ້າ tells ຫຍັງ owe, ຢູ່ໃສ."
+    },
+    "salestaxtab.noJurisdictionsYetAddTheFirst": {
+      "en": "No jurisdictions yet. Add the first place you collect sales tax.",
+      "draft": "ບໍ່ jurisdictions ຍັງ. ເພີ່ມ ທຳອິດ place ເກັບກຳ ການຂາຍ ພາສີ."
+    },
+    "salestaxtab.ofSalesTaxIsnTTagged": {
+      "en": "of sales tax isn't tagged to a jurisdiction yet.\n            Tag invoices with a jurisdiction so every dollar lands in the right bucket.",
+      "draft": "ຂອງ ການຂາຍ ພາສີ ບໍ່ແມ່ນ tagged ຫາ ເຂດອຳນາດ ຍັງ.\n  ປ້າຍ ໃບບິນ ກັບ ເຂດອຳນາດ ດັ່ງນັ້ນ ທຸກ dollar lands ໃນ ຂວາ ໝວດ."
+    },
+    "salestaxtab.taxCollected": {
+      "en": "Tax collected",
+      "draft": "ພາສີ ເກັບແລ້ວ"
+    },
+    "teaminvites.inviteYourAccountantOrTaxPro": {
+      "en": "Invite your accountant or tax pro — they join with the right permissions\n        and can switch between all the workspaces they serve.",
+      "draft": "ຄຳເຊີນ ນັກບັນຊີ ຫຼື ພາສີ pro — ພວກເຂົາ ເຂົ້າຮ່ວມ ກັບ ຂວາ ສິດ\n  ແລະ ສາມາດ ສະຫຼັບ ລະຫວ່າງ ທັງໝົດ ບ່ອນເຮັດວຽກ ພວກເຂົາ serve."
+    },
+    "auditlog.eGTaxInvoiceLogin": {
+      "en": "e.g. tax, invoice, login",
+      "draft": "ເຊັ່ນ ພາສີ, ໃບບິນ, ເຂົ້າສູ່ລະບົບ"
+    },
+    "cpapackage.mileageLogWithIRSRatesApplied": {
+      "en": "Mileage log with IRS rates applied",
+      "draft": "ໄລຍະທາງ ບັນທຶກ ກັບ IRS ອັດຕາ ນຳໃຊ້ແລ້ວ"
+    },
+    "customers.delete": {
+      "en": "Delete",
+      "draft": "ລຶບ"
+    },
+    "customers.deleteConfirm": {
+      "en": "Delete customer \"{{name}}\"? Their invoices and statements stay on record.",
+      "draft": "ລຶບ ລູກຄ້າ \"{{name}}\"? ໃບບິນ ແລະ statements ຢູ່ ໃນ ບັນທຶກ."
+    },
+    "estimates.tax": {
+      "en": "Tax ($)",
+      "draft": "ພາສີ ($)"
+    },
+    "expenses.taxID": {
+      "en": "Tax ID",
+      "draft": "ພາສີ ID"
+    },
+    "expenses.taxYear": {
+      "en": "Tax year",
+      "draft": "ພາສີ ປີ"
+    },
+    "expenses.tax": {
+      "en": "Tax",
+      "draft": "ພາສີ"
+    },
+    "expenses.taxIDEIN": {
+      "en": "Tax ID / EIN",
+      "draft": "ພາສີ ID / EIN"
+    },
+    "invoices.refund": {
+      "en": "Refund",
+      "draft": "ເງິນຄືນ"
+    },
+    "invoices.taxJurisdictionOptional": {
+      "en": "Tax jurisdiction (optional)",
+      "draft": "ພາສີ ເຂດອຳນາດ (ເລືອກໄດ້)"
+    },
+    "invoices.tax": {
+      "en": "Tax ($)",
+      "draft": "ພາສີ ($)"
+    },
+    "invoices.refundCredit": {
+      "en": "Refund credit —",
+      "draft": "ເງິນຄືນ ສິນເຊື່ອ —"
+    },
+    "invoices.refundTheRemaining": {
+      "en": "Refund the remaining",
+      "draft": "ເງິນຄືນ ຍັງເຫຼືອ"
+    },
+    "mileage.irsLogCSV": {
+      "en": "IRS log CSV",
+      "draft": "IRS ບັນທຶກ CSV"
+    },
+    "payroll.deleteDraft": {
+      "en": "Delete draft",
+      "draft": "ລຶບ ສະບັບຮ່າງ"
+    },
+    "payroll.partnershipStubWhenAProviderIs": {
+      "en": "Partnership stub: when a provider is connected, runs here will hand off tax filing and direct deposit automatically.",
+      "draft": "ການຮ່ວມມື ຫາງປີ້: ເມື່ອໃດ ຜູ້ໃຫ້ບໍລິການ ແມ່ນ ເຊື່ອມຕໍ່ແລ້ວ, ຮອບ ທີ່ນີ້ ຈະ ມື ປິດ ພາສີ ການຍື່ນ ແລະ ໂດຍກົງ ເງິນຝາກ ອັດຕະໂນມັດ."
+    },
+    "payroll.employerTaxEst": {
+      "en": "Employer payroll tax (est.)",
+      "draft": "Employer ບັນຊີເງິນເດືອນ ພາສີ (ປມ..)"
+    },
+    "portalview.tax": {
+      "en": "Tax",
+      "draft": "ພາສີ"
+    },
+    "recurringinvoices.tax": {
+      "en": "Tax ($)",
+      "draft": "ພາສີ ($)"
+    },
+    "simulator.safetyFloor": {
+      "en": "Safety floor $",
+      "draft": "Safety ພື້ນ $"
+    },
+    "tax.nameIsRequired": {
+      "en": "Name is required",
+      "draft": "ຊື່ ແມ່ນ ຈຳເປັນ"
+    },
+    "tax.contractorAdded": {
+      "en": "Contractor added",
+      "draft": "ຜູ້ຮັບເໝົາ ເພີ່ມແລ້ວ"
+    },
+    "tax.w9StatusUpdated": {
+      "en": "W-9 status updated",
+      "draft": "W-9 ສະຖານະ ອັບເດດແລ້ວ"
+    },
+    "tax.contractorRemoved": {
+      "en": "Contractor removed",
+      "draft": "ຜູ້ຮັບເໝົາ ເອົາອອກແລ້ວ"
+    },
+    "tax.enterAPositiveAmount": {
+      "en": "Enter a positive amount",
+      "draft": "ປ້ອນ ບວກ ຈຳນວນ"
+    },
+    "tax.paymentRecorded": {
+      "en": "Payment recorded",
+      "draft": "ການຊຳລະ ບັນທຶກແລ້ວ"
+    },
+    "tax.paymentDeleted": {
+      "en": "Payment deleted",
+      "draft": "ການຊຳລະ ລຶບແລ້ວ"
+    },
+    "tax.statusRefreshed": {
+      "en": "Status refreshed",
+      "draft": "ສະຖານະ refreshed"
+    },
+    "tax.addContractor": {
+      "en": "Add contractor",
+      "draft": "ເພີ່ມ ຜູ້ຮັບເໝົາ"
+    },
+    "tax.contractors1099s": {
+      "en": "Contractors & 1099s",
+      "draft": "ຜູ້ຮັບເໝົາ & 1099s"
+    },
+    "tax.salesTax": {
+      "en": "Sales Tax",
+      "draft": "ການຂາຍ ພາສີ"
+    },
+    "tax.taxbanditsNotConnected": {
+      "en": "TaxBandits not connected.",
+      "draft": "TaxBandits ບໍ່ ເຊື່ອມຕໍ່ແລ້ວ."
+    },
+    "tax.taxbanditsSETUPMd": {
+      "en": "TAXBANDITS_SETUP.md",
+      "draft": "TAXBANDITS_SETUP.md"
+    },
+    "tax.inTheRepoNoIRSFiling": {
+      "en": "in the repo. No IRS filing is ever done in-house.",
+      "draft": "ໃນ repo. ບໍ່ IRS ການຍື່ນ ແມ່ນ ເຄີຍ ສຳເລັດ in-house."
+    },
+    "tax.taxbanditsConnectedIn": {
+      "en": "TaxBandits connected in",
+      "draft": "TaxBandits ເຊື່ອມຕໍ່ແລ້ວ ໃນ"
+    },
+    "tax.sandbox": {
+      "en": "sandbox",
+      "draft": "sandbox"
+    },
+    "tax.modeNoRealFilingsFlip": {
+      "en": "mode — no real filings. Flip",
+      "draft": "ໂໝດ — ບໍ່ real filings. Flip"
+    },
+    "tax.taxbanditsSANDBOXFalse": {
+      "en": "TAXBANDITS_SANDBOX=false",
+      "draft": "TAXBANDITS_SANDBOX=false"
+    },
+    "tax.toGoLive": {
+      "en": "to go live.",
+      "draft": "ຫາ ໄປ ສົດ."
+    },
+    "tax.newContractor": {
+      "en": "New contractor",
+      "draft": "ໃໝ່ ຜູ້ຮັບເໝົາ"
+    },
+    "tax.name": {
+      "en": "Name *",
+      "draft": "ຊື່ *"
+    },
+    "tax.businessName": {
+      "en": "Business name",
+      "draft": "ທຸລະກິດ ຊື່"
+    },
+    "tax.email": {
+      "en": "Email",
+      "draft": "ອີເມວ"
+    },
+    "tax.phone": {
+      "en": "Phone",
+      "draft": "ໂທລະສັບ"
+    },
+    "tax.entityType": {
+      "en": "Entity type",
+      "draft": "ໜ່ວຍງານ ປະເພດ"
+    },
+    "tax.ssnEIN": {
+      "en": "SSN / EIN",
+      "draft": "SSN / EIN"
+    },
+    "tax.storedSecurely": {
+      "en": "Stored securely",
+      "draft": "Stored securely"
+    },
+    "tax.street": {
+      "en": "Street",
+      "draft": "Street"
+    },
+    "tax.city": {
+      "en": "City",
+      "draft": "ເມືອງ"
+    },
+    "tax.state": {
+      "en": "State",
+      "draft": "ລັດ"
+    },
+    "tax.zip": {
+      "en": "ZIP",
+      "draft": "ລະຫັດໄປສະນີ"
+    },
+    "tax.cancel": {
+      "en": "Cancel",
+      "draft": "ຍົກເລີກ"
+    },
+    "tax.contractor": {
+      "en": "Contractor",
+      "draft": "ຜູ້ຮັບເໝົາ"
+    },
+    "tax.paid": {
+      "en": "Paid",
+      "draft": "ຈ່າຍແລ້ວ"
+    },
+    "tax.w9": {
+      "en": "W-9",
+      "draft": "W-9"
+    },
+    "tax.NEC": {
+      "en": "1099-NEC",
+      "draft": "1099-NEC"
+    },
+    "tax.eFile": {
+      "en": "E-file",
+      "draft": "E-file"
+    },
+    "tax.actions": {
+      "en": "Actions",
+      "draft": "ການກະທຳ"
+    },
+    "tax.viewPaymentHistory": {
+      "en": "View payment history",
+      "draft": "ເບິ່ງ ການຊຳລະ ປະຫວັດ"
+    },
+    "tax.toggleW9Received": {
+      "en": "Toggle W-9 received",
+      "draft": "ສະວິດ W-9 ຮັບແລ້ວ"
+    },
+    "tax.required": {
+      "en": "Required",
+      "draft": "ຈຳເປັນ"
+    },
+    "tax.viewFilingStatus": {
+      "en": "View filing status",
+      "draft": "ເບິ່ງ ການຍື່ນ ສະຖານະ"
+    },
+    "tax.notFiled": {
+      "en": "Not filed",
+      "draft": "ບໍ່ ຍື່ນແລ້ວ"
+    },
+    "tax.recordPayment": {
+      "en": "Record payment",
+      "draft": "ບັນທຶກ ການຊຳລະ"
+    },
+    "tax.noContractorsYet": {
+      "en": "No contractors yet.",
+      "draft": "ບໍ່ ຜູ້ຮັບເໝົາ ຍັງ."
+    },
+    "tax.NECDataPreview": {
+      "en": "1099-NEC data preview",
+      "draft": "1099-NEC ຂໍ້ມູນ ເບິ່ງຕົວຢ່າງ"
+    },
+    "tax.recipientBox1DataShapedFor": {
+      "en": "Recipient + Box 1 data shaped for e-filing. Tax IDs stay masked — reveal needs PII access. Draft data only, nothing is filed in-house.",
+      "draft": "ຜູ້ຮັບ + Box 1 ຂໍ້ມູນ shaped ສຳລັບ e-filing. ພາສີ IDs ຢູ່ masked — reveal needs PII ການເຂົ້າເຖິງ. ສະບັບຮ່າງ ຂໍ້ມູນ ເທົ່ານັ້ນ, ບໍ່ມີຫຍັງ ແມ່ນ ຍື່ນແລ້ວ in-house."
+    },
+    "tax.loadPreview": {
+      "en": "Load preview",
+      "draft": "ໂຫຼດ ເບິ່ງຕົວຢ່າງ"
+    },
+    "tax.recipient": {
+      "en": "Recipient",
+      "draft": "ຜູ້ຮັບ"
+    },
+    "tax.tin": {
+      "en": "TIN",
+      "draft": "TIN"
+    },
+    "tax.address": {
+      "en": "Address",
+      "draft": "ທີ່ຢູ່"
+    },
+    "tax.box1": {
+      "en": "Box 1",
+      "draft": "Box 1"
+    },
+    "tax.missing": {
+      "en": "missing",
+      "draft": "ຂາດ"
+    },
+    "tax.reveal": {
+      "en": "reveal",
+      "draft": "reveal"
+    },
+    "tax.noContractorsMeetThe": {
+      "en": "No contractors meet the",
+      "draft": "ບໍ່ ຜູ້ຮັບເໝົາ meet "
+    },
+    "tax.reportingThresholdFor": {
+      "en": "reporting threshold for",
+      "draft": "ການລາຍງານ ເກນ ສຳລັບ"
+    },
+    "tax.recordPayment2": {
+      "en": "Record payment —",
+      "draft": "ບັນທຶກ ການຊຳລະ —"
+    },
+    "tax.date": {
+      "en": "Date",
+      "draft": "ວັນທີ"
+    },
+    "tax.amount": {
+      "en": "Amount $",
+      "draft": "ຈຳນວນ $"
+    },
+    "tax.description": {
+      "en": "Description",
+      "draft": "ລາຍລະອຽດ"
+    },
+    "tax.eGMarchBoothRentPayout": {
+      "en": "e.g. March booth rent payout",
+      "draft": "ເຊັ່ນ ມີນາ ຮ້ານ ຄ່າເຊົ່າ ການຈ່າຍ"
+    },
+    "tax.record": {
+      "en": "Record",
+      "draft": "ບັນທຶກ"
+    },
+    "tax.paymentHistory": {
+      "en": "Payment history —",
+      "draft": "ການຊຳລະ ປະຫວັດ —"
+    },
+    "tax.noPaymentsRecordedFor": {
+      "en": "No payments recorded for",
+      "draft": "ບໍ່ ການຊຳລະ ບັນທຶກແລ້ວ ສຳລັບ"
+    },
+    "tax.amount2": {
+      "en": "Amount",
+      "draft": "ຈຳນວນ"
+    },
+    "tax.deletePayment": {
+      "en": "Delete payment",
+      "draft": "ລຶບ ການຊຳລະ"
+    },
+    "tax.yearTotal": {
+      "en": "Year total:",
+      "draft": "ປີ ລວມ:"
+    },
+    "tax.NECFiling": {
+      "en": "1099-NEC filing —",
+      "draft": "1099-NEC ການຍື່ນ —"
+    },
+    "tax.thisDraftLivesInTaxBanditsReview": {
+      "en": "This draft lives in TaxBandits — review and Transmit there to file with the IRS. This app never files in-house.",
+      "draft": "ນີ້ ສະບັບຮ່າງ lives ໃນ TaxBandits — ທົບທວນ ແລະ Transmit there ຫາ ໄຟລ໌ ກັບ IRS. ນີ້ ແອັບ ບໍ່ເຄີຍ ໄຟລ໌ in-house."
+    },
+    "tax.NECIsRequiredForNon": {
+      "en": "1099-NEC is required for non-corporate contractors paid ≥",
+      "draft": "1099-NEC ແມ່ນ ຈຳເປັນ ສຳລັບ non-corporate ຜູ້ຮັບເໝົາ ຈ່າຍແລ້ວ ≥"
+    },
+    "tax.inTheYearEFilingCreates": {
+      "en": "in the year. E-filing creates a draft in TaxBandits — you review and transmit there. This app never files with the IRS directly.",
+      "draft": "ໃນ ປີ. E-filing creates ສະບັບຮ່າງ ໃນ TaxBandits — ທົບທວນ ແລະ transmit there. ນີ້ ແອັບ ບໍ່ເຄີຍ ໄຟລ໌ ກັບ IRS directly."
+    },
+    "taxforecast.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "ພາສີ ການຄາດຄະເນ"
+    },
+    "taxforecast.OfPriorYearTax": {
+      "en": "100% of prior-year tax",
+      "draft": "100% ຂອງ ກ່ອນໜ້າ-ປີ ພາສີ"
+    },
+    "taxforecast.irsDirectPay": {
+      "en": "IRS Direct Pay",
+      "draft": "IRS ໂດຍກົງ ຈ່າຍ"
+    },
+    "nav.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "ພາສີ ການຄາດຄະເນ"
+    },
+    "nav.tax1099s": {
+      "en": "Tax & 1099s",
+      "draft": "ພາສີ & 1099s"
+    },
+    "teamInvites.accountantTaxPro": {
+      "en": "Accountant / Tax pro",
+      "draft": "ນັກບັນຊີ / ພາສີ pro"
+    }
+  }
+}

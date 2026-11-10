@@ -1,0 +1,426 @@
+{
+  "_meta": {
+    "lang": "el",
+    "status": "DRAFT for human review only. Do NOT copy into frontend/src/locales/el/translation.json until a qualified reviewer (counsel/CPA where relevant) approves each string. Live locale keeps English for these keys.",
+    "source": "docs/TRANSLATION_PLAN.md flagged keys (legal/financial/tax/privacy/safety)",
+    "notice": "Approximate translation from English/Spanish, may not be accurate."
+  },
+  "strings": {
+    "salestaxtab.taxJurisdictions": {
+      "en": "Tax jurisdictions",
+      "draft": "Φόρος jurisdictions"
+    },
+    "salestaxtab.everywhereYouCollectSalesTaxState": {
+      "en": "Everywhere you collect sales tax — state, county, city, special district.\n          Tag invoices with a jurisdiction and this page tells you what you owe, where.",
+      "draft": "Παντού συλλέξτε πωλήσεις φόρος — πολιτεία, county, πόλη, special district.\n  Ετικέτα τιμολόγια με δικαιοδοσία και αυτό σελίδα tells τι owe, πού."
+    },
+    "salestaxtab.noJurisdictionsYetAddTheFirst": {
+      "en": "No jurisdictions yet. Add the first place you collect sales tax.",
+      "draft": "Όχι jurisdictions ακόμα. Προσθέστε πρώτο place συλλέξτε πωλήσεις φόρος."
+    },
+    "salestaxtab.ofSalesTaxIsnTTagged": {
+      "en": "of sales tax isn't tagged to a jurisdiction yet.\n            Tag invoices with a jurisdiction so every dollar lands in the right bucket.",
+      "draft": " πωλήσεις φόρος δεν είναι tagged σε δικαιοδοσία ακόμα.\n  Ετικέτα τιμολόγια με δικαιοδοσία έτσι κάθε dollar lands σε δεξιά κατηγορία."
+    },
+    "salestaxtab.taxCollected": {
+      "en": "Tax collected",
+      "draft": "Φόρος συλλέχθηκαν"
+    },
+    "teaminvites.inviteYourAccountantOrTaxPro": {
+      "en": "Invite your accountant or tax pro — they join with the right permissions\n        and can switch between all the workspaces they serve.",
+      "draft": "Πρόσκληση λογιστής ή φόρος pro — αυτοί εγγραφείτε με δεξιά άδειες\n  και μπορείτε αλλάξτε μεταξύ όλα χώροι εργασίας αυτοί serve."
+    },
+    "auditlog.eGTaxInvoiceLogin": {
+      "en": "e.g. tax, invoice, login",
+      "draft": "π.χ. φόρος, τιμολόγιο, σύνδεση"
+    },
+    "cpapackage.mileageLogWithIRSRatesApplied": {
+      "en": "Mileage log with IRS rates applied",
+      "draft": "Χιλιόμετρα αρχείο καταγραφής με IRS συντελεστές εφαρμόστηκε"
+    },
+    "customers.delete": {
+      "en": "Delete",
+      "draft": "Διαγραφή"
+    },
+    "customers.deleteConfirm": {
+      "en": "Delete customer \"{{name}}\"? Their invoices and statements stay on record.",
+      "draft": "Διαγράψτε πελάτης \"{{name}}\"? τιμολόγια και statements μείνετε σε καταγράψτε."
+    },
+    "estimates.tax": {
+      "en": "Tax ($)",
+      "draft": "Φόρος ($)"
+    },
+    "expenses.taxID": {
+      "en": "Tax ID",
+      "draft": "Φόρος ID"
+    },
+    "expenses.taxYear": {
+      "en": "Tax year",
+      "draft": "Φόρος έτος"
+    },
+    "expenses.tax": {
+      "en": "Tax",
+      "draft": "Φόρος"
+    },
+    "expenses.taxIDEIN": {
+      "en": "Tax ID / EIN",
+      "draft": "Φόρος ID / EIN"
+    },
+    "invoices.refund": {
+      "en": "Refund",
+      "draft": "Επιστροφή χρημάτων"
+    },
+    "invoices.taxJurisdictionOptional": {
+      "en": "Tax jurisdiction (optional)",
+      "draft": "Φόρος δικαιοδοσία (προαιρετικό)"
+    },
+    "invoices.tax": {
+      "en": "Tax ($)",
+      "draft": "Φόρος ($)"
+    },
+    "invoices.refundCredit": {
+      "en": "Refund credit —",
+      "draft": "Επιστροφή χρημάτων πίστωση —"
+    },
+    "invoices.refundTheRemaining": {
+      "en": "Refund the remaining",
+      "draft": "Επιστροφή χρημάτων υπολειπόμενο"
+    },
+    "mileage.irsLogCSV": {
+      "en": "IRS log CSV",
+      "draft": "IRS αρχείο καταγραφής CSV"
+    },
+    "payroll.deleteDraft": {
+      "en": "Delete draft",
+      "draft": "Διαγράψτε πρόχειρο"
+    },
+    "payroll.partnershipStubWhenAProviderIs": {
+      "en": "Partnership stub: when a provider is connected, runs here will hand off tax filing and direct deposit automatically.",
+      "draft": "Συνεργασία απόκομμα: πότε πάροχος είναι συνδεδεμένο, εκτελέσεις εδώ θα χέρι ανενεργό φόρος υποβολή και άμεσο κατάθεση αυτόματα."
+    },
+    "payroll.employerTaxEst": {
+      "en": "Employer payroll tax (est.)",
+      "draft": "Employer μισθοδοσία φόρος (περίπου.)"
+    },
+    "portalview.tax": {
+      "en": "Tax",
+      "draft": "Φόρος"
+    },
+    "recurringinvoices.tax": {
+      "en": "Tax ($)",
+      "draft": "Φόρος ($)"
+    },
+    "simulator.safetyFloor": {
+      "en": "Safety floor $",
+      "draft": "Safety κατώτατο όριο $"
+    },
+    "tax.nameIsRequired": {
+      "en": "Name is required",
+      "draft": "Όνομα είναι υποχρεωτικό"
+    },
+    "tax.contractorAdded": {
+      "en": "Contractor added",
+      "draft": "Εργολάβος προστέθηκε"
+    },
+    "tax.w9StatusUpdated": {
+      "en": "W-9 status updated",
+      "draft": "W-9 κατάσταση ενημερώθηκε"
+    },
+    "tax.contractorRemoved": {
+      "en": "Contractor removed",
+      "draft": "Εργολάβος καταργήθηκε"
+    },
+    "tax.enterAPositiveAmount": {
+      "en": "Enter a positive amount",
+      "draft": "Εισαγάγετε θετικό ποσό"
+    },
+    "tax.paymentRecorded": {
+      "en": "Payment recorded",
+      "draft": "Πληρωμή καταγράφηκε"
+    },
+    "tax.paymentDeleted": {
+      "en": "Payment deleted",
+      "draft": "Πληρωμή διαγράφηκε"
+    },
+    "tax.statusRefreshed": {
+      "en": "Status refreshed",
+      "draft": "Κατάσταση refreshed"
+    },
+    "tax.addContractor": {
+      "en": "Add contractor",
+      "draft": "Προσθέστε εργολάβος"
+    },
+    "tax.contractors1099s": {
+      "en": "Contractors & 1099s",
+      "draft": "Εργολάβοι & 1099s"
+    },
+    "tax.salesTax": {
+      "en": "Sales Tax",
+      "draft": "Πωλήσεις Φόρος"
+    },
+    "tax.taxbanditsNotConnected": {
+      "en": "TaxBandits not connected.",
+      "draft": "TaxBandits δεν συνδεδεμένο."
+    },
+    "tax.taxbanditsSETUPMd": {
+      "en": "TAXBANDITS_SETUP.md",
+      "draft": "TAXBANDITS_SETUP.md"
+    },
+    "tax.inTheRepoNoIRSFiling": {
+      "en": "in the repo. No IRS filing is ever done in-house.",
+      "draft": "σε repo. Όχι IRS υποβολή είναι ποτέ ολοκληρώθηκε in-house."
+    },
+    "tax.taxbanditsConnectedIn": {
+      "en": "TaxBandits connected in",
+      "draft": "TaxBandits συνδεδεμένο σε"
+    },
+    "tax.sandbox": {
+      "en": "sandbox",
+      "draft": "sandbox"
+    },
+    "tax.modeNoRealFilingsFlip": {
+      "en": "mode — no real filings. Flip",
+      "draft": "κατάσταση — όχι real filings. Flip"
+    },
+    "tax.taxbanditsSANDBOXFalse": {
+      "en": "TAXBANDITS_SANDBOX=false",
+      "draft": "TAXBANDITS_SANDBOX=false"
+    },
+    "tax.toGoLive": {
+      "en": "to go live.",
+      "draft": "σε μεταβείτε ζωντανό."
+    },
+    "tax.newContractor": {
+      "en": "New contractor",
+      "draft": "Νέο εργολάβος"
+    },
+    "tax.name": {
+      "en": "Name *",
+      "draft": "Όνομα *"
+    },
+    "tax.businessName": {
+      "en": "Business name",
+      "draft": "Επιχείρηση όνομα"
+    },
+    "tax.email": {
+      "en": "Email",
+      "draft": "Email"
+    },
+    "tax.phone": {
+      "en": "Phone",
+      "draft": "Τηλέφωνο"
+    },
+    "tax.entityType": {
+      "en": "Entity type",
+      "draft": "Οντότητα τύπος"
+    },
+    "tax.ssnEIN": {
+      "en": "SSN / EIN",
+      "draft": "SSN / EIN"
+    },
+    "tax.storedSecurely": {
+      "en": "Stored securely",
+      "draft": "Stored securely"
+    },
+    "tax.street": {
+      "en": "Street",
+      "draft": "Street"
+    },
+    "tax.city": {
+      "en": "City",
+      "draft": "Πόλη"
+    },
+    "tax.state": {
+      "en": "State",
+      "draft": "Πολιτεία"
+    },
+    "tax.zip": {
+      "en": "ZIP",
+      "draft": "ΤΑΧΥΔΡΟΜΙΚΌΣ ΚΏΔΙΚΑΣ"
+    },
+    "tax.cancel": {
+      "en": "Cancel",
+      "draft": "Ακύρωση"
+    },
+    "tax.contractor": {
+      "en": "Contractor",
+      "draft": "Εργολάβος"
+    },
+    "tax.paid": {
+      "en": "Paid",
+      "draft": "Εξοφλημένο"
+    },
+    "tax.w9": {
+      "en": "W-9",
+      "draft": "W-9"
+    },
+    "tax.NEC": {
+      "en": "1099-NEC",
+      "draft": "1099-NEC"
+    },
+    "tax.eFile": {
+      "en": "E-file",
+      "draft": "E-file"
+    },
+    "tax.actions": {
+      "en": "Actions",
+      "draft": "Ενέργειες"
+    },
+    "tax.viewPaymentHistory": {
+      "en": "View payment history",
+      "draft": "Δείτε πληρωμή ιστορικό"
+    },
+    "tax.toggleW9Received": {
+      "en": "Toggle W-9 received",
+      "draft": "Διακόπτης W-9 ελήφθη"
+    },
+    "tax.required": {
+      "en": "Required",
+      "draft": "Υποχρεωτικό"
+    },
+    "tax.viewFilingStatus": {
+      "en": "View filing status",
+      "draft": "Δείτε υποβολή κατάσταση"
+    },
+    "tax.notFiled": {
+      "en": "Not filed",
+      "draft": "Δεν υποβλήθηκε"
+    },
+    "tax.recordPayment": {
+      "en": "Record payment",
+      "draft": "Καταγραφή πληρωμής"
+    },
+    "tax.noContractorsYet": {
+      "en": "No contractors yet.",
+      "draft": "Όχι εργολάβοι ακόμα."
+    },
+    "tax.NECDataPreview": {
+      "en": "1099-NEC data preview",
+      "draft": "1099-NEC δεδομένα προεπισκόπηση"
+    },
+    "tax.recipientBox1DataShapedFor": {
+      "en": "Recipient + Box 1 data shaped for e-filing. Tax IDs stay masked — reveal needs PII access. Draft data only, nothing is filed in-house.",
+      "draft": "Παραλήπτης + Box 1 δεδομένα shaped για e-filing. Φόρος IDs μείνετε masked — reveal needs PII πρόσβαση. Πρόχειρο δεδομένα μόνο, τίποτα είναι υποβλήθηκε in-house."
+    },
+    "tax.loadPreview": {
+      "en": "Load preview",
+      "draft": "Φορτώστε προεπισκόπηση"
+    },
+    "tax.recipient": {
+      "en": "Recipient",
+      "draft": "Παραλήπτης"
+    },
+    "tax.tin": {
+      "en": "TIN",
+      "draft": "TIN"
+    },
+    "tax.address": {
+      "en": "Address",
+      "draft": "Διεύθυνση"
+    },
+    "tax.box1": {
+      "en": "Box 1",
+      "draft": "Box 1"
+    },
+    "tax.missing": {
+      "en": "missing",
+      "draft": "λείπει"
+    },
+    "tax.reveal": {
+      "en": "reveal",
+      "draft": "reveal"
+    },
+    "tax.noContractorsMeetThe": {
+      "en": "No contractors meet the",
+      "draft": "Όχι εργολάβοι meet "
+    },
+    "tax.reportingThresholdFor": {
+      "en": "reporting threshold for",
+      "draft": "αναφορά όριο για"
+    },
+    "tax.recordPayment2": {
+      "en": "Record payment —",
+      "draft": "Καταγράψτε πληρωμή —"
+    },
+    "tax.date": {
+      "en": "Date",
+      "draft": "Ημερομηνία"
+    },
+    "tax.amount": {
+      "en": "Amount $",
+      "draft": "Ποσό $"
+    },
+    "tax.description": {
+      "en": "Description",
+      "draft": "Περιγραφή"
+    },
+    "tax.eGMarchBoothRentPayout": {
+      "en": "e.g. March booth rent payout",
+      "draft": "π.χ. Μάρτιος περίπτερο ενοίκιο πληρωμή"
+    },
+    "tax.record": {
+      "en": "Record",
+      "draft": "Καταγράψτε"
+    },
+    "tax.paymentHistory": {
+      "en": "Payment history —",
+      "draft": "Πληρωμή ιστορικό —"
+    },
+    "tax.noPaymentsRecordedFor": {
+      "en": "No payments recorded for",
+      "draft": "Όχι πληρωμές καταγράφηκε για"
+    },
+    "tax.amount2": {
+      "en": "Amount",
+      "draft": "Ποσό"
+    },
+    "tax.deletePayment": {
+      "en": "Delete payment",
+      "draft": "Διαγράψτε πληρωμή"
+    },
+    "tax.yearTotal": {
+      "en": "Year total:",
+      "draft": "Έτος σύνολο:"
+    },
+    "tax.NECFiling": {
+      "en": "1099-NEC filing —",
+      "draft": "1099-NEC υποβολή —"
+    },
+    "tax.thisDraftLivesInTaxBanditsReview": {
+      "en": "This draft lives in TaxBandits — review and Transmit there to file with the IRS. This app never files in-house.",
+      "draft": "Αυτό πρόχειρο lives σε TaxBandits — ελέγξτε και Transmit there σε αρχείο με IRS. Αυτό εφαρμογή ποτέ αρχεία in-house."
+    },
+    "tax.NECIsRequiredForNon": {
+      "en": "1099-NEC is required for non-corporate contractors paid ≥",
+      "draft": "1099-NEC είναι υποχρεωτικό για non-corporate εργολάβοι εξοφλημένο ≥"
+    },
+    "tax.inTheYearEFilingCreates": {
+      "en": "in the year. E-filing creates a draft in TaxBandits — you review and transmit there. This app never files with the IRS directly.",
+      "draft": "σε έτος. E-filing creates πρόχειρο σε TaxBandits — ελέγξτε και transmit there. Αυτό εφαρμογή ποτέ αρχεία με IRS directly."
+    },
+    "taxforecast.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "Φόρος Πρόβλεψη"
+    },
+    "taxforecast.OfPriorYearTax": {
+      "en": "100% of prior-year tax",
+      "draft": "100% προηγούμενο-έτος φόρος"
+    },
+    "taxforecast.irsDirectPay": {
+      "en": "IRS Direct Pay",
+      "draft": "IRS Άμεσο Πληρώστε"
+    },
+    "nav.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "Φόρος Πρόβλεψη"
+    },
+    "nav.tax1099s": {
+      "en": "Tax & 1099s",
+      "draft": "Φόρος & 1099s"
+    },
+    "teamInvites.accountantTaxPro": {
+      "en": "Accountant / Tax pro",
+      "draft": "Λογιστής / Φόρος pro"
+    }
+  }
+}

@@ -1,0 +1,426 @@
+{
+  "_meta": {
+    "lang": "yi",
+    "status": "DRAFT for human review only. Do NOT copy into frontend/src/locales/yi/translation.json until a qualified reviewer (counsel/CPA where relevant) approves each string. Live locale keeps English for these keys.",
+    "source": "docs/TRANSLATION_PLAN.md flagged keys (legal/financial/tax/privacy/safety)",
+    "notice": "Approximate translation from English/Spanish, may not be accurate."
+  },
+  "strings": {
+    "salestaxtab.taxJurisdictions": {
+      "en": "Tax jurisdictions",
+      "draft": "שטײַער יוריסדיקציען"
+    },
+    "salestaxtab.everywhereYouCollectSalesTaxState": {
+      "en": "Everywhere you collect sales tax — state, county, city, special district.\n          Tag invoices with a jurisdiction and this page tells you what you owe, where.",
+      "draft": "איבעראַל איר collect פֿאַרקויפֿן שטײַער — שטאַט, county, שטאָט, special district.\n          טאַג חשבונות מיט a יוריסדיקציע און דאָס זײַט דערציילט איר וואָס איר שולדן, וווּ."
+    },
+    "salestaxtab.noJurisdictionsYetAddTheFirst": {
+      "en": "No jurisdictions yet. Add the first place you collect sales tax.",
+      "draft": "קיין יוריסדיקציען נאָך. צולייגן די ערשט place איר collect פֿאַרקויפֿן שטײַער."
+    },
+    "salestaxtab.ofSalesTaxIsnTTagged": {
+      "en": "of sales tax isn't tagged to a jurisdiction yet.\n            Tag invoices with a jurisdiction so every dollar lands in the right bucket.",
+      "draft": "פֿון פֿאַרקויפֿן שטײַער איז ניט tagged צו a יוריסדיקציע נאָך.\n            טאַג חשבונות מיט a יוריסדיקציע אַזוי יעדער dollar לאַנדן אין די ריכטיק גרופּע."
+    },
+    "salestaxtab.taxCollected": {
+      "en": "Tax collected",
+      "draft": "שטײַער אײַנגעזאַמלט"
+    },
+    "teaminvites.inviteYourAccountantOrTaxPro": {
+      "en": "Invite your accountant or tax pro — they join with the right permissions\n        and can switch between all the workspaces they serve.",
+      "draft": "אײַנלאַדן אייער בוכהאַלטער אָדער שטײַער pro — זיי אָנשליסן מיט די ריכטיק דערלויבענישן\n        און קען וועקסלען צווישן אַלע די אַרבעטספּלעצער זיי serve."
+    },
+    "auditlog.eGTaxInvoiceLogin": {
+      "en": "e.g. tax, invoice, login",
+      "draft": "e.g. שטײַער, חשבון, לאָגין"
+    },
+    "cpapackage.mileageLogWithIRSRatesApplied": {
+      "en": "Mileage log with IRS rates applied",
+      "draft": "מיילידזש לאָג מיט IRS ראַטעס applied"
+    },
+    "customers.delete": {
+      "en": "Delete",
+      "draft": "אויסמעקן"
+    },
+    "customers.deleteConfirm": {
+      "en": "Delete customer \"{{name}}\"? Their invoices and statements stay on record.",
+      "draft": "אויסמעקן קונה \"{{name}}\"? זייער חשבונות און אויסצוגן stay אויף פֿאַרצייכענען."
+    },
+    "estimates.tax": {
+      "en": "Tax ($)",
+      "draft": "שטײַער ($)"
+    },
+    "expenses.taxID": {
+      "en": "Tax ID",
+      "draft": "שטײַער ID"
+    },
+    "expenses.taxYear": {
+      "en": "Tax year",
+      "draft": "שטײַער יאָר"
+    },
+    "expenses.tax": {
+      "en": "Tax",
+      "draft": "שטײַער"
+    },
+    "expenses.taxIDEIN": {
+      "en": "Tax ID / EIN",
+      "draft": "שטײַער ID / EIN"
+    },
+    "invoices.refund": {
+      "en": "Refund",
+      "draft": "צוריקצאָל"
+    },
+    "invoices.taxJurisdictionOptional": {
+      "en": "Tax jurisdiction (optional)",
+      "draft": "שטײַער יוריסדיקציע (אָפּציאָנעל)"
+    },
+    "invoices.tax": {
+      "en": "Tax ($)",
+      "draft": "שטײַער ($)"
+    },
+    "invoices.refundCredit": {
+      "en": "Refund credit —",
+      "draft": "צוריקצאָל קרעדיט —"
+    },
+    "invoices.refundTheRemaining": {
+      "en": "Refund the remaining",
+      "draft": "צוריקצאָל די איבערגעבליבן"
+    },
+    "mileage.irsLogCSV": {
+      "en": "IRS log CSV",
+      "draft": "IRS לאָג CSV"
+    },
+    "payroll.deleteDraft": {
+      "en": "Delete draft",
+      "draft": "אויסמעקן פּלאַן־ווערסיע"
+    },
+    "payroll.partnershipStubWhenAProviderIs": {
+      "en": "Partnership stub: when a provider is connected, runs here will hand off tax filing and direct deposit automatically.",
+      "draft": "פּאַרטנערשאַפֿט צאָלצעטל: ווען a אָנבאָט־געבער איז פֿאַרבונדן, לויפֿט דאָ וועט hand off שטײַער filing און דירעקט דעפּאָזיט אויטאָמאַטיש."
+    },
+    "payroll.employerTaxEst": {
+      "en": "Employer payroll tax (est.)",
+      "draft": "אַרבעטגעבער פּייראָל שטײַער (est.)"
+    },
+    "portalview.tax": {
+      "en": "Tax",
+      "draft": "שטײַער"
+    },
+    "recurringinvoices.tax": {
+      "en": "Tax ($)",
+      "draft": "שטײַער ($)"
+    },
+    "simulator.safetyFloor": {
+      "en": "Safety floor $",
+      "draft": "Safety floor $"
+    },
+    "tax.nameIsRequired": {
+      "en": "Name is required",
+      "draft": "נאָמען איז נײטיק"
+    },
+    "tax.contractorAdded": {
+      "en": "Contractor added",
+      "draft": "קאָנטראַקטאָר צוגעלייגט"
+    },
+    "tax.w9StatusUpdated": {
+      "en": "W-9 status updated",
+      "draft": "W-9 סטאַטוס דערהײַנטיקט"
+    },
+    "tax.contractorRemoved": {
+      "en": "Contractor removed",
+      "draft": "קאָנטראַקטאָר אַראָפּגענומען"
+    },
+    "tax.enterAPositiveAmount": {
+      "en": "Enter a positive amount",
+      "draft": "אַרײַנגעבן a פּאָזיטיוו סומע"
+    },
+    "tax.paymentRecorded": {
+      "en": "Payment recorded",
+      "draft": "צאָלונג פֿאַרצייכנט"
+    },
+    "tax.paymentDeleted": {
+      "en": "Payment deleted",
+      "draft": "צאָלונג אויסגעמעקט"
+    },
+    "tax.statusRefreshed": {
+      "en": "Status refreshed",
+      "draft": "סטאַטוס דערפֿרישט"
+    },
+    "tax.addContractor": {
+      "en": "Add contractor",
+      "draft": "צולייגן קאָנטראַקטאָר"
+    },
+    "tax.contractors1099s": {
+      "en": "Contractors & 1099s",
+      "draft": "קאָנטראַקטאָרן & 1099s"
+    },
+    "tax.salesTax": {
+      "en": "Sales Tax",
+      "draft": "פֿאַרקויפֿן שטײַער"
+    },
+    "tax.taxbanditsNotConnected": {
+      "en": "TaxBandits not connected.",
+      "draft": "TaxBandits ניט פֿאַרבונדן."
+    },
+    "tax.taxbanditsSETUPMd": {
+      "en": "TAXBANDITS_SETUP.md",
+      "draft": "TAXBANDITS_אײַנשטעלונג.md"
+    },
+    "tax.inTheRepoNoIRSFiling": {
+      "en": "in the repo. No IRS filing is ever done in-house.",
+      "draft": "אין די repo. קיין IRS filing איז אַמאָל פֿאַרטיק in-house."
+    },
+    "tax.taxbanditsConnectedIn": {
+      "en": "TaxBandits connected in",
+      "draft": "TaxBandits פֿאַרבונדן אין"
+    },
+    "tax.sandbox": {
+      "en": "sandbox",
+      "draft": "sandbox"
+    },
+    "tax.modeNoRealFilingsFlip": {
+      "en": "mode — no real filings. Flip",
+      "draft": "mode — קיין real filings. Flip"
+    },
+    "tax.taxbanditsSANDBOXFalse": {
+      "en": "TAXBANDITS_SANDBOX=false",
+      "draft": "TAXBANDITS_SANDBOX=false"
+    },
+    "tax.toGoLive": {
+      "en": "to go live.",
+      "draft": "צו גיין live."
+    },
+    "tax.newContractor": {
+      "en": "New contractor",
+      "draft": "נײַ קאָנטראַקטאָר"
+    },
+    "tax.name": {
+      "en": "Name *",
+      "draft": "נאָמען *"
+    },
+    "tax.businessName": {
+      "en": "Business name",
+      "draft": "געשעפֿט נאָמען"
+    },
+    "tax.email": {
+      "en": "Email",
+      "draft": "אימעיל"
+    },
+    "tax.phone": {
+      "en": "Phone",
+      "draft": "טעלעפֿאָן"
+    },
+    "tax.entityType": {
+      "en": "Entity type",
+      "draft": "ענטיטעט טיפּ"
+    },
+    "tax.ssnEIN": {
+      "en": "SSN / EIN",
+      "draft": "SSN / EIN"
+    },
+    "tax.storedSecurely": {
+      "en": "Stored securely",
+      "draft": "Stored securely"
+    },
+    "tax.street": {
+      "en": "Street",
+      "draft": "גאַס"
+    },
+    "tax.city": {
+      "en": "City",
+      "draft": "שטאָט"
+    },
+    "tax.state": {
+      "en": "State",
+      "draft": "שטאַט"
+    },
+    "tax.zip": {
+      "en": "ZIP",
+      "draft": "ZIP"
+    },
+    "tax.cancel": {
+      "en": "Cancel",
+      "draft": "אָפּזאָגן"
+    },
+    "tax.contractor": {
+      "en": "Contractor",
+      "draft": "קאָנטראַקטאָר"
+    },
+    "tax.paid": {
+      "en": "Paid",
+      "draft": "באַצאָלט"
+    },
+    "tax.w9": {
+      "en": "W-9",
+      "draft": "W-9"
+    },
+    "tax.NEC": {
+      "en": "1099-NEC",
+      "draft": "1099-NEC"
+    },
+    "tax.eFile": {
+      "en": "E-file",
+      "draft": "E-file"
+    },
+    "tax.actions": {
+      "en": "Actions",
+      "draft": "אַקציעס"
+    },
+    "tax.viewPaymentHistory": {
+      "en": "View payment history",
+      "draft": "באַטראַכטן צאָלונג היסטאָריע"
+    },
+    "tax.toggleW9Received": {
+      "en": "Toggle W-9 received",
+      "draft": "Toggle W-9 באַקומען"
+    },
+    "tax.required": {
+      "en": "Required",
+      "draft": "נײטיק"
+    },
+    "tax.viewFilingStatus": {
+      "en": "View filing status",
+      "draft": "באַטראַכטן filing סטאַטוס"
+    },
+    "tax.notFiled": {
+      "en": "Not filed",
+      "draft": "ניט filed"
+    },
+    "tax.recordPayment": {
+      "en": "Record payment",
+      "draft": "פֿאַרצייכענען צאָלונג"
+    },
+    "tax.noContractorsYet": {
+      "en": "No contractors yet.",
+      "draft": "קיין קאָנטראַקטאָרן נאָך."
+    },
+    "tax.NECDataPreview": {
+      "en": "1099-NEC data preview",
+      "draft": "1099-NEC data פֿאָרויסבליק"
+    },
+    "tax.recipientBox1DataShapedFor": {
+      "en": "Recipient + Box 1 data shaped for e-filing. Tax IDs stay masked — reveal needs PII access. Draft data only, nothing is filed in-house.",
+      "draft": "באַקומער + קאַסטן 1 data shaped פֿאַר e-filing. שטײַער IDs stay masked — reveal ברויכט PII צוטריט. פּלאַן־ווערסיע data נאָר, גאָרניט איז filed in-house."
+    },
+    "tax.loadPreview": {
+      "en": "Load preview",
+      "draft": "לאָדן פֿאָרויסבליק"
+    },
+    "tax.recipient": {
+      "en": "Recipient",
+      "draft": "באַקומער"
+    },
+    "tax.tin": {
+      "en": "TIN",
+      "draft": "TIN"
+    },
+    "tax.address": {
+      "en": "Address",
+      "draft": "אַדרעס"
+    },
+    "tax.box1": {
+      "en": "Box 1",
+      "draft": "קאַסטן 1"
+    },
+    "tax.missing": {
+      "en": "missing",
+      "draft": "פֿעלנדיק"
+    },
+    "tax.reveal": {
+      "en": "reveal",
+      "draft": "reveal"
+    },
+    "tax.noContractorsMeetThe": {
+      "en": "No contractors meet the",
+      "draft": "קיין קאָנטראַקטאָרן meet די"
+    },
+    "tax.reportingThresholdFor": {
+      "en": "reporting threshold for",
+      "draft": "באַריכט־וועזן threshold פֿאַר"
+    },
+    "tax.recordPayment2": {
+      "en": "Record payment —",
+      "draft": "פֿאַרצייכענען צאָלונג —"
+    },
+    "tax.date": {
+      "en": "Date",
+      "draft": "דאַטע"
+    },
+    "tax.amount": {
+      "en": "Amount $",
+      "draft": "סומע $"
+    },
+    "tax.description": {
+      "en": "Description",
+      "draft": "באַשרײַבונג"
+    },
+    "tax.eGMarchBoothRentPayout": {
+      "en": "e.g. March booth rent payout",
+      "draft": "e.g. March booth רענט אויסצאָל"
+    },
+    "tax.record": {
+      "en": "Record",
+      "draft": "פֿאַרצייכענען"
+    },
+    "tax.paymentHistory": {
+      "en": "Payment history —",
+      "draft": "צאָלונג היסטאָריע —"
+    },
+    "tax.noPaymentsRecordedFor": {
+      "en": "No payments recorded for",
+      "draft": "קיין צאָלונגען פֿאַרצייכנט פֿאַר"
+    },
+    "tax.amount2": {
+      "en": "Amount",
+      "draft": "סומע"
+    },
+    "tax.deletePayment": {
+      "en": "Delete payment",
+      "draft": "אויסמעקן צאָלונג"
+    },
+    "tax.yearTotal": {
+      "en": "Year total:",
+      "draft": "יאָר סך־הכּל:"
+    },
+    "tax.NECFiling": {
+      "en": "1099-NEC filing —",
+      "draft": "1099-NEC filing —"
+    },
+    "tax.thisDraftLivesInTaxBanditsReview": {
+      "en": "This draft lives in TaxBandits — review and Transmit there to file with the IRS. This app never files in-house.",
+      "draft": "דאָס פּלאַן־ווערסיע lives אין TaxBandits — איבערקוקן און Transmit דאָרט צו טעקע מיט די IRS. דאָס app קיינמאָל טעקעס in-house."
+    },
+    "tax.NECIsRequiredForNon": {
+      "en": "1099-NEC is required for non-corporate contractors paid ≥",
+      "draft": "1099-NEC איז נײטיק פֿאַר non-corporate קאָנטראַקטאָרן באַצאָלט ≥"
+    },
+    "tax.inTheYearEFilingCreates": {
+      "en": "in the year. E-filing creates a draft in TaxBandits — you review and transmit there. This app never files with the IRS directly.",
+      "draft": "אין די יאָר. E-filing שאַפֿט a פּלאַן־ווערסיע אין TaxBandits — איר איבערקוקן און transmit דאָרט. דאָס app קיינמאָל טעקעס מיט די IRS directly."
+    },
+    "taxforecast.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "שטײַער פּראָגנאָז"
+    },
+    "taxforecast.OfPriorYearTax": {
+      "en": "100% of prior-year tax",
+      "draft": "100% פֿון prior-year שטײַער"
+    },
+    "taxforecast.irsDirectPay": {
+      "en": "IRS Direct Pay",
+      "draft": "IRS דירעקט באַצאָלן"
+    },
+    "nav.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "שטײַער פּראָגנאָז"
+    },
+    "nav.tax1099s": {
+      "en": "Tax & 1099s",
+      "draft": "שטײַער & 1099s"
+    },
+    "teamInvites.accountantTaxPro": {
+      "en": "Accountant / Tax pro",
+      "draft": "בוכהאַלטער / שטײַער pro"
+    }
+  }
+}

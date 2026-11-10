@@ -1,0 +1,426 @@
+{
+  "_meta": {
+    "lang": "no",
+    "status": "DRAFT for human review only. Do NOT copy into frontend/src/locales/no/translation.json until a qualified reviewer (counsel/CPA where relevant) approves each string. Live locale keeps English for these keys.",
+    "source": "docs/TRANSLATION_PLAN.md flagged keys (legal/financial/tax/privacy/safety)",
+    "notice": "Approximate translation from English/Spanish, may not be accurate."
+  },
+  "strings": {
+    "salestaxtab.taxJurisdictions": {
+      "en": "Tax jurisdictions",
+      "draft": "Skatt jurisdictions"
+    },
+    "salestaxtab.everywhereYouCollectSalesTaxState": {
+      "en": "Everywhere you collect sales tax — state, county, city, special district.\n          Tag invoices with a jurisdiction and this page tells you what you owe, where.",
+      "draft": "Overalt du krev inn salg skatt — delstat, county, by, special district.\n  Tagg fakturaer med jurisdiksjon og denne side tells du hva du owe, hvor."
+    },
+    "salestaxtab.noJurisdictionsYetAddTheFirst": {
+      "en": "No jurisdictions yet. Add the first place you collect sales tax.",
+      "draft": "Ingen jurisdictions ennå. Legg til første place du krev inn salg skatt."
+    },
+    "salestaxtab.ofSalesTaxIsnTTagged": {
+      "en": "of sales tax isn't tagged to a jurisdiction yet.\n            Tag invoices with a jurisdiction so every dollar lands in the right bucket.",
+      "draft": "av salg skatt er ikke tagged til jurisdiksjon ennå.\n  Tagg fakturaer med jurisdiksjon så hver dollar lands i høyre kategori."
+    },
+    "salestaxtab.taxCollected": {
+      "en": "Tax collected",
+      "draft": "Skatt innkrevd"
+    },
+    "teaminvites.inviteYourAccountantOrTaxPro": {
+      "en": "Invite your accountant or tax pro — they join with the right permissions\n        and can switch between all the workspaces they serve.",
+      "draft": "Invitasjon regnskapsfører eller skatt pro — de bli med med høyre tillatelser\n  og kan bytt mellom alle arbeidsområder de serve."
+    },
+    "auditlog.eGTaxInvoiceLogin": {
+      "en": "e.g. tax, invoice, login",
+      "draft": "f.eks. skatt, faktura, pålogging"
+    },
+    "cpapackage.mileageLogWithIRSRatesApplied": {
+      "en": "Mileage log with IRS rates applied",
+      "draft": "Kjørelengde logg med IRS satser anvendt"
+    },
+    "customers.delete": {
+      "en": "Delete",
+      "draft": "Slett"
+    },
+    "customers.deleteConfirm": {
+      "en": "Delete customer \"{{name}}\"? Their invoices and statements stay on record.",
+      "draft": "Slett kunde \"{{name}}\"? Deres fakturaer og statements bli på registrer."
+    },
+    "estimates.tax": {
+      "en": "Tax ($)",
+      "draft": "Skatt ($)"
+    },
+    "expenses.taxID": {
+      "en": "Tax ID",
+      "draft": "Skatt ID"
+    },
+    "expenses.taxYear": {
+      "en": "Tax year",
+      "draft": "Skatt år"
+    },
+    "expenses.tax": {
+      "en": "Tax",
+      "draft": "Skatt"
+    },
+    "expenses.taxIDEIN": {
+      "en": "Tax ID / EIN",
+      "draft": "Skatt ID / EIN"
+    },
+    "invoices.refund": {
+      "en": "Refund",
+      "draft": "Refusjon"
+    },
+    "invoices.taxJurisdictionOptional": {
+      "en": "Tax jurisdiction (optional)",
+      "draft": "Skatt jurisdiksjon (valgfri)"
+    },
+    "invoices.tax": {
+      "en": "Tax ($)",
+      "draft": "Skatt ($)"
+    },
+    "invoices.refundCredit": {
+      "en": "Refund credit —",
+      "draft": "Refusjon kreditt —"
+    },
+    "invoices.refundTheRemaining": {
+      "en": "Refund the remaining",
+      "draft": "Refusjon gjenstående"
+    },
+    "mileage.irsLogCSV": {
+      "en": "IRS log CSV",
+      "draft": "IRS logg CSV"
+    },
+    "payroll.deleteDraft": {
+      "en": "Delete draft",
+      "draft": "Slett utkast"
+    },
+    "payroll.partnershipStubWhenAProviderIs": {
+      "en": "Partnership stub: when a provider is connected, runs here will hand off tax filing and direct deposit automatically.",
+      "draft": "Partnerskap stub: når leverandør er tilkoblet, kjøringer her vil hånd av skatt rapportering og direkte innskudd automatisk."
+    },
+    "payroll.employerTaxEst": {
+      "en": "Employer payroll tax (est.)",
+      "draft": "Employer lønn skatt (ca..)"
+    },
+    "portalview.tax": {
+      "en": "Tax",
+      "draft": "Skatt"
+    },
+    "recurringinvoices.tax": {
+      "en": "Tax ($)",
+      "draft": "Skatt ($)"
+    },
+    "simulator.safetyFloor": {
+      "en": "Safety floor $",
+      "draft": "Safety gulv $"
+    },
+    "tax.nameIsRequired": {
+      "en": "Name is required",
+      "draft": "Navn er påkrevd"
+    },
+    "tax.contractorAdded": {
+      "en": "Contractor added",
+      "draft": "Entreprenør lagt til"
+    },
+    "tax.w9StatusUpdated": {
+      "en": "W-9 status updated",
+      "draft": "W-9 status oppdatert"
+    },
+    "tax.contractorRemoved": {
+      "en": "Contractor removed",
+      "draft": "Entreprenør fjernet"
+    },
+    "tax.enterAPositiveAmount": {
+      "en": "Enter a positive amount",
+      "draft": "Skriv inn positiv beløp"
+    },
+    "tax.paymentRecorded": {
+      "en": "Payment recorded",
+      "draft": "Betaling registrert"
+    },
+    "tax.paymentDeleted": {
+      "en": "Payment deleted",
+      "draft": "Betaling slettet"
+    },
+    "tax.statusRefreshed": {
+      "en": "Status refreshed",
+      "draft": "Status refreshed"
+    },
+    "tax.addContractor": {
+      "en": "Add contractor",
+      "draft": "Legg til entreprenør"
+    },
+    "tax.contractors1099s": {
+      "en": "Contractors & 1099s",
+      "draft": "Entreprenører og 1099"
+    },
+    "tax.salesTax": {
+      "en": "Sales Tax",
+      "draft": "Salg Skatt"
+    },
+    "tax.taxbanditsNotConnected": {
+      "en": "TaxBandits not connected.",
+      "draft": "TaxBandits ikke tilkoblet."
+    },
+    "tax.taxbanditsSETUPMd": {
+      "en": "TAXBANDITS_SETUP.md",
+      "draft": "TAXBANDITS_SETUP.md"
+    },
+    "tax.inTheRepoNoIRSFiling": {
+      "en": "in the repo. No IRS filing is ever done in-house.",
+      "draft": "i repo. Ingen IRS rapportering er ever ferdig in-house."
+    },
+    "tax.taxbanditsConnectedIn": {
+      "en": "TaxBandits connected in",
+      "draft": "TaxBandits tilkoblet i"
+    },
+    "tax.sandbox": {
+      "en": "sandbox",
+      "draft": "sandbox"
+    },
+    "tax.modeNoRealFilingsFlip": {
+      "en": "mode — no real filings. Flip",
+      "draft": "modus — ingen real filings. Flip"
+    },
+    "tax.taxbanditsSANDBOXFalse": {
+      "en": "TAXBANDITS_SANDBOX=false",
+      "draft": "TAXBANDITS_SANDBOX=false"
+    },
+    "tax.toGoLive": {
+      "en": "to go live.",
+      "draft": "til gå direkte."
+    },
+    "tax.newContractor": {
+      "en": "New contractor",
+      "draft": "Ny entreprenør"
+    },
+    "tax.name": {
+      "en": "Name *",
+      "draft": "Navn *"
+    },
+    "tax.businessName": {
+      "en": "Business name",
+      "draft": "Virksomhet navn"
+    },
+    "tax.email": {
+      "en": "Email",
+      "draft": "E-post"
+    },
+    "tax.phone": {
+      "en": "Phone",
+      "draft": "Telefon"
+    },
+    "tax.entityType": {
+      "en": "Entity type",
+      "draft": "Enhet type"
+    },
+    "tax.ssnEIN": {
+      "en": "SSN / EIN",
+      "draft": "SSN / EIN"
+    },
+    "tax.storedSecurely": {
+      "en": "Stored securely",
+      "draft": "Stored securely"
+    },
+    "tax.street": {
+      "en": "Street",
+      "draft": "Street"
+    },
+    "tax.city": {
+      "en": "City",
+      "draft": "By"
+    },
+    "tax.state": {
+      "en": "State",
+      "draft": "Delstat"
+    },
+    "tax.zip": {
+      "en": "ZIP",
+      "draft": "POSTNUMMER"
+    },
+    "tax.cancel": {
+      "en": "Cancel",
+      "draft": "Avbryt"
+    },
+    "tax.contractor": {
+      "en": "Contractor",
+      "draft": "Entreprenør"
+    },
+    "tax.paid": {
+      "en": "Paid",
+      "draft": "Betalt"
+    },
+    "tax.w9": {
+      "en": "W-9",
+      "draft": "W-9"
+    },
+    "tax.NEC": {
+      "en": "1099-NEC",
+      "draft": "1099-NEC"
+    },
+    "tax.eFile": {
+      "en": "E-file",
+      "draft": "E-file"
+    },
+    "tax.actions": {
+      "en": "Actions",
+      "draft": "Handlinger"
+    },
+    "tax.viewPaymentHistory": {
+      "en": "View payment history",
+      "draft": "Vis betaling historikk"
+    },
+    "tax.toggleW9Received": {
+      "en": "Toggle W-9 received",
+      "draft": "Slå W-9 mottatt av/på"
+    },
+    "tax.required": {
+      "en": "Required",
+      "draft": "Påkrevd"
+    },
+    "tax.viewFilingStatus": {
+      "en": "View filing status",
+      "draft": "Vis rapportering status"
+    },
+    "tax.notFiled": {
+      "en": "Not filed",
+      "draft": "Ikke rapportert"
+    },
+    "tax.recordPayment": {
+      "en": "Record payment",
+      "draft": "Registrer betaling"
+    },
+    "tax.noContractorsYet": {
+      "en": "No contractors yet.",
+      "draft": "Ingen entreprenører ennå."
+    },
+    "tax.NECDataPreview": {
+      "en": "1099-NEC data preview",
+      "draft": "Forhåndsvisning av 1099-NEC-data"
+    },
+    "tax.recipientBox1DataShapedFor": {
+      "en": "Recipient + Box 1 data shaped for e-filing. Tax IDs stay masked — reveal needs PII access. Draft data only, nothing is filed in-house.",
+      "draft": "Mottaker + Box 1 data shaped for e-filing. Skatt IDs bli masked — reveal needs PII tilgang. Utkast data kun, ingenting er rapportert in-house."
+    },
+    "tax.loadPreview": {
+      "en": "Load preview",
+      "draft": "Last inn forhåndsvisning"
+    },
+    "tax.recipient": {
+      "en": "Recipient",
+      "draft": "Mottaker"
+    },
+    "tax.tin": {
+      "en": "TIN",
+      "draft": "TIN"
+    },
+    "tax.address": {
+      "en": "Address",
+      "draft": "Adresse"
+    },
+    "tax.box1": {
+      "en": "Box 1",
+      "draft": "Box 1"
+    },
+    "tax.missing": {
+      "en": "missing",
+      "draft": "mangler"
+    },
+    "tax.reveal": {
+      "en": "reveal",
+      "draft": "reveal"
+    },
+    "tax.noContractorsMeetThe": {
+      "en": "No contractors meet the",
+      "draft": "Ingen entreprenører meet "
+    },
+    "tax.reportingThresholdFor": {
+      "en": "reporting threshold for",
+      "draft": "rapportering terskel for"
+    },
+    "tax.recordPayment2": {
+      "en": "Record payment —",
+      "draft": "Registrer betaling —"
+    },
+    "tax.date": {
+      "en": "Date",
+      "draft": "Dato"
+    },
+    "tax.amount": {
+      "en": "Amount $",
+      "draft": "Beløp $"
+    },
+    "tax.description": {
+      "en": "Description",
+      "draft": "Beskrivelse"
+    },
+    "tax.eGMarchBoothRentPayout": {
+      "en": "e.g. March booth rent payout",
+      "draft": "f.eks. Mars stand husleie utbetaling"
+    },
+    "tax.record": {
+      "en": "Record",
+      "draft": "Registrer"
+    },
+    "tax.paymentHistory": {
+      "en": "Payment history —",
+      "draft": "Betaling historikk —"
+    },
+    "tax.noPaymentsRecordedFor": {
+      "en": "No payments recorded for",
+      "draft": "Ingen betalinger registrert for"
+    },
+    "tax.amount2": {
+      "en": "Amount",
+      "draft": "Beløp"
+    },
+    "tax.deletePayment": {
+      "en": "Delete payment",
+      "draft": "Slett betaling"
+    },
+    "tax.yearTotal": {
+      "en": "Year total:",
+      "draft": "År totalt:"
+    },
+    "tax.NECFiling": {
+      "en": "1099-NEC filing —",
+      "draft": "1099-NEC rapportering —"
+    },
+    "tax.thisDraftLivesInTaxBanditsReview": {
+      "en": "This draft lives in TaxBandits — review and Transmit there to file with the IRS. This app never files in-house.",
+      "draft": "Denne utkast lives i TaxBandits — gjennomgang og Transmit there til fil med IRS. Denne app aldri filer in-house."
+    },
+    "tax.NECIsRequiredForNon": {
+      "en": "1099-NEC is required for non-corporate contractors paid ≥",
+      "draft": "1099-NEC er påkrevd for non-corporate entreprenører betalt ≥"
+    },
+    "tax.inTheYearEFilingCreates": {
+      "en": "in the year. E-filing creates a draft in TaxBandits — you review and transmit there. This app never files with the IRS directly.",
+      "draft": "i år. E-filing creates utkast i TaxBandits — du gjennomgang og transmit there. Denne app aldri filer med IRS directly."
+    },
+    "taxforecast.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "Skatt Prognose"
+    },
+    "taxforecast.OfPriorYearTax": {
+      "en": "100% of prior-year tax",
+      "draft": "100% av tidligere-år skatt"
+    },
+    "taxforecast.irsDirectPay": {
+      "en": "IRS Direct Pay",
+      "draft": "IRS Direkte Betal"
+    },
+    "nav.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "Skatt Prognose"
+    },
+    "nav.tax1099s": {
+      "en": "Tax & 1099s",
+      "draft": "Skatt & 1099s"
+    },
+    "teamInvites.accountantTaxPro": {
+      "en": "Accountant / Tax pro",
+      "draft": "Regnskapsfører / Skatt pro"
+    }
+  }
+}

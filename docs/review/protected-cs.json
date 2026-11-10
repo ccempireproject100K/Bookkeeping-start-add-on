@@ -1,0 +1,426 @@
+{
+  "_meta": {
+    "lang": "cs",
+    "status": "DRAFT for human review only. Do NOT copy into frontend/src/locales/cs/translation.json until a qualified reviewer (counsel/CPA where relevant) approves each string. Live locale keeps English for these keys.",
+    "source": "docs/TRANSLATION_PLAN.md flagged keys (legal/financial/tax/privacy/safety)",
+    "notice": "Approximate translation from English/Spanish, may not be accurate."
+  },
+  "strings": {
+    "salestaxtab.taxJurisdictions": {
+      "en": "Tax jurisdictions",
+      "draft": "Daň jurisdictions"
+    },
+    "salestaxtab.everywhereYouCollectSalesTaxState": {
+      "en": "Everywhere you collect sales tax — state, county, city, special district.\n          Tag invoices with a jurisdiction and this page tells you what you owe, where.",
+      "draft": "Všude vybrat prodeje daň — stát, county, město, special district.\n  Štítek faktury s jurisdikce a tento stránka tells co owe, kde."
+    },
+    "salestaxtab.noJurisdictionsYetAddTheFirst": {
+      "en": "No jurisdictions yet. Add the first place you collect sales tax.",
+      "draft": "Žádný jurisdictions zatím. Přidat první place vybrat prodeje daň."
+    },
+    "salestaxtab.ofSalesTaxIsnTTagged": {
+      "en": "of sales tax isn't tagged to a jurisdiction yet.\n            Tag invoices with a jurisdiction so every dollar lands in the right bucket.",
+      "draft": " prodeje daň není tagged do jurisdikce zatím.\n  Štítek faktury s jurisdikce tak každý dollar lands v vpravo kategorie."
+    },
+    "salestaxtab.taxCollected": {
+      "en": "Tax collected",
+      "draft": "Daň vybráno"
+    },
+    "teaminvites.inviteYourAccountantOrTaxPro": {
+      "en": "Invite your accountant or tax pro — they join with the right permissions\n        and can switch between all the workspaces they serve.",
+      "draft": "Pozvánka účetní nebo daň pro — oni připojit se s vpravo oprávnění\n  a může přepnout mezi všechny pracovní prostory oni serve."
+    },
+    "auditlog.eGTaxInvoiceLogin": {
+      "en": "e.g. tax, invoice, login",
+      "draft": "např. daň, faktura, přihlášení"
+    },
+    "cpapackage.mileageLogWithIRSRatesApplied": {
+      "en": "Mileage log with IRS rates applied",
+      "draft": "Kilometrovné protokol s IRS sazby použito"
+    },
+    "customers.delete": {
+      "en": "Delete",
+      "draft": "Smazat"
+    },
+    "customers.deleteConfirm": {
+      "en": "Delete customer \"{{name}}\"? Their invoices and statements stay on record.",
+      "draft": "Smazat zákazník \"{{name}}\"? faktury a statements zůstat na evidovat."
+    },
+    "estimates.tax": {
+      "en": "Tax ($)",
+      "draft": "Daň ($)"
+    },
+    "expenses.taxID": {
+      "en": "Tax ID",
+      "draft": "Daň ID"
+    },
+    "expenses.taxYear": {
+      "en": "Tax year",
+      "draft": "Daň rok"
+    },
+    "expenses.tax": {
+      "en": "Tax",
+      "draft": "Daň"
+    },
+    "expenses.taxIDEIN": {
+      "en": "Tax ID / EIN",
+      "draft": "Daň ID / EIN"
+    },
+    "invoices.refund": {
+      "en": "Refund",
+      "draft": "Vrácení"
+    },
+    "invoices.taxJurisdictionOptional": {
+      "en": "Tax jurisdiction (optional)",
+      "draft": "Daň jurisdikce (volitelné)"
+    },
+    "invoices.tax": {
+      "en": "Tax ($)",
+      "draft": "Daň ($)"
+    },
+    "invoices.refundCredit": {
+      "en": "Refund credit —",
+      "draft": "Vrácení kredit —"
+    },
+    "invoices.refundTheRemaining": {
+      "en": "Refund the remaining",
+      "draft": "Vrácení zbývající"
+    },
+    "mileage.irsLogCSV": {
+      "en": "IRS log CSV",
+      "draft": "IRS protokol CSV"
+    },
+    "payroll.deleteDraft": {
+      "en": "Delete draft",
+      "draft": "Smazat koncept"
+    },
+    "payroll.partnershipStubWhenAProviderIs": {
+      "en": "Partnership stub: when a provider is connected, runs here will hand off tax filing and direct deposit automatically.",
+      "draft": "Partnerství pahýl: kdy poskytovatel je připojeno, běhy zde ruka vypnuto daň podání a přímý vklad automaticky."
+    },
+    "payroll.employerTaxEst": {
+      "en": "Employer payroll tax (est.)",
+      "draft": "Employer mzdy daň (odhad..)"
+    },
+    "portalview.tax": {
+      "en": "Tax",
+      "draft": "Daň"
+    },
+    "recurringinvoices.tax": {
+      "en": "Tax ($)",
+      "draft": "Daň ($)"
+    },
+    "simulator.safetyFloor": {
+      "en": "Safety floor $",
+      "draft": "Safety podlaha $"
+    },
+    "tax.nameIsRequired": {
+      "en": "Name is required",
+      "draft": "Název je povinné"
+    },
+    "tax.contractorAdded": {
+      "en": "Contractor added",
+      "draft": "Dodavatel přidáno"
+    },
+    "tax.w9StatusUpdated": {
+      "en": "W-9 status updated",
+      "draft": "W-9 stav aktualizováno"
+    },
+    "tax.contractorRemoved": {
+      "en": "Contractor removed",
+      "draft": "Dodavatel odebráno"
+    },
+    "tax.enterAPositiveAmount": {
+      "en": "Enter a positive amount",
+      "draft": "Zadejte kladný částka"
+    },
+    "tax.paymentRecorded": {
+      "en": "Payment recorded",
+      "draft": "Platba zaevidováno"
+    },
+    "tax.paymentDeleted": {
+      "en": "Payment deleted",
+      "draft": "Platba smazáno"
+    },
+    "tax.statusRefreshed": {
+      "en": "Status refreshed",
+      "draft": "Stav refreshed"
+    },
+    "tax.addContractor": {
+      "en": "Add contractor",
+      "draft": "Přidat dodavatel"
+    },
+    "tax.contractors1099s": {
+      "en": "Contractors & 1099s",
+      "draft": "Dodavatelé a 1099"
+    },
+    "tax.salesTax": {
+      "en": "Sales Tax",
+      "draft": "Prodeje Daň"
+    },
+    "tax.taxbanditsNotConnected": {
+      "en": "TaxBandits not connected.",
+      "draft": "TaxBandits nepřipojeno."
+    },
+    "tax.taxbanditsSETUPMd": {
+      "en": "TAXBANDITS_SETUP.md",
+      "draft": "TAXBANDITS_SETUP.md"
+    },
+    "tax.inTheRepoNoIRSFiling": {
+      "en": "in the repo. No IRS filing is ever done in-house.",
+      "draft": "v repo. Žádný IRS podání je ever hotovo in-house."
+    },
+    "tax.taxbanditsConnectedIn": {
+      "en": "TaxBandits connected in",
+      "draft": "TaxBandits připojeno v"
+    },
+    "tax.sandbox": {
+      "en": "sandbox",
+      "draft": "sandbox"
+    },
+    "tax.modeNoRealFilingsFlip": {
+      "en": "mode — no real filings. Flip",
+      "draft": "režim — žádný real filings. Flip"
+    },
+    "tax.taxbanditsSANDBOXFalse": {
+      "en": "TAXBANDITS_SANDBOX=false",
+      "draft": "TAXBANDITS_SANDBOX=false"
+    },
+    "tax.toGoLive": {
+      "en": "to go live.",
+      "draft": "do jít živě."
+    },
+    "tax.newContractor": {
+      "en": "New contractor",
+      "draft": "Nový dodavatel"
+    },
+    "tax.name": {
+      "en": "Name *",
+      "draft": "Název *"
+    },
+    "tax.businessName": {
+      "en": "Business name",
+      "draft": "Podnikání název"
+    },
+    "tax.email": {
+      "en": "Email",
+      "draft": "E-mail"
+    },
+    "tax.phone": {
+      "en": "Phone",
+      "draft": "Telefon"
+    },
+    "tax.entityType": {
+      "en": "Entity type",
+      "draft": "Entita typ"
+    },
+    "tax.ssnEIN": {
+      "en": "SSN / EIN",
+      "draft": "SSN / EIN"
+    },
+    "tax.storedSecurely": {
+      "en": "Stored securely",
+      "draft": "Stored securely"
+    },
+    "tax.street": {
+      "en": "Street",
+      "draft": "Street"
+    },
+    "tax.city": {
+      "en": "City",
+      "draft": "Město"
+    },
+    "tax.state": {
+      "en": "State",
+      "draft": "Stát"
+    },
+    "tax.zip": {
+      "en": "ZIP",
+      "draft": "PSČ"
+    },
+    "tax.cancel": {
+      "en": "Cancel",
+      "draft": "Zrušit"
+    },
+    "tax.contractor": {
+      "en": "Contractor",
+      "draft": "Dodavatel"
+    },
+    "tax.paid": {
+      "en": "Paid",
+      "draft": "Zaplaceno"
+    },
+    "tax.w9": {
+      "en": "W-9",
+      "draft": "W-9"
+    },
+    "tax.NEC": {
+      "en": "1099-NEC",
+      "draft": "1099-NEC"
+    },
+    "tax.eFile": {
+      "en": "E-file",
+      "draft": "E-file"
+    },
+    "tax.actions": {
+      "en": "Actions",
+      "draft": "Akce"
+    },
+    "tax.viewPaymentHistory": {
+      "en": "View payment history",
+      "draft": "Zobrazit platba historie"
+    },
+    "tax.toggleW9Received": {
+      "en": "Toggle W-9 received",
+      "draft": "Přepnout W-9 přijato"
+    },
+    "tax.required": {
+      "en": "Required",
+      "draft": "Povinné"
+    },
+    "tax.viewFilingStatus": {
+      "en": "View filing status",
+      "draft": "Zobrazit podání stav"
+    },
+    "tax.notFiled": {
+      "en": "Not filed",
+      "draft": "Ne podáno"
+    },
+    "tax.recordPayment": {
+      "en": "Record payment",
+      "draft": "Zaevidovat platbu"
+    },
+    "tax.noContractorsYet": {
+      "en": "No contractors yet.",
+      "draft": "Žádný dodavatelé zatím."
+    },
+    "tax.NECDataPreview": {
+      "en": "1099-NEC data preview",
+      "draft": "Náhled dat 1099-NEC"
+    },
+    "tax.recipientBox1DataShapedFor": {
+      "en": "Recipient + Box 1 data shaped for e-filing. Tax IDs stay masked — reveal needs PII access. Draft data only, nothing is filed in-house.",
+      "draft": "Příjemce + Box 1 data shaped pro e-filing. Daň IDs zůstat masked — reveal needs PII přístup. Koncept data pouze, nic je podáno in-house."
+    },
+    "tax.loadPreview": {
+      "en": "Load preview",
+      "draft": "Načíst náhled"
+    },
+    "tax.recipient": {
+      "en": "Recipient",
+      "draft": "Příjemce"
+    },
+    "tax.tin": {
+      "en": "TIN",
+      "draft": "TIN"
+    },
+    "tax.address": {
+      "en": "Address",
+      "draft": "Adresa"
+    },
+    "tax.box1": {
+      "en": "Box 1",
+      "draft": "Box 1"
+    },
+    "tax.missing": {
+      "en": "missing",
+      "draft": "chybí"
+    },
+    "tax.reveal": {
+      "en": "reveal",
+      "draft": "reveal"
+    },
+    "tax.noContractorsMeetThe": {
+      "en": "No contractors meet the",
+      "draft": "Žádný dodavatelé meet "
+    },
+    "tax.reportingThresholdFor": {
+      "en": "reporting threshold for",
+      "draft": "reporting práh pro"
+    },
+    "tax.recordPayment2": {
+      "en": "Record payment —",
+      "draft": "Evidovat platba —"
+    },
+    "tax.date": {
+      "en": "Date",
+      "draft": "Datum"
+    },
+    "tax.amount": {
+      "en": "Amount $",
+      "draft": "Částka $"
+    },
+    "tax.description": {
+      "en": "Description",
+      "draft": "Popis"
+    },
+    "tax.eGMarchBoothRentPayout": {
+      "en": "e.g. March booth rent payout",
+      "draft": "např. Březen stánek nájem výplata"
+    },
+    "tax.record": {
+      "en": "Record",
+      "draft": "Evidovat"
+    },
+    "tax.paymentHistory": {
+      "en": "Payment history —",
+      "draft": "Platba historie —"
+    },
+    "tax.noPaymentsRecordedFor": {
+      "en": "No payments recorded for",
+      "draft": "Žádný platby zaevidováno pro"
+    },
+    "tax.amount2": {
+      "en": "Amount",
+      "draft": "Částka"
+    },
+    "tax.deletePayment": {
+      "en": "Delete payment",
+      "draft": "Smazat platbu"
+    },
+    "tax.yearTotal": {
+      "en": "Year total:",
+      "draft": "Rok celkem:"
+    },
+    "tax.NECFiling": {
+      "en": "1099-NEC filing —",
+      "draft": "1099-NEC podání —"
+    },
+    "tax.thisDraftLivesInTaxBanditsReview": {
+      "en": "This draft lives in TaxBandits — review and Transmit there to file with the IRS. This app never files in-house.",
+      "draft": "Tento koncept lives v TaxBandits — kontrola a Transmit there do soubor s IRS. Tento aplikace nikdy soubory in-house."
+    },
+    "tax.NECIsRequiredForNon": {
+      "en": "1099-NEC is required for non-corporate contractors paid ≥",
+      "draft": "1099-NEC je povinné pro non-corporate dodavatelé zaplaceno ≥"
+    },
+    "tax.inTheYearEFilingCreates": {
+      "en": "in the year. E-filing creates a draft in TaxBandits — you review and transmit there. This app never files with the IRS directly.",
+      "draft": "v rok. E-filing creates koncept v TaxBandits — kontrola a transmit there. Tento aplikace nikdy soubory s IRS directly."
+    },
+    "taxforecast.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "Daň Prognóza"
+    },
+    "taxforecast.OfPriorYearTax": {
+      "en": "100% of prior-year tax",
+      "draft": "100% předchozí-rok daň"
+    },
+    "taxforecast.irsDirectPay": {
+      "en": "IRS Direct Pay",
+      "draft": "IRS Přímý Zaplatit"
+    },
+    "nav.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "Daň Prognóza"
+    },
+    "nav.tax1099s": {
+      "en": "Tax & 1099s",
+      "draft": "Daň & 1099s"
+    },
+    "teamInvites.accountantTaxPro": {
+      "en": "Accountant / Tax pro",
+      "draft": "Účetní / Daň pro"
+    }
+  }
+}

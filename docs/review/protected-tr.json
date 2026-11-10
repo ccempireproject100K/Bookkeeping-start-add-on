@@ -1,0 +1,426 @@
+{
+  "_meta": {
+    "lang": "tr",
+    "status": "DRAFT for human review only. Do NOT copy into frontend/src/locales/tr/translation.json until a qualified reviewer (counsel/CPA where relevant) approves each string. Live locale keeps English for these keys.",
+    "source": "docs/TRANSLATION_PLAN.md flagged keys (legal/financial/tax/privacy/safety)",
+    "notice": "Approximate translation from English/Spanish, may not be accurate."
+  },
+  "strings": {
+    "salestaxtab.taxJurisdictions": {
+      "en": "Tax jurisdictions",
+      "draft": "Vergi jurisdictions"
+    },
+    "salestaxtab.everywhereYouCollectSalesTaxState": {
+      "en": "Everywhere you collect sales tax — state, county, city, special district.\n          Tag invoices with a jurisdiction and this page tells you what you owe, where.",
+      "draft": "Her yerde toplayın satışlar vergi — eyalet, county, şehir, special district.\n  Etiket faturalar yetki alanı ve bu sayfa tells ne owe, nerede."
+    },
+    "salestaxtab.noJurisdictionsYetAddTheFirst": {
+      "en": "No jurisdictions yet. Add the first place you collect sales tax.",
+      "draft": "Hayır jurisdictions henüz. Ekleyin ilk place toplayın satışlar vergi."
+    },
+    "salestaxtab.ofSalesTaxIsnTTagged": {
+      "en": "of sales tax isn't tagged to a jurisdiction yet.\n            Tag invoices with a jurisdiction so every dollar lands in the right bucket.",
+      "draft": " satışlar vergi değil tagged yetki alanı henüz.\n  Etiket faturalar yetki alanı böylece her dollar lands sağ kategori."
+    },
+    "salestaxtab.taxCollected": {
+      "en": "Tax collected",
+      "draft": "Vergi toplandı"
+    },
+    "teaminvites.inviteYourAccountantOrTaxPro": {
+      "en": "Invite your accountant or tax pro — they join with the right permissions\n        and can switch between all the workspaces they serve.",
+      "draft": "Davet muhasebeci veya vergi pro — onlar katılın sağ izinler\n  ve olabilir geçiş yapın arasında tüm çalışma alanları onlar serve."
+    },
+    "auditlog.eGTaxInvoiceLogin": {
+      "en": "e.g. tax, invoice, login",
+      "draft": "örn. vergi, fatura, giriş"
+    },
+    "cpapackage.mileageLogWithIRSRatesApplied": {
+      "en": "Mileage log with IRS rates applied",
+      "draft": "Kilometre kayıt IRS oranlar uygulandı"
+    },
+    "customers.delete": {
+      "en": "Delete",
+      "draft": "Sil"
+    },
+    "customers.deleteConfirm": {
+      "en": "Delete customer \"{{name}}\"? Their invoices and statements stay on record.",
+      "draft": "Silin müşteri \"{{name}}\"? faturalar ve statements kalın kaydedin."
+    },
+    "estimates.tax": {
+      "en": "Tax ($)",
+      "draft": "Vergi ($)"
+    },
+    "expenses.taxID": {
+      "en": "Tax ID",
+      "draft": "Vergi ID"
+    },
+    "expenses.taxYear": {
+      "en": "Tax year",
+      "draft": "Vergi yıl"
+    },
+    "expenses.tax": {
+      "en": "Tax",
+      "draft": "Vergi"
+    },
+    "expenses.taxIDEIN": {
+      "en": "Tax ID / EIN",
+      "draft": "Vergi ID / EIN"
+    },
+    "invoices.refund": {
+      "en": "Refund",
+      "draft": "İade"
+    },
+    "invoices.taxJurisdictionOptional": {
+      "en": "Tax jurisdiction (optional)",
+      "draft": "Vergi yetki alanı (isteğe bağlı)"
+    },
+    "invoices.tax": {
+      "en": "Tax ($)",
+      "draft": "Vergi ($)"
+    },
+    "invoices.refundCredit": {
+      "en": "Refund credit —",
+      "draft": "Iade kredi —"
+    },
+    "invoices.refundTheRemaining": {
+      "en": "Refund the remaining",
+      "draft": "Iade kalan"
+    },
+    "mileage.irsLogCSV": {
+      "en": "IRS log CSV",
+      "draft": "IRS kayıt CSV"
+    },
+    "payroll.deleteDraft": {
+      "en": "Delete draft",
+      "draft": "Silin taslak"
+    },
+    "payroll.partnershipStubWhenAProviderIs": {
+      "en": "Partnership stub: when a provider is connected, runs here will hand off tax filing and direct deposit automatically.",
+      "draft": "Ortaklık kupon: ne zaman sağlayıcı bağlı, dönemler burada el kapalı vergi beyan ve doğrudan depozito otomatik olarak."
+    },
+    "payroll.employerTaxEst": {
+      "en": "Employer payroll tax (est.)",
+      "draft": "Employer bordro vergi (yak..)"
+    },
+    "portalview.tax": {
+      "en": "Tax",
+      "draft": "Vergi"
+    },
+    "recurringinvoices.tax": {
+      "en": "Tax ($)",
+      "draft": "Vergi ($)"
+    },
+    "simulator.safetyFloor": {
+      "en": "Safety floor $",
+      "draft": "Safety taban $"
+    },
+    "tax.nameIsRequired": {
+      "en": "Name is required",
+      "draft": "Ad zorunlu"
+    },
+    "tax.contractorAdded": {
+      "en": "Contractor added",
+      "draft": "Yüklenici eklendi"
+    },
+    "tax.w9StatusUpdated": {
+      "en": "W-9 status updated",
+      "draft": "W-9 durum güncellendi"
+    },
+    "tax.contractorRemoved": {
+      "en": "Contractor removed",
+      "draft": "Yüklenici kaldırıldı"
+    },
+    "tax.enterAPositiveAmount": {
+      "en": "Enter a positive amount",
+      "draft": "Girin olumlu tutar"
+    },
+    "tax.paymentRecorded": {
+      "en": "Payment recorded",
+      "draft": "Ödeme kaydedildi"
+    },
+    "tax.paymentDeleted": {
+      "en": "Payment deleted",
+      "draft": "Ödeme silindi"
+    },
+    "tax.statusRefreshed": {
+      "en": "Status refreshed",
+      "draft": "Durum refreshed"
+    },
+    "tax.addContractor": {
+      "en": "Add contractor",
+      "draft": "Ekleyin yüklenici"
+    },
+    "tax.contractors1099s": {
+      "en": "Contractors & 1099s",
+      "draft": "Yükleniciler & 1099s"
+    },
+    "tax.salesTax": {
+      "en": "Sales Tax",
+      "draft": "Satışlar Vergi"
+    },
+    "tax.taxbanditsNotConnected": {
+      "en": "TaxBandits not connected.",
+      "draft": "TaxBandits bağlı."
+    },
+    "tax.taxbanditsSETUPMd": {
+      "en": "TAXBANDITS_SETUP.md",
+      "draft": "TAXBANDITS_SETUP.md"
+    },
+    "tax.inTheRepoNoIRSFiling": {
+      "en": "in the repo. No IRS filing is ever done in-house.",
+      "draft": " repo. Hayır IRS beyan hiç tamam in-house."
+    },
+    "tax.taxbanditsConnectedIn": {
+      "en": "TaxBandits connected in",
+      "draft": "TaxBandits bağlı "
+    },
+    "tax.sandbox": {
+      "en": "sandbox",
+      "draft": "sandbox"
+    },
+    "tax.modeNoRealFilingsFlip": {
+      "en": "mode — no real filings. Flip",
+      "draft": "mod — hayır real filings. Flip"
+    },
+    "tax.taxbanditsSANDBOXFalse": {
+      "en": "TAXBANDITS_SANDBOX=false",
+      "draft": "TAXBANDITS_SANDBOX=false"
+    },
+    "tax.toGoLive": {
+      "en": "to go live.",
+      "draft": " gidin canlı."
+    },
+    "tax.newContractor": {
+      "en": "New contractor",
+      "draft": "Yeni yüklenici"
+    },
+    "tax.name": {
+      "en": "Name *",
+      "draft": "Ad *"
+    },
+    "tax.businessName": {
+      "en": "Business name",
+      "draft": "Işletme ad"
+    },
+    "tax.email": {
+      "en": "Email",
+      "draft": "E-posta"
+    },
+    "tax.phone": {
+      "en": "Phone",
+      "draft": "Telefon"
+    },
+    "tax.entityType": {
+      "en": "Entity type",
+      "draft": "Kuruluş tür"
+    },
+    "tax.ssnEIN": {
+      "en": "SSN / EIN",
+      "draft": "SSN / EIN"
+    },
+    "tax.storedSecurely": {
+      "en": "Stored securely",
+      "draft": "Stored securely"
+    },
+    "tax.street": {
+      "en": "Street",
+      "draft": "Street"
+    },
+    "tax.city": {
+      "en": "City",
+      "draft": "Şehir"
+    },
+    "tax.state": {
+      "en": "State",
+      "draft": "Eyalet"
+    },
+    "tax.zip": {
+      "en": "ZIP",
+      "draft": "POSTA KODU"
+    },
+    "tax.cancel": {
+      "en": "Cancel",
+      "draft": "İptal"
+    },
+    "tax.contractor": {
+      "en": "Contractor",
+      "draft": "Yüklenici"
+    },
+    "tax.paid": {
+      "en": "Paid",
+      "draft": "Ödendi"
+    },
+    "tax.w9": {
+      "en": "W-9",
+      "draft": "W-9"
+    },
+    "tax.NEC": {
+      "en": "1099-NEC",
+      "draft": "1099-NEC"
+    },
+    "tax.eFile": {
+      "en": "E-file",
+      "draft": "E-file"
+    },
+    "tax.actions": {
+      "en": "Actions",
+      "draft": "İşlemler"
+    },
+    "tax.viewPaymentHistory": {
+      "en": "View payment history",
+      "draft": "Görüntüleyin ödeme geçmiş"
+    },
+    "tax.toggleW9Received": {
+      "en": "Toggle W-9 received",
+      "draft": "Anahtar W-9 alındı"
+    },
+    "tax.required": {
+      "en": "Required",
+      "draft": "Zorunlu"
+    },
+    "tax.viewFilingStatus": {
+      "en": "View filing status",
+      "draft": "Görüntüleyin beyan durum"
+    },
+    "tax.notFiled": {
+      "en": "Not filed",
+      "draft": " beyan edildi"
+    },
+    "tax.recordPayment": {
+      "en": "Record payment",
+      "draft": "Kaydedin ödeme"
+    },
+    "tax.noContractorsYet": {
+      "en": "No contractors yet.",
+      "draft": "Hayır yükleniciler henüz."
+    },
+    "tax.NECDataPreview": {
+      "en": "1099-NEC data preview",
+      "draft": "1099-NEC veriler önizleme"
+    },
+    "tax.recipientBox1DataShapedFor": {
+      "en": "Recipient + Box 1 data shaped for e-filing. Tax IDs stay masked — reveal needs PII access. Draft data only, nothing is filed in-house.",
+      "draft": "Alıcı + Box 1 veriler shaped için e-filing. Vergi IDs kalın masked — reveal needs PII erişim. Taslak veriler yalnızca, hiçbir şey beyan edildi in-house."
+    },
+    "tax.loadPreview": {
+      "en": "Load preview",
+      "draft": "Yükleyin önizleme"
+    },
+    "tax.recipient": {
+      "en": "Recipient",
+      "draft": "Alıcı"
+    },
+    "tax.tin": {
+      "en": "TIN",
+      "draft": "TIN"
+    },
+    "tax.address": {
+      "en": "Address",
+      "draft": "Adres"
+    },
+    "tax.box1": {
+      "en": "Box 1",
+      "draft": "Box 1"
+    },
+    "tax.missing": {
+      "en": "missing",
+      "draft": "eksik"
+    },
+    "tax.reveal": {
+      "en": "reveal",
+      "draft": "reveal"
+    },
+    "tax.noContractorsMeetThe": {
+      "en": "No contractors meet the",
+      "draft": "Hayır yükleniciler meet "
+    },
+    "tax.reportingThresholdFor": {
+      "en": "reporting threshold for",
+      "draft": "raporlama eşik için"
+    },
+    "tax.recordPayment2": {
+      "en": "Record payment —",
+      "draft": "Kaydedin ödeme —"
+    },
+    "tax.date": {
+      "en": "Date",
+      "draft": "Tarih"
+    },
+    "tax.amount": {
+      "en": "Amount $",
+      "draft": "Tutar $"
+    },
+    "tax.description": {
+      "en": "Description",
+      "draft": "Açıklama"
+    },
+    "tax.eGMarchBoothRentPayout": {
+      "en": "e.g. March booth rent payout",
+      "draft": "örn. Mart stant kira ödeme"
+    },
+    "tax.record": {
+      "en": "Record",
+      "draft": "Kaydedin"
+    },
+    "tax.paymentHistory": {
+      "en": "Payment history —",
+      "draft": "Ödeme geçmiş —"
+    },
+    "tax.noPaymentsRecordedFor": {
+      "en": "No payments recorded for",
+      "draft": "Hayır ödemeler kaydedildi için"
+    },
+    "tax.amount2": {
+      "en": "Amount",
+      "draft": "Tutar"
+    },
+    "tax.deletePayment": {
+      "en": "Delete payment",
+      "draft": "Silin ödeme"
+    },
+    "tax.yearTotal": {
+      "en": "Year total:",
+      "draft": "Yıl toplam:"
+    },
+    "tax.NECFiling": {
+      "en": "1099-NEC filing —",
+      "draft": "1099-NEC beyan —"
+    },
+    "tax.thisDraftLivesInTaxBanditsReview": {
+      "en": "This draft lives in TaxBandits — review and Transmit there to file with the IRS. This app never files in-house.",
+      "draft": "Bu taslak lives TaxBandits — inceleyin ve Transmit there dosya IRS. Bu uygulama asla dosyalar in-house."
+    },
+    "tax.NECIsRequiredForNon": {
+      "en": "1099-NEC is required for non-corporate contractors paid ≥",
+      "draft": "1099-NEC zorunlu için non-corporate yükleniciler ödendi ≥"
+    },
+    "tax.inTheYearEFilingCreates": {
+      "en": "in the year. E-filing creates a draft in TaxBandits — you review and transmit there. This app never files with the IRS directly.",
+      "draft": " yıl. E-filing creates taslak TaxBandits — inceleyin ve transmit there. Bu uygulama asla dosyalar IRS directly."
+    },
+    "taxforecast.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "Vergi Tahmin"
+    },
+    "taxforecast.OfPriorYearTax": {
+      "en": "100% of prior-year tax",
+      "draft": "100% önceki-yıl vergi"
+    },
+    "taxforecast.irsDirectPay": {
+      "en": "IRS Direct Pay",
+      "draft": "IRS Doğrudan Ödeyin"
+    },
+    "nav.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "Vergi Tahmin"
+    },
+    "nav.tax1099s": {
+      "en": "Tax & 1099s",
+      "draft": "Vergi & 1099s"
+    },
+    "teamInvites.accountantTaxPro": {
+      "en": "Accountant / Tax pro",
+      "draft": "Muhasebeci / Vergi pro"
+    }
+  }
+}

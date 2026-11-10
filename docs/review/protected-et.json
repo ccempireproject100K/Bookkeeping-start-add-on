@@ -1,0 +1,426 @@
+{
+  "_meta": {
+    "lang": "et",
+    "status": "DRAFT for human review only. Do NOT copy into frontend/src/locales/et/translation.json until a qualified reviewer (counsel/CPA where relevant) approves each string. Live locale keeps English for these keys.",
+    "source": "docs/TRANSLATION_PLAN.md flagged keys (legal/financial/tax/privacy/safety)",
+    "notice": "Approximate translation from English/Spanish, may not be accurate."
+  },
+  "strings": {
+    "salestaxtab.taxJurisdictions": {
+      "en": "Tax jurisdictions",
+      "draft": "Maks jurisdictions"
+    },
+    "salestaxtab.everywhereYouCollectSalesTaxState": {
+      "en": "Everywhere you collect sales tax — state, county, city, special district.\n          Tag invoices with a jurisdiction and this page tells you what you owe, where.",
+      "draft": "Kõikjal kogu müük maks — osariik, county, linn, special district.\n  Silt arved koos jurisdiktsioon ja see leht tells mis owe, kus."
+    },
+    "salestaxtab.noJurisdictionsYetAddTheFirst": {
+      "en": "No jurisdictions yet. Add the first place you collect sales tax.",
+      "draft": "Pole jurisdictions veel. Lisa esimene place kogu müük maks."
+    },
+    "salestaxtab.ofSalesTaxIsnTTagged": {
+      "en": "of sales tax isn't tagged to a jurisdiction yet.\n            Tag invoices with a jurisdiction so every dollar lands in the right bucket.",
+      "draft": " müük maks pole tagged kuni jurisdiktsioon veel.\n  Silt arved koos jurisdiktsioon nii iga dollar lands parem kategooria."
+    },
+    "salestaxtab.taxCollected": {
+      "en": "Tax collected",
+      "draft": "Maks kogutud"
+    },
+    "teaminvites.inviteYourAccountantOrTaxPro": {
+      "en": "Invite your accountant or tax pro — they join with the right permissions\n        and can switch between all the workspaces they serve.",
+      "draft": "Kutse raamatupidaja või maks pro — nad liitu koos parem õigused\n  ja saab vaheta vahel kõik tööruumid nad serve."
+    },
+    "auditlog.eGTaxInvoiceLogin": {
+      "en": "e.g. tax, invoice, login",
+      "draft": "nt. maks, arve, sisselogimine"
+    },
+    "cpapackage.mileageLogWithIRSRatesApplied": {
+      "en": "Mileage log with IRS rates applied",
+      "draft": "Läbisõit logi koos IRS hinnad rakendatud"
+    },
+    "customers.delete": {
+      "en": "Delete",
+      "draft": "Kustuta"
+    },
+    "customers.deleteConfirm": {
+      "en": "Delete customer \"{{name}}\"? Their invoices and statements stay on record.",
+      "draft": "Kustuta klient \"{{name}}\"? arved ja statements jää registreeri."
+    },
+    "estimates.tax": {
+      "en": "Tax ($)",
+      "draft": "Maks ($)"
+    },
+    "expenses.taxID": {
+      "en": "Tax ID",
+      "draft": "Maks ID"
+    },
+    "expenses.taxYear": {
+      "en": "Tax year",
+      "draft": "Maks aasta"
+    },
+    "expenses.tax": {
+      "en": "Tax",
+      "draft": "Maks"
+    },
+    "expenses.taxIDEIN": {
+      "en": "Tax ID / EIN",
+      "draft": "Maks ID / EIN"
+    },
+    "invoices.refund": {
+      "en": "Refund",
+      "draft": "Tagasimakse"
+    },
+    "invoices.taxJurisdictionOptional": {
+      "en": "Tax jurisdiction (optional)",
+      "draft": "Maks jurisdiktsioon (valikuline)"
+    },
+    "invoices.tax": {
+      "en": "Tax ($)",
+      "draft": "Maks ($)"
+    },
+    "invoices.refundCredit": {
+      "en": "Refund credit —",
+      "draft": "Tagasimakse kreedit —"
+    },
+    "invoices.refundTheRemaining": {
+      "en": "Refund the remaining",
+      "draft": "Tagasimakse jäänud"
+    },
+    "mileage.irsLogCSV": {
+      "en": "IRS log CSV",
+      "draft": "IRS logi CSV"
+    },
+    "payroll.deleteDraft": {
+      "en": "Delete draft",
+      "draft": "Kustuta mustand"
+    },
+    "payroll.partnershipStubWhenAProviderIs": {
+      "en": "Partnership stub: when a provider is connected, runs here will hand off tax filing and direct deposit automatically.",
+      "draft": "Partnerlus tüvi: millal pakkuja on ühendatud, käivitamised siin käsi väljas maks esitamine ja otsene sissemakse automaatselt."
+    },
+    "payroll.employerTaxEst": {
+      "en": "Employer payroll tax (est.)",
+      "draft": "Employer palgad maks (hinn..)"
+    },
+    "portalview.tax": {
+      "en": "Tax",
+      "draft": "Maks"
+    },
+    "recurringinvoices.tax": {
+      "en": "Tax ($)",
+      "draft": "Maks ($)"
+    },
+    "simulator.safetyFloor": {
+      "en": "Safety floor $",
+      "draft": "Safety põrand $"
+    },
+    "tax.nameIsRequired": {
+      "en": "Name is required",
+      "draft": "Nimi on kohustuslik"
+    },
+    "tax.contractorAdded": {
+      "en": "Contractor added",
+      "draft": "Töövõtja lisatud"
+    },
+    "tax.w9StatusUpdated": {
+      "en": "W-9 status updated",
+      "draft": "W-9 olek uuendatud"
+    },
+    "tax.contractorRemoved": {
+      "en": "Contractor removed",
+      "draft": "Töövõtja eemaldatud"
+    },
+    "tax.enterAPositiveAmount": {
+      "en": "Enter a positive amount",
+      "draft": "Sisesta positiivne summa"
+    },
+    "tax.paymentRecorded": {
+      "en": "Payment recorded",
+      "draft": "Makse registreeritud"
+    },
+    "tax.paymentDeleted": {
+      "en": "Payment deleted",
+      "draft": "Makse kustutatud"
+    },
+    "tax.statusRefreshed": {
+      "en": "Status refreshed",
+      "draft": "Olek refreshed"
+    },
+    "tax.addContractor": {
+      "en": "Add contractor",
+      "draft": "Lisa töövõtja"
+    },
+    "tax.contractors1099s": {
+      "en": "Contractors & 1099s",
+      "draft": "Töövõtjad ja 1099-d"
+    },
+    "tax.salesTax": {
+      "en": "Sales Tax",
+      "draft": "Müük Maks"
+    },
+    "tax.taxbanditsNotConnected": {
+      "en": "TaxBandits not connected.",
+      "draft": "TaxBandits ei ühendatud."
+    },
+    "tax.taxbanditsSETUPMd": {
+      "en": "TAXBANDITS_SETUP.md",
+      "draft": "TAXBANDITS_SETUP.md"
+    },
+    "tax.inTheRepoNoIRSFiling": {
+      "en": "in the repo. No IRS filing is ever done in-house.",
+      "draft": " repo. Pole IRS esitamine on ever valmis in-house."
+    },
+    "tax.taxbanditsConnectedIn": {
+      "en": "TaxBandits connected in",
+      "draft": "TaxBandits ühendatud "
+    },
+    "tax.sandbox": {
+      "en": "sandbox",
+      "draft": "sandbox"
+    },
+    "tax.modeNoRealFilingsFlip": {
+      "en": "mode — no real filings. Flip",
+      "draft": "režiim — pole real filings. Flip"
+    },
+    "tax.taxbanditsSANDBOXFalse": {
+      "en": "TAXBANDITS_SANDBOX=false",
+      "draft": "TAXBANDITS_SANDBOX=false"
+    },
+    "tax.toGoLive": {
+      "en": "to go live.",
+      "draft": "kuni mine reaalajas."
+    },
+    "tax.newContractor": {
+      "en": "New contractor",
+      "draft": "Uus töövõtja"
+    },
+    "tax.name": {
+      "en": "Name *",
+      "draft": "Nimi *"
+    },
+    "tax.businessName": {
+      "en": "Business name",
+      "draft": "Äri nimi"
+    },
+    "tax.email": {
+      "en": "Email",
+      "draft": "E-post"
+    },
+    "tax.phone": {
+      "en": "Phone",
+      "draft": "Telefon"
+    },
+    "tax.entityType": {
+      "en": "Entity type",
+      "draft": "Üksus tüüp"
+    },
+    "tax.ssnEIN": {
+      "en": "SSN / EIN",
+      "draft": "SSN / EIN"
+    },
+    "tax.storedSecurely": {
+      "en": "Stored securely",
+      "draft": "Stored securely"
+    },
+    "tax.street": {
+      "en": "Street",
+      "draft": "Street"
+    },
+    "tax.city": {
+      "en": "City",
+      "draft": "Linn"
+    },
+    "tax.state": {
+      "en": "State",
+      "draft": "Osariik"
+    },
+    "tax.zip": {
+      "en": "ZIP",
+      "draft": "POSTIINDEKS"
+    },
+    "tax.cancel": {
+      "en": "Cancel",
+      "draft": "Tühista"
+    },
+    "tax.contractor": {
+      "en": "Contractor",
+      "draft": "Töövõtja"
+    },
+    "tax.paid": {
+      "en": "Paid",
+      "draft": "Makstud"
+    },
+    "tax.w9": {
+      "en": "W-9",
+      "draft": "W-9"
+    },
+    "tax.NEC": {
+      "en": "1099-NEC",
+      "draft": "1099-NEC"
+    },
+    "tax.eFile": {
+      "en": "E-file",
+      "draft": "E-file"
+    },
+    "tax.actions": {
+      "en": "Actions",
+      "draft": "Tegevused"
+    },
+    "tax.viewPaymentHistory": {
+      "en": "View payment history",
+      "draft": "Vaata makse ajalugu"
+    },
+    "tax.toggleW9Received": {
+      "en": "Toggle W-9 received",
+      "draft": "Lülita W-9 kättesaadud"
+    },
+    "tax.required": {
+      "en": "Required",
+      "draft": "Kohustuslik"
+    },
+    "tax.viewFilingStatus": {
+      "en": "View filing status",
+      "draft": "Vaata esitamine olek"
+    },
+    "tax.notFiled": {
+      "en": "Not filed",
+      "draft": "Ei esitatud"
+    },
+    "tax.recordPayment": {
+      "en": "Record payment",
+      "draft": "Registreeri makse"
+    },
+    "tax.noContractorsYet": {
+      "en": "No contractors yet.",
+      "draft": "Pole töövõtjad veel."
+    },
+    "tax.NECDataPreview": {
+      "en": "1099-NEC data preview",
+      "draft": "1099-NEC andmete eelvaade"
+    },
+    "tax.recipientBox1DataShapedFor": {
+      "en": "Recipient + Box 1 data shaped for e-filing. Tax IDs stay masked — reveal needs PII access. Draft data only, nothing is filed in-house.",
+      "draft": "Saaja + Box 1 andmed shaped jaoks e-filing. Maks IDs jää masked — reveal needs PII juurdepääs. Mustand andmed ainult, mitte midagi on esitatud in-house."
+    },
+    "tax.loadPreview": {
+      "en": "Load preview",
+      "draft": "Laadi eelvaade"
+    },
+    "tax.recipient": {
+      "en": "Recipient",
+      "draft": "Saaja"
+    },
+    "tax.tin": {
+      "en": "TIN",
+      "draft": "TIN"
+    },
+    "tax.address": {
+      "en": "Address",
+      "draft": "Aadress"
+    },
+    "tax.box1": {
+      "en": "Box 1",
+      "draft": "Box 1"
+    },
+    "tax.missing": {
+      "en": "missing",
+      "draft": "puudub"
+    },
+    "tax.reveal": {
+      "en": "reveal",
+      "draft": "reveal"
+    },
+    "tax.noContractorsMeetThe": {
+      "en": "No contractors meet the",
+      "draft": "Pole töövõtjad meet "
+    },
+    "tax.reportingThresholdFor": {
+      "en": "reporting threshold for",
+      "draft": "aruandlus lävi jaoks"
+    },
+    "tax.recordPayment2": {
+      "en": "Record payment —",
+      "draft": "Registreeri makse —"
+    },
+    "tax.date": {
+      "en": "Date",
+      "draft": "Kuupäev"
+    },
+    "tax.amount": {
+      "en": "Amount $",
+      "draft": "Summa $"
+    },
+    "tax.description": {
+      "en": "Description",
+      "draft": "Kirjeldus"
+    },
+    "tax.eGMarchBoothRentPayout": {
+      "en": "e.g. March booth rent payout",
+      "draft": "nt. Märts boksi üür väljamakse"
+    },
+    "tax.record": {
+      "en": "Record",
+      "draft": "Registreeri"
+    },
+    "tax.paymentHistory": {
+      "en": "Payment history —",
+      "draft": "Makse ajalugu —"
+    },
+    "tax.noPaymentsRecordedFor": {
+      "en": "No payments recorded for",
+      "draft": "Pole maksed registreeritud jaoks"
+    },
+    "tax.amount2": {
+      "en": "Amount",
+      "draft": "Summa"
+    },
+    "tax.deletePayment": {
+      "en": "Delete payment",
+      "draft": "Kustuta makse"
+    },
+    "tax.yearTotal": {
+      "en": "Year total:",
+      "draft": "Aasta kokku:"
+    },
+    "tax.NECFiling": {
+      "en": "1099-NEC filing —",
+      "draft": "1099-NEC esitamine —"
+    },
+    "tax.thisDraftLivesInTaxBanditsReview": {
+      "en": "This draft lives in TaxBandits — review and Transmit there to file with the IRS. This app never files in-house.",
+      "draft": "See mustand lives TaxBandits — ülevaade ja Transmit there kuni fail koos IRS. See rakendus mitte kunagi failid in-house."
+    },
+    "tax.NECIsRequiredForNon": {
+      "en": "1099-NEC is required for non-corporate contractors paid ≥",
+      "draft": "1099-NEC on kohustuslik jaoks non-corporate töövõtjad makstud ≥"
+    },
+    "tax.inTheYearEFilingCreates": {
+      "en": "in the year. E-filing creates a draft in TaxBandits — you review and transmit there. This app never files with the IRS directly.",
+      "draft": " aasta. E-filing creates mustand TaxBandits — ülevaade ja transmit there. See rakendus mitte kunagi failid koos IRS directly."
+    },
+    "taxforecast.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "Maks Prognoos"
+    },
+    "taxforecast.OfPriorYearTax": {
+      "en": "100% of prior-year tax",
+      "draft": "100% eelnev-aasta maks"
+    },
+    "taxforecast.irsDirectPay": {
+      "en": "IRS Direct Pay",
+      "draft": "IRS Otsene Maksa"
+    },
+    "nav.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "Maks Prognoos"
+    },
+    "nav.tax1099s": {
+      "en": "Tax & 1099s",
+      "draft": "Maks & 1099s"
+    },
+    "teamInvites.accountantTaxPro": {
+      "en": "Accountant / Tax pro",
+      "draft": "Raamatupidaja / Maks pro"
+    }
+  }
+}

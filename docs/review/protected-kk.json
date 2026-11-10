@@ -1,0 +1,426 @@
+{
+  "_meta": {
+    "lang": "kk",
+    "status": "DRAFT for human review only. Do NOT copy into frontend/src/locales/kk/translation.json until a qualified reviewer (counsel/CPA where relevant) approves each string. Live locale keeps English for these keys.",
+    "source": "docs/TRANSLATION_PLAN.md flagged keys (legal/financial/tax/privacy/safety)",
+    "notice": "Approximate translation from English/Spanish, may not be accurate."
+  },
+  "strings": {
+    "salestaxtab.taxJurisdictions": {
+      "en": "Tax jurisdictions",
+      "draft": "Салық jurisdictions"
+    },
+    "salestaxtab.everywhereYouCollectSalesTaxState": {
+      "en": "Everywhere you collect sales tax — state, county, city, special district.\n          Tag invoices with a jurisdiction and this page tells you what you owe, where.",
+      "draft": "Барлық жерде жинаңыз сату салық — штат, county, қала, special district.\n  Белгі шот-фактуралар құзырет және бұл бет tells не owe, қайда."
+    },
+    "salestaxtab.noJurisdictionsYetAddTheFirst": {
+      "en": "No jurisdictions yet. Add the first place you collect sales tax.",
+      "draft": "Жоқ jurisdictions әлі. Қосыңыз бірінші place жинаңыз сату салық."
+    },
+    "salestaxtab.ofSalesTaxIsnTTagged": {
+      "en": "of sales tax isn't tagged to a jurisdiction yet.\n            Tag invoices with a jurisdiction so every dollar lands in the right bucket.",
+      "draft": " сату салық емес tagged құзырет әлі.\n  Белгі шот-фактуралар құзырет сондықтан әр dollar lands оң санат."
+    },
+    "salestaxtab.taxCollected": {
+      "en": "Tax collected",
+      "draft": "Салық жиналды"
+    },
+    "teaminvites.inviteYourAccountantOrTaxPro": {
+      "en": "Invite your accountant or tax pro — they join with the right permissions\n        and can switch between all the workspaces they serve.",
+      "draft": "Шақыру бухгалтер немесе салық pro — олар қосылыңыз оң рұқсаттар\n  және мүмкін ауысыңыз арасында барлық жұмыс кеңістіктері олар serve."
+    },
+    "auditlog.eGTaxInvoiceLogin": {
+      "en": "e.g. tax, invoice, login",
+      "draft": "мәс. салық, шот-фактура, кіру"
+    },
+    "cpapackage.mileageLogWithIRSRatesApplied": {
+      "en": "Mileage log with IRS rates applied",
+      "draft": "Жүріс журнал IRS мөлшерлемелер қолданылды"
+    },
+    "customers.delete": {
+      "en": "Delete",
+      "draft": "Жою"
+    },
+    "customers.deleteConfirm": {
+      "en": "Delete customer \"{{name}}\"? Their invoices and statements stay on record.",
+      "draft": "Жойыңыз клиент \"{{name}}\"? шот-фактуралар және statements қалыңыз жазыңыз."
+    },
+    "estimates.tax": {
+      "en": "Tax ($)",
+      "draft": "Салық ($)"
+    },
+    "expenses.taxID": {
+      "en": "Tax ID",
+      "draft": "Салық ID"
+    },
+    "expenses.taxYear": {
+      "en": "Tax year",
+      "draft": "Салық жыл"
+    },
+    "expenses.tax": {
+      "en": "Tax",
+      "draft": "Салық"
+    },
+    "expenses.taxIDEIN": {
+      "en": "Tax ID / EIN",
+      "draft": "Салық ID / EIN"
+    },
+    "invoices.refund": {
+      "en": "Refund",
+      "draft": "Қайтару"
+    },
+    "invoices.taxJurisdictionOptional": {
+      "en": "Tax jurisdiction (optional)",
+      "draft": "Салық құзырет (міндетті емес)"
+    },
+    "invoices.tax": {
+      "en": "Tax ($)",
+      "draft": "Салық ($)"
+    },
+    "invoices.refundCredit": {
+      "en": "Refund credit —",
+      "draft": "Қайтару кредит —"
+    },
+    "invoices.refundTheRemaining": {
+      "en": "Refund the remaining",
+      "draft": "Қайтару қалған"
+    },
+    "mileage.irsLogCSV": {
+      "en": "IRS log CSV",
+      "draft": "IRS журнал CSV"
+    },
+    "payroll.deleteDraft": {
+      "en": "Delete draft",
+      "draft": "Жойыңыз жоба"
+    },
+    "payroll.partnershipStubWhenAProviderIs": {
+      "en": "Partnership stub: when a provider is connected, runs here will hand off tax filing and direct deposit automatically.",
+      "draft": "Серіктестік түбіртек: қашан жеткізуші қосылған, кезеңдер осында қол өшірулі салық тапсыру және тікелей депозит автоматты түрде."
+    },
+    "payroll.employerTaxEst": {
+      "en": "Employer payroll tax (est.)",
+      "draft": "Employer жалақы салық (шамамен.)"
+    },
+    "portalview.tax": {
+      "en": "Tax",
+      "draft": "Салық"
+    },
+    "recurringinvoices.tax": {
+      "en": "Tax ($)",
+      "draft": "Салық ($)"
+    },
+    "simulator.safetyFloor": {
+      "en": "Safety floor $",
+      "draft": "Safety төменгі шек $"
+    },
+    "tax.nameIsRequired": {
+      "en": "Name is required",
+      "draft": "Аты міндетті"
+    },
+    "tax.contractorAdded": {
+      "en": "Contractor added",
+      "draft": "Мердігер қосылды"
+    },
+    "tax.w9StatusUpdated": {
+      "en": "W-9 status updated",
+      "draft": "W-9 мәртебе жаңартылды"
+    },
+    "tax.contractorRemoved": {
+      "en": "Contractor removed",
+      "draft": "Мердігер алып тасталды"
+    },
+    "tax.enterAPositiveAmount": {
+      "en": "Enter a positive amount",
+      "draft": "Енгізіңіз оң сома"
+    },
+    "tax.paymentRecorded": {
+      "en": "Payment recorded",
+      "draft": "Төлем тіркелді"
+    },
+    "tax.paymentDeleted": {
+      "en": "Payment deleted",
+      "draft": "Төлем жойылды"
+    },
+    "tax.statusRefreshed": {
+      "en": "Status refreshed",
+      "draft": "Мәртебе refreshed"
+    },
+    "tax.addContractor": {
+      "en": "Add contractor",
+      "draft": "Қосыңыз мердігер"
+    },
+    "tax.contractors1099s": {
+      "en": "Contractors & 1099s",
+      "draft": "Мердігерлер & 1099s"
+    },
+    "tax.salesTax": {
+      "en": "Sales Tax",
+      "draft": "Сату Салық"
+    },
+    "tax.taxbanditsNotConnected": {
+      "en": "TaxBandits not connected.",
+      "draft": "TaxBandits қосылған."
+    },
+    "tax.taxbanditsSETUPMd": {
+      "en": "TAXBANDITS_SETUP.md",
+      "draft": "TAXBANDITS_SETUP.md"
+    },
+    "tax.inTheRepoNoIRSFiling": {
+      "en": "in the repo. No IRS filing is ever done in-house.",
+      "draft": " repo. Жоқ IRS тапсыру ешқашан дайын in-house."
+    },
+    "tax.taxbanditsConnectedIn": {
+      "en": "TaxBandits connected in",
+      "draft": "TaxBandits қосылған "
+    },
+    "tax.sandbox": {
+      "en": "sandbox",
+      "draft": "sandbox"
+    },
+    "tax.modeNoRealFilingsFlip": {
+      "en": "mode — no real filings. Flip",
+      "draft": "режим — жоқ real filings. Flip"
+    },
+    "tax.taxbanditsSANDBOXFalse": {
+      "en": "TAXBANDITS_SANDBOX=false",
+      "draft": "TAXBANDITS_SANDBOX=false"
+    },
+    "tax.toGoLive": {
+      "en": "to go live.",
+      "draft": " өтіңіз тікелей."
+    },
+    "tax.newContractor": {
+      "en": "New contractor",
+      "draft": "Жаңа мердігер"
+    },
+    "tax.name": {
+      "en": "Name *",
+      "draft": "Атауы *"
+    },
+    "tax.businessName": {
+      "en": "Business name",
+      "draft": "Бизнес аты"
+    },
+    "tax.email": {
+      "en": "Email",
+      "draft": "Электрондық пошта"
+    },
+    "tax.phone": {
+      "en": "Phone",
+      "draft": "Телефон"
+    },
+    "tax.entityType": {
+      "en": "Entity type",
+      "draft": "Ұйым түрі"
+    },
+    "tax.ssnEIN": {
+      "en": "SSN / EIN",
+      "draft": "SSN / EIN"
+    },
+    "tax.storedSecurely": {
+      "en": "Stored securely",
+      "draft": "Stored securely"
+    },
+    "tax.street": {
+      "en": "Street",
+      "draft": "Street"
+    },
+    "tax.city": {
+      "en": "City",
+      "draft": "Қала"
+    },
+    "tax.state": {
+      "en": "State",
+      "draft": "Штат"
+    },
+    "tax.zip": {
+      "en": "ZIP",
+      "draft": "ПОШТА ИНДЕКСІ"
+    },
+    "tax.cancel": {
+      "en": "Cancel",
+      "draft": "Болдырмау"
+    },
+    "tax.contractor": {
+      "en": "Contractor",
+      "draft": "Мердігер"
+    },
+    "tax.paid": {
+      "en": "Paid",
+      "draft": "Төленді"
+    },
+    "tax.w9": {
+      "en": "W-9",
+      "draft": "W-9"
+    },
+    "tax.NEC": {
+      "en": "1099-NEC",
+      "draft": "1099-NEC"
+    },
+    "tax.eFile": {
+      "en": "E-file",
+      "draft": "E-file"
+    },
+    "tax.actions": {
+      "en": "Actions",
+      "draft": "Әрекеттер"
+    },
+    "tax.viewPaymentHistory": {
+      "en": "View payment history",
+      "draft": "Көріңіз төлем тарих"
+    },
+    "tax.toggleW9Received": {
+      "en": "Toggle W-9 received",
+      "draft": "Ауыстырып қосқыш W-9 алынды"
+    },
+    "tax.required": {
+      "en": "Required",
+      "draft": "Міндетті"
+    },
+    "tax.viewFilingStatus": {
+      "en": "View filing status",
+      "draft": "Көріңіз тапсыру мәртебе"
+    },
+    "tax.notFiled": {
+      "en": "Not filed",
+      "draft": " тапсырылды"
+    },
+    "tax.recordPayment": {
+      "en": "Record payment",
+      "draft": "Жазыңыз төлем"
+    },
+    "tax.noContractorsYet": {
+      "en": "No contractors yet.",
+      "draft": "Жоқ мердігерлер әлі."
+    },
+    "tax.NECDataPreview": {
+      "en": "1099-NEC data preview",
+      "draft": "1099-NEC деректер алдын ала қарау"
+    },
+    "tax.recipientBox1DataShapedFor": {
+      "en": "Recipient + Box 1 data shaped for e-filing. Tax IDs stay masked — reveal needs PII access. Draft data only, nothing is filed in-house.",
+      "draft": "Алушы + Box 1 деректер shaped үшін e-filing. Салық IDs қалыңыз masked — reveal needs PII қолжетімділік. Жоба деректер тек, ешнәрсе тапсырылды in-house."
+    },
+    "tax.loadPreview": {
+      "en": "Load preview",
+      "draft": "Жүктеңіз алдын ала қарау"
+    },
+    "tax.recipient": {
+      "en": "Recipient",
+      "draft": "Алушы"
+    },
+    "tax.tin": {
+      "en": "TIN",
+      "draft": "TIN"
+    },
+    "tax.address": {
+      "en": "Address",
+      "draft": "Мекенжай"
+    },
+    "tax.box1": {
+      "en": "Box 1",
+      "draft": "Box 1"
+    },
+    "tax.missing": {
+      "en": "missing",
+      "draft": "жетіспейді"
+    },
+    "tax.reveal": {
+      "en": "reveal",
+      "draft": "reveal"
+    },
+    "tax.noContractorsMeetThe": {
+      "en": "No contractors meet the",
+      "draft": "Жоқ мердігерлер meet "
+    },
+    "tax.reportingThresholdFor": {
+      "en": "reporting threshold for",
+      "draft": "есептілік шек үшін"
+    },
+    "tax.recordPayment2": {
+      "en": "Record payment —",
+      "draft": "Жазыңыз төлем —"
+    },
+    "tax.date": {
+      "en": "Date",
+      "draft": "Күні"
+    },
+    "tax.amount": {
+      "en": "Amount $",
+      "draft": "Сома $"
+    },
+    "tax.description": {
+      "en": "Description",
+      "draft": "Сипаттама"
+    },
+    "tax.eGMarchBoothRentPayout": {
+      "en": "e.g. March booth rent payout",
+      "draft": "мәс. Наурыз көрме орны жалдау төлем"
+    },
+    "tax.record": {
+      "en": "Record",
+      "draft": "Жазыңыз"
+    },
+    "tax.paymentHistory": {
+      "en": "Payment history —",
+      "draft": "Төлем тарих —"
+    },
+    "tax.noPaymentsRecordedFor": {
+      "en": "No payments recorded for",
+      "draft": "Жоқ төлемдер тіркелді үшін"
+    },
+    "tax.amount2": {
+      "en": "Amount",
+      "draft": "Сома"
+    },
+    "tax.deletePayment": {
+      "en": "Delete payment",
+      "draft": "Жойыңыз төлем"
+    },
+    "tax.yearTotal": {
+      "en": "Year total:",
+      "draft": "Жыл барлығы:"
+    },
+    "tax.NECFiling": {
+      "en": "1099-NEC filing —",
+      "draft": "1099-NEC тапсыру —"
+    },
+    "tax.thisDraftLivesInTaxBanditsReview": {
+      "en": "This draft lives in TaxBandits — review and Transmit there to file with the IRS. This app never files in-house.",
+      "draft": "Бұл жоба lives TaxBandits — қарап шығыңыз және Transmit there файл IRS. Бұл қосымша ешқашан файлдар in-house."
+    },
+    "tax.NECIsRequiredForNon": {
+      "en": "1099-NEC is required for non-corporate contractors paid ≥",
+      "draft": "1099-NEC міндетті үшін non-corporate мердігерлер төленді ≥"
+    },
+    "tax.inTheYearEFilingCreates": {
+      "en": "in the year. E-filing creates a draft in TaxBandits — you review and transmit there. This app never files with the IRS directly.",
+      "draft": " жыл. E-filing creates жоба TaxBandits — қарап шығыңыз және transmit there. Бұл қосымша ешқашан файлдар IRS directly."
+    },
+    "taxforecast.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "Салық Болжам"
+    },
+    "taxforecast.OfPriorYearTax": {
+      "en": "100% of prior-year tax",
+      "draft": "100% алдыңғы-жыл салық"
+    },
+    "taxforecast.irsDirectPay": {
+      "en": "IRS Direct Pay",
+      "draft": "IRS Тікелей Төлеңіз"
+    },
+    "nav.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "Салық Болжам"
+    },
+    "nav.tax1099s": {
+      "en": "Tax & 1099s",
+      "draft": "Салық & 1099s"
+    },
+    "teamInvites.accountantTaxPro": {
+      "en": "Accountant / Tax pro",
+      "draft": "Бухгалтер / Салық pro"
+    }
+  }
+}

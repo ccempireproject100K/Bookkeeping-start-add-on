@@ -1,0 +1,426 @@
+{
+  "_meta": {
+    "lang": "ha",
+    "status": "DRAFT for human review only. Do NOT copy into frontend/src/locales/ha/translation.json until a qualified reviewer (counsel/CPA where relevant) approves each string. Live locale keeps English for these keys.",
+    "source": "docs/TRANSLATION_PLAN.md flagged keys (legal/financial/tax/privacy/safety)",
+    "notice": "Approximate translation from English/Spanish, may not be accurate."
+  },
+  "strings": {
+    "salestaxtab.taxJurisdictions": {
+      "en": "Tax jurisdictions",
+      "draft": "Yankunan haraji"
+    },
+    "salestaxtab.everywhereYouCollectSalesTaxState": {
+      "en": "Everywhere you collect sales tax — state, county, city, special district.\n          Tag invoices with a jurisdiction and this page tells you what you owe, where.",
+      "draft": "Ko'ina kuke karɓar harajin sayarwa — jiha, gunduma, birni, gunduma ta musamman.\n          Yi wa takardun biya alama da yankin haraji kuma wannan shafin yana gaya muku abin da kuke bi, ina."
+    },
+    "salestaxtab.noJurisdictionsYetAddTheFirst": {
+      "en": "No jurisdictions yet. Add the first place you collect sales tax.",
+      "draft": "Babu yankunan haraji tukuna. Ƙara wuri na farko da kuke karɓar harajin sayarwa."
+    },
+    "salestaxtab.ofSalesTaxIsnTTagged": {
+      "en": "of sales tax isn't tagged to a jurisdiction yet.\n            Tag invoices with a jurisdiction so every dollar lands in the right bucket.",
+      "draft": "na harajin sayarwa ba a yi masa alama zuwa yankin haraji ba tukuna.\n            Yi wa takardun biya alama da yankin haraji don kowane dala ta faɗa a kwandon da ya dace."
+    },
+    "salestaxtab.taxCollected": {
+      "en": "Tax collected",
+      "draft": "Harajin da aka karɓa"
+    },
+    "teaminvites.inviteYourAccountantOrTaxPro": {
+      "en": "Invite your accountant or tax pro — they join with the right permissions\n        and can switch between all the workspaces they serve.",
+      "draft": "Gayyaci akawuntanku ko ƙwararren haraji — suna shiga da izini da ya dace\n        kuma suna iya canjawa tsakanin duk wuraren aiki da suke yi wa hidima."
+    },
+    "auditlog.eGTaxInvoiceLogin": {
+      "en": "e.g. tax, invoice, login",
+      "draft": "misali haraji, takardar biya, shiga"
+    },
+    "cpapackage.mileageLogWithIRSRatesApplied": {
+      "en": "Mileage log with IRS rates applied",
+      "draft": "Rajistar tafiya tare da ƙimar IRS da aka aiwatar"
+    },
+    "customers.delete": {
+      "en": "Delete",
+      "draft": "Goge"
+    },
+    "customers.deleteConfirm": {
+      "en": "Delete customer \"{{name}}\"? Their invoices and statements stay on record.",
+      "draft": "Goge abokin ciniki “{{name}}”? Takardun biyarsa da sanarwowi suna nan a rikodi."
+    },
+    "estimates.tax": {
+      "en": "Tax ($)",
+      "draft": "Haraji ($)"
+    },
+    "expenses.taxID": {
+      "en": "Tax ID",
+      "draft": "ID na Haraji"
+    },
+    "expenses.taxYear": {
+      "en": "Tax year",
+      "draft": "Shekarar haraji"
+    },
+    "expenses.tax": {
+      "en": "Tax",
+      "draft": "Haraji"
+    },
+    "expenses.taxIDEIN": {
+      "en": "Tax ID / EIN",
+      "draft": "ID na Haraji / EIN"
+    },
+    "invoices.refund": {
+      "en": "Refund",
+      "draft": "Mayar da kuɗi"
+    },
+    "invoices.taxJurisdictionOptional": {
+      "en": "Tax jurisdiction (optional)",
+      "draft": "Yankin haraji (na zaɓi)"
+    },
+    "invoices.tax": {
+      "en": "Tax ($)",
+      "draft": "Haraji ($)"
+    },
+    "invoices.refundCredit": {
+      "en": "Refund credit —",
+      "draft": "Mayar da bashin —"
+    },
+    "invoices.refundTheRemaining": {
+      "en": "Refund the remaining",
+      "draft": "Mayar da ragowar"
+    },
+    "mileage.irsLogCSV": {
+      "en": "IRS log CSV",
+      "draft": "CSV rajistar IRS"
+    },
+    "payroll.deleteDraft": {
+      "en": "Delete draft",
+      "draft": "Goge daftari"
+    },
+    "payroll.partnershipStubWhenAProviderIs": {
+      "en": "Partnership stub: when a provider is connected, runs here will hand off tax filing and direct deposit automatically.",
+      "draft": "Stub ɗin haɗin gwiwa: lokacin da aka haɗa mai bayarwa, gudu a nan zai mika shigar da haraji da ajiya kai tsaye da kai."
+    },
+    "payroll.employerTaxEst": {
+      "en": "Employer payroll tax (est.)",
+      "draft": "Harajin biyan albashi na ma'aikaci (ƙiyashi)"
+    },
+    "portalview.tax": {
+      "en": "Tax",
+      "draft": "Haraji"
+    },
+    "recurringinvoices.tax": {
+      "en": "Tax ($)",
+      "draft": "Haraji ($)"
+    },
+    "simulator.safetyFloor": {
+      "en": "Safety floor $",
+      "draft": "Ƙasan aminci $"
+    },
+    "tax.nameIsRequired": {
+      "en": "Name is required",
+      "draft": "Ana bukatar suna"
+    },
+    "tax.contractorAdded": {
+      "en": "Contractor added",
+      "draft": "An ƙara ɗan kwangila"
+    },
+    "tax.w9StatusUpdated": {
+      "en": "W-9 status updated",
+      "draft": "An sabunta matsayin W-9"
+    },
+    "tax.contractorRemoved": {
+      "en": "Contractor removed",
+      "draft": "An cire ɗan kwangila"
+    },
+    "tax.enterAPositiveAmount": {
+      "en": "Enter a positive amount",
+      "draft": "Shigar da adadi mai kyau"
+    },
+    "tax.paymentRecorded": {
+      "en": "Payment recorded",
+      "draft": "An yi wa biya rikodi"
+    },
+    "tax.paymentDeleted": {
+      "en": "Payment deleted",
+      "draft": "An goge biya"
+    },
+    "tax.statusRefreshed": {
+      "en": "Status refreshed",
+      "draft": "An sabunta matsayi"
+    },
+    "tax.addContractor": {
+      "en": "Add contractor",
+      "draft": "Ƙara ɗan kwangila"
+    },
+    "tax.contractors1099s": {
+      "en": "Contractors & 1099s",
+      "draft": "'Yan kwangila & 1099s"
+    },
+    "tax.salesTax": {
+      "en": "Sales Tax",
+      "draft": "Harajin Sayarwa"
+    },
+    "tax.taxbanditsNotConnected": {
+      "en": "TaxBandits not connected.",
+      "draft": "TaxBandits ba a haɗa ba."
+    },
+    "tax.taxbanditsSETUPMd": {
+      "en": "TAXBANDITS_SETUP.md",
+      "draft": "TAXBANDITS_SETUP.md"
+    },
+    "tax.inTheRepoNoIRSFiling": {
+      "en": "in the repo. No IRS filing is ever done in-house.",
+      "draft": "a cikin repo. Ba a taɓa shigar da IRS a gida ba."
+    },
+    "tax.taxbanditsConnectedIn": {
+      "en": "TaxBandits connected in",
+      "draft": "An haɗa TaxBandits a cikin"
+    },
+    "tax.sandbox": {
+      "en": "sandbox",
+      "draft": "sandbox"
+    },
+    "tax.modeNoRealFilingsFlip": {
+      "en": "mode — no real filings. Flip",
+      "draft": "yanayi — babu shigarwa na gaske. Canja"
+    },
+    "tax.taxbanditsSANDBOXFalse": {
+      "en": "TAXBANDITS_SANDBOX=false",
+      "draft": "TAXBANDITS_SANDBOX=false"
+    },
+    "tax.toGoLive": {
+      "en": "to go live.",
+      "draft": "don fara aiki."
+    },
+    "tax.newContractor": {
+      "en": "New contractor",
+      "draft": "Sabon ɗan kwangila"
+    },
+    "tax.name": {
+      "en": "Name *",
+      "draft": "Suna *"
+    },
+    "tax.businessName": {
+      "en": "Business name",
+      "draft": "Sunan kasuwanci"
+    },
+    "tax.email": {
+      "en": "Email",
+      "draft": "Imel"
+    },
+    "tax.phone": {
+      "en": "Phone",
+      "draft": "Waya"
+    },
+    "tax.entityType": {
+      "en": "Entity type",
+      "draft": "Nau'in mahaluƙi"
+    },
+    "tax.ssnEIN": {
+      "en": "SSN / EIN",
+      "draft": "SSN / EIN"
+    },
+    "tax.storedSecurely": {
+      "en": "Stored securely",
+      "draft": "An adana lafiya"
+    },
+    "tax.street": {
+      "en": "Street",
+      "draft": "Titi"
+    },
+    "tax.city": {
+      "en": "City",
+      "draft": "Birni"
+    },
+    "tax.state": {
+      "en": "State",
+      "draft": "Jiha"
+    },
+    "tax.zip": {
+      "en": "ZIP",
+      "draft": "ZIP"
+    },
+    "tax.cancel": {
+      "en": "Cancel",
+      "draft": "Soke"
+    },
+    "tax.contractor": {
+      "en": "Contractor",
+      "draft": "Ɗan kwangila"
+    },
+    "tax.paid": {
+      "en": "Paid",
+      "draft": "An biya"
+    },
+    "tax.w9": {
+      "en": "W-9",
+      "draft": "W-9"
+    },
+    "tax.NEC": {
+      "en": "1099-NEC",
+      "draft": "1099-NEC"
+    },
+    "tax.eFile": {
+      "en": "E-file",
+      "draft": "E-file"
+    },
+    "tax.actions": {
+      "en": "Actions",
+      "draft": "Ayyuka"
+    },
+    "tax.viewPaymentHistory": {
+      "en": "View payment history",
+      "draft": "Duba tarihin biya"
+    },
+    "tax.toggleW9Received": {
+      "en": "Toggle W-9 received",
+      "draft": "Canja W-9 da aka karɓa"
+    },
+    "tax.required": {
+      "en": "Required",
+      "draft": "Ana bukata"
+    },
+    "tax.viewFilingStatus": {
+      "en": "View filing status",
+      "draft": "Duba matsayin shigarwa"
+    },
+    "tax.notFiled": {
+      "en": "Not filed",
+      "draft": "Ba a shigar ba"
+    },
+    "tax.recordPayment": {
+      "en": "Record payment",
+      "draft": "Yi wa biya rikodi"
+    },
+    "tax.noContractorsYet": {
+      "en": "No contractors yet.",
+      "draft": "Babu 'yan kwangila tukuna."
+    },
+    "tax.NECDataPreview": {
+      "en": "1099-NEC data preview",
+      "draft": "Duba bayanan 1099-NEC"
+    },
+    "tax.recipientBox1DataShapedFor": {
+      "en": "Recipient + Box 1 data shaped for e-filing. Tax IDs stay masked — reveal needs PII access. Draft data only, nothing is filed in-house.",
+      "draft": "Bayanan Mai karɓa + Akwatin 1 an tsara su don e-filing. ID na Haraji suna ɓoye — bayyanawa na bukatar izinin PII. Bayanan daftari kaɗai, ba a shigar da komai a gida ba."
+    },
+    "tax.loadPreview": {
+      "en": "Load preview",
+      "draft": "Loda dubawa"
+    },
+    "tax.recipient": {
+      "en": "Recipient",
+      "draft": "Mai karɓa"
+    },
+    "tax.tin": {
+      "en": "TIN",
+      "draft": "TIN"
+    },
+    "tax.address": {
+      "en": "Address",
+      "draft": "Adireshi"
+    },
+    "tax.box1": {
+      "en": "Box 1",
+      "draft": "Akwati 1"
+    },
+    "tax.missing": {
+      "en": "missing",
+      "draft": "ya ɓace"
+    },
+    "tax.reveal": {
+      "en": "reveal",
+      "draft": "bayyana"
+    },
+    "tax.noContractorsMeetThe": {
+      "en": "No contractors meet the",
+      "draft": "Babu 'yan kwangila da suka cika"
+    },
+    "tax.reportingThresholdFor": {
+      "en": "reporting threshold for",
+      "draft": "ƙofar bayar da rahoto don"
+    },
+    "tax.recordPayment2": {
+      "en": "Record payment —",
+      "draft": "Yi wa biya rikodi —"
+    },
+    "tax.date": {
+      "en": "Date",
+      "draft": "Rana"
+    },
+    "tax.amount": {
+      "en": "Amount $",
+      "draft": "Adadi $"
+    },
+    "tax.description": {
+      "en": "Description",
+      "draft": "Bayani"
+    },
+    "tax.eGMarchBoothRentPayout": {
+      "en": "e.g. March booth rent payout",
+      "draft": "misali Biyan hayar rumun Maris"
+    },
+    "tax.record": {
+      "en": "Record",
+      "draft": "Rikodi"
+    },
+    "tax.paymentHistory": {
+      "en": "Payment history —",
+      "draft": "Tarihin biya —"
+    },
+    "tax.noPaymentsRecordedFor": {
+      "en": "No payments recorded for",
+      "draft": "Babu biyan da aka yi wa rikodi don"
+    },
+    "tax.amount2": {
+      "en": "Amount",
+      "draft": "Adadi"
+    },
+    "tax.deletePayment": {
+      "en": "Delete payment",
+      "draft": "Goge biya"
+    },
+    "tax.yearTotal": {
+      "en": "Year total:",
+      "draft": "Jimillar shekara:"
+    },
+    "tax.NECFiling": {
+      "en": "1099-NEC filing —",
+      "draft": "Shigar da 1099-NEC —"
+    },
+    "tax.thisDraftLivesInTaxBanditsReview": {
+      "en": "This draft lives in TaxBandits — review and Transmit there to file with the IRS. This app never files in-house.",
+      "draft": "Wannan daftari yana cikin TaxBandits — ku duba kuma ku Tura can don shigar da IRS. Wannan manhajar ba ta taɓa shigarwa a gida ba."
+    },
+    "tax.NECIsRequiredForNon": {
+      "en": "1099-NEC is required for non-corporate contractors paid ≥",
+      "draft": "Ana bukatar 1099-NEC don 'yan kwangila marasa kamfani da aka biya ≥"
+    },
+    "tax.inTheYearEFilingCreates": {
+      "en": "in the year. E-filing creates a draft in TaxBandits — you review and transmit there. This app never files with the IRS directly.",
+      "draft": "a cikin shekara. E-filing yana ƙirƙirar daftari a TaxBandits — ku duba kuma ku tura can. Wannan manhajar ba ta taɓa shigarwa da IRS kai tsaye ba."
+    },
+    "taxforecast.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "Hasashen Haraji"
+    },
+    "taxforecast.OfPriorYearTax": {
+      "en": "100% of prior-year tax",
+      "draft": "100% na harajin shekarar da ta gabata"
+    },
+    "taxforecast.irsDirectPay": {
+      "en": "IRS Direct Pay",
+      "draft": "IRS Direct Pay"
+    },
+    "nav.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "Hasashen Haraji"
+    },
+    "nav.tax1099s": {
+      "en": "Tax & 1099s",
+      "draft": "Haraji & 1099s"
+    },
+    "teamInvites.accountantTaxPro": {
+      "en": "Accountant / Tax pro",
+      "draft": "Akawunta / Ƙwararren haraji"
+    }
+  }
+}

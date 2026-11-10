@@ -1,0 +1,426 @@
+{
+  "_meta": {
+    "lang": "si",
+    "status": "DRAFT for human review only. Do NOT copy into frontend/src/locales/si/translation.json until a qualified reviewer (counsel/CPA where relevant) approves each string. Live locale keeps English for these keys.",
+    "source": "docs/TRANSLATION_PLAN.md flagged keys (legal/financial/tax/privacy/safety)",
+    "notice": "Approximate translation from English/Spanish, may not be accurate."
+  },
+  "strings": {
+    "salestaxtab.taxJurisdictions": {
+      "en": "Tax jurisdictions",
+      "draft": "බද්ද jurisdictions"
+    },
+    "salestaxtab.everywhereYouCollectSalesTaxState": {
+      "en": "Everywhere you collect sales tax — state, county, city, special district.\n          Tag invoices with a jurisdiction and this page tells you what you owe, where.",
+      "draft": "සෑම තැනම ඔබ collect විකිණුම් බද්ද — ප්‍රාන්තය, county, නගරය, special district.\n  ටැගය ඉන්වොයිස් සමඟ බල ප්‍රදේශය සහ මේ පිටුව tells ඔබ මොකක් ඔබ owe, කොහෙද."
+    },
+    "salestaxtab.noJurisdictionsYetAddTheFirst": {
+      "en": "No jurisdictions yet. Add the first place you collect sales tax.",
+      "draft": "නැහැ jurisdictions තවම. එක් කරන්න පළමු place ඔබ collect විකිණුම් බද්ද."
+    },
+    "salestaxtab.ofSalesTaxIsnTTagged": {
+      "en": "of sales tax isn't tagged to a jurisdiction yet.\n            Tag invoices with a jurisdiction so every dollar lands in the right bucket.",
+      "draft": "හි විකිණුම් බද්ද නැහැ tagged ට බල ප්‍රදේශය තවම.\n  ටැගය ඉන්වොයිස් සමඟ බල ප්‍රදේශය එබැවින් සෑම dollar lands හි දකුණ කණ්ඩායම."
+    },
+    "salestaxtab.taxCollected": {
+      "en": "Tax collected",
+      "draft": "බද්ද එකතු කළ"
+    },
+    "teaminvites.inviteYourAccountantOrTaxPro": {
+      "en": "Invite your accountant or tax pro — they join with the right permissions\n        and can switch between all the workspaces they serve.",
+      "draft": "ආරාධනය ඔබේ ගණකාධිකාරී හෝ බද්ද වෘත්තීය — ඔවුහු එක්වන්න සමඟ දකුණ අවසර\n  සහ පුළුවන් මාරු කරන්න අතර සියල්ල වැඩබිම් ඔවුහු serve."
+    },
+    "auditlog.eGTaxInvoiceLogin": {
+      "en": "e.g. tax, invoice, login",
+      "draft": "උදා. බද්ද, ඉන්වොයිසය, පිවිසුම"
+    },
+    "cpapackage.mileageLogWithIRSRatesApplied": {
+      "en": "Mileage log with IRS rates applied",
+      "draft": "සැතපුම් සටහන සමඟ IRS අනුපාත applied"
+    },
+    "customers.delete": {
+      "en": "Delete",
+      "draft": "මකන්න"
+    },
+    "customers.deleteConfirm": {
+      "en": "Delete customer \"{{name}}\"? Their invoices and statements stay on record.",
+      "draft": "මකන්න පාරිභෝගිකයා \"{{name}}\"? ඔවුන්ගේ ඉන්වොයිස් සහ ප්‍රකාශන ඉන්න මත සටහන් කරන්න."
+    },
+    "estimates.tax": {
+      "en": "Tax ($)",
+      "draft": "බද්ද ($)"
+    },
+    "expenses.taxID": {
+      "en": "Tax ID",
+      "draft": "බද්ද ID"
+    },
+    "expenses.taxYear": {
+      "en": "Tax year",
+      "draft": "බද්ද වසර"
+    },
+    "expenses.tax": {
+      "en": "Tax",
+      "draft": "බද්ද"
+    },
+    "expenses.taxIDEIN": {
+      "en": "Tax ID / EIN",
+      "draft": "බද්ද ID / EIN"
+    },
+    "invoices.refund": {
+      "en": "Refund",
+      "draft": "ආපසු ගෙවීම"
+    },
+    "invoices.taxJurisdictionOptional": {
+      "en": "Tax jurisdiction (optional)",
+      "draft": "බද්ද බල ප්‍රදේශය (වෛකල්පික)"
+    },
+    "invoices.tax": {
+      "en": "Tax ($)",
+      "draft": "බද්ද ($)"
+    },
+    "invoices.refundCredit": {
+      "en": "Refund credit —",
+      "draft": "ආපසු ගෙවීම බැර —"
+    },
+    "invoices.refundTheRemaining": {
+      "en": "Refund the remaining",
+      "draft": "ආපසු ගෙවීම ඉතිරි"
+    },
+    "mileage.irsLogCSV": {
+      "en": "IRS log CSV",
+      "draft": "IRS සටහන CSV"
+    },
+    "payroll.deleteDraft": {
+      "en": "Delete draft",
+      "draft": "මකන්න කෙටුම්පත"
+    },
+    "payroll.partnershipStubWhenAProviderIs": {
+      "en": "Partnership stub: when a provider is connected, runs here will hand off tax filing and direct deposit automatically.",
+      "draft": "හවුල්කාරිත්වය කොටස: කවදා සපයන්නා වේ සම්බන්ධිත, ධාවනය වේ මෙහි කරනු ඇත අත නිවා බද්ද ගොනු කිරීම සහ සෘජු තැන්පතුව ස්වයංක්‍රීයව."
+    },
+    "payroll.employerTaxEst": {
+      "en": "Employer payroll tax (est.)",
+      "draft": "Employer වැටුප් ලේඛනය බද්ද (ඇස්තමේන්තුව.)"
+    },
+    "portalview.tax": {
+      "en": "Tax",
+      "draft": "බද්ද"
+    },
+    "recurringinvoices.tax": {
+      "en": "Tax ($)",
+      "draft": "බද්ද ($)"
+    },
+    "simulator.safetyFloor": {
+      "en": "Safety floor $",
+      "draft": "Safety floor $"
+    },
+    "tax.nameIsRequired": {
+      "en": "Name is required",
+      "draft": "නම වේ අවශ්‍ය"
+    },
+    "tax.contractorAdded": {
+      "en": "Contractor added",
+      "draft": "කොන්ත්‍රාත්කරු එකතු කළ"
+    },
+    "tax.w9StatusUpdated": {
+      "en": "W-9 status updated",
+      "draft": "W-9 තත්ත්වය යාවත්කාල කළ"
+    },
+    "tax.contractorRemoved": {
+      "en": "Contractor removed",
+      "draft": "කොන්ත්‍රාත්කරු ඉවත් කළ"
+    },
+    "tax.enterAPositiveAmount": {
+      "en": "Enter a positive amount",
+      "draft": "ඇතුළු කරන්න ධන මුදල"
+    },
+    "tax.paymentRecorded": {
+      "en": "Payment recorded",
+      "draft": "ගෙවීම සටහන් කළ"
+    },
+    "tax.paymentDeleted": {
+      "en": "Payment deleted",
+      "draft": "ගෙවීම මකා දැමූ"
+    },
+    "tax.statusRefreshed": {
+      "en": "Status refreshed",
+      "draft": "තත්ත්වය refreshed"
+    },
+    "tax.addContractor": {
+      "en": "Add contractor",
+      "draft": "එක් කරන්න කොන්ත්‍රාත්කරු"
+    },
+    "tax.contractors1099s": {
+      "en": "Contractors & 1099s",
+      "draft": "කොන්ත්‍රාත්කරුවන් & 1099s"
+    },
+    "tax.salesTax": {
+      "en": "Sales Tax",
+      "draft": "විකිණුම් බද්ද"
+    },
+    "tax.taxbanditsNotConnected": {
+      "en": "TaxBandits not connected.",
+      "draft": "TaxBandits නැහැ සම්බන්ධිත."
+    },
+    "tax.taxbanditsSETUPMd": {
+      "en": "TAXBANDITS_SETUP.md",
+      "draft": "TAXBANDITS_SETUP.md"
+    },
+    "tax.inTheRepoNoIRSFiling": {
+      "en": "in the repo. No IRS filing is ever done in-house.",
+      "draft": "හි repo. නැහැ IRS ගොනු කිරීම වේ කවදා හරි in-house."
+    },
+    "tax.taxbanditsConnectedIn": {
+      "en": "TaxBandits connected in",
+      "draft": "TaxBandits සම්බන්ධිත හි"
+    },
+    "tax.sandbox": {
+      "en": "sandbox",
+      "draft": "sandbox"
+    },
+    "tax.modeNoRealFilingsFlip": {
+      "en": "mode — no real filings. Flip",
+      "draft": "mode — නැහැ real filings. Flip"
+    },
+    "tax.taxbanditsSANDBOXFalse": {
+      "en": "TAXBANDITS_SANDBOX=false",
+      "draft": "TAXBANDITS_SANDBOX=අසත්‍ය"
+    },
+    "tax.toGoLive": {
+      "en": "to go live.",
+      "draft": "ට යන්න සජීවී."
+    },
+    "tax.newContractor": {
+      "en": "New contractor",
+      "draft": "නව කොන්ත්‍රාත්කරු"
+    },
+    "tax.name": {
+      "en": "Name *",
+      "draft": "නම *"
+    },
+    "tax.businessName": {
+      "en": "Business name",
+      "draft": "ව්‍යාපාරය නම"
+    },
+    "tax.email": {
+      "en": "Email",
+      "draft": "විද්‍යුත් ලිපිනය"
+    },
+    "tax.phone": {
+      "en": "Phone",
+      "draft": "දුරකථනය"
+    },
+    "tax.entityType": {
+      "en": "Entity type",
+      "draft": "ආයතනය වර්ගය"
+    },
+    "tax.ssnEIN": {
+      "en": "SSN / EIN",
+      "draft": "SSN / EIN"
+    },
+    "tax.storedSecurely": {
+      "en": "Stored securely",
+      "draft": "Stored securely"
+    },
+    "tax.street": {
+      "en": "Street",
+      "draft": "Street"
+    },
+    "tax.city": {
+      "en": "City",
+      "draft": "නගරය"
+    },
+    "tax.state": {
+      "en": "State",
+      "draft": "ප්‍රාන්තය"
+    },
+    "tax.zip": {
+      "en": "ZIP",
+      "draft": "තැපැල් කේතය"
+    },
+    "tax.cancel": {
+      "en": "Cancel",
+      "draft": "අවලංගු කරන්න"
+    },
+    "tax.contractor": {
+      "en": "Contractor",
+      "draft": "කොන්ත්‍රාත්කරු"
+    },
+    "tax.paid": {
+      "en": "Paid",
+      "draft": "ගෙවූ"
+    },
+    "tax.w9": {
+      "en": "W-9",
+      "draft": "W-9"
+    },
+    "tax.NEC": {
+      "en": "1099-NEC",
+      "draft": "1099-NEC"
+    },
+    "tax.eFile": {
+      "en": "E-file",
+      "draft": "E-file"
+    },
+    "tax.actions": {
+      "en": "Actions",
+      "draft": "ක්‍රියා"
+    },
+    "tax.viewPaymentHistory": {
+      "en": "View payment history",
+      "draft": "බලන්න ගෙවීම ඉතිහාසය"
+    },
+    "tax.toggleW9Received": {
+      "en": "Toggle W-9 received",
+      "draft": "Toggle W-9 ලැබුණා"
+    },
+    "tax.required": {
+      "en": "Required",
+      "draft": "අවශ්‍ය"
+    },
+    "tax.viewFilingStatus": {
+      "en": "View filing status",
+      "draft": "බලන්න ගොනු කිරීම තත්ත්වය"
+    },
+    "tax.notFiled": {
+      "en": "Not filed",
+      "draft": "නැහැ filed"
+    },
+    "tax.recordPayment": {
+      "en": "Record payment",
+      "draft": "සටහන් කරන්න ගෙවීම"
+    },
+    "tax.noContractorsYet": {
+      "en": "No contractors yet.",
+      "draft": "නැහැ කොන්ත්‍රාත්කරුවන් තවම."
+    },
+    "tax.NECDataPreview": {
+      "en": "1099-NEC data preview",
+      "draft": "1099-NEC දත්ත පෙරදසුන"
+    },
+    "tax.recipientBox1DataShapedFor": {
+      "en": "Recipient + Box 1 data shaped for e-filing. Tax IDs stay masked — reveal needs PII access. Draft data only, nothing is filed in-house.",
+      "draft": "ලබන්නා + Box 1 දත්ත shaped සඳහා e-filing. බද්ද IDs ඉන්න masked — reveal needs PII ප්‍රවේශය. කෙටුම්පත දත්ත පමණක්, කිසිවක් නැහැ වේ filed in-house."
+    },
+    "tax.loadPreview": {
+      "en": "Load preview",
+      "draft": "පූරණය කරන්න පෙරදසුන"
+    },
+    "tax.recipient": {
+      "en": "Recipient",
+      "draft": "ලබන්නා"
+    },
+    "tax.tin": {
+      "en": "TIN",
+      "draft": "TIN"
+    },
+    "tax.address": {
+      "en": "Address",
+      "draft": "ලිපිනය"
+    },
+    "tax.box1": {
+      "en": "Box 1",
+      "draft": "Box 1"
+    },
+    "tax.missing": {
+      "en": "missing",
+      "draft": "නැතිවූ"
+    },
+    "tax.reveal": {
+      "en": "reveal",
+      "draft": "reveal"
+    },
+    "tax.noContractorsMeetThe": {
+      "en": "No contractors meet the",
+      "draft": "නැහැ කොන්ත්‍රාත්කරුවන් meet "
+    },
+    "tax.reportingThresholdFor": {
+      "en": "reporting threshold for",
+      "draft": "වාර්තා කිරීම threshold සඳහා"
+    },
+    "tax.recordPayment2": {
+      "en": "Record payment —",
+      "draft": "සටහන් කරන්න ගෙවීම —"
+    },
+    "tax.date": {
+      "en": "Date",
+      "draft": "දිනය"
+    },
+    "tax.amount": {
+      "en": "Amount $",
+      "draft": "මුදල $"
+    },
+    "tax.description": {
+      "en": "Description",
+      "draft": "විස්තරය"
+    },
+    "tax.eGMarchBoothRentPayout": {
+      "en": "e.g. March booth rent payout",
+      "draft": "උදා. March කුටිය කුලිය ගෙවීම"
+    },
+    "tax.record": {
+      "en": "Record",
+      "draft": "සටහන් කරන්න"
+    },
+    "tax.paymentHistory": {
+      "en": "Payment history —",
+      "draft": "ගෙවීම ඉතිහාසය —"
+    },
+    "tax.noPaymentsRecordedFor": {
+      "en": "No payments recorded for",
+      "draft": "නැහැ ගෙවීම් සටහන් කළ සඳහා"
+    },
+    "tax.amount2": {
+      "en": "Amount",
+      "draft": "මුදල"
+    },
+    "tax.deletePayment": {
+      "en": "Delete payment",
+      "draft": "මකන්න ගෙවීම"
+    },
+    "tax.yearTotal": {
+      "en": "Year total:",
+      "draft": "වසර එකතුව:"
+    },
+    "tax.NECFiling": {
+      "en": "1099-NEC filing —",
+      "draft": "1099-NEC ගොනු කිරීම —"
+    },
+    "tax.thisDraftLivesInTaxBanditsReview": {
+      "en": "This draft lives in TaxBandits — review and Transmit there to file with the IRS. This app never files in-house.",
+      "draft": "මේ කෙටුම්පත lives හි TaxBandits — සමාලෝචනය සහ Transmit there ට ගොනුව සමඟ IRS. මේ යෙදුම කවදාවත් ගොනු in-house."
+    },
+    "tax.NECIsRequiredForNon": {
+      "en": "1099-NEC is required for non-corporate contractors paid ≥",
+      "draft": "1099-NEC වේ අවශ්‍ය සඳහා non-corporate කොන්ත්‍රාත්කරුවන් ගෙවූ ≥"
+    },
+    "tax.inTheYearEFilingCreates": {
+      "en": "in the year. E-filing creates a draft in TaxBandits — you review and transmit there. This app never files with the IRS directly.",
+      "draft": "හි වසර. E-filing creates කෙටුම්පත හි TaxBandits — ඔබ සමාලෝචනය සහ transmit there. මේ යෙදුම කවදාවත් ගොනු සමඟ IRS directly."
+    },
+    "taxforecast.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "බද්ද පුරෝකථනය"
+    },
+    "taxforecast.OfPriorYearTax": {
+      "en": "100% of prior-year tax",
+      "draft": "100% හි prior-year බද්ද"
+    },
+    "taxforecast.irsDirectPay": {
+      "en": "IRS Direct Pay",
+      "draft": "IRS සෘජු ගෙවන්න"
+    },
+    "nav.taxForecast": {
+      "en": "Tax Forecast",
+      "draft": "බද්ද පුරෝකථනය"
+    },
+    "nav.tax1099s": {
+      "en": "Tax & 1099s",
+      "draft": "බද්ද & 1099s"
+    },
+    "teamInvites.accountantTaxPro": {
+      "en": "Accountant / Tax pro",
+      "draft": "ගණකාධිකාරී / බද්ද වෘත්තීය"
+    }
+  }
+}
