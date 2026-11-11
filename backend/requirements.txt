@@ -33,7 +33,12 @@ stripe==11.3.0
 redis>=5.0.0
 # Bake-off #14 PDF utilities (licenses verified 2026-10-30: pypdf BSD-3-Clause,
 # pdfplumber MIT, pdfminer.six MIT, pypdfium2 BSD-3/Apache-2.0, reportlab BSD-style)
-pypdf>=5.0.0
+# pypdf capped <7 (2026-11-11): pypdf 7.0.0 removes the unassigned-page
+# PageObject.replace_contents() path that the stamp/watermark merge flow
+# (lib/pdfutil.py stamp_pdf -> Page.merge_page) relies on — pypdf 6.x emits
+# a DeprecationWarning naming the 7.0.0 removal. An unbounded pin would
+# break PDF watermark/stamping on the next fresh rebuild.
+pypdf>=5.0.0,<7
 pdfplumber>=0.11.0
 reportlab>=4.0.0
 # Standout extra A: PDF invoice intake pilot (invoice2data, MIT — verified 2026-10-30)
