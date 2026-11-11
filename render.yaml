@@ -6,18 +6,11 @@ services:
   - type: web
     name: bookkeeping-api
     runtime: python
-    # The tax engine (tax-engine/, TypeScript) must be compiled for the
-    # tax-packet and welcome-gift estimates; without it they answer 503
-    # "engine_not_built". Render's native runtimes include Node.js.
-    buildCommand: pip install -r backend/requirements.txt && cd tax-engine && npm ci --include=dev && npm run build
+    buildCommand: pip install -r backend/requirements.txt
     startCommand: uvicorn server:app --host 0.0.0.0 --port $PORT --app-dir backend
     envVars:
       - key: PYTHON_VERSION
         value: 3.12.0
-      # Node runs the tax engine at build and request time; pin a
-      # supported release instead of whatever Render defaults to.
-      - key: NODE_VERSION
-        value: "22"
       - key: MONGO_URL
         sync: false
       - key: DB_NAME
@@ -29,7 +22,27 @@ services:
       # Optional integrations (add when you have the keys):
       # - key: PLAID_CLIENT_ID
       # - key: PLAID_SECRET
-      # - key: AI_API_KEY
+      # - key: EMERGENT_LLM_KEY
+      # Federated sign-in (per provider; a provider is OFF — button
+      # hidden, endpoints 404 — until ALL THREE of its keys are set).
+      # Redirect URIs registered at each provider console must be the
+      # API host + /api/auth/<provider>/callback, e.g.
+      # https://bookkeeping-api.onrender.com/api/auth/google/callback
+      # - key: GOOGLE_CLIENT_ID
+      # - key: GOOGLE_CLIENT_SECRET
+      # - key: GOOGLE_REDIRECT_URI
+      # - key: FACEBOOK_CLIENT_ID
+      # - key: FACEBOOK_CLIENT_SECRET
+      # - key: FACEBOOK_REDIRECT_URI
+      # - key: MICROSOFT_CLIENT_ID
+      # - key: MICROSOFT_CLIENT_SECRET
+      # - key: MICROSOFT_REDIRECT_URI
+      # - key: MICROSOFT_TENANT (optional, default "common" = personal + work accounts)
+      # - key: LINKEDIN_CLIENT_ID
+      # - key: LINKEDIN_CLIENT_SECRET
+      # - key: LINKEDIN_REDIRECT_URI
+      # Apple: plumbing ready-only; activation gated on the paid Apple
+      # Developer Program (owner decision). No keys this wave.
       # Scheduled collections autopilot (off unless ENABLE_SCHEDULER=true):
       - key: ENABLE_SCHEDULER
         value: false
