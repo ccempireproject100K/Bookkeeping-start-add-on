@@ -1,19 +1,14 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { api, errMsg } from "@/lib/api";
-import { asFace } from "@/lib/packs";
-import { asMarketList, findMarket, readMarketChoice } from "@/lib/markets";
-import FaceIcon from "@/components/FaceIcon";
-import { KeyRound, ArrowRight, Fingerprint } from "lucide-react";
+import { errMsg } from "@/lib/api";
+import { Scissors, ArrowRight, Fingerprint } from "lucide-react";
 import { loginWithPasskey, passkeysSupported } from "@/lib/webauthn";
-import LanguageSwitcher from "@/components/LanguageSwitcher";
-import { DictateButton, normalizeEmailDictation } from "@/components/Dictation";
-import { LOGIN } from "@/constants/testIds";
+import { fetchEnabledProviders, federatedStartUrl } from "@/lib/federated";
 import { useTranslation } from "react-i18next";
 const DEMOS = [{
   role: "Owner",
@@ -21,15 +16,15 @@ const DEMOS = [{
   password: "Owner123!"
 }, {
   role: "Accountant",
-  email: "accountant@mindatease.example",
+  email: "accountant@fadeco.com",
   password: "Books123!"
 }, {
   role: "Bookkeeper",
-  email: "bookkeeper@mindatease.example",
+  email: "bookkeeper@fadeco.com",
   password: "Books123!"
 }, {
   role: "Technician",
-  email: "marcus@mindatease.example",
+  email: "marcus@fadeco.com",
   password: "Staff123!"
 }];
 export default function Login() {
@@ -39,38 +34,29 @@ export default function Login() {
   const {
     user,
     login,
+    register,
     refresh
   } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
+  const [shopName, setShopName] = useState("");
+  const [mode, setMode] = useState("login");
+  const [providers, setProviders] = useState([]);
   const [totpCode, setTotpCode] = useState("");
   const [totpNeeded, setTotpNeeded] = useState(false);
   const [busy, setBusy] = useState(false);
   useEffect(() => {
     if (user) navigate("/");
   }, [user, navigate]);
-  // Public face for this hostname: a niche subdomain shows that trade's
-  // pack (name, tagline, icon); anything else resolves to the generic
-  // trade-neutral product face — never a default trade's branding.
-  const [face, setFace] = useState(null);
   useEffect(() => {
-    api.get("/niches/resolve", {
-      params: {
-        host: window.location.hostname
-      }
-    }).then((d) => setFace(asFace(d))).catch(() => {});
-  }, []);
-  const tradeFace = face && face.niche_id !== "generic" ? face : null;
-  const brandName = face?.product_name || "Mind at Ease Solutions";
-  // Market chosen on the public pages (industries / register) rides
-  // along in localStorage — show its flag + name so the choice is
-  // visibly honored here too.
-  const [marketFace, setMarketFace] = useState(null);
-  useEffect(() => {
-    const code = readMarketChoice();
-    if (!code) return;
-    api.get("/market-packs").then((d) => setMarketFace(findMarket(d, code))).catch(() => {});
+    // Social sign-in buttons exist ONLY when the backend says the
+    // provider is configured (env keys set). Unset = invisible.
+    fetchEnabledProviders().then(setProviders);
+    if (new URLSearchParams(window.location.search).get("social_error")) {
+      toast.error("Social sign-in didn't go through. Try again or use your email and password.");
+    }
   }, []);
   const passkeyLogin = async () => {
     if (!email.trim()) {
@@ -93,6 +79,17 @@ export default function Login() {
     e?.preventDefault?.();
     setBusy(true);
     try {
+      if (mode === "signup" && !creds) {
+        await register({
+          email,
+          password,
+          name: name.trim(),
+          shop_name: shopName.trim() || "My Shop"
+        });
+        toast.success(t("login.welcomeBack"));
+        navigate("/");
+        return;
+      }
       await login(creds?.email || email, creds?.password || password, totpCode);
       toast.success(t("login.welcomeBack"));
       setTotpNeeded(false);
@@ -113,86 +110,89 @@ export default function Login() {
   return <div className="min-h-screen grid lg:grid-cols-2">
       {/* Brand side */}
       <div className="hidden lg:flex relative flex-col justify-between p-12 overflow-hidden">
+        <img src="https://images.unsplash.com/photo-1698479603408-1a66a6d9e80f?crop=entropy&cs=srgb&fm=jpg&q=85&w=1400" alt={t("login.hvacEquipment")} className="absolute inset-0 w-full h-full object-cover opacity-30" />
         <div className="absolute inset-0 bg-gradient-to-br from-[#0B0D10] via-[#0B0D10]/85 to-[#0B0D10]/40" />
         <div className="relative flex items-center gap-3">
           <div className="w-10 h-10 rounded-lg brand-mark" />
-          <span className="font-display font-bold text-xl">{brandName}</span>
-          {marketFace && <span data-testid="login-market-face" className="text-sm text-gray-400">{marketFace.flag} {marketFace.name}</span>}
+          <span className="font-display font-bold text-xl">{t("login.mindAtEaseSolutionsHVAC")}</span>
         </div>
         <div className="relative max-w-md">
-          {tradeFace && <div className="flex items-center gap-2 mb-5">
-              <span className="w-9 h-9 rounded-lg flex items-center justify-center" style={{
-              backgroundColor: `${tradeFace.colors?.accent || "#f59e0b"}22`,
-              color: tradeFace.colors?.accent || "#f59e0b"
-            }}>
-                <FaceIcon name={tradeFace.icon} size={18} />
-              </span>
-              <span className="text-xs uppercase tracking-widest text-gray-400">{tradeFace.trade}</span>
-            </div>}
           <h1 className="font-display text-4xl font-bold leading-tight mb-4">{t("login.knowYourProfitOn")} <span className="text-amber-500">{t("login.everyJob")}</span>.
           </h1>
-          <p className="text-gray-400 leading-relaxed">{tradeFace ? tradeFace.tagline : t("login.contractorJobCostingWiredStraightInto")}</p>
+          <p className="text-gray-400 leading-relaxed">{t("login.contractorJobCostingWiredStraightInto")}</p>
         </div>
         <div className="relative text-xs text-gray-500 font-mono">{t("login.revenueJobCostsGrossProfit")}</div>
       </div>
 
       {/* Form side */}
-      <div className="relative flex items-center justify-center p-6 sm:p-10">
-        <div className="absolute top-4 end-4">
-          <LanguageSwitcher compact />
-        </div>
+      <div className="flex items-center justify-center p-6 sm:p-10">
         <div className="w-full max-w-sm animate-rise">
           <div className="lg:hidden flex items-center gap-3 mb-8">
             <div className="w-9 h-9 rounded-lg brand-mark" />
-            <span className="font-display font-bold text-lg">{brandName}</span>
+            <span className="font-display font-bold text-lg">{t("login.mindAtEaseHVAC")}</span>
           </div>
-          <h2 className="font-display text-2xl font-bold mb-1">{t("login.signIn")}</h2>
+          <h2 className="font-display text-2xl font-bold mb-1">{mode === "signup" ? "Create your account" : t("login.signIn")}</h2>
           <p className="text-sm text-gray-500 mb-6">{t("login.accessYourWorkspace")}</p>
 
           <form onSubmit={submit} className="space-y-4">
+            {mode === "signup" && <>
+              <div>
+                <Label className="text-xs text-gray-400">Your name</Label>
+                <Input data-testid="register-name" type="text" value={name} onChange={e => setName(e.target.value)} placeholder="Your name" className="mt-1 bg-[#14171E] border-[#222838]" />
+              </div>
+              <div>
+                <Label className="text-xs text-gray-400">Business name</Label>
+                <Input data-testid="register-shop" type="text" value={shopName} onChange={e => setShopName(e.target.value)} placeholder="My Shop" className="mt-1 bg-[#14171E] border-[#222838]" />
+              </div>
+            </>}
             <div>
               <Label className="text-xs text-gray-400">{t("login.email")}</Label>
-              <div className="flex items-start gap-2 mt-1">
-                <Input data-testid="login-email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder={t("login.youShopCom")} className="bg-[#14171E] border-[#222838]" />
-                <DictateButton onText={text => setEmail(normalizeEmailDictation(text))} />
-              </div>
+              <Input data-testid="login-email" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder={t("login.youShopCom")} className="mt-1 bg-[#14171E] border-[#222838]" />
             </div>
             <div>
               <Label className="text-xs text-gray-400">{t("login.password")}</Label>
               <Input data-testid="login-password" type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" className="mt-1 bg-[#14171E] border-[#222838]" />
-              <div className="mt-1.5 text-end">
-                <Link to="/forgot-password" data-testid={LOGIN.forgotPasswordLink} className="text-xs text-gray-500 hover:text-amber-400">{t("login.forgotPassword")}</Link>
-              </div>
             </div>
             {totpNeeded && <div>
                 <Label className="text-xs text-gray-400">{t("login.authenticatorCode")}</Label>
                 <Input data-testid="login-totp" inputMode="numeric" value={totpCode} onChange={e => setTotpCode(e.target.value)} placeholder="123456" maxLength={8} autoFocus className="mt-1 bg-[#14171E] border-[#222838] font-mono tracking-widest" />
               </div>}
             <Button data-testid="login-submit" type="submit" disabled={busy} className="w-full bg-amber-600 hover:bg-amber-500 text-black font-semibold">
-              {busy ? "Signing in…" : "Sign in"} <ArrowRight size={16} className="ms-1 rtl:-scale-x-100" />
+              {busy ? "Please wait…" : mode === "signup" ? "Create account" : "Sign in"} <ArrowRight size={16} className="ml-1" />
             </Button>
           </form>
 
+          <button type="button" data-testid="login-register-link" onClick={() => setMode(mode === "signup" ? "login" : "signup")} className="w-full text-center text-xs text-gray-400 hover:text-amber-400 mt-3">
+            {mode === "signup" ? "Already have an account? Sign in" : "New here? Create an account"}
+          </button>
+
+          {providers.length > 0 && <div data-testid="federated-providers" className="mt-6">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="h-px flex-1 bg-[#222838]" />
+                <span className="text-[10px] uppercase tracking-widest text-gray-500">or</span>
+                <div className="h-px flex-1 bg-[#222838]" />
+              </div>
+              <div className="space-y-2">
+                {providers.map(p => <a key={p.name} data-testid={`login-${p.name}`} href={federatedStartUrl(p.name)} className="flex items-center justify-center gap-3 w-full px-4 py-2.5 rounded-md bg-white text-gray-800 text-sm font-medium hover:bg-gray-100 transition-colors">
+                    <span aria-hidden="true" className="flex items-center justify-center w-5 h-5 rounded-full text-[11px] font-bold text-white" style={{
+                backgroundColor: p.color
+              }}>{p.badge}</span>
+                    Continue with {p.label}
+                  </a>)}
+              </div>
+            </div>}
+
           {passkeysSupported() && <Button data-testid="login-passkey" onClick={passkeyLogin} disabled={busy} variant="outline" className="w-full mt-3 border-[#222838]">
-              <Fingerprint size={16} className="me-2" /> {t("login.signInWithPasskey")}</Button>}
+              <Fingerprint size={16} className="mr-2" /> {t("login.signInWithPasskey")}</Button>}
 
           <div className="mt-8">
             <div className="text-[10px] uppercase tracking-widest text-gray-500 mb-3 flex items-center gap-2">
-              <KeyRound size={12} /> {t("login.demoLogins")}</div>
+              <Scissors size={12} /> {t("login.demoLogins")}</div>
             <div className="grid grid-cols-2 gap-2">
-              {DEMOS.map(d => <button key={d.role} data-testid={`demo-login-${d.role.toLowerCase()}`} onClick={e => submit(e, d)} disabled={busy} className="text-start px-3 py-2 rounded-lg bg-[#14171E] border border-[#222838] hover:border-amber-500/40 transition-colors">
+              {DEMOS.map(d => <button key={d.role} data-testid={`demo-login-${d.role.toLowerCase()}`} onClick={e => submit(e, d)} disabled={busy} className="text-left px-3 py-2 rounded-lg bg-[#14171E] border border-[#222838] hover:border-amber-500/40 transition-colors">
                   <div className="text-sm font-medium text-gray-100">{d.role}</div>
                   <div className="text-[10px] text-gray-500 truncate">{d.email}</div>
                 </button>)}
-            </div>
-          </div>
-
-          <div className="mt-8 text-center space-y-2">
-            <div>
-              <Link to="/register" data-testid="login-register-link" className="text-sm text-amber-500 hover:text-amber-400">Create your workspace</Link>
-            </div>
-            <div>
-              <Link to="/industries" className="text-xs text-gray-500 hover:text-amber-400">Bookkeeping for your industry — all 36 trades</Link>
             </div>
           </div>
         </div>
