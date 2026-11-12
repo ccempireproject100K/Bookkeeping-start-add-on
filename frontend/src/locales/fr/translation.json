@@ -2057,7 +2057,7 @@
 "datacleanLanding.perMonth": "/ mois",
 "datacleanLanding.rowsIncluded": "{{rows}} lignes incluses",
 "datacleanLanding.overage": "Ensuite {{price}} par tranche de 1 000 lignes supplémentaires",
-"datacleanLanding.bundleBody": "Un prix mensuel unique qui couvre les deux moitiés. DataClean est prêt à l'emploi dès aujourd'hui. L'application de sécurité antibots sera incluse dans cette même offre lors de sa sortie : elle n'est pas encore disponible.",
+"datacleanLanding.bundleBody": "Un prix mensuel unique qui couvre les deux moitiés. DataClean est prêt à l'emploi dès aujourd'hui.",
 "datacleanLanding.statusAvailableNow": "Disponible dès maintenant",
 "datacleanLanding.statusComingSoon": "Bientôt disponible",
 "datacleanLanding.testModeNote": "Le paiement est en mode test — rien n'est facturé.",

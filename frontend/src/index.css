@@ -89,6 +89,76 @@ h1, h2, h3, h4, .font-display { font-family: 'Outfit', sans-serif; }
   background: linear-gradient(135deg, #f59e0b 0%, #b45309 60%, #78350f 100%);
 }
 
+/* DataClean storefront — announcement names + per-half pop (design pass
+   2026-11-11). Oversized extruded type: a stack of offset shadows reads
+   as 3D depth without any image weight. */
+.announce-3d {
+  letter-spacing: -0.01em;
+  text-shadow:
+    0 1px 0 rgba(0,0,0,0.45),
+    0 2px 0 rgba(0,0,0,0.40),
+    0 3px 0 rgba(0,0,0,0.35),
+    0 5px 0 rgba(0,0,0,0.30),
+    0 10px 24px rgba(0,0,0,0.55);
+}
+.announce-amber {
+  color: #fbbf24;
+  text-shadow:
+    0 1px 0 #b45309, 0 2px 0 #92400e, 0 3px 0 #78350f,
+    0 5px 0 rgba(0,0,0,0.35),
+    0 12px 30px rgba(245,158,11,0.35);
+}
+.announce-cyan {
+  color: #22d3ee;
+  text-shadow:
+    0 1px 0 #0e7490, 0 2px 0 #155e75, 0 3px 0 #164e63,
+    0 5px 0 rgba(0,0,0,0.35),
+    0 12px 30px rgba(34,211,238,0.32);
+}
+
+/* Scroll reveal for the pricing halves (JS adds .reveal-in on view;
+   no-JS / reduced-motion / no-IO all land on the visible state). */
+.reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.22,1,0.36,1);
+}
+.reveal-in { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+}
+
+/* Hover tilt — pointer-fine devices only, never under reduced motion. */
+.tilt-scene { perspective: 1100px; }
+.tilt-card { transition: transform 0.35s cubic-bezier(0.22,1,0.36,1), box-shadow 0.35s ease; }
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .tilt-card:hover { transform: rotateX(3.5deg) rotateY(-3.5deg) translateY(-4px); }
+}
+
+/* Security visual: a scan line sweeping the shield panel. */
+@keyframes scan-sweep {
+  0% { top: 6%; opacity: 0; }
+  12% { opacity: 1; }
+  88% { opacity: 1; }
+  100% { top: 88%; opacity: 0; }
+}
+.scan-line {
+  animation: scan-sweep 3.2s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .scan-line { animation: none; opacity: 0; }
+}
+
+/* DataClean visual: the clean rows breathe with a soft shine pass. */
+@keyframes row-shine {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+.row-shine { animation: row-shine 2.8s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .row-shine { animation: none; opacity: 1; }
+}
+
 /* Guided voice fill: the field the walk is currently listening for. */
 .voice-walk-highlight {
   outline: 2px solid #f59e0b;

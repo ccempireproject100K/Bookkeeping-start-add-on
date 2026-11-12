@@ -50,6 +50,22 @@ services:
       # - key: LINKEDIN_REDIRECT_URI
       # Apple: plumbing ready-only; activation gated on the paid Apple
       # Developer Program (owner decision). No keys this wave.
+      # DataClean + Security launch: the security engine wiring is
+      # proven, so Security and the DataClean + Security bundle are
+      # sellable. Stripe remains honestly key-gated: checkout returns
+      # 503 until the owner supplies these values in Render.
+      - key: SECURITY_PRODUCT_BUILT
+        value: "1"
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_PUBLISHABLE_KEY
+        sync: false
+      - key: STRIPE_DATACLEAN_WEBHOOK_SECRET
+        sync: false
+      # Optional only: STRIPE_PRICE_DATACLEAN / STRIPE_PRICE_SECURITY /
+      # STRIPE_PRICE_BUNDLE pin dashboard-managed Stripe Price ids.
+      # When unset, scripts/ensure_stripe_products.py provisions and
+      # records the deterministic ids from the stamped price ladder.
       # Scheduled collections autopilot (off unless ENABLE_SCHEDULER=true):
       - key: ENABLE_SCHEDULER
         value: false
