@@ -31,9 +31,9 @@ jest.mock("lottie-web", () => ({
 }));
 
 const CATALOG = [
-  { id: "dataclean", name: "DataClean", amount_cents: 1299, display: "$12.99/mo", sellable: true, status: "live" },
-  { id: "security", name: "Security", amount_cents: 1899, display: "$18.99/mo", sellable: false, status: "coming_soon" },
-  { id: "bundle", name: "DataClean + Security", amount_cents: 2799, display: "$27.99/mo", sellable: false, status: "coming_soon", parts_total_cents: 3198, savings_cents: 399 },
+  { id: "dataclean", name: "Empire Digital Data Clean", amount_cents: 1299, display: "$12.99/mo", sellable: true, status: "live" },
+  { id: "security", name: "Empire Security Suite", amount_cents: 1899, display: "$18.99/mo", sellable: false, status: "coming_soon" },
+  { id: "bundle", name: "Empire Digital Data Clean + Empire Security Suite", amount_cents: 2799, display: "$27.99/mo", sellable: false, status: "coming_soon", parts_total_cents: 3198, savings_cents: 399 },
 ];
 
 const status = (over = {}) => ({

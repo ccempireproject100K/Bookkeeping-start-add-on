@@ -445,7 +445,7 @@ def test_pricing_config_carries_the_bundle_with_honest_flags():
     assert len(cfg["bundles"]) == 1
     bundle = cfg["bundles"][0]
     assert bundle["id"] == "dataclean-security"
-    assert bundle["name"] == "DataClean + Security"
+    assert bundle["name"] == "Empire Digital Data Clean + Empire Security Suite"
     # The stamped bundle price (2026-11-04): $27.99 against parts of
     # $31.98 — the $3.99 saving is computed from the ladder.
     assert bundle["monthly_price_cents"] == 2799
