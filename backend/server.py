@@ -8,21 +8,30 @@ from fastapi import FastAPI, APIRouter
 from starlette.middleware.cors import CORSMiddleware
 
 from db import db, get_client
+from lib.cors import cors_origin_regex, cors_origins
 from lib.ratelimit import RateLimitMiddleware
-from lib.security_headers import SecurityHeadersMiddleware
+from lib.security_headers import ContentSecurityPolicyMiddleware, SecurityHeadersMiddleware
+from routers import plans
+from routers import referrals
+from routers import password_reset
 from routers import (auth, federated_auth, ledger, products, pos, invoices, cashclose, dashboard,
-                     bills, aging, giftcards, commissions, customers, jobs,
+                     pdftools, onboarding, welcome_gift, trial, guide, importer, autopay, taxpacket, dedupe,
+                     bills, billing, aging, giftcards, commissions, customers, jobs,
                      banking, vendors, reports, estimates,
                      recurring_invoices, reminders, backup, bankfeed, copilot,
                      time, portal, payroll, budget, tax, sales_tax, edition, totp, audit,
                      webauthn, alerts, invites, receipts, mileage, collections,
                      simulator, subcompliance, cpa, pulse, pricing, taxforecast,
-                     playground, combo, kpis, benchmarks, voice, taxposture,
+                     playground, combo, kpis, benchmarks, voice, voice_transcribe, taxposture,
                      whitelabel, entities, cleanup, purchase_orders,
-                     fx, market_packs)
+                     fx, market_packs, cfdi, integrations, marketplace,
+                     developers, invoice_payments, procurement_sync,
+                     dataclean_api, dataclean_admin, dataclean_jobs,
+                     dataclean_connectors, dataclean_billing,
+                     integration_events, platform_entitlements)
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("barbers_ledger")
+logger = logging.getLogger("mindatease")
 
 app = FastAPI(title="Mind at Ease Solutions — Books API")
 api_router = APIRouter(prefix="/api")
@@ -43,9 +52,10 @@ async def health():
         return {"db": "error", "detail": str(e)}
 
 
-for r in (auth.router, federated_auth.router, ledger.router, products.router, pos.router,
+for r in (auth.router, federated_auth.router, password_reset.router, ledger.router, products.router, pos.router,
+          referrals.router,
           invoices.router, cashclose.router, dashboard.router,
-          bills.router, aging.router, giftcards.router, commissions.router,
+          bills.router, billing.router, aging.router, giftcards.router, commissions.router,
           customers.router, jobs.router, banking.router, vendors.router,
           reports.router, estimates.router,
           recurring_invoices.router, reminders.router, backup.router,
@@ -56,29 +66,76 @@ for r in (auth.router, federated_auth.router, ledger.router, products.router, po
           invites.router, receipts.router, mileage.router, collections.router,
           simulator.router, subcompliance.router, cpa.router, pulse.router,
           pricing.router, taxforecast.router, playground.router, combo.router,
-          kpis.router, benchmarks.router, voice.router, taxposture.router,
+          kpis.router, benchmarks.router, voice.router, voice_transcribe.router, taxposture.router,
           whitelabel.router, entities.router, cleanup.router,
           purchase_orders.router, fx.router, fx.currencies_router,
-          market_packs.router):
+          market_packs.router, cfdi.router, integrations.router,
+          marketplace.router, developers.router, invoice_payments.router,
+          procurement_sync.router,
+          pdftools.router, onboarding.router, welcome_gift.router, trial.router, guide.router, importer.router, autopay.router,
+          taxpacket.router, dedupe.router,
+          dataclean_api.router, dataclean_admin.router,
+          dataclean_jobs.router,
+          dataclean_connectors.router, dataclean_billing.router,
+          integration_events.router, platform_entitlements.router):
     api_router.include_router(r)
+api_router.include_router(plans.router)
 
 app.include_router(api_router)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[os.environ.get("FRONTEND_URL", "http://localhost:3000")],
+    allow_origins=cors_origins(),
+    allow_origin_regex=cors_origin_regex(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 app.add_middleware(RateLimitMiddleware)
 app.add_middleware(SecurityHeadersMiddleware)
+# --- security-hardening (2026-10-16): CSP middleware, strictly additive block.
+# Keep this block intact; other agents may add their own middleware above/below.
+app.add_middleware(ContentSecurityPolicyMiddleware)
+# --- end security-hardening
 
 
 @app.on_event("startup")
 async def startup():
+    # Fail fast on a weak signing secret, before serving a single request.
+    from lib.auth import check_jwt_secret
+    check_jwt_secret()
+    # Fail fast on a half-configured receipt store: BOOKS_STORAGE_BACKEND=r2
+    # with any BOOKS_R2_* value missing must crash the boot loudly, never
+    # silently fall back to this host's ephemeral disk (STORAGE.md).
+    from lib.receipt_storage import build_receipt_storage
+    build_receipt_storage()
     indexes = [
+        # Empire referral ledger (B1-B3): person codes are globally
+        # unique; raw events dedupe on their deterministic key;
+        # earnings are one per (product, payment); a payout batch key
+        # (Stripe batch / TC migration) can land exactly once. The
+        # stripe_webhook_events unique index below is shared by both
+        # Stripe webhook endpoints (same collection, same unique key,
+        # per-endpoint claim shapes; see REFERRAL_HOST_BUILD.md).
+        (db.empire_persons, "code", {"unique": True}),
+        (db.empire_persons, "emails", {}),
+        (db.referral_events, "dedupe_key", {"unique": True}),
+        (db.referral_attributions, "id", {"unique": True}),
+        (db.referral_earnings, "id", {"unique": True}),
+        (db.referral_earnings, [("referrer_id", 1), ("product", 1)], {}),
+        # Summary reads (aggregation-backed since the referral perf
+        # fix): per-site paying counts group by referred person, the
+        # pending-adjustment sums and the frozen check key off
+        # (referrer, product[, status]).
+        (db.referral_earnings, [("referrer_id", 1), ("product", 1), ("referred_id", 1)], {}),
+        (db.referral_adjustments, [("referrer_id", 1), ("product", 1), ("status", 1)], {}),
+        (db.referral_disputes, [("referrer_id", 1), ("status", 1)], {}),
+        (db.referral_payouts, "batch_key", {"unique": True}),
+        (db.referral_pay_batches, "id", {"unique": True}),
+        (db.referral_payout_queue, [("referrer_id", 1), ("status", 1)], {}),
         (db.users, "email", {"unique": True}),
+        # Federated sign-in (PR #212): provider subject lookup + the
+        # shared identities link list stamped by create_workspace.
         (db.users, "google_sub", {"unique": True, "sparse": True}),
         (db.users, [("identities.provider", 1), ("identities.provider_user_id", 1)], {}),
         (db.accounts, [("tenant_id", 1), ("code", 1)], {"unique": True}),
@@ -89,6 +146,68 @@ async def startup():
         (db.bank_transactions, [("tenant_id", 1), ("dedupe_hash", 1)], {"unique": True}),
         (db.bank_accounts, [("tenant_id", 1), ("gl_code", 1)], {}),
         (db.rates, [("base", 1), ("quote", 1), ("date", 1)], {"unique": True}),
+        # Momo sync: idempotency records are unique per (tenant, key) —
+        # this index is what makes concurrent duplicate pushes safe.
+        (db.idempotency_records, [("tenant_id", 1), ("key", 1)], {"unique": True}),
+        (db.idempotency_records, [("tenant_id", 1), ("updated_at", -1)], {}),
+        # Integration credentials: client_id is the global lookup key.
+        (db.integration_credentials, "client_id", {"unique": True}),
+        (db.integration_credentials, [("tenant_id", 1), ("created_at", -1)], {}),
+        # sync_key stamps let an interrupted sync retry find its resource.
+        (db.customers, [("tenant_id", 1), ("sync_key", 1)], {}),
+        (db.invoices, [("tenant_id", 1), ("sync_key", 1)], {}),
+        # Procurement sync (contract addendum 2026-11-05, v1.1): bills
+        # carry the same sync_key stamp; (source, source_bill_id) is the
+        # natural dedupe anchor, and external_ref resolves vendors/jobs.
+        (db.bills, [("tenant_id", 1), ("sync_key", 1)], {}),
+        (db.bills, [("tenant_id", 1), ("source", 1), ("source_bill_id", 1)], {}),
+        (db.vendors, [("tenant_id", 1), ("external_ref", 1)], {}),
+        (db.jobs, [("tenant_id", 1), ("external_ref", 1)], {}),
+        (db.job_costs, [("tenant_id", 1), ("bill_id", 1)], {}),
+        # Invoice payments (Stripe Connect): webhook reconciliation is
+        # idempotent by event id — the unique index is the enforcement.
+        (db.stripe_webhook_events, "id", {"unique": True}),
+        (db.payment_transactions, "session_id", {}),
+        (db.payment_transactions, "payment_intent_id", {}),
+        (db.tenants, "stripe_connect.account_id", {}),
+        # Marketplace / developers: API keys are looked up by hash;
+        # webhook subscriptions + deliveries are tenant-scoped, and the
+        # delivery retry sweep scans by (status, next_retry_at).
+        (db.api_keys, "key_hash", {"unique": True}),
+        (db.api_keys, [("tenant_id", 1), ("created_at", -1)], {}),
+        (db.webhook_subscriptions, [("tenant_id", 1), ("created_at", -1)], {}),
+        (db.webhook_deliveries, [("tenant_id", 1), ("created_at", -1)], {}),
+        (db.webhook_deliveries, [("status", 1), ("next_retry_at", 1)], {}),
+        # DataClean external API (Phase 3): keys are looked up by hash;
+        # usage metering rows are read per tenant and per key.
+        (db.dataclean_api_keys, "key_hash", {"unique": True}),
+        (db.dataclean_api_keys, [("tenant_id", 1), ("created_at", -1)], {}),
+        (db.dataclean_api_usage, [("tenant_id", 1), ("created_at", -1)], {}),
+        (db.dataclean_api_usage, [("key_id", 1), ("created_at", -1)], {}),
+        # DataClean power-up: stored lists, batch jobs, lookup cache.
+        (db.dataclean_lists, [("tenant_id", 1), ("created_at", -1)], {}),
+        (db.dataclean_list_records, [("tenant_id", 1), ("list_id", 1)], {}),
+        (db.dataclean_list_suggestions, [("tenant_id", 1), ("list_id", 1), ("status", 1)], {}),
+        (db.dataclean_list_merges, [("tenant_id", 1), ("list_id", 1)], {}),
+        (db.dataclean_list_schedules, [("tenant_id", 1), ("next_run_at", 1)], {}),
+        (db.dataclean_jobs, [("tenant_id", 1), ("created_at", -1)], {}),
+        (db.dataclean_jobs, [("status", 1), ("created_at", 1)], {}),
+        (db.dataclean_job_artifacts, [("tenant_id", 1), ("job_id", 1), ("seq", 1)], {}),
+        (db.dataclean_lookup_cache, [("tenant_id", 1), ("kind", 1), ("value_hash", 1)], {"unique": True}),
+        (db.dataclean_connector_tokens, [("tenant_id", 1), ("provider", 1)], {"unique": True}),
+        # Subscription billing (Stripe): the billing webhook shares the
+        # stripe_webhook_events unique index above; the referral outbox
+        # holds exactly one record per product payment (the empire
+        # referral ledger ingest reads it).
+        (db.referral_payment_events, [("product", 1), ("payment_id", 1)], {"unique": True}),
+        (db.tenants, "billing.subscription_id", {}),
+        (db.tenants, "billing.stripe_customer_id", {}),
+        # DataClean billing (Stripe): webhook resolution reads the
+        # tenant by this flow's own ids; the product catalog mapping
+        # is keyed by product id.
+        (db.tenants, "dataclean_billing.subscription_id", {}),
+        (db.tenants, "dataclean_billing.stripe_customer_id", {}),
+        (db.dataclean_stripe_products, "product", {"unique": True}),
     ]
     for coll, keys, opts in indexes:
         try:
@@ -108,7 +227,7 @@ async def startup():
         await _sched.start()
     except Exception as e:
         logger.warning(f"Scheduler not started: {e}")
-    logger.info("Barber's Ledger started; indexes ensured.")
+    logger.info("Mind at Ease Solutions — Books API started; indexes ensured.")
 
 
 @app.on_event("shutdown")
