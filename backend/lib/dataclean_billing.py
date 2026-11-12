@@ -26,8 +26,9 @@ imported LAZILY, only after the gate. Keys are read from the
 environment at call time and never logged.
 
 Environment (production):
-  STRIPE_SECRET_KEY               platform secret (sk_test_… in test
-                                  mode, sk_live_… live) — required
+  STRIPE_SECRET_KEY               platform secret (sk_/rk_ test… in
+                                  test mode, sk_/rk_ live… live) —
+                                  required
   STRIPE_DATACLEAN_WEBHOOK_SECRET signing secret for THIS flow's
                                   webhook endpoint (falls back to
                                   STRIPE_WEBHOOK_SECRET)
@@ -106,6 +107,15 @@ def publishable_key() -> str:
 
 def configured() -> bool:
     return bool(secret())
+
+
+def billing_mode() -> str:
+    """"live"/"test" label for the configured key — display +
+    honesty only (charging is gated by configured(), never by this
+    label). Delegates to lib/dataclean_api.stripe_key_mode, the
+    single implementation, so a restricted live key (rk_live_…)
+    reads "live" exactly like a full one (sk_live_…)."""
+    return dca.billing_mode()
 
 
 def enforcement_on() -> bool:

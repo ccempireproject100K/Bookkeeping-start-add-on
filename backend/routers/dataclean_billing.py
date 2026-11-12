@@ -101,7 +101,7 @@ async def dataclean_billing_status(
     view["entitled"] = entitled
     return {
         "configured": dcb.configured(),
-        "billing_mode": "live" if (dcb.secret().startswith("sk_live_")) else "test",
+        "billing_mode": dcb.billing_mode(),
         "publishable_key": dcb.publishable_key(),
         "enforcement_on": dcb.enforcement_on(),
         "billing": view,

@@ -254,6 +254,42 @@ def _sub_obj(**over):
     return obj
 
 
+# ---------------- billing_mode: live keys, BOTH secret shapes ----------------
+def test_stripe_key_mode_prefixes():
+    # Stripe issues full (sk_…) and restricted (rk_…) secrets; the
+    # owner's live secret is rk_live_…, so every surface must read
+    # it as live. Regression pin for the sk_-only checks that
+    # mislabeled the live deployment as test mode (2026-11-12).
+    assert DCA.stripe_key_mode("sk_live_abc") == "live"
+    assert DCA.stripe_key_mode("rk_live_abc") == "live"
+    assert DCA.stripe_key_mode("sk_test_abc") == "test"
+    assert DCA.stripe_key_mode("rk_test_abc") == "test"
+    assert DCA.stripe_key_mode("") == "test"
+    assert DCA.stripe_key_mode("pk_live_abc") == "test"  # not a secret
+
+
+def test_billing_mode_follows_the_configured_key(monkeypatch):
+    for key, mode in (("sk_live_abc", "live"), ("rk_live_abc", "live"),
+                      ("sk_test_abc", "test"), ("rk_test_abc", "test")):
+        monkeypatch.setenv("STRIPE_SECRET_KEY", key)
+        assert DCA.billing_mode() == mode
+        assert DCB.billing_mode() == mode
+    monkeypatch.delenv("STRIPE_SECRET_KEY", raising=False)
+    assert DCA.billing_mode() == "test"
+    assert DCB.billing_mode() == "test"
+
+
+def test_status_reports_live_for_restricted_live_key(monkeypatch):
+    async def _run():
+        _fx(monkeypatch)
+        _set_keys(monkeypatch)
+        monkeypatch.setenv("STRIPE_SECRET_KEY", "rk_live_abc")
+        out = await R.dataclean_billing_status(USER)
+        assert out["configured"] is True
+        assert out["billing_mode"] == "live"
+    asyncio.run(_run())
+
+
 # ---------------- the ladder + sellable flags ----------------
 def test_catalog_is_the_stamped_ladder(monkeypatch):
     _set_keys(monkeypatch)
