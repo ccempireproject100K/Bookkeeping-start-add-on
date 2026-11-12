@@ -100,7 +100,7 @@ describe("fallback bundle mirrors the backend bundle config", () => {
     expect(FALLBACK_PRICING.bundles).toHaveLength(1);
     const b = FALLBACK_PRICING.bundles[0];
     expect(b.id).toBe("dataclean-security");
-    expect(b.name).toBe("DataClean + Security");
+    expect(b.name).toBe("Empire Digital Data Clean + Empire Security Suite");
     // The owner-stamped ladder (2026-11-04): $27.99 against $31.98 in
     // parts — a computed $3.99 saving — and NOT sellable while the
     // security half is unbuilt.

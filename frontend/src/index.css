@@ -116,6 +116,18 @@ h1, h2, h3, h4, .font-display { font-family: 'Outfit', sans-serif; }
     0 12px 30px rgba(34,211,238,0.32);
 }
 
+/* Floating headlines (owner ask 2026-11-11): the two product names
+   bob gently — a few px over 5s, ease-in-out, alternating. Transform
+   only, so it never gates visibility; off under reduced motion. */
+@keyframes announce-float {
+  from { transform: translateY(0); }
+  to { transform: translateY(-6px); }
+}
+.announce-float { animation: announce-float 5s ease-in-out infinite alternate; }
+@media (prefers-reduced-motion: reduce) {
+  .announce-float { animation: none; }
+}
+
 /* Scroll reveal for the pricing halves (JS adds .reveal-in on view;
    no-JS / reduced-motion / no-IO all land on the visible state). */
 .reveal {

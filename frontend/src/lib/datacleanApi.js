@@ -82,13 +82,13 @@ export const FALLBACK_PRICING = {
   placeholder: false,
   billing_mode: "test",
   products: [
-    { id: "dataclean", name: "DataClean", monthly_price_cents: 1299, status: "live", built: true, available: true, sellable: true, placeholder: false },
-    { id: "security", name: "Security", monthly_price_cents: 1899, status: "coming_soon", built: false, available: false, sellable: false, placeholder: false },
+    { id: "dataclean", name: "Empire Digital Data Clean", monthly_price_cents: 1299, status: "live", built: true, available: true, sellable: true, placeholder: false },
+    { id: "security", name: "Empire Security Suite", monthly_price_cents: 1899, status: "coming_soon", built: false, available: false, sellable: false, placeholder: false },
   ],
   bundles: [
     {
       id: "dataclean-security",
-      name: "DataClean + Security",
+      name: "Empire Digital Data Clean + Empire Security Suite",
       monthly_price_cents: 2799,
       parts_total_cents: 3198,
       savings_cents: 399,
@@ -96,8 +96,8 @@ export const FALLBACK_PRICING = {
       status: "coming_soon",
       sellable: false,
       components: [
-        { id: "dataclean", name: "DataClean", status: "live", built: true, available: true },
-        { id: "security", name: "Security", status: "coming_soon", built: false, available: false },
+        { id: "dataclean", name: "Empire Digital Data Clean", status: "live", built: true, available: true },
+        { id: "security", name: "Empire Security Suite", status: "coming_soon", built: false, available: false },
       ],
     },
   ],

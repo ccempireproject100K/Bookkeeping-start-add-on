@@ -124,12 +124,12 @@ def products_config() -> list:
     remediation when it ships — never as guaranteed removal)."""
     built = security_built()
     return [
-        {"id": "dataclean", "name": "DataClean",
+        {"id": "dataclean", "name": "Empire Digital Data Clean",
          "monthly_price_cents": _env_int("DATACLEAN_PRICE_DATACLEAN_CENTS",
                                          DATACLEAN_PRICE_CENTS),
          "status": "live", "built": True, "available": True,
          "sellable": True, "placeholder": False},
-        {"id": "security", "name": "Security",
+        {"id": "security", "name": "Empire Security Suite",
          "monthly_price_cents": _env_int("DATACLEAN_PRICE_SECURITY_CENTS",
                                          SECURITY_PRICE_CENTS),
          "status": "live" if built else "coming_soon",
@@ -155,7 +155,7 @@ def bundle_config() -> list:
     sellable = bool(dc["available"] and sec["available"])
     return [{
         "id": "dataclean-security",
-        "name": "DataClean + Security",
+        "name": "Empire Digital Data Clean + Empire Security Suite",
         "monthly_price_cents": price,
         "parts_total_cents": parts,
         "savings_cents": parts - price,
@@ -163,9 +163,9 @@ def bundle_config() -> list:
         "status": "live" if sellable else "coming_soon",
         "sellable": sellable,
         "components": [
-            {"id": "dataclean", "name": "DataClean",
+            {"id": "dataclean", "name": "Empire Digital Data Clean",
              "status": dc["status"], "built": True, "available": True},
-            {"id": "security", "name": "Security",
+            {"id": "security", "name": "Empire Security Suite",
              "status": sec["status"], "built": sec["built"],
              "available": sec["available"]},
         ],

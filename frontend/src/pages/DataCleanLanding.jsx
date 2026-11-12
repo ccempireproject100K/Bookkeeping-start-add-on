@@ -255,7 +255,7 @@ export default function DataCleanLanding() {
                     {t("datacleanLanding.statusComingSoon")}
                   </span>)}
               </div>
-              <h3 className={`announce-3d mt-3 font-display text-5xl xl:text-6xl font-black uppercase leading-none ${accent.nameClass}`}>
+              <h3 className={`announce-3d announce-float mt-3 font-display font-black uppercase leading-none text-4xl xl:text-5xl ${accent.nameClass}`}>
                 {p.name}
               </h3>
               <HalfVisual productId={p.id} />
