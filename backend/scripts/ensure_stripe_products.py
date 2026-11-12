@@ -29,8 +29,7 @@ async def _main() -> int:
         return 2
     mapping = await dataclean_billing.ensure_products()
     print(json.dumps(mapping, indent=2, sort_keys=True))
-    mode = "live" if dataclean_billing.secret().startswith("sk_live_") \
-        else "test"
+    mode = dataclean_billing.billing_mode()
     print(f"\nProvisioned in Stripe {mode} mode. Optional env pinning:")
     for pid, row in sorted(mapping.items()):
         env = dataclean_billing.product_catalog()[pid]["price_env"]

@@ -106,12 +106,21 @@ def security_built() -> bool:
     return _env_bool("SECURITY_PRODUCT_BUILT", False)
 
 
+def stripe_key_mode(key: str) -> str:
+    """"live" when `key` is a live Stripe secret — full (sk_live_…)
+    or restricted (rk_live_…) alike — else "test" (sk_test_…,
+    rk_test_…, empty, or anything unrecognized). Stripe issues both
+    secret shapes; the owner's live secret is a restricted key, so
+    an sk_-only check would mislabel a live deployment as test."""
+    k = (key or "").strip()
+    return "live" if k.startswith(("sk_live_", "rk_live_")) else "test"
+
+
 def billing_mode() -> str:
     """"live" when the configured Stripe secret is a live key, else
     "test". Display + honesty only — lib/dataclean_billing.py does
     the actual key-gating before any Stripe call."""
-    key = (os.environ.get("STRIPE_SECRET_KEY") or "").strip()
-    return "live" if key.startswith("sk_live_") else "test"
+    return stripe_key_mode(os.environ.get("STRIPE_SECRET_KEY") or "")
 
 
 def products_config() -> list:
