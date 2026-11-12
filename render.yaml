@@ -6,11 +6,18 @@ services:
   - type: web
     name: bookkeeping-api
     runtime: python
-    buildCommand: pip install -r backend/requirements.txt
+    # The tax engine (tax-engine/, TypeScript) must be compiled for the
+    # tax-packet and welcome-gift estimates; without it they answer 503
+    # "engine_not_built". Render's native runtimes include Node.js.
+    buildCommand: pip install -r backend/requirements.txt && cd tax-engine && npm ci --include=dev && npm run build
     startCommand: uvicorn server:app --host 0.0.0.0 --port $PORT --app-dir backend
     envVars:
       - key: PYTHON_VERSION
         value: 3.12.0
+      # Node runs the tax engine at build and request time; pin a
+      # supported release instead of whatever Render defaults to.
+      - key: NODE_VERSION
+        value: "22"
       - key: MONGO_URL
         sync: false
       - key: DB_NAME

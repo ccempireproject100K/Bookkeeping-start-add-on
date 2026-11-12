@@ -3,15 +3,17 @@ import os
 from datetime import datetime, timezone, timedelta
 from typing import Optional
 from fastapi import APIRouter, Response, HTTPException, Depends, Request
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, field_validator
 
 from db import db
+from lib.audit import append_audit
 from lib.base import Scoped, new_id, now_iso
 from lib.auth import (
     hash_password, verify_password, create_access_token,
     set_session_cookie, clear_session_cookie, get_current_user, require,
 )
 from lib.coa import seed_coa
+from lib.plans import validate_plan, new_trial_fields
 from lib.pii import last4, pii_decrypt, pii_encrypt
 from lib.pwned import is_pwned
 from lib.devices import check_device
@@ -25,6 +27,27 @@ class RegisterBody(BaseModel):
     name: str
     shop_name: str = "My Shop"
     niche_id: Optional[str] = None
+    market_code: Optional[str] = None  # one of the 46 market packs; validated in create_workspace
+    plan: Optional[str] = None  # light | medium | heavy; default light + 14-day trial
+    trial_door: Optional[str] = None  # nocard | card — the two trial doors (lib/trial.py)
+    ref: Optional[str] = None  # empire referral code; stored on the tenant, first-touch only
+
+    @field_validator("password")
+    @classmethod
+    def validate_password(cls, password: str) -> str:
+        # bcrypt hashes only the first 72 bytes; reject longer values rather than
+        # silently treating distinct supplied passwords as equivalent.
+        if not 12 <= len(password.encode("utf-8")) <= 72:
+            raise ValueError("Password must be between 12 and 72 UTF-8 bytes")
+        return password
+
+    @field_validator("name", "shop_name")
+    @classmethod
+    def validate_names(cls, value: str) -> str:
+        value = value.strip()
+        if not value or len(value) > 120:
+            raise ValueError("Name must be between 1 and 120 characters")
+        return value
 
 
 class LoginBody(BaseModel):
@@ -49,7 +72,7 @@ def _public(user: dict) -> dict:
 
 
 async def _audit(user, action, entity, entity_id, details=None):
-    await db.audit_log.insert_one({
+    await append_audit(db, {
         "id": new_id(), "tenant_id": user["tenant_id"],
         "actor_id": user["id"], "actor_name": user.get("name"),
         "actor_role": user.get("role"), "action": action, "entity": entity,
@@ -57,7 +80,7 @@ async def _audit(user, action, entity, entity_id, details=None):
     })
 
 
-async def create_workspace(email, password, name, shop_name, role="owner", tenant_id=None, commission_rate=0, niche_id=None, identity=None):
+async def create_workspace(email, password, name, shop_name, role="owner", tenant_id=None, commission_rate=0, niche_id=None, plan=None, market_code=None, ref=None, trial_door=None, identity=None):
     """Create a workspace + its first user. THE operator-grant path:
     ordinary registration IS the operator grant in Bookkeeping — the
     first user of a new workspace is role "owner", and PERMISSIONS maps
@@ -72,19 +95,68 @@ async def create_workspace(email, password, name, shop_name, role="owner", tenan
     ``identities`` link list, with a ``google_sub`` mirror for Google.
     """
     from lib.niches import get_pack, DEFAULT_NICHE
+    from lib.markets import get_market
+    from lib.currencies import is_supported
     email = email.lower().strip()
     if await db.users.find_one({"email": email}):
         raise HTTPException(status_code=409, detail="An account with this email already exists")
     pack = get_pack(niche_id)
     niche_id = pack.get("id") or DEFAULT_NICHE
+    # A market is optional, but a supplied one must be a real market pack —
+    # no silent fallback to an invented default (mirrors the resolver).
+    market = None
+    if market_code:
+        market = get_market(market_code)
+        if market is None:
+            raise HTTPException(status_code=400, detail="Unknown market")
+    stored_plan = validate_plan(plan) if plan else "light"
     if tenant_id is None:
         tenant_id = new_id()
-        await db.tenants.insert_one({
+        # Seed the books' base currency from the market's currency at
+        # creation only, and only when the multi-currency system supports
+        # that currency — otherwise the USD default stands (the market's
+        # own currency still rides on the tenant's market face).
+        base_currency = "USD"
+        if market and is_supported(market.get("currency")):
+            base_currency = market["currency"]
+        tenant = {
             "id": tenant_id, "name": shop_name, "niche_id": niche_id,
+            "market_code": market["code"] if market else None,
             "settings": {"inventory_enabled": True, "sales_tax_rate": 0.0725,
-                         "double_entry_mode": "primary", "base_currency": "USD"},
+                         "double_entry_mode": "primary", "base_currency": base_currency},
             "created_at": now_iso(),
-        })
+        }
+        door = trial_door if trial_door in ("nocard", "card") else "nocard"
+        tenant.update(new_trial_fields(door))   # Light + 14-day Medium trial, chosen door
+        tenant["plan"] = stored_plan            # explicit signup choice wins on expiry
+        # Referral attribution (empire program): first-touch wins — the
+        # code is stamped once, here at tenant creation, and no later
+        # signup or call may overwrite it. Codes are TC-issued 8-char
+        # uppercase; normalize case/space so a pasted link always matches.
+        code = ref.strip().upper() if isinstance(ref, str) else ""
+        if code:
+            tenant["referred_by_code"] = code[:64]
+            # Friend benefit (R-3): recorded at signup through the
+            # link. tier_up runs 14 days from plan start at one tier
+            # above the signup plan; a top-tier (heavy) signup gets
+            # half off its first two paid months instead. The tier_up
+            # is consumed by lib/plans.effective_plan.
+            from datetime import datetime as _dt, timedelta as _td, timezone as _tz
+            _ladder = ("light", "medium", "heavy")
+            _idx = _ladder.index(stored_plan) if stored_plan in _ladder else 0
+            _start = _dt.now(_tz.utc)
+            if _idx == len(_ladder) - 1:
+                tenant["friend_benefit"] = {
+                    "type": "half_off", "signup_plan": stored_plan,
+                    "months": 2, "percent_off": 50,
+                    "starts_at": _start.isoformat()}
+            else:
+                tenant["friend_benefit"] = {
+                    "type": "tier_up", "signup_plan": stored_plan,
+                    "tier": _ladder[_idx + 1], "days": 14,
+                    "starts_at": _start.isoformat(),
+                    "ends_at": (_start + _td(days=14)).isoformat()}
+        await db.tenants.insert_one(tenant)
         await seed_coa(Scoped(db.accounts, tenant_id), niche_id)
     if password is None:
         # Federated signup: no local password. Hash random material so
@@ -116,8 +188,13 @@ async def register(body: RegisterBody, response: Response):
         raise HTTPException(
             400, "This password has appeared in a data breach. "
                  "Please choose a different one.")
+    if body.trial_door is not None and body.trial_door not in ("nocard", "card"):
+        raise HTTPException(
+            400, "trial_door must be 'nocard' or 'card' — the two trial doors.")
     user = await create_workspace(body.email, body.password, body.name, body.shop_name,
-                                  niche_id=body.niche_id)
+                                  niche_id=body.niche_id, plan=body.plan,
+                                  market_code=body.market_code, ref=body.ref,
+                                  trial_door=body.trial_door)
     await _issue(response, user)
     return _public(user)
 
@@ -294,6 +371,7 @@ async def migrate_encrypt_pii(user: dict = Depends(require("ledger:admin"))):
     - contractors.tax_id -> tax_id_enc + tax_id_last4 (plaintext then unset)
     - contractors.tax_id_enc holding PLAINTEXT (pre-encryption router wrote it
       directly) -> encrypted in place; Fernet tokens start with "gAAAAA"
+    - vendors.tax_id -> tax_id_enc + tax_id_last4 (plaintext then unset)
     - users.payout_account / payout_routing -> payout_*_enc + *_last4 (plaintext then unset)
     Run after any agent stored plaintext; safe to run repeatedly.
     """
@@ -322,6 +400,17 @@ async def migrate_encrypt_pii(user: dict = Depends(require("ledger:admin"))):
             {"_id": c["_id"]},
             {"$set": {"tax_id_enc": pii_encrypt(enc), "tax_id_last4": last4(enc)}})
         contractors_n += 1
+    vendors_n = 0
+    async for v in db.vendors.find(
+            {"tax_id": {"$exists": True, "$ne": ""}}):
+        tax_id = (v.get("tax_id") or "").strip()
+        if not tax_id:
+            continue
+        await db.vendors.update_one(
+            {"_id": v["_id"]},
+            {"$set": {"tax_id_enc": pii_encrypt(tax_id), "tax_id_last4": last4(tax_id)},
+             "$unset": {"tax_id": ""}})
+        vendors_n += 1
     users_n = 0
     async for u in db.users.find({"$or": [{"payout_account": {"$exists": True, "$ne": ""}},
                                           {"payout_routing": {"$exists": True, "$ne": ""}}]}):
@@ -344,8 +433,9 @@ async def migrate_encrypt_pii(user: dict = Depends(require("ledger:admin"))):
             await db.users.update_one({"_id": u["_id"]}, op)
             users_n += 1
     await _audit(user, "pii.migrate", "system", "pii",
-                 {"contractors": contractors_n, "users": users_n})
-    return {"ok": True, "contractors_encrypted": contractors_n, "users_encrypted": users_n}
+                 {"contractors": contractors_n, "vendors": vendors_n, "users": users_n})
+    return {"ok": True, "contractors_encrypted": contractors_n,
+            "vendors_encrypted": vendors_n, "users_encrypted": users_n}
 
 
 class SwitchBody(BaseModel):
