@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { animate, useInView } from "framer-motion";
 import {
-  Sparkles, Copy, ShieldCheck, Gauge, ArrowRight, KeyRound, UploadCloud, Wand2,
+  Sparkles, Copy, ShieldCheck, Shield, Check, Gauge, ArrowRight, KeyRound, UploadCloud, Wand2,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
@@ -44,6 +44,104 @@ function SavingsTicker({ bundle }) {
     </span>
   );
 }
+
+/** Scroll reveal (design pass 2026-11-11): the pricing halves rise in
+ * as they enter view. Visible by default wherever IntersectionObserver
+ * is unavailable or the user prefers reduced motion — content is never
+ * gated on the animation. */
+function Reveal({ children, delay = 0, className = "" }) {
+  const ref = useRef(null);
+  const [shown, setShown] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (!("IntersectionObserver" in window)
+      || window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches) {
+      setShown(true);
+      return;
+    }
+    const io = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) { setShown(true); io.disconnect(); }
+    }, { threshold: 0.12 });
+    io.observe(el);
+    // Hard fallback: content must never stay hidden behind the reveal —
+    // full-page captures, print, and odd embed contexts get it too.
+    const fallback = setTimeout(() => setShown(true), 1200);
+    return () => { io.disconnect(); clearTimeout(fallback); };
+  }, []);
+  return (
+    <div ref={ref} style={{ transitionDelay: `${delay}ms` }}
+      className={`reveal ${shown ? "reveal-in" : ""} ${className}`}>
+      {children}
+    </div>
+  );
+}
+
+/** Per-half dynamic visual (design pass 2026-11-11) — pure CSS/SVG, no
+ * image weight. Security: a shield under a sweeping scan line.
+ * DataClean: messy, duplicated rows on the left resolving into aligned,
+ * checked rows on the right. Decorative only. */
+function HalfVisual({ productId }) {
+  if (productId === "security") {
+    return (
+      <div aria-hidden="true" className="relative mt-5 h-32 rounded-xl overflow-hidden border border-cyan-400/25 bg-[radial-gradient(120px_80px_at_50%_45%,rgba(34,211,238,0.22),transparent_70%)]">
+        <div className="absolute inset-0 flex items-center justify-center">
+          <Shield size={76} strokeWidth={1.4} className="text-cyan-300 drop-shadow-[0_6px_16px_rgba(34,211,238,0.45)]" />
+          <Check size={30} strokeWidth={3} className="absolute text-cyan-100" />
+        </div>
+        <div className="scan-line absolute left-[8%] right-[8%] h-[3px] rounded-full bg-cyan-300/80 shadow-[0_0_14px_3px_rgba(34,211,238,0.55)]" />
+        <div className="absolute inset-x-6 bottom-2.5 flex justify-between">
+          {[0, 1, 2, 3, 4].map((i) => (
+            <span key={i} className="h-1 w-6 rounded-full bg-cyan-400/30" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+  const messy = [
+    { w: "72%", r: "-2deg", tone: "bg-gray-500/50" },
+    { w: "88%", r: "1.5deg", tone: "bg-gray-500/40" },
+    { w: "64%", r: "-1deg", tone: "bg-amber-400/50" },
+    { w: "80%", r: "2deg", tone: "bg-gray-500/40" },
+  ];
+  const clean = ["92%", "92%", "92%", "92%"];
+  return (
+    <div aria-hidden="true" className="relative mt-5 h-32 rounded-xl overflow-hidden border border-amber-400/25 bg-[radial-gradient(120px_80px_at_50%_45%,rgba(245,158,11,0.18),transparent_70%)] px-4 py-3.5 flex items-center gap-2.5">
+      <div className="flex-1 space-y-2">
+        {messy.map((row, i) => (
+          <div key={i} style={{ width: row.w, transform: `rotate(${row.r})` }}
+            className={`h-3.5 rounded ${row.tone}`} />
+        ))}
+      </div>
+      <ArrowRight size={18} className="shrink-0 text-amber-300" />
+      <div className="flex-1 space-y-2">
+        {clean.map((w, i) => (
+          <div key={i} style={{ width: w }} className="row-shine flex items-center justify-end h-3.5 rounded bg-emerald-400/70 pr-1">
+            <Check size={11} strokeWidth={3.5} className="text-emerald-950" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** Per-half accent language (design pass 2026-11-11): DataClean keeps
+ * the house amber; Security takes a distinct cyan so the two halves
+ * read as two products at a glance. */
+const HALF_ACCENTS = {
+  dataclean: {
+    nameClass: "announce-amber",
+    glow: "shadow-[0_24px_60px_-24px_rgba(245,158,11,0.45)]",
+    bar: "from-amber-500 via-amber-300 to-amber-600",
+    border: "hover:border-amber-400/50",
+  },
+  security: {
+    nameClass: "announce-cyan",
+    glow: "shadow-[0_24px_60px_-24px_rgba(34,211,238,0.42)]",
+    bar: "from-cyan-500 via-cyan-300 to-cyan-600",
+    border: "hover:border-cyan-400/50",
+  },
+};
 
 /** DataClean storefront / pricing page (Phase 3 shell). Built into the
  * app like every other page; it goes live only when the whole stack
@@ -141,11 +239,14 @@ export default function DataCleanLanding() {
               {t("datacleanLanding.placeholderNote")}
             </span>
           </p>)}
-        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4 max-w-3xl mx-auto">
-          {(pricing.products || []).map((p) => (
-            <article key={p.id} className="card-surface p-6 flex flex-col" data-testid={`landing-plan-${p.id}`}>
-              <div className="flex items-center justify-between gap-3">
-                <h3 className="font-display font-semibold">{p.name}</h3>
+        <div className="tilt-scene mt-8 grid grid-cols-1 md:grid-cols-2 gap-5 max-w-4xl mx-auto">
+          {(pricing.products || []).map((p, i) => {
+            const accent = HALF_ACCENTS[p.id] || HALF_ACCENTS.dataclean;
+            return (
+            <Reveal key={p.id} delay={i * 120} className="h-full">
+            <article className={`card-surface tilt-card relative overflow-hidden p-6 pt-7 flex flex-col h-full ${accent.glow} ${accent.border}`} data-testid={`landing-plan-${p.id}`}>
+              <div aria-hidden="true" className={`absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r ${accent.bar}`} />
+              <div className="flex items-center justify-end gap-3">
                 {productState(p) === "available" ? (
                   <span className="inline-block text-xs text-emerald-300 bg-emerald-500/10 border border-emerald-500/30 rounded-full px-2.5 py-1">
                     {t("datacleanLanding.statusAvailableNow")}
@@ -154,7 +255,11 @@ export default function DataCleanLanding() {
                     {t("datacleanLanding.statusComingSoon")}
                   </span>)}
               </div>
-              <div className="mt-3 font-mono text-3xl font-semibold">
+              <h3 className={`announce-3d mt-3 font-display text-5xl xl:text-6xl font-black uppercase leading-none ${accent.nameClass}`}>
+                {p.name}
+              </h3>
+              <HalfVisual productId={p.id} />
+              <div className="mt-5 font-mono text-4xl font-semibold">
                 {priceLabel(p.monthly_price_cents)}
                 <span className="text-sm text-gray-500"> {t("datacleanLanding.perMonth")}</span>
               </div>
@@ -169,12 +274,16 @@ export default function DataCleanLanding() {
                 <span className="mt-5 inline-flex justify-center items-center h-10 px-4 rounded-lg border border-[#2a3040] text-sm text-gray-500">
                   {t("datacleanLanding.statusComingSoon")}
                 </span>)}
-            </article>))}
+            </article>
+            </Reveal>);
+          })}
         </div>
         {(pricing.bundles || []).map((b) => (
-          <article key={b.id} className="card-surface p-6 mt-4 relative overflow-hidden border-amber-500/40" data-testid={`landing-bundle-${b.id}`}>
+          <Reveal key={b.id} className="mt-4">
+          <article className="card-surface p-6 relative overflow-hidden border-amber-500/40 shadow-[0_24px_60px_-24px_rgba(245,158,11,0.35)]" data-testid={`landing-bundle-${b.id}`}>
+            <div aria-hidden="true" className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-amber-500 via-cyan-400 to-cyan-600" />
             <div className="flex flex-wrap items-baseline justify-between gap-3">
-              <h3 className="font-display font-semibold flex items-center gap-2">
+              <h3 className="font-display text-2xl font-extrabold tracking-tight flex items-center gap-2">
                 {b.name}
                 <span className="inline-block text-xs text-amber-300 bg-amber-500/10 border border-amber-500/30 rounded-full px-2.5 py-1">
                   {t("datacleanLanding.bestValue")}
@@ -213,7 +322,8 @@ export default function DataCleanLanding() {
               <span className="mt-5 inline-flex justify-center items-center h-10 px-4 rounded-lg border border-[#2a3040] text-sm text-gray-500">
                 {t("datacleanLanding.statusComingSoon")}
               </span>)}
-          </article>))}
+          </article>
+          </Reveal>))}
         {pricing.billing_mode === "test" && (
           <p className="mt-4 text-center text-xs text-gray-600">{t("datacleanLanding.testModeNote")}</p>)}
       </section>

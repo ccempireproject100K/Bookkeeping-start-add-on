@@ -184,7 +184,8 @@ async def startup():
         (db.dataclean_api_keys, [("tenant_id", 1), ("created_at", -1)], {}),
         (db.dataclean_api_usage, [("tenant_id", 1), ("created_at", -1)], {}),
         (db.dataclean_api_usage, [("key_id", 1), ("created_at", -1)], {}),
-        # DataClean power-up: stored lists, batch jobs, lookup cache.
+        # DataClean stored lists, batch jobs, lookup cache, and
+        # connector tokens.
         (db.dataclean_lists, [("tenant_id", 1), ("created_at", -1)], {}),
         (db.dataclean_list_records, [("tenant_id", 1), ("list_id", 1)], {}),
         (db.dataclean_list_suggestions, [("tenant_id", 1), ("list_id", 1), ("status", 1)], {}),
