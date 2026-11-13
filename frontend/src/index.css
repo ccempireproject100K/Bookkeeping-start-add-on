@@ -177,3 +177,32 @@ h1, h2, h3, h4, .font-display { font-family: 'Outfit', sans-serif; }
   outline-offset: 2px;
   box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.18);
 }
+
+/* ============================================================
+   DESIGN STAGE 2 — BOOKKEEPING (2026-11-12)
+   Three product-tied passes, CSS-only, in this shared stylesheet
+   so they land on every page. Books' world: the ruled ledger
+   page, the double-entry column, and posting an entry.
+   ============================================================ */
+
+/* PASS 1 — "Ruled Ledger Paper" (tie: a ledger page is never a
+   blank sheet — faint horizontal ruling runs down the page, so
+   no surface is a blank wall and no region an unstyled void).
+   Layered with the existing amber/blue glows on .app-bg; page
+   roots that paint their own solid background opt in via the
+   .ledger-page class. Pure background gradients — no images,
+   no layout change, negligible paint cost on a phone. */
+.ledger-page {
+  background:
+    radial-gradient(1200px 600px at 80% -10%, rgba(217,119,6,0.08), transparent 60%),
+    radial-gradient(900px 500px at -10% 10%, rgba(37,99,235,0.06), transparent 55%),
+    repeating-linear-gradient(0deg, rgba(226,232,240,0.05) 0 1px, transparent 1px 34px),
+    #0B0D10;
+}
+.app-bg {
+  background:
+    radial-gradient(1200px 600px at 80% -10%, rgba(217,119,6,0.08), transparent 60%),
+    radial-gradient(900px 500px at -10% 10%, rgba(37,99,235,0.06), transparent 55%),
+    repeating-linear-gradient(0deg, rgba(226,232,240,0.05) 0 1px, transparent 1px 34px),
+    #0B0D10;
+}

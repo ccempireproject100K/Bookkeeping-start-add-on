@@ -72,7 +72,7 @@ export default function Industries() {
   const accent = market?.colors?.accent || "#f59e0b";
 
   return (
-    <div className="min-h-screen bg-[#0B0D10] text-gray-100">
+    <div className="min-h-screen bg-[#0B0D10] text-gray-100 ledger-page">
       <div className="max-w-6xl mx-auto px-6 py-12">
         <div className="flex items-center justify-between mb-12">
           <div className="flex items-center gap-3">

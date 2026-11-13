@@ -83,7 +83,7 @@ export default function TradeLanding() {
 
   if (missing) {
     return (
-      <div className="min-h-screen bg-[#0B0D10] text-gray-100 flex items-center justify-center p-6">
+      <div className="min-h-screen bg-[#0B0D10] text-gray-100 flex items-center justify-center p-6 ledger-page">
         <div className="text-center">
           <h1 className="font-display text-3xl font-bold mb-3">That industry isn't on the list yet</h1>
           <p className="text-gray-400 mb-6">Mind at Ease Solutions covers 36 trades — yours may be one of them.</p>
@@ -97,7 +97,7 @@ export default function TradeLanding() {
 
   if (!pack) {
     return (
-      <div className="min-h-screen bg-[#0B0D10] text-gray-100 flex items-center justify-center">
+      <div className="min-h-screen bg-[#0B0D10] text-gray-100 flex items-center justify-center ledger-page">
         <p className="text-gray-500 text-sm">Loading…</p>
       </div>
     );
@@ -130,7 +130,7 @@ export default function TradeLanding() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#0B0D10] text-gray-100">
+    <div className="min-h-screen bg-[#0B0D10] text-gray-100 ledger-page">
       <div className="max-w-6xl mx-auto px-6 py-12">
         <div className="flex items-center justify-between mb-14">
           <div className="flex items-center gap-3">

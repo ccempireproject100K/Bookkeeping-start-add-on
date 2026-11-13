@@ -90,7 +90,7 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0B0D10] text-gray-100 flex items-center justify-center p-6">
+    <div className="min-h-screen bg-[#0B0D10] text-gray-100 flex items-center justify-center p-6 ledger-page">
       <div className="w-full max-w-md animate-rise">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">

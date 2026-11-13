@@ -107,7 +107,7 @@ export default function Login() {
       setBusy(false);
     }
   };
-  return <div className="min-h-screen grid lg:grid-cols-2">
+  return <div className="min-h-screen grid lg:grid-cols-2 ledger-page">
       {/* Brand side */}
       <div className="hidden lg:flex relative flex-col justify-between p-12 overflow-hidden">
         <img src="https://images.unsplash.com/photo-1698479603408-1a66a6d9e80f?crop=entropy&cs=srgb&fm=jpg&q=85&w=1400" alt={t("login.hvacEquipment")} className="absolute inset-0 w-full h-full object-cover opacity-30" />

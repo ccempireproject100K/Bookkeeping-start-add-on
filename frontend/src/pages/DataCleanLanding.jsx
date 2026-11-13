@@ -177,7 +177,7 @@ export default function DataCleanLanding() {
     { icon: Gauge, title: t("datacleanLanding.s3Title"), body: t("datacleanLanding.s3Body") },
   ];
 
-  return <div className="min-h-screen bg-[#0d0f14] text-gray-100">
+  return <div className="min-h-screen bg-[#0d0f14] text-gray-100 ledger-page">
     <header className="border-b border-[#1c212e]">
       <div className="max-w-5xl mx-auto px-5 py-4 flex items-center justify-between gap-4">
         <span className="font-display font-semibold tracking-tight">
