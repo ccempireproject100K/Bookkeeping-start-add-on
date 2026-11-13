@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<title>Mind At Ease — Internal: consent by cohort and scope (staged proof, demo data)</title>
+<style>
+  body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:#101418;background:#f7f8f9;margin:0}
+  .wrap{max-width:860px;margin:0 auto;padding:36px 20px 60px}
+  h1{font-size:23px;margin:0 0 4px} h2{font-size:18px;margin:24px 0 8px}
+  .sub{color:#5b6572;font-size:13.5px;margin:0 0 18px;line-height:1.5}
+  table{width:100%;border-collapse:collapse;background:#fff;border:1px solid #e3e7ec;border-radius:12px;overflow:hidden;font-size:13.5px}
+  th,td{padding:9px 12px;text-align:right;border-bottom:1px solid #eef1f4}
+  th{background:#0d2b26;color:#fff;font-weight:650} td:nth-child(2),td:nth-child(3){text-align:left}
+  th:nth-child(2),th:nth-child(3){text-align:left} tr:last-child td{border-bottom:0}
+  .tot{margin-top:12px;background:#fff;border:1px solid #e3e7ec;border-radius:12px;padding:14px 18px;font-size:14px;line-height:1.7}
+  .gate{margin-top:16px;background:#fff8e6;border:1px solid #ecd28a;border-radius:12px;padding:14px 18px;font-size:13.5px;line-height:1.6}
+</style></head><body><div class="wrap">
+<h1>Data-release consent — cohort report by scope</h1>
+<p class="sub">Internal view. Computed from consent records only, independently for each clause scope and current clause version. Cohort = signup month × trade (industry_slug) × plan — the AI Office tenant fields as they exist in the flow. <strong>Demo data</strong> (invented tenants) for this staged proof.</p>
+
+<h2>Scope A — marketing + product improvement</h2>
+<table>
+<tr><th>Signup month</th><th>Trade</th><th>Plan</th><th>Presented</th><th>Opted in now</th><th>Declined</th><th>Opted out (ever)</th><th>Opt-in rate</th><th>Opt-out rate</th></tr>
+<tr><td>2026-09</td><td>hvac</td><td>starter</td><td>14</td><td>8</td><td>5</td><td>1</td><td><strong>57.1%</strong></td><td>11.1%</td></tr>
+<tr><td>2026-09</td><td>plumbing</td><td>lite</td><td>11</td><td>5</td><td>6</td><td>0</td><td><strong>45.5%</strong></td><td>0.0%</td></tr>
+<tr><td>2026-09</td><td>roofing</td><td>pro</td><td>6</td><td>3</td><td>2</td><td>1</td><td><strong>50.0%</strong></td><td>25.0%</td></tr>
+<tr><td>2026-10</td><td>electrical</td><td>starter</td><td>9</td><td>5</td><td>4</td><td>0</td><td><strong>55.6%</strong></td><td>0.0%</td></tr>
+<tr><td>2026-10</td><td>hvac</td><td>pro</td><td>7</td><td>5</td><td>2</td><td>0</td><td><strong>71.4%</strong></td><td>0.0%</td></tr>
+<tr><td>2026-10</td><td>hvac</td><td>starter</td><td>18</td><td>10</td><td>6</td><td>2</td><td><strong>55.6%</strong></td><td>16.7%</td></tr>
+<tr><td>2026-10</td><td>plumbing</td><td>lite</td><td>13</td><td>5</td><td>7</td><td>1</td><td><strong>38.5%</strong></td><td>16.7%</td></tr>
+<tr><td>2026-11</td><td>electrical</td><td>lite</td><td>8</td><td>2</td><td>5</td><td>1</td><td><strong>25.0%</strong></td><td>33.3%</td></tr>
+<tr><td>2026-11</td><td>hvac</td><td>starter</td><td>10</td><td>7</td><td>3</td><td>0</td><td><strong>70.0%</strong></td><td>0.0%</td></tr>
+<tr><td>2026-11</td><td>roofing</td><td>pro</td><td>5</td><td>3</td><td>2</td><td>0</td><td><strong>60.0%</strong></td><td>0.0%</td></tr>
+</table>
+<div class="tot"><strong>Scope A — marketing + product improvement totals:</strong> presented 101 · opted in now 53 · declined 42 · opted out ever 6 · <strong>opt-in rate 52.5%</strong> · opt-out rate 10.2% (of tenants who ever opted in)</div>
+
+<h2>Scope B — third-party licensing</h2>
+<table>
+<tr><th>Signup month</th><th>Trade</th><th>Plan</th><th>Presented</th><th>Opted in now</th><th>Declined</th><th>Opted out (ever)</th><th>Opt-in rate</th><th>Opt-out rate</th></tr>
+<tr><td>2026-09</td><td>hvac</td><td>starter</td><td>14</td><td>6</td><td>8</td><td>0</td><td><strong>42.9%</strong></td><td>0.0%</td></tr>
+<tr><td>2026-09</td><td>plumbing</td><td>lite</td><td>11</td><td>6</td><td>4</td><td>1</td><td><strong>54.5%</strong></td><td>14.3%</td></tr>
+<tr><td>2026-09</td><td>roofing</td><td>pro</td><td>6</td><td>3</td><td>3</td><td>0</td><td><strong>50.0%</strong></td><td>0.0%</td></tr>
+<tr><td>2026-10</td><td>electrical</td><td>starter</td><td>9</td><td>6</td><td>3</td><td>0</td><td><strong>66.7%</strong></td><td>0.0%</td></tr>
+<tr><td>2026-10</td><td>hvac</td><td>pro</td><td>7</td><td>4</td><td>3</td><td>0</td><td><strong>57.1%</strong></td><td>0.0%</td></tr>
+<tr><td>2026-10</td><td>hvac</td><td>starter</td><td>18</td><td>8</td><td>9</td><td>1</td><td><strong>44.4%</strong></td><td>11.1%</td></tr>
+<tr><td>2026-10</td><td>plumbing</td><td>lite</td><td>13</td><td>4</td><td>8</td><td>1</td><td><strong>30.8%</strong></td><td>20.0%</td></tr>
+<tr><td>2026-11</td><td>electrical</td><td>lite</td><td>8</td><td>3</td><td>4</td><td>1</td><td><strong>37.5%</strong></td><td>25.0%</td></tr>
+<tr><td>2026-11</td><td>hvac</td><td>starter</td><td>10</td><td>4</td><td>5</td><td>1</td><td><strong>40.0%</strong></td><td>20.0%</td></tr>
+<tr><td>2026-11</td><td>roofing</td><td>pro</td><td>5</td><td>2</td><td>3</td><td>0</td><td><strong>40.0%</strong></td><td>0.0%</td></tr>
+</table>
+<div class="tot"><strong>Scope B — third-party licensing totals:</strong> presented 101 · opted in now 46 · declined 50 · opted out ever 5 · <strong>opt-in rate 45.5%</strong> · opt-out rate 9.8% (of tenants who ever opted in)</div>
+<div class="gate"><strong>Standing gate:</strong> consent is not a license. No dataset is produced, shared, or licensed to a third party unless it passes the re-identification risk review (docs/REIDENTIFICATION-RISK-REVIEW.md) with a named human sign-off — and the owner's word.</div>
+</div></body></html>

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mind At Ease — Settings → Privacy (staged proof: contributor receipt)</title>
+<style>
+  :root{ --ink:#101418; --muted:#5b6572; --line:#e3e7ec; --accent:#0f766e; --card:#f4f8f7; --card-line:#bfe0d8;
+         --license-card:#f5f7ff; --license-line:#c4d8ff; --warn-bg:#fff8e6; --warn-line:#ecd28a; }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--ink);background:#f7f8f9}
+  .wrap{max-width:680px;margin:0 auto;padding:40px 20px 64px}
+  h1{font-size:24px;margin:0 0 4px} h2{font-size:18px;margin:26px 0 8px}
+  .sub{color:var(--muted);font-size:14px;margin:0 0 20px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:24px 28px}
+  .release{border:1.5px solid var(--card-line);background:var(--card);border-radius:12px;padding:16px;margin-top:16px}
+  .release.licensing{border-color:var(--license-line);background:var(--license-card)}
+  .tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);
+       border:1px solid var(--card-line);border-radius:999px;padding:2px 8px;margin-bottom:9px;background:#fff}
+  .check{display:flex;gap:10px;align-items:flex-start;font-size:14px;line-height:1.45}
+  .check input{width:18px;height:18px;margin-top:2px;flex:none}
+  .draft{font-size:12px;color:#694d00;background:var(--warn-bg);border:1px solid var(--warn-line);border-radius:8px;
+        padding:7px 9px;margin:0 0 9px;line-height:1.45}
+  .status{font-size:13px;margin-top:12px;border-radius:10px;padding:11px 13px;background:#eef4ff;border:1px solid #c4d8ff;line-height:1.5}
+  .reconfirm{font-size:13.5px;margin-top:12px;border-radius:10px;padding:13px 15px;background:var(--warn-bg);
+        border:1px solid var(--warn-line);line-height:1.55}
+  .reconfirm p{margin:7px 0 0}
+  .leave{margin-top:12px;border:1px solid #b3261e;color:#b3261e;background:#fff;border-radius:9px;padding:8px 11px;
+        font-weight:650;cursor:pointer}
+  .demo{font-size:12.5px;font-weight:700;color:#694d00;background:var(--warn-bg);border:1px solid var(--warn-line);
+        border-radius:9px;padding:9px 11px;line-height:1.45}
+  table{width:100%;border-collapse:collapse;font-size:13px;margin-top:12px}
+  th,td{text-align:left;vertical-align:top;padding:9px 8px;border-bottom:1px solid #eef1f4;line-height:1.45}
+  th{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+  tr:last-child td{border-bottom:0}
+  .log{font-size:12.5px;color:var(--muted);margin-top:14px;line-height:1.6;white-space:pre-line}
+  .staged{font-size:11.5px;color:var(--muted);margin-bottom:12px}
+  .note{font-size:12.5px;color:var(--muted);line-height:1.55;margin-top:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="staged">STAGED PROOF — not the live site. The settings surface where consent changes are recorded and a contributor receipt is shown.</div>
+  <h1>Settings → Privacy</h1>
+  <p class="sub">Reyes Roofing LLC</p>
+
+  <div class="card">
+    <h2 style="margin-top:0">Your two data-use choices</h2>
+
+    <div class="release">
+      <span class="tag">Marketing + product improvement</span>
+      <div class="check">
+        <input id="datarelease" type="checkbox" checked>
+        <label for="datarelease">I agree that Mind At Ease may use my business data in aggregated, anonymized form for marketing, product improvement, and licensed insights to third parties, with all identifying details removed.</label>
+      </div>
+      <div id="marketing-status" class="status">Current state: <strong>OPTED IN</strong> — clause version v1-2026-11-11.</div>
+      <button id="leave-marketing" class="leave" type="button">Leave marketing + product improvement</button>
+    </div>
+
+    <div class="release licensing">
+      <span class="tag">Third-party licensing</span>
+      <p class="draft"><strong>ROUTER-DRAFTED wording — awaiting the owner's stamp.</strong></p>
+      <div class="check">
+        <input id="licensingrelease" type="checkbox" checked>
+        <label for="licensingrelease">I agree that Mind At Ease may license aggregated, anonymized insights based on my business data to third parties, with all identifying details removed.</label>
+      </div>
+      <div id="licensing-status" class="status">Current state: <strong>OPTED IN</strong> — clause version v1-2026-11-11.</div>
+      <button id="leave-licensing" class="leave" type="button">Leave third-party licensing</button>
+    </div>
+
+    <h2>Annual re-confirmation — pending state</h2>
+    <div id="annual-reconfirmation-status" class="reconfirm">
+      <strong>RE-CONFIRMATION REQUIRED — licensing paused</strong>
+      <p>This is the state shown when the yearly licensing check passes its anniversary unanswered. Licensing stays out of future releases until you re-confirm. Marketing + product improvement stays exactly as you left it.</p>
+      <button id="reconfirm-licensing" class="leave" type="button">Re-confirm licensing</button>
+    </div>
+
+    <h2>Contributor receipt — release registry</h2>
+    <div class="demo">DEMO / SEED — not a real release. No real releases exist in this staged build; the entries below are fixtures only.</div>
+    <table aria-label="Seeded demo release registry">
+      <tr><th>Release</th><th>Date</th><th>Scope</th><th>Cell</th><th>Your give-back</th></tr>
+      <tr>
+        <td><strong>Demo Metro Services Overview</strong><br>DEMO / SEED — not a real release</td>
+        <td>2026-09-30</td>
+        <td>Marketing + product improvement</td>
+        <td>HVAC x Fort Worth metro x established shops (seed example)</td>
+        <td><strong>Your benchmark report</strong><br>Benchmark picture for your own trade × metro from this release.<br><em>Entitlement recorded — report delivery wired later.</em></td>
+      </tr>
+      <tr>
+        <td><strong>Demo Licensed Financing Insights</strong><br>DEMO / SEED — not a real release</td>
+        <td>2026-10-31</td>
+        <td>Third-party licensing</td>
+        <td>Roofing x Fort Worth metro x financing-offering shops (seed example)</td>
+        <td><strong>Your benchmark report</strong><br>Benchmark picture for your own trade × metro from this release.<br><em>Entitlement recorded — report delivery wired later.</em></td>
+      </tr>
+    </table>
+    <p class="note">Leaving a scope changes future eligibility immediately. This receipt history remains visible; already published aggregates are not recalled.</p>
+    <p class="note"><strong>Account deletion:</strong> If you delete your account, you are out of every future release. A contribution already baked into a past release cannot be removed from that past release. Nothing new includes the business after deletion.</p>
+
+    <div id="log" class="log">Change log
+• onboarding — marketing + product improvement: presented, opted in (v1-2026-11-11)
+• onboarding — third-party licensing: presented, opted in (v1-2026-11-11)</div>
+  </div>
+</div>
+<script>
+  var marketing = document.getElementById('datarelease'),
+      licensing = document.getElementById('licensingrelease'),
+      marketingStatus = document.getElementById('marketing-status'),
+      licensingStatus = document.getElementById('licensing-status'),
+      log = document.getElementById('log');
+
+  function updateMarketing(){
+    if (marketing.checked) {
+      marketingStatus.innerHTML = 'Current state: <strong>OPTED IN</strong> — change recorded from Settings. Applies going forward.';
+      log.textContent += '\n• settings — marketing + product improvement: opted in (v1-2026-11-11)';
+    } else {
+      marketingStatus.innerHTML = 'Current state: <strong>OPTED OUT</strong> — excluded from future marketing/product-improvement aggregates.';
+      log.textContent += '\n• settings — marketing + product improvement: opted out (v1-2026-11-11)';
+    }
+  }
+  function updateLicensing(){
+    if (licensing.checked) {
+      licensingStatus.innerHTML = 'Current state: <strong>OPTED IN</strong> — change recorded from Settings. Applies going forward.';
+      log.textContent += '\n• settings — third-party licensing: opted in (v1-2026-11-11)';
+    } else {
+      licensingStatus.innerHTML = 'Current state: <strong>OPTED OUT</strong> — excluded from future licensed releases.';
+      log.textContent += '\n• settings — third-party licensing: opted out (v1-2026-11-11)';
+    }
+  }
+  marketing.addEventListener('change', updateMarketing);
+  licensing.addEventListener('change', updateLicensing);
+  document.getElementById('leave-marketing').addEventListener('click', function(){
+    if (marketing.checked) { marketing.checked = false; updateMarketing(); }
+  });
+  document.getElementById('leave-licensing').addEventListener('click', function(){
+    if (licensing.checked) { licensing.checked = false; updateLicensing(); }
+  });
+  document.getElementById('reconfirm-licensing').addEventListener('click', function(){
+    var panel = document.getElementById('annual-reconfirmation-status');
+    panel.innerHTML = '<strong>RE-CONFIRMED — licensing continues</strong><p>Your yearly licensing re-confirmation is recorded, and a new annual cycle starts. Marketing + product improvement was not changed.</p>';
+    log.textContent += '\n• settings — third-party licensing: annual re-confirmation confirmed';
+  });
+</script>
+</body>
+</html>

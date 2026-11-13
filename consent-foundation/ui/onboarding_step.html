@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mind At Ease — Create your account (staged proof: split data-release consents)</title>
+<style>
+  :root{ --ink:#101418; --muted:#5b6572; --line:#e3e7ec; --accent:#0f766e; --accent-ink:#ffffff;
+         --card:#f4f8f7; --card-line:#bfe0d8; --license-card:#f5f7ff; --license-line:#c4d8ff; }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--ink);
+       background:linear-gradient(160deg,#0d1f1c 0%,#12312b 46%,#f7f8f9 46.2%,#f7f8f9 100%);min-height:100vh}
+  .wrap{max-width:560px;margin:0 auto;padding:40px 20px 64px}
+  .brand{color:#fff;font-weight:700;letter-spacing:.02em;font-size:15px;text-transform:uppercase}
+  .card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:28px;margin-top:18px;
+        box-shadow:0 18px 40px rgba(10,30,25,.18)}
+  h1{font-size:26px;margin:0 0 4px;letter-spacing:-.01em}
+  .sub{color:var(--muted);font-size:14px;margin:0 0 20px}
+  label.f{display:block;font-size:13px;font-weight:600;margin:14px 0 6px}
+  input[type=text],input[type=email],input[type=password]{width:100%;padding:11px 12px;border:1px solid var(--line);
+        border-radius:10px;font-size:14px}
+  .check{display:flex;gap:10px;align-items:flex-start;padding:12px 0;font-size:14px;line-height:1.45}
+  .check input{width:18px;height:18px;margin-top:2px;flex:none}
+  .req{color:#b3261e;font-weight:700}
+  /* Each consent gets its OWN card: visually separate from the terms line and
+     from the other consent, so each reads as its own decision. */
+  .release{border:1.5px solid var(--card-line);background:var(--card);border-radius:12px;padding:16px 16px 8px;margin:18px 0 4px}
+  .release.licensing{border-color:var(--license-line);background:var(--license-card)}
+  .release .tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+        color:var(--accent);border:1px solid var(--card-line);border-radius:999px;padding:2px 8px;margin-bottom:8px;background:#fff}
+  .release .plain{font-size:12.5px;color:var(--muted);margin:0 0 8px;line-height:1.5}
+  .release .draft{font-size:12px;color:#694d00;background:#fff8e6;border:1px solid #ecd28a;border-radius:8px;
+        padding:7px 9px;margin:0 0 8px;line-height:1.45}
+  details{border:1px solid var(--line);border-radius:12px;padding:13px 15px;margin-top:16px;background:#fff}
+  summary{cursor:pointer;font-weight:700;font-size:14px}
+  .means{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:10px}
+  .means h3{font-size:13px;margin:0 0 6px}
+  .means ul{font-size:13px;line-height:1.5;margin:0;padding-left:18px}
+  .panel-line{font-size:13px;line-height:1.55;margin:13px 0 0;padding-top:11px;border-top:1px solid var(--line)}
+  @media (max-width:520px){.means{grid-template-columns:1fr}}
+  button{width:100%;height:46px;border:0;border-radius:10px;background:var(--accent);color:var(--accent-ink);
+        font-size:15px;font-weight:650;margin-top:18px;cursor:pointer}
+  button:disabled{background:#c7ced4;cursor:not-allowed}
+  .result{margin-top:16px;font-size:13.5px;border-radius:10px;padding:12px 14px;display:none;line-height:1.5}
+  .result.ok{display:block;background:#eafaf3;border:1px solid #a7e8c8}
+  .note{font-size:12px;color:var(--muted);margin-top:14px;line-height:1.5}
+  /* The one-time nudge pop-up. Both buttons share one class: same size,
+     same weight — the dismissal is exactly as prominent as the accept. */
+  .nudge-overlay{position:fixed;inset:0;background:rgba(10,20,18,.55);display:none;
+        align-items:center;justify-content:center;padding:20px;z-index:10}
+  .nudge-overlay.open{display:flex}
+  .nudge{background:#fff;border-radius:16px;max-width:460px;width:100%;padding:26px;
+        box-shadow:0 24px 60px rgba(0,0,0,.35)}
+  .nudge h2{font-size:20px;margin:0 0 10px;letter-spacing:-.01em}
+  .nudge p{font-size:14.5px;line-height:1.55;margin:0 0 12px}
+  .nudge .respect{font-weight:700;font-size:15px;border-top:1px solid var(--line);
+        padding-top:12px;margin-top:4px}
+  .nudge-btns{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+  .nudge-btn{height:46px;border-radius:10px;font-size:15px;font-weight:650;cursor:pointer;width:100%}
+  .nudge-btn.accept{background:var(--accent);color:var(--accent-ink);border:0}
+  .nudge-btn.dismiss{background:#fff;color:var(--ink);border:1.5px solid var(--ink)}
+  .staged{color:#fff;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);
+        font-size:11.5px;border-radius:8px;padding:6px 10px;display:inline-block;margin-top:10px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand">Mind At Ease Solutions</div>
+  <div class="staged">STAGED PROOF — not the live site. Shows onboarding with two separate, optional data-use consents.</div>
+
+  <div class="card">
+    <h1>Create your account</h1>
+    <p class="sub">Set up your shop. Three separate decisions are at the bottom of this form — they are not bundled.</p>
+
+    <label class="f" for="name">Your name</label>
+    <input id="name" type="text" value="Jordan Reyes">
+    <label class="f" for="biz">Business name</label>
+    <input id="biz" type="text" value="Reyes Roofing LLC">
+    <label class="f" for="email">Email</label>
+    <input id="email" type="email" value="jordan@reyesroofing.example">
+    <label class="f" for="pw">Password</label>
+    <input id="pw" type="password" value="••••••••••">
+
+    <!-- Decision 1: the main terms. This is the ONLY gate on account creation. -->
+    <div class="check">
+      <input id="terms" type="checkbox">
+      <label for="terms">I accept the Mind At Ease Terms of Service and Privacy Policy. <span class="req">Required</span></label>
+    </div>
+
+    <!-- Decision 2: Scope A. Its own card and checkbox, unchecked by default. -->
+    <div class="release">
+      <span class="tag">Optional — marketing + product improvement</span>
+      <div class="check" style="padding-top:2px">
+        <input id="datarelease" type="checkbox">
+        <label for="datarelease">I agree that Mind At Ease may use my business data in aggregated, anonymized form for marketing, product improvement, and licensed insights to third parties, with all identifying details removed.</label>
+      </div>
+      <p class="plain">Scope A · clause version v1-2026-11-11. Separate from the terms and from licensing below. Leaving it unchecked changes nothing about your account or service.</p>
+    </div>
+
+    <!-- Decision 3: Scope B, third-party licensing as its own opt-in. -->
+    <div class="release licensing">
+      <span class="tag">Optional — third-party licensing</span>
+      <p class="draft"><strong>ROUTER-DRAFTED wording — awaiting the owner's stamp.</strong> This draft is shown only to prove the separate-consent structure.</p>
+      <div class="check" style="padding-top:2px">
+        <input id="licensingrelease" type="checkbox">
+        <label for="licensingrelease">I agree that Mind At Ease may license aggregated, anonymized insights based on my business data to third parties, with all identifying details removed.</label>
+      </div>
+      <p class="plain">Scope B · clause version v1-2026-11-11. Licensing requires this box specifically. The marketing/product-improvement box above does not substitute for it.</p>
+    </div>
+
+    <details id="what-this-means">
+      <summary>What this means</summary>
+      <div class="means">
+        <section>
+          <h3>Aggregated, anonymized data can look like</h3>
+          <ul>
+            <li>Average ticket size for roofers in a metro.</li>
+            <li>Share of shops offering financing.</li>
+          </ul>
+        </section>
+        <section>
+          <h3>What never leaves</h3>
+          <ul>
+            <li>Business names.</li>
+            <li>Customer lists.</li>
+            <li>Exact revenue.</li>
+            <li>Anything pointing at one business.</li>
+          </ul>
+        </section>
+      </div>
+      <p class="panel-line"><strong>Give-back:</strong> If your business contributes to a release, you get the benchmark picture for your trade and metro.</p>
+      <p class="panel-line">If you delete your account, you are out of every future release. A contribution already baked into a past release cannot be removed from that past release.</p>
+    </details>
+
+    <!-- The one-time nudge: appears on Continue for an unchecked scope,
+         at most once per scope in this signup session. Copy is UI copy,
+         not clause language. The owner's respect line sits in the body,
+         above the buttons — not buried. -->
+    <div id="nudge-overlay" class="nudge-overlay" role="dialog" aria-modal="true" aria-labelledby="nudge-title">
+      <div class="nudge">
+        <h2 id="nudge-title">Before you go — your benchmark report</h2>
+        <p id="nudge-body"></p>
+        <p class="respect">It's 100% your choice and we respect your decision either way.</p>
+        <div class="nudge-btns">
+          <button type="button" id="nudge-accept" class="nudge-btn accept">Yes, count me in</button>
+          <button type="button" id="nudge-dismiss" class="nudge-btn dismiss">No thanks, continue</button>
+        </div>
+      </div>
+    </div>
+
+    <button id="submit" disabled>Create account</button>
+    <div id="result" class="result"></div>
+    <p class="note">Try it: accept the terms but leave both optional boxes unchecked — the account still creates, and each consent record shows “declined.” Check either optional box with the terms unchecked — the button stays off. The three decisions never substitute for each other.</p>
+  </div>
+</div>
+
+<script>
+  var terms = document.getElementById('terms'),
+      rel   = document.getElementById('datarelease'),
+      lic   = document.getElementById('licensingrelease'),
+      btn   = document.getElementById('submit'),
+      out   = document.getElementById('result');
+  function sync(){ btn.disabled = !terms.checked; }
+  terms.addEventListener('change', sync); rel.addEventListener('change', sync);
+  lic.addEventListener('change', sync); sync();
+
+  /* --- The one-time nudge -------------------------------------------------
+     Fires on Continue for an UNCHECKED scope, at most once per scope in
+     this signup session. It never checks a box by itself: only the
+     "Yes, count me in" tap (the user's own click) checks it. Dismissing
+     proceeds exactly as before — the terms remain the only gate. Every
+     show / accept / dismiss goes to the nudge log (mirrored server-side
+     in consent/nudge.py events nudge_shown / nudge_accepted /
+     nudge_dismissed). */
+  var NUDGE_COPY = {
+    datarelease: {
+      scope: 'marketing_improvement',
+      body: 'Shops that share their numbers get the benchmark report for their trade and metro: how your ticket size and workload stack up against shops like yours. It only exists because shops contribute, and your business is never named in it.'
+    },
+    licensingrelease: {
+      scope: 'licensing',
+      body: 'Shops that opt in to licensing get the benchmark report for their trade and metro: how your numbers stack up against shops like yours. Pooled insights may be licensed to third parties with all identifying details removed — your business is never named.'
+    }
+  };
+  var nudged = {}, nudgeLog = [], activeNudge = null;
+  var overlay = document.getElementById('nudge-overlay'),
+      nudgeBody = document.getElementById('nudge-body'),
+      nudgeAccept = document.getElementById('nudge-accept'),
+      nudgeDismiss = document.getElementById('nudge-dismiss');
+  var BOXES = { datarelease: rel, licensingrelease: lic };
+
+  function nextNudge(){
+    for (var id in NUDGE_COPY) {
+      if (!BOXES[id].checked && !nudged[id]) return id;
+    }
+    return null;
+  }
+  function showNudge(id){
+    nudged[id] = true; activeNudge = id;
+    nudgeLog.push('nudge_shown:' + NUDGE_COPY[id].scope);
+    nudgeBody.textContent = NUDGE_COPY[id].body;
+    overlay.className = 'nudge-overlay open';
+  }
+  function hideNudge(){ overlay.className = 'nudge-overlay'; activeNudge = null; }
+  function createAccount(){
+    out.className = 'result ok';
+    out.textContent = 'Account created. Consent records written: marketing/product improvement = ' +
+      (rel.checked ? 'OPTED IN' : 'DECLINED') + ' · licensing = ' +
+      (lic.checked ? 'OPTED IN' : 'DECLINED') + ' · each at clause version v1-2026-11-11 · surface: onboarding.' +
+      (nudgeLog.length ? ' Nudge log: ' + nudgeLog.join(' · ') + '.' : '');
+  }
+  function attemptContinue(){
+    var id = nextNudge();
+    if (id) { showNudge(id); return; }
+    createAccount();
+  }
+  nudgeAccept.addEventListener('click', function(){
+    if (!activeNudge) return;
+    var id = activeNudge;
+    nudgeLog.push('nudge_accepted:' + NUDGE_COPY[id].scope);
+    BOXES[id].checked = true;  // the user's own tap checks the box
+    hideNudge();
+    attemptContinue();
+  });
+  nudgeDismiss.addEventListener('click', function(){
+    if (!activeNudge) return;
+    nudgeLog.push('nudge_dismissed:' + NUDGE_COPY[activeNudge].scope);
+    hideNudge();
+    attemptContinue();
+  });
+  btn.addEventListener('click', attemptContinue);
+</script>
+</body>
+</html>
