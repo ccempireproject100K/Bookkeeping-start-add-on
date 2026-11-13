@@ -237,3 +237,37 @@ h1, h2, h3, h4, .font-display { font-family: 'Outfit', sans-serif; }
 table thead th {
   border-bottom: 3px double rgba(245,158,11,0.45);
 }
+
+/* PASS 3 — "Posting the Entry" (tie: posting an entry into the
+   ledger — the entry is written once, underlined once, and then
+   it sits in the book). ONE-SHOT on view entry only: each card
+   posts in with a single short rise, and each page heading gets
+   a single amber rule drawn under it, like the pen stroke that
+   underlines a freshly posted heading. Nothing loops. Fully
+   disabled under prefers-reduced-motion. */
+@keyframes ledger-post {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.card-surface:not(.animate-pulse) { animation: ledger-post 0.45s cubic-bezier(0.22,1,0.36,1) both; }
+
+.ledger-page h1, .app-bg h1 { position: relative; }
+.ledger-page h1::after, .app-bg h1::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -6px;
+  height: 2px;
+  width: 100%;
+  background: linear-gradient(90deg, rgba(245,158,11,0.65), rgba(245,158,11,0));
+  transform-origin: left;
+  animation: ledger-rule-draw 0.9s cubic-bezier(0.22,1,0.36,1) 0.15s both;
+}
+@keyframes ledger-rule-draw {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .card-surface:not(.animate-pulse) { animation: none; }
+  .ledger-page h1::after, .app-bg h1::after { animation: none; }
+}
