@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { api, errMsg } from "@/lib/api";
-import { money, fmtDate } from "@/lib/format";
+import { money, fmtDate, setHomeCurrency } from "@/lib/format";
+import { DualAmount, FxStamp, fxResultText, FX_OUT_OF_SCOPE_NOTE } from "@/components/Fx";
 import { PageHeader, Card, Loading } from "@/components/Page";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -31,7 +32,10 @@ export default function Invoices() {
   const [tax, setTax] = useState("");
   const [lines, setLines] = useState([{ name: "", revenue_code: "4020", amount: "" }]);
   const [payInv, setPayInv] = useState(null);
-  const [pay, setPay] = useState({ amount: "", payment_method: "bank", credit_id: "" });
+  const [pay, setPay] = useState({ amount: "", payment_method: "bank", credit_id: "", fx_rate: "" });
+  const [fxInfo, setFxInfo] = useState({ home_currency: "USD", common_currencies: ["USD"] });
+  const [currency, setCurrency] = useState("");
+  const [fxRate, setFxRate] = useState("");
   const [juris, setJuris] = useState([]);
   const [jurisId, setJurisId] = useState("");
   const [creditOpen, setCreditOpen] = useState(false);
@@ -64,17 +68,23 @@ export default function Invoices() {
 
   const load = () => api.get("/invoices").then(setInvoices).catch(() => setInvoices([]));
   const loadCredits = () => api.get("/invoices/customer-credits").then(setCredits).catch(() => {});
-  useEffect(() => { load(); loadCredits(); }, []);
+  const loadFx = () => api.get("/fx/rates").then((r) => { setFxInfo(r); setHomeCurrency(r.home_currency); }).catch(() => {});
+  useEffect(() => { load(); loadCredits(); loadFx(); }, []);
+
+  const docCurrency = currency || fxInfo.home_currency;
+  const isForeignDoc = docCurrency !== fxInfo.home_currency;
 
   const create = async () => {
     try {
       await api.post("/invoices", {
         client_name: client, tax: parseFloat(tax) || 0,
         tax_jurisdiction_id: jurisId || null,
+        currency: docCurrency,
+        fx_rate: isForeignDoc && fxRate ? parseFloat(fxRate) : null,
         lines: lines.filter((l) => l.name && l.amount).map((l) => ({ kind: "service", name: l.name, revenue_code: l.revenue_code, amount: parseFloat(l.amount) || 0 })),
       });
       toast.success("Invoice issued");
-      setOpen(false); setClient(""); setTax(""); setJurisId(""); setLines([{ name: "", revenue_code: "4020", amount: "" }]); load();
+      setOpen(false); setClient(""); setTax(""); setJurisId(""); setCurrency(""); setFxRate(""); setLines([{ name: "", revenue_code: "4020", amount: "" }]); load();
     } catch (e) { toast.error(errMsg(e)); }
   };
   const openNewInvoice = () => {
@@ -91,9 +101,10 @@ export default function Invoices() {
   };
   const doPay = async () => {
     try {
-      const r = await api.post(`/invoices/${payInv.id}/pay`, { payment_method: pay.payment_method, amount: pay.amount ? parseFloat(pay.amount) : null, credit_id: pay.credit_id || null });
-      toast.success(r.overpayment_cents > 0 ? `Paid — ${money(r.overpayment_cents)} saved as customer credit` : "Payment recorded");
-      setPayInv(null); setPay({ amount: "", payment_method: "bank", credit_id: "" }); load(); loadCredits();
+      const r = await api.post(`/invoices/${payInv.id}/pay`, { payment_method: pay.payment_method, amount: pay.amount ? parseFloat(pay.amount) : null, credit_id: pay.credit_id || null, fx_rate: pay.fx_rate ? parseFloat(pay.fx_rate) : null });
+      const fxText = fxResultText(r, payInv.home_currency);
+      toast.success(r.overpayment_cents > 0 ? `Paid — ${money(r.overpayment_cents)} saved as customer credit` : fxText ? `Payment recorded — ${fxText}` : "Payment recorded");
+      setPayInv(null); setPay({ amount: "", payment_method: "bank", credit_id: "", fx_rate: "" }); load(); loadCredits();
     } catch (e) { toast.error(errMsg(e)); }
   };
 
@@ -130,10 +141,10 @@ export default function Invoices() {
               <tbody>
                 {invoices.map((inv) => (
                   <tr key={inv.id} className="border-b border-[#171c26] hover:bg-[#161b25]">
-                    <td className="px-5 py-3 text-gray-100">{inv.client_name}</td>
+                    <td className="px-5 py-3 text-gray-100">{inv.client_name}<FxStamp doc={inv} /></td>
                     <td className="px-5 py-3 text-gray-400">{fmtDate(inv.created_at?.slice(0, 10))}</td>
-                    <td className="px-5 py-3 text-right font-mono text-gray-200">{money(inv.total_cents)}</td>
-                    <td className="px-5 py-3 text-right font-mono text-amber-400">{money(inv.balance_cents)}</td>
+                    <td className="px-5 py-3 text-right font-mono text-gray-200"><DualAmount doc={inv} homeCents={inv.total_cents} txnCents={inv.txn_total_cents} /></td>
+                    <td className="px-5 py-3 text-right font-mono text-amber-400"><DualAmount doc={inv} homeCents={inv.balance_cents} txnCents={inv.txn_balance_cents} /></td>
                     <td className="px-5 py-3"><span className={`px-2 py-0.5 rounded-full text-xs border capitalize ${STATUS_CLS[inv.status] || ""}`}>{inv.status}</span></td>
                     {isOwner && (
                       <td className="px-5 py-3 text-right">
@@ -143,7 +154,7 @@ export default function Invoices() {
                               <Button size="sm" variant="ghost" title="Copy a 7-day payment link for this invoice" onClick={async () => { try { await quickPaymentLink(inv.id); } catch (e) { toast.error(errMsg(e)); } }} data-testid={`plink-${inv.id}`}>
                                 <Link2 size={14} />
                               </Button>
-                              <Button size="sm" className="h-7 bg-emerald-600 hover:bg-emerald-500 text-black" onClick={() => { setPayInv(inv); setPay({ amount: "", payment_method: "bank", credit_id: "" }); }} data-testid={`pay-${inv.id}`}>Receive Payment</Button>
+                              <Button size="sm" className="h-7 bg-emerald-600 hover:bg-emerald-500 text-black" onClick={() => { setPayInv(inv); setPay({ amount: "", payment_method: "bank", credit_id: "", fx_rate: "" }); }} data-testid={`pay-${inv.id}`}>Receive Payment</Button>
                             </>
                           )}
                         </div>
@@ -155,6 +166,7 @@ export default function Invoices() {
               </tbody>
             </table>
           </Card>
+          <p className="text-[11px] text-gray-600 mt-3">{FX_OUT_OF_SCOPE_NOTE}</p>
         </TabsContent>
 
         <TabsContent value="credits" className="mt-4">
@@ -217,6 +229,21 @@ export default function Invoices() {
             <Button variant="ghost" size="sm" onClick={() => setLines([...lines, { name: "", revenue_code: "4020", amount: "" }])} className="text-amber-400 hover:bg-amber-500/10"><FilePlus size={14} className="mr-1" />Add line</Button>
           </div>
           <div className="grid grid-cols-2 gap-3">
+            <div><Label className="text-xs">Currency</Label>
+              <Select value={docCurrency} onValueChange={setCurrency}>
+                <SelectTrigger data-testid="invoice-currency" className="bg-[#0F1218] border-[#222838]"><SelectValue /></SelectTrigger>
+                <SelectContent className="bg-[#14171E] border-[#222838] text-gray-100">
+                  {fxInfo.common_currencies.map((c) => <SelectItem key={c} value={c}>{c}{c === fxInfo.home_currency ? " (home)" : ""}</SelectItem>)}
+                </SelectContent>
+              </Select></div>
+            <div><Label className="text-xs">Tax ({docCurrency})</Label><Input data-testid="invoice-tax" value={tax} onChange={(e) => setTax(e.target.value)} className="bg-[#0F1218] border-[#222838] font-mono" /></div>
+          </div>
+          {isForeignDoc && (
+            <div><Label className="text-xs">FX rate — {fxInfo.home_currency} per 1 {docCurrency} (optional; blank = today's stored rate)</Label>
+              <Input data-testid="invoice-fx-rate" value={fxRate} onChange={(e) => setFxRate(e.target.value)} placeholder="e.g. 1.10" className="bg-[#0F1218] border-[#222838] font-mono" />
+              <p className="text-[11px] text-gray-600 mt-1">Amounts below are in {docCurrency}. The rate is stamped on the invoice and never changes afterwards; the ledger posts {fxInfo.home_currency}.</p></div>
+          )}
+          <div className="grid grid-cols-2 gap-3">
             <div><Label className="text-xs">Tax jurisdiction (optional)</Label>
               <Select value={jurisId} onValueChange={pickJurisdiction}>
                 <SelectTrigger data-testid="invoice-jurisdiction" className="bg-[#0F1218] border-[#222838]"><SelectValue placeholder="None" /></SelectTrigger>
@@ -224,7 +251,6 @@ export default function Invoices() {
                   {juris.map((j) => <SelectItem key={j.id} value={j.id}>{j.name} · {j.rate_pct}%</SelectItem>)}
                 </SelectContent>
               </Select></div>
-            <div><Label className="text-xs">Tax ($)</Label><Input data-testid="invoice-tax" value={tax} onChange={(e) => setTax(e.target.value)} className="bg-[#0F1218] border-[#222838] font-mono" /></div>
           </div>
           <DialogFooter><Button data-testid="invoice-save" onClick={create} className="bg-amber-600 hover:bg-amber-500 text-black">Issue Invoice</Button></DialogFooter>
         </DialogContent>
@@ -233,14 +259,20 @@ export default function Invoices() {
       <Dialog open={!!payInv} onOpenChange={(o) => !o && setPayInv(null)}>
         <DialogContent className="bg-[#14171E] border-[#222838]">
           <DialogHeader><DialogTitle>Receive Payment — {payInv?.client_name}</DialogTitle></DialogHeader>
-          {payInv && <div className="text-sm text-gray-400">Balance due: <span className="font-mono text-amber-400">{money(payInv.balance_cents)}</span></div>}
-          <div><Label className="text-xs">Amount (blank = full balance)</Label><Input data-testid="payinv-amount" value={pay.amount} onChange={(e) => setPay({ ...pay, amount: e.target.value })} className="bg-[#0F1218] border-[#222838] font-mono" placeholder="Full balance" /></div>
+          {payInv && <div className="text-sm text-gray-400">Balance due: <span className="font-mono text-amber-400"><DualAmount doc={payInv} homeCents={payInv.balance_cents} txnCents={payInv.txn_balance_cents} /></span><FxStamp doc={payInv} /></div>}
+          <div><Label className="text-xs">Amount{payInv?.is_foreign ? ` (${payInv.txn_currency})` : ""} (blank = full balance)</Label><Input data-testid="payinv-amount" value={pay.amount} onChange={(e) => setPay({ ...pay, amount: e.target.value })} className="bg-[#0F1218] border-[#222838] font-mono" placeholder="Full balance" /></div>
+          {payInv?.is_foreign && (
+            <div><Label className="text-xs">Payment-day FX rate — {payInv.home_currency} per 1 {payInv.txn_currency} (optional; blank = today's stored rate)</Label>
+              <Input data-testid="payinv-fx-rate" value={pay.fx_rate} onChange={(e) => setPay({ ...pay, fx_rate: e.target.value })} placeholder={`Invoice stamped at ${payInv.fx_rate}`} className="bg-[#0F1218] border-[#222838] font-mono" />
+              <p className="text-[11px] text-gray-600 mt-1">If this rate differs from the invoice stamp, the difference posts as realized FX gain/loss.</p></div>
+          )}
           <div><Label className="text-xs">Deposit to</Label>
             <Select value={pay.payment_method} onValueChange={(v) => setPay({ ...pay, payment_method: v })}>
               <SelectTrigger data-testid="payinv-method" className="bg-[#0F1218] border-[#222838]"><SelectValue /></SelectTrigger>
               <SelectContent className="bg-[#14171E] border-[#222838] text-gray-100"><SelectItem value="bank">Bank</SelectItem><SelectItem value="card">Card</SelectItem><SelectItem value="cash">Cash</SelectItem></SelectContent>
             </Select></div>
-          {invCredits.length > 0 && <div><Label className="text-xs">Apply customer credit</Label>
+          {payInv?.is_foreign && invCredits.length > 0 && <p className="text-[11px] text-gray-500">Customer credits can't be applied to foreign-currency invoices yet — settle the credit on a {payInv.home_currency} invoice.</p>}
+          {!payInv?.is_foreign && invCredits.length > 0 && <div><Label className="text-xs">Apply customer credit</Label>
             <Select value={pay.credit_id} onValueChange={(v) => setPay({ ...pay, credit_id: v })}>
               <SelectTrigger data-testid="payinv-credit" className="bg-[#0F1218] border-[#222838]"><SelectValue placeholder="None" /></SelectTrigger>
               <SelectContent className="bg-[#14171E] border-[#222838] text-gray-100">{invCredits.map((c) => <SelectItem key={c.id} value={c.id}>{money(c.remaining_cents)} available</SelectItem>)}</SelectContent>

@@ -41,6 +41,8 @@ BASE_COA = [
     ("3100", "Retained Earnings", "equity", "credit"),
     ("4900", "Discounts & Promos", "revenue", "debit"),    # contra-revenue
     ("4090", "Late Fee Income", "revenue", "credit"),
+    ("4950", "FX Gain — Realized", "revenue", "credit"),   # multi-currency: payment-day rate beat the document stamp
+    ("6990", "FX Loss — Realized", "expense", "debit"),    # multi-currency: payment-day rate moved against the document stamp
     ("5000", "Job Cost — Materials", "expense", "debit"),
     ("5005", "Job Cost — Labor", "expense", "debit"),
     ("5006", "Job Cost — Equipment", "expense", "debit"),

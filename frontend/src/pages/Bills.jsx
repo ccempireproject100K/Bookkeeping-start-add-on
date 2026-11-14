@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { api, errMsg } from "@/lib/api";
-import { money, fmtDate, today } from "@/lib/format";
+import { money, fmtDate, today, setHomeCurrency } from "@/lib/format";
+import { DualAmount, FxStamp, fxResultText, FX_OUT_OF_SCOPE_NOTE } from "@/components/Fx";
 import { PageHeader, Card, Loading } from "@/components/Page";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -25,22 +26,26 @@ export default function Bills() {
   const [coa, setCoa] = useState([]);
   const [credits, setCredits] = useState([]);
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ vendor: "", expense_code: "5700", amount: "", due_date: "", recurring: false, frequency: "monthly" });
+  const [form, setForm] = useState({ vendor: "", expense_code: "5700", amount: "", due_date: "", recurring: false, frequency: "monthly", currency: "", fx_rate: "" });
   const [payBill, setPayBill] = useState(null);
-  const [pay, setPay] = useState({ amount: "", payment_method: "bank", credit_id: "" });
+  const [pay, setPay] = useState({ amount: "", payment_method: "bank", credit_id: "", fx_rate: "" });
+  const [fxInfo, setFxInfo] = useState({ home_currency: "USD", common_currencies: ["USD"] });
 
   const load = () => api.get("/bills").then(setBills).catch(() => setBills([]));
-  useEffect(() => { load(); api.get("/ledger/accounts").then(setCoa).catch(() => {}); api.get("/vendors/credits/list").then(setCredits).catch(() => {}); }, []);
+  useEffect(() => { load(); api.get("/ledger/accounts").then(setCoa).catch(() => {}); api.get("/vendors/credits/list").then(setCredits).catch(() => {}); api.get("/fx/rates").then((r) => { setFxInfo(r); setHomeCurrency(r.home_currency); }).catch(() => {}); }, []);
   const expenseAccts = coa.filter((c) => c.type === "expense" && !c.archived);
+  const docCurrency = form.currency || fxInfo.home_currency;
+  const isForeignDoc = docCurrency !== fxInfo.home_currency;
 
   const create = async () => {
-    try { await api.post("/bills", { vendor: form.vendor, expense_code: form.expense_code, amount: parseFloat(form.amount) || 0, due_date: form.due_date || null, recurring: form.recurring, frequency: form.recurring ? form.frequency : null }); toast.success("Bill created"); setOpen(false); setForm({ vendor: "", expense_code: "5700", amount: "", due_date: "", recurring: false, frequency: "monthly" }); load(); }
+    try { await api.post("/bills", { vendor: form.vendor, expense_code: form.expense_code, amount: parseFloat(form.amount) || 0, due_date: form.due_date || null, recurring: form.recurring, frequency: form.recurring ? form.frequency : null, currency: docCurrency, fx_rate: isForeignDoc && form.fx_rate ? parseFloat(form.fx_rate) : null }); toast.success("Bill created"); setOpen(false); setForm({ vendor: "", expense_code: "5700", amount: "", due_date: "", recurring: false, frequency: "monthly", currency: "", fx_rate: "" }); load(); }
     catch (e) { toast.error(errMsg(e)); }
   };
   const doPay = async () => {
     try {
-      await api.post(`/bills/${payBill.id}/pay`, { payment_method: pay.payment_method, amount: pay.amount ? parseFloat(pay.amount) : null, credit_id: pay.credit_id || null });
-      toast.success("Payment recorded"); setPayBill(null); setPay({ amount: "", payment_method: "bank", credit_id: "" }); load(); api.get("/vendors/credits/list").then(setCredits);
+      const r = await api.post(`/bills/${payBill.id}/pay`, { payment_method: pay.payment_method, amount: pay.amount ? parseFloat(pay.amount) : null, credit_id: pay.credit_id || null, fx_rate: pay.fx_rate ? parseFloat(pay.fx_rate) : null });
+      const fxText = fxResultText(r, payBill.home_currency);
+      toast.success(fxText ? `Payment recorded — ${fxText}` : "Payment recorded"); setPayBill(null); setPay({ amount: "", payment_method: "bank", credit_id: "", fx_rate: "" }); load(); api.get("/vendors/credits/list").then(setCredits);
     } catch (e) { toast.error(errMsg(e)); }
   };
   const genNext = async (id) => { try { await api.post(`/bills/${id}/generate-next`); toast.success("Next occurrence created"); load(); } catch (e) { toast.error(errMsg(e)); } };
@@ -62,13 +67,13 @@ export default function Bills() {
           <tbody>
             {bills.map((b) => (
               <tr key={b.id} className="border-b border-[#171c26] hover:bg-[#161b25]">
-                <td className="px-4 py-3 text-gray-100">{b.vendor}{b.recurring && <span className="ml-2 text-xs text-amber-500/70">↻ {b.frequency}</span>}</td>
+                <td className="px-4 py-3 text-gray-100">{b.vendor}{b.recurring && <span className="ml-2 text-xs text-amber-500/70">↻ {b.frequency}</span>}<FxStamp doc={b} /></td>
                 <td className="px-4 py-3 text-gray-400">{fmtDate(b.due_date)}</td>
-                <td className="px-4 py-3 text-right font-mono text-gray-300">{money(b.amount_cents)}</td>
-                <td className="px-4 py-3 text-right font-mono text-amber-400">{money(b.balance_cents)}</td>
+                <td className="px-4 py-3 text-right font-mono text-gray-300"><DualAmount doc={b} homeCents={b.amount_cents} txnCents={b.txn_amount_cents} /></td>
+                <td className="px-4 py-3 text-right font-mono text-amber-400"><DualAmount doc={b} homeCents={b.balance_cents} txnCents={b.txn_balance_cents} /></td>
                 <td className="px-4 py-3"><span className={`px-2 py-0.5 rounded-full text-xs border capitalize ${STATUS_CLS[b.status] || ""}`}>{b.status}</span></td>
                 {canManage && <td className="px-4 py-3 text-right space-x-2">
-                  {b.balance_cents > 0 && <Button size="sm" className="h-7 bg-emerald-600 hover:bg-emerald-500 text-black" data-testid={`pay-bill-${b.id}`} onClick={() => { setPayBill(b); setPay({ amount: "", payment_method: "bank", credit_id: "" }); }}>Pay</Button>}
+                  {b.balance_cents > 0 && <Button size="sm" className="h-7 bg-emerald-600 hover:bg-emerald-500 text-black" data-testid={`pay-bill-${b.id}`} onClick={() => { setPayBill(b); setPay({ amount: "", payment_method: "bank", credit_id: "", fx_rate: "" }); }}>Pay</Button>}
                   {b.recurring && <Button size="sm" variant="outline" className="h-7 border-[#222838]" data-testid={`gen-${b.id}`} onClick={() => genNext(b.id)}><RefreshCw size={13} /></Button>}
                 </td>}
               </tr>
@@ -77,15 +82,27 @@ export default function Bills() {
           </tbody>
         </table>
       </Card>
+      <p className="text-[11px] text-gray-600 mt-3">{FX_OUT_OF_SCOPE_NOTE}</p>
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="bg-[#14171E] border-[#222838]">
           <DialogHeader><DialogTitle>New Bill</DialogTitle></DialogHeader>
           <div><Label className="text-xs">Vendor</Label><Input data-testid="bill-vendor" value={form.vendor} onChange={(e) => setForm({ ...form, vendor: e.target.value })} className="bg-[#0F1218] border-[#222838]" /></div>
           <div className="grid grid-cols-2 gap-3">
-            <div><Label className="text-xs">Amount ($)</Label><Input data-testid="bill-amount" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} className="bg-[#0F1218] border-[#222838] font-mono" /></div>
+            <div><Label className="text-xs">Currency</Label>
+              <Select value={docCurrency} onValueChange={(v) => setForm({ ...form, currency: v })}>
+                <SelectTrigger data-testid="bill-currency" className="bg-[#0F1218] border-[#222838]"><SelectValue /></SelectTrigger>
+                <SelectContent className="bg-[#14171E] border-[#222838] text-gray-100">
+                  {fxInfo.common_currencies.map((c) => <SelectItem key={c} value={c}>{c}{c === fxInfo.home_currency ? " (home)" : ""}</SelectItem>)}
+                </SelectContent>
+              </Select></div>
             <div><Label className="text-xs">Due date</Label><Input data-testid="bill-due" type="date" value={form.due_date} onChange={(e) => setForm({ ...form, due_date: e.target.value })} className="bg-[#0F1218] border-[#222838]" /></div>
           </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div><Label className="text-xs">Amount ({docCurrency})</Label><Input data-testid="bill-amount" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} className="bg-[#0F1218] border-[#222838] font-mono" /></div>
+            {isForeignDoc && <div><Label className="text-xs">FX rate — {fxInfo.home_currency} per 1 {docCurrency} (optional)</Label><Input data-testid="bill-fx-rate" value={form.fx_rate} onChange={(e) => setForm({ ...form, fx_rate: e.target.value })} placeholder="Blank = today's stored rate" className="bg-[#0F1218] border-[#222838] font-mono" /></div>}
+          </div>
+          {isForeignDoc && <p className="text-[11px] text-gray-600">The rate is stamped on the bill and never changes afterwards; the ledger posts {fxInfo.home_currency}.</p>}
           <div><Label className="text-xs">Expense account</Label>
             <Select value={form.expense_code} onValueChange={(v) => setForm({ ...form, expense_code: v })}>
               <SelectTrigger data-testid="bill-code" className="bg-[#0F1218] border-[#222838]"><SelectValue /></SelectTrigger>
@@ -101,14 +118,20 @@ export default function Bills() {
       <Dialog open={!!payBill} onOpenChange={(o) => !o && setPayBill(null)}>
         <DialogContent className="bg-[#14171E] border-[#222838]">
           <DialogHeader><DialogTitle>Pay {payBill?.vendor}</DialogTitle></DialogHeader>
-          {payBill && <div className="text-sm text-gray-400">Balance due: <span className="font-mono text-amber-400">{money(payBill.balance_cents)}</span></div>}
-          <div><Label className="text-xs">Amount (blank = full balance)</Label><Input data-testid="paybill-amount" value={pay.amount} onChange={(e) => setPay({ ...pay, amount: e.target.value })} className="bg-[#0F1218] border-[#222838] font-mono" placeholder="Full balance" /></div>
+          {payBill && <div className="text-sm text-gray-400">Balance due: <span className="font-mono text-amber-400"><DualAmount doc={payBill} homeCents={payBill.balance_cents} txnCents={payBill.txn_balance_cents} /></span><FxStamp doc={payBill} /></div>}
+          <div><Label className="text-xs">Amount{payBill?.is_foreign ? ` (${payBill.txn_currency})` : ""} (blank = full balance)</Label><Input data-testid="paybill-amount" value={pay.amount} onChange={(e) => setPay({ ...pay, amount: e.target.value })} className="bg-[#0F1218] border-[#222838] font-mono" placeholder="Full balance" /></div>
+          {payBill?.is_foreign && (
+            <div><Label className="text-xs">Payment-day FX rate — {payBill.home_currency} per 1 {payBill.txn_currency} (optional; blank = today's stored rate)</Label>
+              <Input data-testid="paybill-fx-rate" value={pay.fx_rate} onChange={(e) => setPay({ ...pay, fx_rate: e.target.value })} placeholder={`Bill stamped at ${payBill.fx_rate}`} className="bg-[#0F1218] border-[#222838] font-mono" />
+              <p className="text-[11px] text-gray-600 mt-1">If this rate differs from the bill stamp, the difference posts as realized FX gain/loss.</p></div>
+          )}
           <div><Label className="text-xs">Pay from</Label>
             <Select value={pay.payment_method} onValueChange={(v) => setPay({ ...pay, payment_method: v })}>
               <SelectTrigger data-testid="paybill-method" className="bg-[#0F1218] border-[#222838]"><SelectValue /></SelectTrigger>
               <SelectContent className="bg-[#14171E] border-[#222838] text-gray-100"><SelectItem value="bank">Bank</SelectItem><SelectItem value="card">Card</SelectItem><SelectItem value="cash">Cash</SelectItem></SelectContent>
             </Select></div>
-          {vendorCredits.length > 0 && <div><Label className="text-xs">Apply vendor credit</Label>
+          {payBill?.is_foreign && vendorCredits.length > 0 && <p className="text-[11px] text-gray-500">Vendor credits can't be applied to foreign-currency bills yet — settle the credit on a {payBill.home_currency} bill.</p>}
+          {!payBill?.is_foreign && vendorCredits.length > 0 && <div><Label className="text-xs">Apply vendor credit</Label>
             <Select value={pay.credit_id} onValueChange={(v) => setPay({ ...pay, credit_id: v })}>
               <SelectTrigger data-testid="paybill-credit" className="bg-[#0F1218] border-[#222838]"><SelectValue placeholder="None" /></SelectTrigger>
               <SelectContent className="bg-[#14171E] border-[#222838] text-gray-100">{vendorCredits.map((c) => <SelectItem key={c.id} value={c.id}>{money(c.remaining_cents)} — {c.memo}</SelectItem>)}</SelectContent>
