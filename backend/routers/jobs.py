@@ -14,6 +14,7 @@ from lib import timeutil as T
 from lib import jobalerts as JA
 from lib import jobcosting as JC
 from lib import jobphases as JP
+from lib import retainage as R
 
 router = APIRouter(prefix="/jobs", tags=["jobs"])
 
@@ -313,6 +314,10 @@ class JobBody(BaseModel):
     estimated_costs: dict = {}            # {material, labor, equipment, subcontractor, other} dollars
     alert_warning_pct: Optional[float] = None   # per-job budget-watch override
     alert_overrun_pct: Optional[float] = None
+    retainage_pct: float = 0              # % the customer holds back from us (0 = no retainage)
+    retainage_payable_pct: Optional[float] = None   # % we hold back from subs (None = same as above)
+    retainage_release_days: Optional[int] = None    # release due N days after substantial completion
+    retainage_release_due_date: Optional[str] = None
 
 
 @router.get("")
@@ -448,6 +453,7 @@ async def get_job(job_id: str, user: dict = Depends(get_current_user)):
     j["profit"] = await _profit(user, j, await _team_rates(user))
     j["budget"] = await _budget_for(user, j, j["profit"])
     j["phase_variance"] = await _phase_view(user, j, j["profit"])
+    j["retainage"] = await R.job_summary(user["tenant_id"], j)
     j["costs"] = await jobcosts(user).find_list({"job_id": job_id}, sort=[("created_at", -1)])
     j["invoices"] = await Scoped(db.invoices, user["tenant_id"]).find_list({"job_id": job_id}, sort=[("created_at", -1)])
     # Committed-costs budget view — shares the "budget" key with the
@@ -577,6 +583,12 @@ async def create_job(body: JobBody, user: dict = Depends(require("ops:manage")))
         "estimated_revenue_cents": to_cents(body.estimated_revenue),
         "estimated_costs_cents": est_costs, "change_orders": [],
         "phases": [],
+        "retainage_pct": body.retainage_pct,
+        "retainage_payable_pct": body.retainage_payable_pct,
+        "retainage_phase_pcts": {},
+        "retainage_release_days": body.retainage_release_days,
+        "retainage_release_due_date": body.retainage_release_due_date,
+        "substantial_completion_date": None,
         "created_at": now_iso(),
     }
     if body.alert_warning_pct is not None:
@@ -937,6 +949,7 @@ async def reject_change_order(job_id: str, co_id: str, user: dict = Depends(requ
 class JobInvoiceBody(BaseModel):
     amount: float
     tax: float = 0
+    phase_id: Optional[str] = None    # bill against one phase (retainage % may differ by phase)
 
 
 @router.post("/{job_id}/invoice")
@@ -945,22 +958,56 @@ async def invoice_job(job_id: str, body: JobInvoiceBody, user: dict = Depends(re
     j = await jobs(user).find_one({"id": job_id})
     if not j:
         raise HTTPException(status_code=404, detail="Job not found")
+    if body.phase_id and j.get("phases"):
+        if body.phase_id not in {p.get("id") for p in j["phases"]}:
+            raise HTTPException(status_code=422, detail="Unknown phase for this job")
     subtotal = to_cents(body.amount)
     tax_cents = to_cents(body.tax)
     gross = subtotal + tax_cents
+
+    # Retainage: the customer's holdback is RECORDED, never collected by
+    # us. Net due rides regular AR (1200); the held slice rides the
+    # retainage receivable account (1210) and the sub-ledger, and the
+    # invoice carries gross / held / net due for the customer to see.
+    pct = R.pct_for_job(j, body.phase_id, "receivable")
+    held = R.held_cents_for(subtotal, pct)
     inv_id = new_id()
-    entry = await L.post_journal_entry(db, tenant_id, user, P.build_invoice_issue(
-        revenue_lines=[{"revenue_code": "4000", "amount_cents": subtotal}],
-        tax_cents=tax_cents, cogs_cents=0, gross_cents=gross,
-        entry_date=today_str(), source_ref=inv_id, memo=f"{j['job_number']} — {j['customer_name']}",
-    ), status="posted")
+    if held > 0:
+        await R.ensure_accounts(tenant_id)
+        jl = [P.dr("1200", gross - held, "Invoice issued — net of retainage"),
+              P.dr(R.RET_RECEIVABLE, held, f"Retainage held ({pct}%)"),
+              P.cr("4000", subtotal, "Revenue")]
+        if tax_cents:
+            jl.append(P.cr("2100", tax_cents, "Sales tax"))
+        entry = await L.post_journal_entry(db, tenant_id, user, {
+            "entry_date": today_str(), "source": "invoice_issue", "source_ref": inv_id,
+            "memo": f"{j['job_number']} — {j['customer_name']}",
+            "lines": jl,
+        }, status="posted")
+    else:
+        entry = await L.post_journal_entry(db, tenant_id, user, P.build_invoice_issue(
+            revenue_lines=[{"revenue_code": "4000", "amount_cents": subtotal}],
+            tax_cents=tax_cents, cogs_cents=0, gross_cents=gross,
+            entry_date=today_str(), source_ref=inv_id, memo=f"{j['job_number']} — {j['customer_name']}",
+        ), status="posted")
     doc = {
         "id": inv_id, "job_id": job_id, "client_name": j["customer_name"],
         "lines": [{"kind": "job", "name": f"{j['job_number']} contract", "revenue_code": "4000", "amount": body.amount}],
         "subtotal_cents": subtotal, "tax_cents": tax_cents, "total_cents": gross,
+        "retainage_pct": pct if held > 0 else 0,
+        "retainage_held_cents": held,
+        "net_due_cents": gross - held,
+        "phase_id": body.phase_id,
         "status": "issued", "due_date": None, "issue_entry": entry["number"],
         "paid_entry": None, "created_at": now_iso(),
     }
     await Scoped(db.invoices, tenant_id).insert_one(doc)
+    if held > 0:
+        hold = await R.record_hold(
+            tenant_id, side="receivable", job=j, phase_id=body.phase_id,
+            source_type="job_invoice", source_id=inv_id,
+            gross_cents=subtotal, held_cents=held, pct=pct,
+            counterparty=j["customer_name"])
+        doc["retainage_entry_id"] = hold["id"]
     doc.pop("_id", None)
     return doc

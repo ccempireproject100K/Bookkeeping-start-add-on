@@ -190,7 +190,9 @@ export default function Invoices() {
               </thead>
               <tbody>
                 {invoices.map(inv => <tr key={inv.id} className="border-b border-[#171c26] hover:bg-[#161b25]">
-                    <td className="px-5 py-3 text-gray-100">{inv.client_name}</td>
+                    <td className="px-5 py-3 text-gray-100">{inv.client_name}{inv.retainage_held_cents > 0 && <div className="text-[11px] text-gray-400 mt-0.5" data-testid={`retainage-line-${inv.id}`}>
+                          Billed {money(inv.total_cents)} · Retainage held ({inv.retainage_pct}%): {money(inv.retainage_held_cents)} · <span className="text-amber-400">Net due: {money(inv.net_due_cents)}</span>
+                        </div>}</td>
                     <td className="px-5 py-3 text-gray-400">{fmtDate(inv.created_at?.slice(0, 10))}</td>
                     <td className="px-5 py-3 text-end font-mono text-gray-200">{moneyFor(inv.total_cents, inv.currency)}</td>
                     <td className="px-5 py-3 text-end font-mono text-amber-400">{moneyFor(inv.balance_cents, inv.currency)}</td>

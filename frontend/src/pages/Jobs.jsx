@@ -55,7 +55,7 @@ export default function Jobs() {
   const [allTeam, setAllTeam] = useState([]);
   const [settingsOpen, setSettingsOpen] = useState(false);
 
-  const [form, setForm] = useState({ customer_name: "", job_type: "installation", description: "", estimated_revenue: "", material: "", labor: "", equipment: "", subcontractor: "", other: "" });
+  const [form, setForm] = useState({ customer_name: "", job_type: "installation", description: "", estimated_revenue: "", material: "", labor: "", equipment: "", subcontractor: "", other: "", retainage_pct: "", retainage_payable_pct: "" });
   const [cost, setCost] = useState({ category: "material", description: "", amount: "", hours: "", rate: "", technician_id: "", paid: false, product_id: "", qty: "1", commitment_id: "", phase_id: "" });
   const [co, setCo] = useState({ description: "", reason: "", revenue_delta: "", cost_delta: "", delay_days: "", material: "", labor: "", equipment: "", subcontractor: "", other: "" });
   const [notifs, setNotifs] = useState([]);
@@ -66,17 +66,7 @@ export default function Jobs() {
     enabled: true
   });
   const [cfgOpen, setCfgOpen] = useState(false);
-  const [form, setForm] = useState({
-    customer_name: "",
-    job_type: "installation",
-    description: "",
-    estimated_revenue: "",
-    material: "",
-    labor: "",
-    equipment: "",
-    subcontractor: "",
-    other: ""
-  });
+  const [retRollup, setRetRollup] = useState(null);
   const [invAmt, setInvAmt] = useState("");
   const load = () => api.get("/jobs").then(setRows).catch(() => setRows([]));
   const loadJc = useCallback(() => {
@@ -86,6 +76,7 @@ export default function Jobs() {
   useEffect(() => {
     load();
     loadJc();
+    api.get("/retainage").then(setRetRollup).catch(() => {});
     api.get("/customers").then(setCustomers);
     api.get("/products").then(setSupplies).catch(() => {});
     api.get("/auth/team").then((t) => { setAllTeam(t); setTeam(t.filter((u) => u.role === "barber")); });
@@ -134,7 +125,6 @@ export default function Jobs() {
       toast.error(errMsg(e));
     }
   };
-  const openDetail = useCallback(id => api.get(`/jobs/${id}`).then(setDetail), []);
   const createJob = async () => {
     try {
       await api.post("/jobs", {
@@ -142,7 +132,9 @@ export default function Jobs() {
         job_type: form.job_type,
         description: form.description,
         estimated_revenue: parseFloat(form.estimated_revenue) || 0,
-        estimated_costs: Object.fromEntries(CATS.map(c => [c, parseFloat(form[c]) || 0]))
+        estimated_costs: Object.fromEntries(CATS.map(c => [c, parseFloat(form[c]) || 0])),
+        retainage_pct: parseFloat(form.retainage_pct) || 0,
+        retainage_payable_pct: form.retainage_payable_pct === "" ? null : parseFloat(form.retainage_payable_pct)
       });
       toast.success(t("jobs.estimateCreated"));
       setCreateOpen(false);
@@ -282,6 +274,12 @@ export default function Jobs() {
                 )}
               </div>
             ))}
+      {retRollup && (retRollup.receivable.outstanding_cents > 0 || retRollup.payable.outstanding_cents > 0) && (
+        <Card className="mb-4 px-5 py-3" data-testid="retainage-rollup">
+          <div className="flex flex-wrap gap-x-8 gap-y-1 text-sm">
+            <span className="text-gray-400">Retainage held from us: <span className="font-mono text-amber-400">{money(retRollup.receivable.outstanding_cents)}</span> outstanding</span>
+            <span className="text-gray-400">Retainage we hold from subs: <span className="font-mono text-amber-400">{money(retRollup.payable.outstanding_cents)}</span> outstanding</span>
+            <span className="text-[11px] text-gray-500 self-center">Tracked here only — Bookkeeping does not hold, collect, or pay out retainage.</span>
           </div>
         </Card>
       )}
@@ -374,6 +372,9 @@ export default function Jobs() {
               ...form,
               description: e.target.value
             })} className="bg-[#0F1218] border-[#222838]" /></div>
+            <div className="col-span-2"><Label className="text-xs">Description</Label><Input data-testid="job-description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="bg-[#0F1218] border-[#222838]" /></div>
+            <div><Label className="text-xs">Retainage held from us (%)</Label><Input data-testid="job-retainage-pct" value={form.retainage_pct} onChange={(e) => setForm({ ...form, retainage_pct: e.target.value })} className="bg-[#0F1218] border-[#222838] font-mono" placeholder="0" /></div>
+            <div><Label className="text-xs">Retainage we hold from subs (%)</Label><Input data-testid="job-retainage-payable-pct" value={form.retainage_payable_pct} onChange={(e) => setForm({ ...form, retainage_payable_pct: e.target.value })} className="bg-[#0F1218] border-[#222838] font-mono" placeholder="Same as left" /></div>
             <div className="col-span-2 grid grid-cols-5 gap-2">
               {CATS.map(c => <div key={c}><Label className="text-[10px] capitalize text-gray-500">{c}</Label><Input data-testid={`est-${c}`} value={form[c]} onChange={e => setForm({
                 ...form,
@@ -632,6 +633,7 @@ function JobDetail({
 
       {/* Phases / cost codes */}
       <PhaseSection detail={detail} isOwner={isOwner} refresh={refresh} />
+          <RetainagePanel detail={detail} isOwner={isOwner} refreshDetail={refreshDetail} />
 
       {/* Add cost */}
       {isOwner && detail.status !== "estimate" && <div className="mt-2 p-3 rounded-lg bg-[#0F1218] border border-[#222838]">
@@ -1018,6 +1020,126 @@ function PhaseSection({ detail, isOwner, refresh }) {
             ))}
             <Button size="sm" data-testid="phase-save" onClick={addPhase} className="bg-sky-600 hover:bg-sky-500 text-black h-8">Add Phase</Button>
           </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function RetainagePanel({ detail, isOwner }) {
+  const [data, setData] = useState(null);
+  const [amounts, setAmounts] = useState({});
+  const [form, setForm] = useState(null);
+
+  const load = useCallback(() => {
+    api.get(`/retainage/jobs/${detail.id}`).then((d) => {
+      setData(d);
+      setForm({
+        retainage_pct: d.retainage_pct ?? 0,
+        retainage_payable_pct: d.retainage_payable_pct ?? "",
+        retainage_release_days: detail.retainage_release_days ?? "",
+        retainage_release_due_date: detail.retainage_release_due_date ?? "",
+        substantial_completion_date: detail.substantial_completion_date ?? "",
+        retainage_release_note: detail.retainage_release_note ?? "",
+      });
+    }).catch(() => setData(null));
+  }, [detail.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { load(); }, [load]);
+
+  if (!data) return null;
+  const hasRetainage = (detail.retainage_pct || 0) > 0 || data.entries.length > 0;
+  if (!hasRetainage && !isOwner) return null;
+
+  const mark = async (entry) => {
+    try {
+      const amt = amounts[entry.id];
+      await api.post(`/retainage/entries/${entry.id}/mark-released`, {
+        amount: amt ? parseFloat(amt) : null, note: "",
+      });
+      toast.success("Release recorded — Bookkeeping did not move any money");
+      setAmounts((a) => ({ ...a, [entry.id]: "" }));
+      load();
+    } catch (e) { toast.error(errMsg(e)); }
+  };
+
+  const saveSettings = async () => {
+    try {
+      const body = {
+        retainage_pct: parseFloat(form.retainage_pct) || 0,
+        retainage_payable_pct: form.retainage_payable_pct === "" ? null : parseFloat(form.retainage_payable_pct),
+        retainage_release_days: form.retainage_release_days === "" ? null : parseInt(form.retainage_release_days),
+        retainage_release_due_date: form.retainage_release_due_date || null,
+        substantial_completion_date: form.substantial_completion_date || null,
+        retainage_release_note: form.retainage_release_note || null,
+      };
+      const d = await api.post(`/retainage/jobs/${detail.id}/settings`, body);
+      setData(d);
+      toast.success("Retainage settings saved");
+    } catch (e) { toast.error(errMsg(e)); }
+  };
+
+  const sideBlock = (label, s) => (
+    <div className="rounded-lg bg-[#14171E] border border-[#222838] px-3 py-2">
+      <div className="text-[10px] uppercase tracking-wider text-gray-500">{label}</div>
+      <div className="font-mono text-lg mt-0.5 text-amber-400">{money(s.outstanding_cents)} <span className="text-xs text-gray-500">still held</span></div>
+      <div className="text-[11px] text-gray-500 font-mono">held {money(s.held_cents)} · released {money(s.released_cents)}</div>
+    </div>
+  );
+
+  return (
+    <div className="mt-2 p-3 rounded-lg bg-[#0F1218] border border-[#222838]" data-testid="retainage-panel">
+      <h4 className="text-xs uppercase tracking-wider text-gray-500 mb-1">Retainage</h4>
+      <p className="text-[11px] text-gray-500 mb-2">
+        Tracked here only. Bookkeeping does not hold, collect, or pay out retainage — when a release
+        happens outside the app, record it below so the books show what's still held.
+        {data.release_due_date && <> Release due: <span className="text-amber-400 font-mono">{data.release_due_date}</span></>}
+      </p>
+      {data.release_due_date && data.release_due_date <= new Date().toISOString().slice(0, 10) &&
+        ((data.receivable?.outstanding_cents || 0) + (data.payable?.outstanding_cents || 0)) > 0 && (
+        <div className="mb-2 p-2 rounded bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs" data-testid="retainage-due-banner">
+          Release due — {data.release_due_date} has passed with {money((data.receivable?.outstanding_cents || 0) + (data.payable?.outstanding_cents || 0))} still held.
+          A due reminder has been recorded in your notifications. Bookkeeping does not collect or pay retainage —
+          record the release below once it happens outside the app.
+        </div>
+      )}
+      <div className="grid grid-cols-2 gap-3">
+        {sideBlock("Held from us by the customer", data.receivable)}
+        {sideBlock("Held by us from subs", data.payable)}
+      </div>
+
+      {data.entries.length > 0 && (
+        <table className="w-full text-sm mt-2" data-testid="table-retainage-entries">
+          <tbody>
+            {data.entries.map((e) => (
+              <tr key={e.id} className="border-b border-[#171c26]">
+                <td className="py-1.5 text-gray-400 w-24 capitalize">{e.side === "receivable" ? "From us" : "From sub"}</td>
+                <td className="py-1.5 text-gray-300">{e.counterparty || "—"}{e.phase_id ? <span className="text-gray-500"> · phase {e.phase_id}</span> : ""}</td>
+                <td className="py-1.5 text-right font-mono text-gray-400">held {money(e.held_cents)}</td>
+                <td className="py-1.5 text-right font-mono text-amber-400 w-32">still held {money(e.outstanding_cents)}</td>
+                <td className="py-1.5 text-right w-56">
+                  {isOwner && e.outstanding_cents > 0 && (
+                    <span className="inline-flex gap-1 items-center">
+                      <Input data-testid={`ret-amount-${e.id}`} value={amounts[e.id] || ""} onChange={(ev) => setAmounts((a) => ({ ...a, [e.id]: ev.target.value }))} placeholder="$ (blank = all)" className="bg-[#14171E] border-[#222838] h-7 text-xs font-mono w-28" />
+                      <Button size="sm" data-testid={`ret-mark-${e.id}`} onClick={() => mark(e)} className="bg-sky-600 hover:bg-sky-500 text-black h-7 text-xs">Record release</Button>
+                    </span>
+                  )}
+                  {e.outstanding_cents <= 0 && <span className="text-xs text-emerald-400">Released</span>}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+
+      {isOwner && form && (
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-3 items-end">
+          <div><Label className="text-[10px]">Held from us (%)</Label><Input data-testid="ret-set-pct" value={form.retainage_pct} onChange={(e) => setForm({ ...form, retainage_pct: e.target.value })} className="bg-[#14171E] border-[#222838] h-8 text-xs font-mono" /></div>
+          <div><Label className="text-[10px]">Held from subs (%)</Label><Input data-testid="ret-set-payable-pct" value={form.retainage_payable_pct} onChange={(e) => setForm({ ...form, retainage_payable_pct: e.target.value })} className="bg-[#14171E] border-[#222838] h-8 text-xs font-mono" /></div>
+          <div><Label className="text-[10px]">Release due date</Label><Input data-testid="ret-set-due" type="date" value={form.retainage_release_due_date} onChange={(e) => setForm({ ...form, retainage_release_due_date: e.target.value })} className="bg-[#14171E] border-[#222838] h-8 text-xs" /></div>
+          <div><Label className="text-[10px]">Substantial completion</Label><Input data-testid="ret-set-completion" type="date" value={form.substantial_completion_date} onChange={(e) => setForm({ ...form, substantial_completion_date: e.target.value })} className="bg-[#14171E] border-[#222838] h-8 text-xs" /></div>
+          <div><Label className="text-[10px]">…or days after completion</Label><Input data-testid="ret-set-days" value={form.retainage_release_days} onChange={(e) => setForm({ ...form, retainage_release_days: e.target.value })} className="bg-[#14171E] border-[#222838] h-8 text-xs font-mono" /></div>
+          <div><Label className="text-[10px]">Release condition (in words)</Label><Input data-testid="ret-set-note" value={form.retainage_release_note} onChange={(e) => setForm({ ...form, retainage_release_note: e.target.value })} className="bg-[#14171E] border-[#222838] h-8 text-xs" placeholder="e.g. 30 days after punch list" /></div>
+          <Button size="sm" data-testid="ret-set-save" onClick={saveSettings} className="bg-amber-600 hover:bg-amber-500 text-black h-8">Save Retainage Settings</Button>
         </div>
       )}
     </div>

@@ -18,6 +18,7 @@ BASE_COA = [
     ("1050", "Stripe Clearing", "asset", "debit"),
     ("1060", "Undeposited Funds", "asset", "debit"),
     ("1200", "Accounts Receivable", "asset", "debit"),
+    ("1210", "Retainage Receivable", "asset", "debit"),
     ("1300", "Inventory — Retail", "asset", "debit"),
     ("1310", "Inventory — Supply", "asset", "debit"),
     ("1500", "Prepaid Expenses", "asset", "debit"),
@@ -29,6 +30,10 @@ BASE_COA = [
     # PO receipt ("Unknown account 2020") on main. Added by the job-costing
     # lane as a FIX-IT-FIRST foundation repair.
     ("2020", "Goods Received Not Invoiced", "liability", "credit"),
+    # Retainage Payable — code 2030, NOT 2020: 2020 is GRNI (above, landed
+    # first via more lanes). Merge-train ruling 2026-11-14: GRNI keeps 2020;
+    # retainage payable takes the next free 20xx code.
+    ("2030", "Retainage Payable", "liability", "credit"),
     ("2100", "Sales Tax Payable", "liability", "credit"),
     ("2120", "Payroll Liabilities", "liability", "credit"),
     ("2200", "Unearned Revenue — Prepaid Packages", "liability", "credit"),
