@@ -13,6 +13,7 @@ from lib import posting as P
 from lib import timeutil as T
 from lib import jobalerts as JA
 from lib import jobcosting as JC
+from lib import jobphases as JP
 
 router = APIRouter(prefix="/jobs", tags=["jobs"])
 
@@ -289,6 +290,23 @@ async def profitability_report(group_by: str = "job", user: dict = Depends(requi
     return {"group_by": group_by, "items": items}
 
 
+async def _phase_view(user, job, profit):
+    """Per-phase variance for a job (empty view when it has no phases —
+    an unphased job's payload is exactly what it was before phases)."""
+    if not job.get("phases"):
+        costs = await jobcosts(user).find_list({"job_id": job["id"]})
+        warn, over = await JP.get_thresholds(user["tenant_id"])
+        return JP.phase_variance(job, costs,
+                                 profit["estimated_cost_cents"], warn, over)
+    costs = await jobcosts(user).find_list({"job_id": job["id"]})
+    warn, over = await JP.get_thresholds(user["tenant_id"])
+    committed = await JP.committed_by_phase(user["tenant_id"], job)
+    view = JP.phase_variance(job, costs, profit["estimated_cost_cents"],
+                             warn, over, committed)
+    await JP.evaluate_phase_drift(user["tenant_id"], job, view)
+    return view
+
+
 @router.get("/{job_id}")
 async def get_job(job_id: str, user: dict = Depends(get_current_user)):
     j = await jobs(user).find_one({"id": job_id})
@@ -297,6 +315,7 @@ async def get_job(job_id: str, user: dict = Depends(get_current_user)):
     j = {k: v for k, v in j.items() if k != "_id"}
     j["profit"] = await _profit(user, j, await _team_rates(user))
     j["budget"] = await _budget_for(user, j, j["profit"])
+    j["phase_variance"] = await _phase_view(user, j, j["profit"])
     j["costs"] = await jobcosts(user).find_list({"job_id": job_id}, sort=[("created_at", -1)])
     j["invoices"] = await Scoped(db.invoices, user["tenant_id"]).find_list({"job_id": job_id}, sort=[("created_at", -1)])
     # Committed-costs budget view — shares the "budget" key with the
@@ -325,6 +344,94 @@ async def get_job(job_id: str, user: dict = Depends(get_current_user)):
     return j
 
 
+# ---------------- Phases / cost codes ----------------
+class PhaseBody(BaseModel):
+    name: str
+    budget: dict = {}          # {material, labor, equipment, subcontractor, other} dollars
+
+
+def _phase_budget_cents(raw: dict) -> dict:
+    bad = set(raw or {}) - set(CATEGORIES)
+    if bad:
+        raise HTTPException(status_code=422,
+                            detail=f"Unknown budget categories: {sorted(bad)}")
+    return {c: to_cents((raw or {}).get(c, 0)) for c in CATEGORIES}
+
+
+async def _job_or_404(user, job_id):
+    j = await jobs(user).find_one({"id": job_id})
+    if not j:
+        raise HTTPException(status_code=404, detail="Job not found")
+    return j
+
+
+@router.get("/{job_id}/phases")
+async def get_phases(job_id: str, user: dict = Depends(get_current_user)):
+    j = await _job_or_404(user, job_id)
+    profit = await _profit(user, j)
+    return await _phase_view(user, j, profit)
+
+
+@router.post("/{job_id}/phases")
+async def add_phase(job_id: str, body: PhaseBody,
+                    user: dict = Depends(require("ops:manage"))):
+    if not body.name.strip():
+        raise HTTPException(status_code=422, detail="Phase name is required")
+    j = await _job_or_404(user, job_id)
+    phase = {"id": new_id(), "name": body.name.strip(),
+             "budget_cents": _phase_budget_cents(body.budget),
+             "created_at": now_iso()}
+    await jobs(user).update_one({"id": job_id},
+                                {"$push": {"phases": phase}})
+    j = await _job_or_404(user, job_id)
+    profit = await _profit(user, j)
+    check = JP.budget_check(j, profit["estimated_cost_cents"])
+    await L.audit(db, user["tenant_id"], user, "job.phase_add",
+                  {"job": j["job_number"], "phase": phase["name"]})
+    return {"phase": phase, "budget_check": check}
+
+
+@router.patch("/{job_id}/phases/{phase_id}")
+async def update_phase(job_id: str, phase_id: str, body: PhaseBody,
+                       user: dict = Depends(require("ops:manage"))):
+    if not body.name.strip():
+        raise HTTPException(status_code=422, detail="Phase name is required")
+    j = await _job_or_404(user, job_id)
+    phase = JP.phase_of(j, phase_id)
+    if not phase:
+        raise HTTPException(status_code=404, detail="Phase not found")
+    phases = [dict(p) for p in j.get("phases") or []]
+    for p in phases:
+        if p["id"] == phase_id:
+            p["name"] = body.name.strip()
+            p["budget_cents"] = _phase_budget_cents(body.budget)
+    await jobs(user).update_one({"id": job_id}, {"$set": {"phases": phases}})
+    j = await _job_or_404(user, job_id)
+    profit = await _profit(user, j)
+    check = JP.budget_check(j, profit["estimated_cost_cents"])
+    return {"phase": JP.phase_of(j, phase_id), "budget_check": check}
+
+
+@router.delete("/{job_id}/phases/{phase_id}")
+async def delete_phase(job_id: str, phase_id: str,
+                       user: dict = Depends(require("ops:manage"))):
+    j = await _job_or_404(user, job_id)
+    if not JP.phase_of(j, phase_id):
+        raise HTTPException(status_code=404, detail="Phase not found")
+    tagged = await jobcosts(user).find_list({"job_id": job_id,
+                                             "phase_id": phase_id}, limit=1)
+    if tagged:
+        raise HTTPException(
+            status_code=409,
+            detail="Phase has costs tagged to it — re-tag them before deleting")
+    phases = [p for p in j.get("phases") or [] if p["id"] != phase_id]
+    await jobs(user).update_one({"id": job_id}, {"$set": {"phases": phases}})
+    j = await _job_or_404(user, job_id)
+    profit = await _profit(user, j)
+    return {"deleted": phase_id,
+            "budget_check": JP.budget_check(j, profit["estimated_cost_cents"])}
+
+
 @router.post("")
 async def create_job(body: JobBody, user: dict = Depends(require("ops:manage"))):
     _validate_thresholds(body.alert_warning_pct, body.alert_overrun_pct)
@@ -337,6 +444,7 @@ async def create_job(body: JobBody, user: dict = Depends(require("ops:manage")))
         "description": body.description, "status": "estimate",
         "estimated_revenue_cents": to_cents(body.estimated_revenue),
         "estimated_costs_cents": est_costs, "change_orders": [],
+        "phases": [],
         "created_at": now_iso(),
     }
     if body.alert_warning_pct is not None:
@@ -400,7 +508,8 @@ async def update_status(job_id: str, body: StatusBody, user: dict = Depends(requ
 async def record_job_cost(user, job, *, category, description="", amount_cents=None,
                           amount=None, hours=0.0, rate_cents=0, product_id=None, qty=1,
                           technician_id=None, paid=False, source="manual", source_ref=None,
-                          burden_percent=None, extra=None, commitment_id=None):
+                          burden_percent=None, extra=None, commitment_id=None,
+                          phase_id=None):
     """THE job cost-posting path: exactly one journal entry + one job_costs row.
 
     The manual POST /jobs/{id}/costs endpoint and field capture (approved time
@@ -476,6 +585,7 @@ async def record_job_cost(user, job, *, category, description="", amount_cents=N
         "category": category, "description": description,
         "amount_cents": amount_cents, "hours": hours, "rate": rate_cents,
         "product_id": product_id, "qty": qty, "technician_id": technician_id,
+        "phase_id": phase_id,
         "entry_number": entry["number"], "journal_entry_id": entry.get("id"),
         "source": source, "source_ref": source_ref,
         "burden_percent": burden_pct, "burdened_amount_cents": burdened,
@@ -524,6 +634,7 @@ class CostBody(BaseModel):
     product_id: Optional[str] = None
     qty: int = 1
     technician_id: Optional[str] = None
+    phase_id: Optional[str] = None   # optional phase / cost-code tag
     paid: bool = False    # True -> cash; False -> payable
     commitment_id: Optional[str] = None   # subcontract commitment this cost fulfils
 
@@ -537,6 +648,8 @@ async def add_cost(job_id: str, body: CostBody, user: dict = Depends(require("op
         raise HTTPException(status_code=409, detail="Convert the estimate to an active job before logging costs")
     if body.category not in CATEGORY_ACCOUNT:
         raise HTTPException(status_code=422, detail="Invalid category")
+    if body.phase_id and not JP.phase_of(j, body.phase_id):
+        raise HTTPException(status_code=422, detail="Phase not found on this job")
     # Manual path keeps its historical amount math exactly (Decimal dollars).
     amount_cents = None
     if body.category == "labor":
@@ -548,10 +661,14 @@ async def add_cost(job_id: str, body: CostBody, user: dict = Depends(require("op
         amount_cents=amount_cents, hours=body.hours, rate_cents=to_cents(body.rate),
         product_id=body.product_id, qty=body.qty, technician_id=body.technician_id,
         paid=body.paid, source="manual", source_ref=None,
-        commitment_id=body.commitment_id)
+        commitment_id=body.commitment_id, phase_id=body.phase_id)
     _, res = await _evaluate(user, j)
     doc["budget"] = res["budget"]
     doc["alerts_fired"] = res["fired"]
+    if body.phase_id:
+        view = await _phase_view(user, j, await _profit(user, j))
+        doc["phase_drift"] = [pv for pv in view["phases"]
+                              if pv["phase_id"] == body.phase_id and pv["drift"]]
     return doc
 
 

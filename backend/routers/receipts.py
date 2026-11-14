@@ -27,6 +27,7 @@ from lib.base import Scoped, new_id, now_iso, today_str, to_cents
 from lib import ledger as L
 from lib import posting as P
 from lib import receiptmatch as RM
+from lib import jobphases as JP
 from lib.coa import ACCOUNT_TYPE_OF, NAME_OF
 from lib.niches import get_pack
 from routers.jobs import CATEGORY_ACCOUNT
@@ -149,9 +150,11 @@ async def upload_receipt(file: UploadFile = File(...),
 
 class JobTagBody(BaseModel):
     job_id: Optional[str] = None     # null clears the tag
+    phase_id: Optional[str] = None   # optional phase refinement of the tag
 
 
 @router.post("/{rid}/job")
+@router.patch("/{rid}/job-tag")
 async def tag_receipt_job(rid: str, body: JobTagBody,
                           user: dict = Depends(require("ops:manage"))):
     """Tag (or untag) a receipt to a job from the review screen. The cost
@@ -164,9 +167,15 @@ async def tag_receipt_job(rid: str, body: JobTagBody,
         raise HTTPException(409, "Already posted — the job tag is locked")
     if body.job_id and not await _resolve_job(user, body.job_id):
         raise HTTPException(404, "Job not found")
-    await receipts(user).update_one({"id": rid}, {"$set": {"job_id": body.job_id or None}})
-    await audit(user, "receipt.job_tag", "receipt", rid, {"job_id": body.job_id})
+    if body.phase_id:
+        await _validate_job_phase(user, body.job_id, body.phase_id)
+    await receipts(user).update_one(
+        {"id": rid},
+        {"$set": {"job_id": body.job_id or None, "phase_id": body.phase_id}})
+    await audit(user, "receipt.job_tag", "receipt", rid,
+                {"job_id": body.job_id, "phase_id": body.phase_id})
     doc["job_id"] = body.job_id or None
+    doc["phase_id"] = body.phase_id
     return doc
 
 
@@ -391,7 +400,28 @@ class PostBody(BaseModel):
     description: str = ""
     payment_method: str = "bank"
     bank_transaction_id: Optional[str] = None
-    job_id: Optional[str] = None     # overrides the receipt's stored job tag
+    # Optional job / phase tag (job-costing asks #3/#4): when set — here
+    # or pre-tagged on the receipt — the posted amount also lands in the
+    # job's actuals under job_category, carrying the phase tag.
+    job_id: Optional[str] = None
+    phase_id: Optional[str] = None
+    job_category: str = "material"
+
+
+async def _validate_job_phase(user, job_id, phase_id):
+    """Resolve a job tag (+ optional phase refinement) for receipt posting.
+    Phase requires a job and must exist on that job."""
+    if phase_id and not job_id:
+        raise HTTPException(422, "phase_id requires a job_id")
+    if not job_id:
+        return None
+    job = await Scoped(db.jobs, user["tenant_id"]).find_one({"id": job_id})
+    if not job:
+        raise HTTPException(422, "Job not found")
+    if phase_id and not JP.phase_of(job, phase_id):
+        raise HTTPException(422, "Phase not found on this job")
+    return job
+
 
 
 @router.post("/{rid}/post")
@@ -433,9 +463,12 @@ async def post_receipt(rid: str, body: PostBody, user: dict = Depends(require("o
             raise HTTPException(422, "Bank transaction not found")
 
     job_id = body.job_id if body.job_id is not None else doc.get("job_id")
-    job = await _resolve_job(user, job_id) if job_id else None
-    if job_id and not job:
-        raise HTTPException(404, "Job not found")
+    phase_id = body.phase_id if body.phase_id is not None else doc.get("phase_id")
+    job = await _validate_job_phase(user, job_id, phase_id) if job_id else None
+    if job is not None and "job_category" in body.model_fields_set and \
+            body.job_category not in ("material", "labor", "equipment",
+                                      "subcontractor", "other"):
+        raise HTTPException(422, "Unknown job category")
     cash = P._cash_account(body.payment_method)
     exp_id = new_id()
     edate = body.expense_date or today_str()
@@ -455,24 +488,31 @@ async def post_receipt(rid: str, body: PostBody, user: dict = Depends(require("o
     await Scoped(db.expenses, user["tenant_id"]).insert_one(exp_doc)
     if job:
         extracted = doc.get("extracted") or {}
-        category = job_category_for_receipt(
-            body.category_code,
-            NAME_OF.get(body.category_code, "") or extracted.get("category_name", ""))
+        if "job_category" in body.model_fields_set:
+            category = body.job_category
+        else:
+            category = job_category_for_receipt(
+                body.category_code,
+                NAME_OF.get(body.category_code, "") or extracted.get("category_name", ""))
+        cost_id = new_id()
         await Scoped(db.job_costs, user["tenant_id"]).insert_one({
-            "id": new_id(), "job_id": job["id"], "job_number": job["job_number"],
+            "id": cost_id, "job_id": job["id"], "job_number": job["job_number"],
             "category": category,
             "description": (body.description or body.vendor or "Receipt").strip(),
             "amount_cents": amount, "hours": 0, "rate": 0,
             "product_id": None, "qty": 1, "technician_id": None,
-            "entry_number": entry["number"], "journal_entry_id": entry["id"],
+            "entry_number": entry["number"], "journal_entry_id": entry.get("id"),
             "source": "receipt", "source_ref": rid,
             "receipt_id": rid, "expense_id": exp_id,
             "burden_percent": None, "burdened_amount_cents": None,
+            "phase_id": phase_id,
             "created_at": now_iso()})
+        exp_doc["job_cost_id"] = cost_id
     await receipts(user).update_one(
         {"id": rid},
         {"$set": {"status": "posted", "expense_id": exp_id,
                   "job_id": job["id"] if job else doc.get("job_id"),
+                  "phase_id": phase_id,
                   "matched_bank_txn": txn_id}})
     await audit(user, "receipt.post", "receipt", rid,
                 {"expense_id": exp_id, "amount": amount, "vendor": body.vendor,

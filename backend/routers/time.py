@@ -26,6 +26,7 @@ from lib.auth import PERMISSIONS, require
 from lib import ledger as L
 from lib import burden as BURDEN
 from lib import jobcosting as JC
+from lib import jobphases as JP
 
 router = APIRouter(prefix="/time", tags=["time"])
 
@@ -142,7 +143,8 @@ async def sync_entry_job_cost(user, entry):
         if (row and row.get("job_id") == job_id
                 and row.get("amount_cents") == amount
                 and row.get("hours") == entry["hours"]
-                and row.get("rate") == entry["rate_cents"]):
+                and row.get("rate") == entry["rate_cents"]
+                and row.get("phase_id") == entry.get("phase_id")):
             return entry   # already posted, unchanged — never duplicate
         await _unpost_job_cost(user, entry)
 
@@ -153,7 +155,8 @@ async def sync_entry_job_cost(user, entry):
         description=f"{entry.get('user_name') or 'Tech'} — {desc}",
         amount_cents=amount, hours=entry["hours"], rate_cents=entry["rate_cents"],
         technician_id=entry.get("user_id"), paid=False,
-        source="time_entry", source_ref=entry["id"], burden_percent=burden_pct)
+        source="time_entry", source_ref=entry["id"], burden_percent=burden_pct,
+        phase_id=entry.get("phase_id"))
     await coll(user).update_one({"id": entry["id"]}, {"$set": {
         "job_cost_id": doc["id"], "job_cost_posted_cents": amount,
         "burden_percent": burden_pct}})
@@ -167,12 +170,29 @@ def _can_approve(user) -> bool:
     return user.get("role") in PERMISSIONS.get("time:approve", set())
 
 
+async def _validate_job_phase(user, job_id, phase_id):
+    """A phase tag is a refinement of a job link: phase requires a job,
+    and the phase must exist on that job. Returns the job doc or None."""
+    if phase_id and not job_id:
+        raise HTTPException(status_code=422,
+                            detail="phase_id requires a job_id")
+    if not job_id:
+        return None
+    job = await Scoped(db.jobs, user["tenant_id"]).find_one({"id": job_id})
+    if not job:
+        raise HTTPException(status_code=422, detail="Job not found")
+    if phase_id and not JP.phase_of(job, phase_id):
+        raise HTTPException(status_code=422, detail="Phase not found on this job")
+    return job
+
+
 class ClockInBody(BaseModel):
     notes: str = Field(default="", max_length=300)
     client_name: str = Field(default="", max_length=160)
     job_id: Optional[str] = Field(default=None, max_length=64)  # optional job link
     rate: Optional[float] = Field(default=None, ge=0, le=10000)   # $/hr override
     billable_rate: Optional[float] = Field(default=None, ge=0, le=10000)  # $/hr charged to the client
+    phase_id: Optional[str] = None
 
 
 class ManualEntryBody(BaseModel):
@@ -184,6 +204,7 @@ class ManualEntryBody(BaseModel):
     job_id: Optional[str] = Field(default=None, max_length=64)  # optional job link
     rate: Optional[float] = Field(default=None, ge=0, le=10000)   # $/hr override
     billable_rate: Optional[float] = Field(default=None, ge=0, le=10000)  # $/hr charged to the client
+    phase_id: Optional[str] = None
 
 
 class EntryPatchBody(BaseModel):
@@ -195,12 +216,13 @@ class EntryPatchBody(BaseModel):
     billable_rate: Optional[float] = Field(default=None, ge=0, le=10000)
     job_id: Optional[str] = None     # link/relink to this job
     clear_job: bool = False          # unlink from the job
+    phase_id: Optional[str] = None
 
 
 def _out(d: dict) -> dict:
     out = {k: d.get(k) for k in ("id", "user_id", "user_name", "date", "clock_in",
                                  "clock_out", "hours", "notes", "client_name", "billable",
-                                 "job_id", "status", "approved_by", "approved_at",
+                                 "job_id", "phase_id", "status", "approved_by", "approved_at",
                                  "closed_at", "created_at",
                                  "job_cost_id", "job_cost_posted_cents",
                                  "burden_percent", "billed_invoice_id", "billed_at",
@@ -216,10 +238,18 @@ def _out(d: dict) -> dict:
 async def _new_entry_fields(user, body) -> dict:
     """Shared job-link + rate resolution for clock-in and manual entries."""
     job_id = body.job_id or None
-    if job_id and not await _resolve_job(user, job_id):
-        raise HTTPException(status_code=404, detail="Job not found")
+    phase_id = getattr(body, "phase_id", None)
+    if phase_id and not job_id:
+        raise HTTPException(status_code=422, detail="phase_id requires a job_id")
+    if job_id:
+        job = await _resolve_job(user, job_id)
+        if not job:
+            raise HTTPException(status_code=404, detail="Job not found")
+        if phase_id and not JP.phase_of(job, phase_id):
+            raise HTTPException(status_code=422,
+                                detail="Phase not found on this job")
     rate_cents = to_cents(body.rate) if body.rate is not None else await _default_rate_cents(user)
-    return {"job_id": job_id, "rate_cents": rate_cents,
+    return {"job_id": job_id, "phase_id": phase_id, "rate_cents": rate_cents,
             "billable_rate_cents": (to_cents(body.billable_rate)
                                     if getattr(body, "billable_rate", None) else None),
             "billed_invoice_id": None, "billed_at": None, "billed_rate_cents": None,
@@ -235,7 +265,7 @@ async def clock_in(body: ClockInBody, user: dict = Depends(require("time:manage"
         "id": new_id(), "user_id": user["id"], "user_name": user.get("name"),
         "date": today_str(), "clock_in": now_iso(), "clock_out": None, "hours": 0.0,
         "notes": body.notes, "client_name": body.client_name, "billable": True,
-        "job_id": body.job_id or None,
+    "job_id": body.job_id or None, "phase_id": body.phase_id or None,
         "status": "open", "approved_by": None, "approved_at": None,
         "closed_at": None, "created_at": now_iso(),
         **await _new_entry_fields(user, body),
@@ -282,7 +312,7 @@ async def log_entry(body: ManualEntryBody, user: dict = Depends(require("time:ma
         "id": new_id(), "user_id": user["id"], "user_name": user.get("name"),
         "date": body.date, "clock_in": None, "clock_out": None, "hours": round(body.hours, 2),
         "notes": body.notes, "client_name": body.client_name, "billable": body.billable,
-        "job_id": body.job_id or None,
+    "job_id": body.job_id or None, "phase_id": body.phase_id or None,
         "status": "logged", "approved_by": None, "approved_at": None,
         "closed_at": None, "created_at": now_iso(),
         **await _new_entry_fields(user, body),
@@ -319,10 +349,15 @@ async def update_entry(entry_id: str, body: EntryPatchBody, user: dict = Depends
         patch["billable_rate_cents"] = to_cents(body.billable_rate) or None
     if body.clear_job:
         patch["job_id"] = None
+        patch["phase_id"] = None
     elif body.job_id is not None:
         if not await _resolve_job(user, body.job_id):
             raise HTTPException(status_code=404, detail="Job not found")
         patch["job_id"] = body.job_id
+    if body.phase_id is not None and not body.clear_job:
+        await _validate_job_phase(
+            user, patch.get("job_id", doc.get("job_id")), body.phase_id)
+        patch["phase_id"] = body.phase_id
     if patch:
         await coll(user).update_one({"id": entry_id}, {"$set": patch})
         doc.update(patch)
