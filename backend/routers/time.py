@@ -15,8 +15,29 @@ from db import db
 from lib.audit import append_audit
 from lib.base import Scoped, new_id, now_iso, today_str
 from lib.auth import PERMISSIONS, require
+from lib import jobcosting as JC
 
 router = APIRouter(prefix="/time", tags=["time"])
+
+
+async def _with_labor_costs(user, rows):
+    """Attach a burdened labor-cost preview to each entry (hours x
+    payroll rate, burden applied) so the true cost shows on the
+    timesheet. Entries get NO extra key when no burden is configured
+    for the worker — the response is then exactly as before."""
+    basis_cache = {}
+    out = []
+    for r in rows:
+        o = _out(r)
+        uid = r.get("user_id")
+        if uid not in basis_cache:
+            basis_cache[uid] = await JC.user_labor_basis(user["tenant_id"], uid)
+        preview = await JC.entry_labor_preview(
+            user["tenant_id"], uid, r.get("hours"), basis=basis_cache[uid])
+        if preview:
+            o["labor_cost"] = preview
+        out.append(o)
+    return out
 
 
 async def _audit(user, action, entity, entity_id, details=None):
@@ -103,7 +124,7 @@ async def list_entries(user_id: Optional[str] = None, date_from: Optional[str] =
     if date_to:
         f["date"] = {**f.get("date", {}), "$lte": date_to}
     rows = await coll(user).find_list(f, sort=[("date", -1), ("created_at", -1)], limit=2000)
-    return [_out(r) for r in rows]
+    return await _with_labor_costs(user, rows)
 
 
 @router.post("/entries")
@@ -145,7 +166,7 @@ async def timesheet(period: Optional[str] = None, user_id: Optional[str] = None,
     return {
         "user_id": target, "user_name": name, "period": period,
         "total_hours": total, "hours_by_status": by_status,
-        "entries": [_out(r) for r in rows],
+        "entries": await _with_labor_costs(user, rows),
     }
 
 

@@ -176,7 +176,15 @@ def review_queue(user):
 async def cat_learning_enabled(user):
     """Tenant setting (default ON): when OFF, nothing is ever learned —
     no pattern is read or stored, and every doubtful item is flag-and-fix."""
-    tenant = await db.tenants.find_one({"id": user["tenant_id"]}, {"_id": 0})
+    # Merged-tree seam (2026-11-14): _insert_txn is called from sync/import
+    # paths whose test doubles model only a subset of collections. A real
+    # motor Database resolves any collection attribute; a partial double
+    # may not — degrade to the default (learning ON, no patterns) instead
+    # of crashing ingestion.
+    tenants = getattr(db, "tenants", None)
+    if tenants is None:
+        return True
+    tenant = await tenants.find_one({"id": user["tenant_id"]}, {"_id": 0})
     settings = (tenant or {}).get("settings") or {}
     return bool(settings.get("cat_learning_enabled", True))
 
@@ -186,7 +194,8 @@ async def assess_categorization(user, description):
     this tenant taught us (only when learning is on). Deterministic."""
     rule_list = await rules(user).find_list()
     learned = {}
-    if await cat_learning_enabled(user):
+    if await cat_learning_enabled(user) \
+            and getattr(db, "cat_learned_patterns", None) is not None:
         for p in await learned_patterns(user).find_list(limit=5000):
             learned[p["pattern"]] = p
     return catconfidence.evaluate(description, rule_list, learned)
@@ -206,7 +215,8 @@ async def flag_for_review(user, txn_doc, assessment):
         "status": "pending", "resolution_code": None, "learned": False,
         "created_at": now_iso(), "resolved_at": None,
     }
-    await review_queue(user).insert_one(item)
+    if getattr(db, "cat_review_queue", None) is not None:
+        await review_queue(user).insert_one(item)
     item.pop("_id", None)
     return item
 

@@ -29,6 +29,8 @@ from fastapi import HTTPException  # noqa: E402
 from pymongo.errors import DuplicateKeyError  # noqa: E402
 
 import lib.audit as audit_mod  # noqa: E402
+import lib.jobalerts as jobalerts_mod  # noqa: E402
+import lib.jobcosting as jobcosting_mod  # noqa: E402
 import lib.auth as auth_mod  # noqa: E402
 import lib.idempotency as idem  # noqa: E402
 import lib.integration_auth as iauth  # noqa: E402
@@ -254,8 +256,11 @@ def fdb(monkeypatch):
             {"id": tenant, "name": f"Shop {tenant}", "settings": {}})
         fake._colls.setdefault("users", FakeCollection()).docs.append(
             make_user(tenant))
+    # jobalerts/jobcosting included: in the merged tree (2026-11-14)
+    # jobs.get_job also reads the budget-alert config and the committed-
+    # costs config through those lib modules' own db handles.
     for mod in (proc_r, jobs_r, integrations_r, idem, iauth,
-                auth_mod, audit_mod):
+                auth_mod, audit_mod, jobalerts_mod, jobcosting_mod):
         monkeypatch.setattr(mod, "db", fake)
     return fake
 
