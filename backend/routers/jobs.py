@@ -11,6 +11,7 @@ from lib.auth import require, get_current_user
 from lib import ledger as L
 from lib import posting as P
 from lib import timeutil as T
+from lib import jobalerts as JA
 
 router = APIRouter(prefix="/jobs", tags=["jobs"])
 
@@ -99,6 +100,70 @@ async def _profit(user, job, team_rates=None):
     }
 
 
+# ---------------- Budget watch (overrun alerts, walk #9) ----------------
+def _validate_thresholds(warning_pct, overrun_pct):
+    for name, v in (("warning_pct", warning_pct), ("overrun_pct", overrun_pct)):
+        if v is not None and not (0 < v <= 200):
+            raise HTTPException(status_code=422,
+                                detail=f"{name} must be between 1 and 200")
+    if warning_pct is not None and overrun_pct is not None \
+            and warning_pct >= overrun_pct:
+        raise HTTPException(status_code=422,
+                            detail="warning_pct must be below overrun_pct")
+
+
+async def _budget_for(user, job, profit):
+    cfg = await JA.get_config(user["tenant_id"])
+    return JA.budget_state(job, profit, cfg)
+
+
+async def _evaluate(user, job):
+    """Recompute profit and run the budget watch after a mutation."""
+    profit = await _profit(user, job)
+    res = await JA.evaluate_alerts(user["tenant_id"], job, profit,
+                                   actor_id=user.get("id"))
+    return profit, res
+
+
+class AlertSettingsBody(BaseModel):
+    warning_pct: float = JA.DEFAULT_WARNING_PCT
+    overrun_pct: float = JA.DEFAULT_OVERRUN_PCT
+    enabled: bool = True
+
+
+@router.get("/alert-settings")
+async def get_alert_settings(user: dict = Depends(get_current_user)):
+    return await JA.get_config(user["tenant_id"])
+
+
+@router.put("/alert-settings")
+async def update_alert_settings(body: AlertSettingsBody,
+                                user: dict = Depends(require("ops:manage"))):
+    _validate_thresholds(body.warning_pct, body.overrun_pct)
+    cfg = await JA.save_config(user["tenant_id"], body.warning_pct,
+                               body.overrun_pct, body.enabled)
+    await L.audit(db, user["tenant_id"], user, "job.alert_settings",
+                  {"warning_pct": body.warning_pct,
+                   "overrun_pct": body.overrun_pct, "enabled": body.enabled})
+    return cfg
+
+
+@router.get("/notifications")
+async def list_job_notifications(user: dict = Depends(get_current_user)):
+    rows = await JA._notif_coll(user["tenant_id"]).find_list(
+        {"kind": "job_budget_alert"}, sort=[("created_at", -1)], limit=50)
+    return {"notifications": rows,
+            "unread": sum(1 for r in rows if not r.get("read"))}
+
+
+@router.post("/notifications/{notif_id}/read")
+async def mark_job_notification_read(notif_id: str,
+                                     user: dict = Depends(get_current_user)):
+    await JA._notif_coll(user["tenant_id"]).update_one(
+        {"id": notif_id, "kind": "job_budget_alert"}, {"$set": {"read": True}})
+    return {"ok": True}
+
+
 # ---------------- CRUD ----------------
 class JobBody(BaseModel):
     customer_id: Optional[str] = None
@@ -108,16 +173,19 @@ class JobBody(BaseModel):
     description: str = ""
     estimated_revenue: float = 0
     estimated_costs: dict = {}            # {material, labor, equipment, subcontractor, other} dollars
+    alert_warning_pct: Optional[float] = None   # per-job budget-watch override
+    alert_overrun_pct: Optional[float] = None
 
 
 @router.get("")
 async def list_jobs(user: dict = Depends(get_current_user)):
     rows = await jobs(user).find_list(sort=[("created_at", -1)], limit=500)
     rates = await _team_rates(user)
+    cfg = await JA.get_config(user["tenant_id"])
     out = []
     for j in rows:
         p = await _profit(user, j, rates)
-        out.append({**j, "profit": p})
+        out.append({**j, "profit": p, "budget": JA.budget_state(j, p, cfg)})
     return out
 
 
@@ -220,6 +288,7 @@ async def get_job(job_id: str, user: dict = Depends(get_current_user)):
         raise HTTPException(status_code=404, detail="Job not found")
     j = {k: v for k, v in j.items() if k != "_id"}
     j["profit"] = await _profit(user, j, await _team_rates(user))
+    j["budget"] = await _budget_for(user, j, j["profit"])
     j["costs"] = await jobcosts(user).find_list({"job_id": job_id}, sort=[("created_at", -1)])
     j["invoices"] = await Scoped(db.invoices, user["tenant_id"]).find_list({"job_id": job_id}, sort=[("created_at", -1)])
     return j
@@ -227,6 +296,7 @@ async def get_job(job_id: str, user: dict = Depends(get_current_user)):
 
 @router.post("")
 async def create_job(body: JobBody, user: dict = Depends(require("ops:manage"))):
+    _validate_thresholds(body.alert_warning_pct, body.alert_overrun_pct)
     seq = await Scoped(db.jobs, user["tenant_id"]).next_seq(db.counters, "job")
     est_costs = {c: to_cents(body.estimated_costs.get(c, 0)) for c in CATEGORIES}
     doc = {
@@ -238,9 +308,42 @@ async def create_job(body: JobBody, user: dict = Depends(require("ops:manage")))
         "estimated_costs_cents": est_costs, "change_orders": [],
         "created_at": now_iso(),
     }
+    if body.alert_warning_pct is not None:
+        doc["alert_warning_pct"] = body.alert_warning_pct
+    if body.alert_overrun_pct is not None:
+        doc["alert_overrun_pct"] = body.alert_overrun_pct
     await jobs(user).insert_one(doc)
     doc.pop("_id", None)
     return doc
+
+
+class JobThresholdsBody(BaseModel):
+    alert_warning_pct: Optional[float] = None
+    alert_overrun_pct: Optional[float] = None
+
+
+@router.patch("/{job_id}/alert-thresholds")
+async def update_job_thresholds(job_id: str, body: JobThresholdsBody,
+                                user: dict = Depends(require("ops:manage"))):
+    """Per-job budget-watch override. Passing null for a field clears
+    that override (the tenant threshold applies again)."""
+    j = await jobs(user).find_one({"id": job_id})
+    if not j:
+        raise HTTPException(status_code=404, detail="Job not found")
+    eff_warn = body.alert_warning_pct if body.alert_warning_pct is not None \
+        else j.get("alert_warning_pct")
+    eff_over = body.alert_overrun_pct if body.alert_overrun_pct is not None \
+        else j.get("alert_overrun_pct")
+    _validate_thresholds(eff_warn, eff_over)
+    await jobs(user).update_one({"id": job_id}, {"$set": {
+        "alert_warning_pct": body.alert_warning_pct,
+        "alert_overrun_pct": body.alert_overrun_pct}})
+    j = await jobs(user).find_one({"id": job_id})
+    _, res = await _evaluate(user, j)
+    return {"job_id": job_id,
+            "alert_warning_pct": body.alert_warning_pct,
+            "alert_overrun_pct": body.alert_overrun_pct,
+            "budget": res["budget"], "alerts_fired": res["fired"]}
 
 
 class StatusBody(BaseModel):
@@ -256,7 +359,10 @@ async def update_status(job_id: str, body: StatusBody, user: dict = Depends(requ
         raise HTTPException(status_code=404, detail="Job not found")
     await jobs(user).update_one({"id": job_id}, {"$set": {"status": body.status}})
     await L.audit(db, user["tenant_id"], user, "job.status", {"job": j["job_number"], "status": body.status})
-    return {"status": body.status}
+    j = await jobs(user).find_one({"id": job_id})
+    _, res = await _evaluate(user, j)
+    return {"status": body.status, "budget": res["budget"],
+            "alerts_fired": res["fired"]}
 
 
 # ---------------- Costs ----------------
@@ -325,6 +431,9 @@ async def add_cost(job_id: str, body: CostBody, user: dict = Depends(require("op
     }
     await jobcosts(user).insert_one(doc)
     doc.pop("_id", None)
+    _, res = await _evaluate(user, j)
+    doc["budget"] = res["budget"]
+    doc["alerts_fired"] = res["fired"]
     return doc
 
 
@@ -348,7 +457,12 @@ async def add_change_order(job_id: str, body: ChangeOrderBody, user: dict = Depe
         "approved": body.approved, "created_at": now_iso(),
     }
     await jobs(user).update_one({"id": job_id}, {"$push": {"change_orders": co}})
-    return co
+    # An approved change order moves the estimate, so the budget watch
+    # re-evaluates: an increase can clear a fired threshold (re-crossing
+    # may fire again); a decrease can cross one right now.
+    j = await jobs(user).find_one({"id": job_id})
+    _, res = await _evaluate(user, j)
+    return {**co, "budget": res["budget"], "alerts_fired": res["fired"]}
 
 
 # ---------------- Job invoice (revenue) ----------------
