@@ -33,6 +33,8 @@ class ProductBody(BaseModel):
     commissionable: bool = True
     image_url: Optional[str] = None
     tax_category: Optional[str] = None   # sales-tax v1 category (lib/sales_tax_engine)
+    tracking_mode: str = "none"       # none | serial | lot (opt-in lot/serial layer)
+    warranty_months: int = 0          # warranty length from install (assignment) date
 
 
 def _tax_category_or_422(value):
@@ -44,6 +46,8 @@ def _tax_category_or_422(value):
 
 @router.post("")
 async def create_product(body: ProductBody, user: dict = Depends(require("ops:manage"))):
+    if body.tracking_mode not in ("none", "serial", "lot"):
+        raise HTTPException(status_code=422, detail="tracking_mode must be none, serial or lot")
     doc = {
         "id": new_id(), "name": body.name, "type": body.type,
         "revenue_code": body.revenue_code, "price_cents": to_cents(body.price),
@@ -51,6 +55,8 @@ async def create_product(body: ProductBody, user: dict = Depends(require("ops:ma
         "reorder_point": int(body.reorder_point),
         "commissionable": body.commissionable, "image_url": body.image_url, "created_at": now_iso(),
         "tax_category": _tax_category_or_422(body.tax_category) or "general_goods",
+        "tracking_mode": body.tracking_mode,
+        "warranty_months": max(0, int(body.warranty_months)),
     }
     await coll(user).insert_one(doc)
     doc.pop("_id", None)
@@ -63,6 +69,8 @@ class ProductPatch(BaseModel):
     reorder_point: Optional[int] = None
     type: Optional[str] = None
     tax_category: Optional[str] = None
+    tracking_mode: Optional[str] = None
+    warranty_months: Optional[int] = None
 
 
 @router.patch("/{product_id}")
@@ -81,6 +89,12 @@ async def update_product(product_id: str, body: ProductPatch, user: dict = Depen
         updates["type"] = body.type
     if body.tax_category is not None:
         updates["tax_category"] = _tax_category_or_422(body.tax_category)
+    if body.tracking_mode is not None:
+        if body.tracking_mode not in ("none", "serial", "lot"):
+            raise HTTPException(status_code=422, detail="tracking_mode must be none, serial or lot")
+        updates["tracking_mode"] = body.tracking_mode
+    if body.warranty_months is not None:
+        updates["warranty_months"] = max(0, int(body.warranty_months))
     if updates:
         await coll(user).update_one({"id": product_id}, {"$set": updates})
     return {"id": product_id, **updates}

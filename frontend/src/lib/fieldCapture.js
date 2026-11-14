@@ -13,6 +13,7 @@ export const apiTransport = {
   postClockIn: (payload) => api.post("/time/clock-in", payload),
   postClockOut: (payload) => api.post("/time/clock-out", payload),
   postExpense: (payload) => api.post("/vendors/expenses", payload),
+  postStockScan: (payload) => api.post("/inventory/scan", payload),
 
   async uploadReceipt(blob, filename, clientKey /* , notes */) {
     const fd = new FormData();

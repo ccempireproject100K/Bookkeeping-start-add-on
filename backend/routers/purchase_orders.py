@@ -137,6 +137,11 @@ async def approve_po(po_id: str, user: dict = Depends(require("ops:manage"))):
 class ReceiveLine(BaseModel):
     product_id: str
     quantity: int
+    # Lot/serial capture for tracked products (ignored for untracked ones,
+    # whose receiving behavior is unchanged).
+    serials: Optional[List[str]] = None
+    lot_number: Optional[str] = None
+    expiry_date: Optional[str] = None
 
 
 class ReceiveBody(BaseModel):
@@ -155,6 +160,25 @@ async def receive_po(po_id: str, body: ReceiveBody,
     if not body.lines:
         raise HTTPException(422, "Nothing to receive")
     await _ensure_grni(user)
+    # Pre-validate lot/serial capture for tracked products BEFORE any line
+    # posts, so a bad serial list can never half-receive a PO.
+    from lib import stocktrack as _ST
+    from routers.tracking import _validate_serials_free
+    for rl in body.lines:
+        prod = await Scoped(db.products, user["tenant_id"]).find_one({"id": rl.product_id})
+        if not prod:
+            continue  # the main loop raises the proper 404
+        mode = _ST.tracking_mode(prod)
+        if mode == "serial":
+            serials = [(_s or "").strip().upper() for _s in (rl.serials or [])]
+            if len(serials) != rl.quantity:
+                raise HTTPException(
+                    422, f"{prod.get('name')} is serial-tracked: receiving needs exactly "
+                         f"one serial per unit (got {len(serials)} for {rl.quantity})")
+            await _validate_serials_free(user, prod, serials)
+        elif mode == "lot" and not (rl.lot_number or "").strip():
+            raise HTTPException(
+                422, f"{prod.get('name')} is lot-tracked: receiving needs a lot number")
     rdate = body.receive_date or today_str()
     tid = user["tenant_id"]
     total_cents = 0
@@ -175,6 +199,19 @@ async def receive_po(po_id: str, body: ReceiveBody,
         await Scoped(db.products, tid).update_one(
             {"id": rl.product_id},
             {"$set": {"quantity_on_hand": new_qty, "unit_cost_cents": new_cost}})
+        # Lot/serial layer: record the tracked units/lot for this receipt
+        # (quantities already applied above — qty_already_applied=True).
+        _mode = _ST.tracking_mode(prod)
+        if _mode == "serial":
+            await _ST.receive_units(
+                user, prod, [(_s or "").strip().upper() for _s in (rl.serials or [])],
+                source_ref=po_id, note=f"PO {po['number']} receive",
+                qty_already_applied=True)
+        elif _mode == "lot":
+            await _ST.receive_lot(
+                user, prod, rl.lot_number, rl.quantity,
+                expiry_date=rl.expiry_date, source_ref=po_id,
+                note=f"PO {po['number']} receive", qty_already_applied=True)
         line["received_qty"] += rl.quantity
         total_cents += rl.quantity * line["unit_cost_cents"]
     # DR Inventory / CR GRNI

@@ -88,7 +88,8 @@ const deadTransport = {
 
 describe("queue scope", () => {
   test("only field capture kinds exist — no money movement can queue", () => {
-    expect(QUEUE_KINDS).toEqual(["time_entry", "time_clock_in", "time_clock_out", "receipt", "expense_note"]);
+    // stock_scan registered by the merge train (lot/serial lane wiring).
+    expect(QUEUE_KINDS).toEqual(["time_entry", "time_clock_in", "time_clock_out", "receipt", "expense_note", "stock_scan"]);
   });
   test("enqueue rejects an invoice send (online-only action)", async () => {
     const q = createQueue({ store: createMemoryStore(), transport: deadTransport });

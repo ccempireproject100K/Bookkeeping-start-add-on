@@ -84,6 +84,7 @@ export function OfflineQueueProvider({ children }) {
       captureClockOut: () => capture("time_clock_out", {}),
       captureReceipt: (payload) => capture("receipt", payload),
       captureExpenseNote: (payload) => capture("expense_note", payload),
+      captureStockScan: (payload) => capture("stock_scan", payload),
       /**
        * Clock-out pressed while the matching clock-in is still queued:
        * the pair becomes ONE manual time entry built from the phone's own

@@ -10,6 +10,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { toast } from "sonner";
 import { Plus, PackagePlus, Sliders, AlertTriangle } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import TrackingPanel from "@/components/TrackingPanel";
+
 export default function Inventory() {
   const {
     t
@@ -27,7 +29,9 @@ export default function Inventory() {
     type: "retail",
     price: "",
     unit_cost: "",
-    quantity_on_hand: ""
+    quantity_on_hand: "",
+    tracking_mode: "none",
+    warranty_months: ""
   });
   const [restock, setRestock] = useState({
     quantity: "",
@@ -37,6 +41,10 @@ export default function Inventory() {
     quantity_delta: "",
     reason: ""
   });
+
+  const [form, setForm] = useState({ name: "", type: "retail", price: "", unit_cost: "", quantity_on_hand: "", tracking_mode: "none", warranty_months: "" });
+  const [restock, setRestock] = useState({ quantity: "", unit_cost: "" });
+  const [adjust, setAdjust] = useState({ quantity_delta: "", reason: "" });
   const [lowStock, setLowStock] = useState([]);
   const load = () => {
     api.get("/products").then(setProducts).catch(() => setProducts([]));
@@ -53,7 +61,9 @@ export default function Inventory() {
         revenue_code: form.type === "retail" ? "4100" : "4100",
         price: parseFloat(form.price) || 0,
         unit_cost: parseFloat(form.unit_cost) || 0,
-        quantity_on_hand: parseInt(form.quantity_on_hand) || 0
+        quantity_on_hand: parseInt(form.quantity_on_hand) || 0,
+        tracking_mode: form.tracking_mode,
+        warranty_months: parseInt(form.warranty_months) || 0
       });
       toast.success(t("inventory.productAdded"));
       setAddOpen(false);
@@ -62,12 +72,22 @@ export default function Inventory() {
         type: "retail",
         price: "",
         unit_cost: "",
-        quantity_on_hand: ""
+        quantity_on_hand: "",
+        tracking_mode: "none",
+        warranty_months: ""
       });
       load();
     } catch (e) {
       toast.error(errMsg(e));
     }
+        name: form.name, type: form.type, revenue_code: form.type === "retail" ? "4100" : "4100",
+        price: parseFloat(form.price) || 0, unit_cost: parseFloat(form.unit_cost) || 0,
+        quantity_on_hand: parseInt(form.quantity_on_hand) || 0,
+        tracking_mode: form.tracking_mode, warranty_months: parseInt(form.warranty_months) || 0,
+      });
+      toast.success("Product added");
+      setAddOpen(false); setForm({ name: "", type: "retail", price: "", unit_cost: "", quantity_on_hand: "", tracking_mode: "none", warranty_months: "" }); load();
+    } catch (e) { toast.error(errMsg(e)); }
   };
   const doRestock = async () => {
     try {
@@ -141,7 +161,10 @@ export default function Inventory() {
             </thead>
             <tbody>
               {products.map(p => <tr key={p.id} className="border-b border-[#171c26] hover:bg-[#161b25]">
-                  <td className="px-5 py-3 text-gray-100">{p.name}</td>
+                  <td className="px-5 py-3 text-gray-100">{p.name}{p.tracking_mode && p.tracking_mode !== "none" && <span className="ml-2 text-[11px] px-2 py-0.5 rounded-full border border-sky-500/40 bg-sky-500/10 text-sky-300 capitalize">{p.tracking_mode}-tracked</span>}</td>
+              {products.map((p) => (
+                <tr key={p.id} className="border-b border-[#171c26] hover:bg-[#161b25]">
+                  <td className="px-5 py-3 text-gray-100">{p.name}{p.tracking_mode && p.tracking_mode !== "none" && <span className="ml-2 text-[11px] px-2 py-0.5 rounded-full border border-sky-500/40 bg-sky-500/10 text-sky-300 capitalize">{p.tracking_mode}-tracked</span>}</td>
                   <td className="px-5 py-3"><span className="text-xs px-2 py-0.5 rounded-full bg-[#222838] text-gray-300 capitalize">{p.type}</span></td>
                   <td className="px-5 py-3 text-end font-mono text-gray-300">{money(p.price_cents)}</td>
                   <td className="px-5 py-3 text-end font-mono text-gray-400">{money(p.unit_cost_cents)}</td>
@@ -157,6 +180,8 @@ export default function Inventory() {
           </table>
         </div>
       </Card>
+
+      <TrackingPanel products={products} onChanged={load} />
 
       {/* Add product */}
       <Dialog open={addOpen} onOpenChange={setAddOpen}>
@@ -181,6 +206,29 @@ export default function Inventory() {
               ...form,
               quantity_on_hand: e.target.value
             })} className="bg-[#0F1218] border-[#222838] font-mono" /></div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-xs">Tracking</Label>
+                <select data-testid="product-tracking" value={form.tracking_mode} onChange={e => setForm({ ...form, tracking_mode: e.target.value })} className="w-full bg-[#0F1218] border border-[#222838] rounded-md px-2 py-2 text-sm text-gray-200">
+                  <option value="none">None — quantity only</option>
+                  <option value="serial">Serial — one number per unit</option>
+                  <option value="lot">Lot — batches with expiry</option>
+                </select>
+              </div>
+              <div><Label className="text-xs">Warranty (months from install)</Label><Input data-testid="product-warranty" value={form.warranty_months} onChange={e => setForm({ ...form, warranty_months: e.target.value })} placeholder="0 = none" className="bg-[#0F1218] border-[#222838] font-mono" /></div>
+            </div>
+            <div><Label className="text-xs">Opening Quantity</Label><Input data-testid="product-qty" value={form.quantity_on_hand} onChange={(e) => setForm({ ...form, quantity_on_hand: e.target.value })} className="bg-[#0F1218] border-[#222838] font-mono" /></div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="text-xs">Tracking</Label>
+                <select data-testid="product-tracking" value={form.tracking_mode} onChange={(e) => setForm({ ...form, tracking_mode: e.target.value })} className="w-full bg-[#0F1218] border border-[#222838] rounded-md px-2 py-2 text-sm text-gray-200">
+                  <option value="none">None — quantity only</option>
+                  <option value="serial">Serial — one number per unit</option>
+                  <option value="lot">Lot — batches with expiry</option>
+                </select>
+              </div>
+              <div><Label className="text-xs">Warranty (months from install)</Label><Input data-testid="product-warranty" value={form.warranty_months} onChange={(e) => setForm({ ...form, warranty_months: e.target.value })} placeholder="0 = none" className="bg-[#0F1218] border-[#222838] font-mono" /></div>
+            </div>
           </div>
           <DialogFooter><Button data-testid="product-save" onClick={createProduct} className="bg-amber-600 hover:bg-amber-500 text-black">{t("inventory.add")}</Button></DialogFooter>
         </DialogContent>
