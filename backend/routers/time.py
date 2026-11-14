@@ -172,6 +172,7 @@ class ClockInBody(BaseModel):
     client_name: str = Field(default="", max_length=160)
     job_id: Optional[str] = Field(default=None, max_length=64)  # optional job link
     rate: Optional[float] = Field(default=None, ge=0, le=10000)   # $/hr override
+    billable_rate: Optional[float] = Field(default=None, ge=0, le=10000)  # $/hr charged to the client
 
 
 class ManualEntryBody(BaseModel):
@@ -182,6 +183,7 @@ class ManualEntryBody(BaseModel):
     billable: bool = True
     job_id: Optional[str] = Field(default=None, max_length=64)  # optional job link
     rate: Optional[float] = Field(default=None, ge=0, le=10000)   # $/hr override
+    billable_rate: Optional[float] = Field(default=None, ge=0, le=10000)  # $/hr charged to the client
 
 
 class EntryPatchBody(BaseModel):
@@ -190,6 +192,7 @@ class EntryPatchBody(BaseModel):
     client_name: Optional[str] = Field(default=None, max_length=160)
     billable: Optional[bool] = None
     rate: Optional[float] = Field(default=None, ge=0, le=10000)
+    billable_rate: Optional[float] = Field(default=None, ge=0, le=10000)
     job_id: Optional[str] = None     # link/relink to this job
     clear_job: bool = False          # unlink from the job
 
@@ -200,9 +203,13 @@ def _out(d: dict) -> dict:
                                  "job_id", "status", "approved_by", "approved_at",
                                  "closed_at", "created_at",
                                  "job_cost_id", "job_cost_posted_cents",
-                                 "burden_percent")}
+                                 "burden_percent", "billed_invoice_id", "billed_at",
+                                 "billed_rate_cents")}
     out["rate"] = cents_to_dollars(d.get("rate_cents") or 0)
     out["rate_cents"] = d.get("rate_cents") or 0
+    out["billable_rate_cents"] = d.get("billable_rate_cents")
+    out["billable_rate"] = (cents_to_dollars(d["billable_rate_cents"])
+                            if d.get("billable_rate_cents") else None)
     return out
 
 
@@ -213,6 +220,10 @@ async def _new_entry_fields(user, body) -> dict:
         raise HTTPException(status_code=404, detail="Job not found")
     rate_cents = to_cents(body.rate) if body.rate is not None else await _default_rate_cents(user)
     return {"job_id": job_id, "rate_cents": rate_cents,
+            "billable_rate_cents": (to_cents(body.billable_rate)
+                                    if getattr(body, "billable_rate", None) else None),
+            "billed_invoice_id": None, "billed_at": None, "billed_rate_cents": None,
+            "billing_history": [],
             "job_cost_id": None, "job_cost_posted_cents": None, "burden_percent": None}
 
 
@@ -304,6 +315,8 @@ async def update_entry(entry_id: str, body: EntryPatchBody, user: dict = Depends
         patch["billable"] = body.billable
     if body.rate is not None:
         patch["rate_cents"] = to_cents(body.rate)
+    if body.billable_rate is not None:
+        patch["billable_rate_cents"] = to_cents(body.billable_rate) or None
     if body.clear_job:
         patch["job_id"] = None
     elif body.job_id is not None:

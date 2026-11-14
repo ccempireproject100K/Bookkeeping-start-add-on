@@ -10,6 +10,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { Play, Square, Plus, Clock } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import BillTimePanel from "./BillTimePanel";
 const STATUS_CLS = {
   open: "bg-sky-500/10 text-sky-400 border-sky-500/20",
   logged: "bg-amber-500/10 text-amber-400 border-amber-500/20",
@@ -216,7 +217,7 @@ export default function Time() {
                 )}
               </td>
               <td className="px-5 py-3 text-gray-500 text-xs max-w-[200px] truncate">{e.notes || "—"}</td>
-              <td className="px-5 py-3"><span className={`px-2 py-0.5 rounded-full text-xs border capitalize ${STATUS_CLS[e.status] || ""}`}>{e.status}</span></td>
+              <td className="px-5 py-3"><span className={`px-2 py-0.5 rounded-full text-xs border capitalize ${STATUS_CLS[e.status] || ""}`}>{e.status}</span>{e.billed_invoice_id && <div className="text-[10px] text-sky-400 mt-0.5">billed ✓</div>}</td>
               {actions && <td className="px-5 py-3 text-end">
                   <div className="flex gap-1 justify-end">
                     {e.status === "logged" && <Button size="sm" className="h-7 bg-emerald-600 hover:bg-emerald-500 text-black" onClick={() => approve(e.id)}>Approve</Button>}
@@ -323,6 +324,7 @@ export default function Time() {
           {entryTable(entries, false, false)}
         </TabsContent>
       </Tabs>
+      {isOwner && <BillTimePanel />}
       <p className="flex items-center gap-1 text-xs text-gray-600 mt-4"><Clock size={12} /> Approved entries can be closed to lock them; clocking is audited.</p>
     </div>;
 }
