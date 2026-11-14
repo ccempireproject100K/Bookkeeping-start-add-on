@@ -28,6 +28,14 @@ const NEXT_LABEL = {
   active: "Mark Completed",
   completed: "Close Job"
 };
+const CO_CLS = {
+  pending: "bg-amber-500/10 text-amber-400 border-amber-500/20",
+  approved: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+  rejected: "bg-rose-500/10 text-rose-400 border-rose-500/20",
+};
+const NEXT = { estimate: "active", active: "completed", completed: "closed" };
+const NEXT_LABEL = { estimate: "Convert to Job", active: "Mark Completed", completed: "Close Job" };
+
 export default function Jobs() {
   const {
     t
@@ -49,7 +57,7 @@ export default function Jobs() {
 
   const [form, setForm] = useState({ customer_name: "", job_type: "installation", description: "", estimated_revenue: "", material: "", labor: "", equipment: "", subcontractor: "", other: "" });
   const [cost, setCost] = useState({ category: "material", description: "", amount: "", hours: "", rate: "", technician_id: "", paid: false, product_id: "", qty: "1", commitment_id: "", phase_id: "" });
-  const [co, setCo] = useState({ description: "", revenue_delta: "", cost_delta: "" });
+  const [co, setCo] = useState({ description: "", reason: "", revenue_delta: "", cost_delta: "", delay_days: "", material: "", labor: "", equipment: "", subcontractor: "", other: "" });
   const [notifs, setNotifs] = useState([]);
   const [alertCfg, setAlertCfg] = useState(null);
   const [cfgForm, setCfgForm] = useState({
@@ -68,22 +76,6 @@ export default function Jobs() {
     equipment: "",
     subcontractor: "",
     other: ""
-  });
-  const [cost, setCost] = useState({
-    category: "material",
-    description: "",
-    amount: "",
-    hours: "",
-    rate: "",
-    technician_id: "",
-    paid: false,
-    product_id: "",
-    qty: "1"
-  });
-  const [co, setCo] = useState({
-    description: "",
-    revenue_delta: "",
-    cost_delta: ""
   });
   const [invAmt, setInvAmt] = useState("");
   const load = () => api.get("/jobs").then(setRows).catch(() => setRows([]));
@@ -226,24 +218,25 @@ export default function Jobs() {
   const addCo = async () => {
     try {
       await api.post(`/jobs/${detail.id}/change-orders`, {
-        description: co.description,
+        description: co.description, reason: co.reason,
         revenue_delta: parseFloat(co.revenue_delta) || 0,
-        cost_delta: parseFloat(co.cost_delta) || 0,
-        approved: true
+        delay_days: parseInt(co.delay_days) || 0,
+        cost_impact: Object.fromEntries(CATS.map((c) => [c, parseFloat(co[c]) || 0])),
       });
-      toast.success(t("jobs.changeOrderAdded"));
-      setCo({
-        description: "",
-        revenue_delta: "",
-        cost_delta: ""
-      });
-      openDetail(detail.id);
-      load();
-      loadNotifs();
-    } catch (e) {
-      toast.error(errMsg(e));
-    }
+      toast.success("Change order submitted — pending approval (budget unchanged until approved)");
+      setCo({ description: "", reason: "", revenue_delta: "", delay_days: "", material: "", labor: "", equipment: "", subcontractor: "", other: "" });
+      openDetail(detail.id); load(); loadNotifs();
+    } catch (e) { toast.error(errMsg(e)); }
   };
+
+  const decideCo = async (coId, action) => {
+    try {
+      await api.post(`/jobs/${detail.id}/change-orders/${coId}/${action}`);
+      toast.success(action === "approve" ? "Change order approved — budget revised" : "Change order rejected");
+      openDetail(detail.id); load(); loadNotifs();
+    } catch (e) { toast.error(errMsg(e)); }
+  };
+
   const invoice = async () => {
     try {
       await api.post(`/jobs/${detail.id}/invoice`, {
@@ -332,7 +325,7 @@ export default function Jobs() {
                   <td className="px-5 py-3 font-mono text-amber-400">{j.job_number}</td>
                   <td className="px-5 py-3 text-gray-100">{j.customer_name}</td>
                   <td className="px-5 py-3 capitalize text-gray-300">{j.job_type}</td>
-                  <td className="px-5 py-3"><span className={`px-2 py-0.5 rounded-full text-xs border capitalize ${STATUS_CLS[j.status]}`}>{j.status}</span></td>
+                  <td className="px-5 py-3"><span className={`px-2 py-0.5 rounded-full text-xs border capitalize ${STATUS_CLS[j.status]}`}>{j.status}</span>{j.co_summary?.pending_count > 0 && <span data-testid={`co-pending-chip-${j.job_number}`} className="ms-2 px-2 py-0.5 rounded-full text-xs border bg-amber-500/10 text-amber-400 border-amber-500/20">{j.co_summary.pending_count} CO waiting</span>}</td>
                   <td className="px-5 py-3 text-end font-mono text-gray-300">{dollars(j.profit.revenue)}</td>
 <td className="px-5 py-3 text-end font-mono">
                     <span className={j.budget?.level === "overrun" ? "text-rose-400 font-semibold" : j.budget?.level === "warning" ? "text-amber-400 font-semibold" : "text-gray-400"}>{dollars(j.profit.cost)}</span>
@@ -734,6 +727,61 @@ function JobDetail({
           </table>
         </div>}
 
+      {/* Pending change orders — visible block */}
+      {pendingCos.length > 0 && (
+        <div className="mt-2 p-3 rounded-lg bg-amber-500/5 border border-amber-500/30" data-testid="co-pending-block">
+          <h4 className="text-xs uppercase tracking-wider text-amber-400 mb-2">
+            {pendingCos.length} change order{pendingCos.length > 1 ? "s" : ""} waiting — {money(sum.pending_revenue_cents || 0)} pending revenue · {money(sum.pending_cost_cents || 0)} pending cost
+          </h4>
+          <div className="space-y-2">
+            {pendingCos.map((c) => (
+              <div key={c.id} className="flex items-center justify-between gap-2 text-sm">
+                <div className="text-gray-200">{c.description}
+                  <span className="text-gray-500 text-xs"> · rev {money(c.revenue_delta_cents)} · cost {money(c.cost_delta_cents)}{c.reason ? ` · ${c.reason}` : ""}</span>
+                </div>
+                {isOwner && detail.status !== "estimate" && (
+                  <div className="flex gap-1 shrink-0">
+                    <Button size="sm" data-testid={`co-approve-${c.id}`} onClick={() => decideCo(c.id, "approve")} className="bg-emerald-600 hover:bg-emerald-500 text-black h-7 text-xs">Approve</Button>
+                    <Button size="sm" data-testid={`co-reject-${c.id}`} onClick={() => decideCo(c.id, "reject")} className="bg-rose-600/80 hover:bg-rose-500 text-black h-7 text-xs">Reject</Button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+          <div className="text-[11px] text-gray-500 mt-1">Pending change orders do not change the job budget. Approving revises the estimate the same day.</div>
+        </div>
+      )}
+
+      {/* Change order history */}
+      {cos.length > 0 && (
+        <div className="mt-2" data-testid="co-history">
+          <h4 className="text-xs uppercase tracking-wider text-gray-500 mb-2">Change Order History</h4>
+          <div className="space-y-2">
+            {cos.map((c) => (
+              <div key={c.id} className="p-2.5 rounded-lg bg-[#0F1218] border border-[#222838] text-sm">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-gray-200">{c.description}</span>
+                  <span className={`px-2 py-0.5 rounded-full text-[11px] border capitalize ${CO_CLS[c.state] || CO_CLS.pending}`}>{c.state}</span>
+                </div>
+                <div className="text-xs text-gray-400 mt-1">
+                  Revenue {money(c.revenue_delta_cents)} · Cost {money(c.cost_delta_cents)}
+                  {c.delay_days ? ` · +${c.delay_days} day${c.delay_days > 1 ? "s" : ""}` : ""}
+                  {c.reason ? ` · Reason: ${c.reason}` : ""}
+                </div>
+                {c.cost_impact_cents && Object.keys(c.cost_impact_cents).length > 0 && (
+                  <div className="text-xs text-gray-500 mt-0.5">Cost impact: {Object.entries(c.cost_impact_cents).map(([k, v]) => `${k} ${money(v)}`).join(" · ")}</div>
+                )}
+                <div className="text-[11px] text-gray-500 mt-1 space-y-0.5">
+                  {(c.history || []).map((h, i) => (
+                    <div key={i}>{h.event} {h.by_name ? `by ${h.by_name}` : ""} {h.at ? `· ${fmtDate(h.at.slice(0, 10))}` : ""}</div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Change order + invoice */}
       {isOwner && detail.status !== "estimate" && <div className="grid sm:grid-cols-2 gap-3 mt-2">
           <div className="p-3 rounded-lg bg-[#0F1218] border border-[#222838]">
@@ -742,6 +790,10 @@ function JobDetail({
           ...co,
           description: e.target.value
         })} placeholder={t("jobs.description")} className="bg-[#14171E] border-[#222838] h-8 text-xs mb-2" />
+            <Input data-testid="co-reason" value={co.reason} onChange={e => setCo({
+          ...co,
+          reason: e.target.value
+        })} placeholder="Reason (customer request, site condition…)" className="bg-[#14171E] border-[#222838] h-8 text-xs mb-2" />
             <div className="flex gap-2">
               <Input data-testid="co-revenue" value={co.revenue_delta} onChange={e => setCo({
             ...co,
@@ -751,8 +803,18 @@ function JobDetail({
             ...co,
             cost_delta: e.target.value
           })} placeholder={t("jobs.cost2")} className="bg-[#14171E] border-[#222838] h-8 text-xs font-mono" />
+              <Input data-testid="co-delay" value={co.delay_days} onChange={e => setCo({
+            ...co,
+            delay_days: e.target.value
+          })} placeholder="Delay days" className="bg-[#14171E] border-[#222838] h-8 text-xs font-mono" />
               <Button size="sm" data-testid="co-save" onClick={addCo} className="bg-amber-600 hover:bg-amber-500 text-black h-8">{t("jobs.add")}</Button>
             </div>
+            <div className="grid grid-cols-5 gap-1 mb-2">
+              {CATS.map((c) => (
+                <div key={c}><Label className="text-[10px] capitalize text-gray-500">{c}</Label><Input data-testid={`co-impact-${c}`} value={co[c]} onChange={(e) => setCo({ ...co, [c]: e.target.value })} className="bg-[#14171E] border-[#222838] h-8 text-xs font-mono" placeholder="0" /></div>
+              ))}
+            </div>
+            <Button size="sm" data-testid="co-save" onClick={addCo} className="bg-amber-600 hover:bg-amber-500 text-black h-8">Submit for Approval</Button>
           </div>
           <div className="p-3 rounded-lg bg-[#0F1218] border border-[#222838]">
             <h4 className="text-xs uppercase tracking-wider text-gray-500 mb-2">{t("jobs.invoiceCustomerRecognizeRevenue")}</h4>
