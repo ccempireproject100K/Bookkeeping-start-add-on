@@ -1589,6 +1589,7 @@
   "nav.fiscalPeriods": "Fiscal Periods",
   "nav.invoices": "Invoices",
   "nav.bills": "Bills",
+  "nav.billPay": "Pay Queue",
   "nav.expensesVendors": "Expenses & Vendors",
   "nav.receiptInbox": "Receipt Inbox",
   "nav.marketplace": "App Marketplace",

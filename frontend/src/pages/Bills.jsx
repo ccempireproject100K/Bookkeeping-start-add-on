@@ -37,7 +37,10 @@ export default function Bills() {
     due_date: "",
     recurring: false,
     frequency: "monthly",
-    currency: "USD"
+    currency: "USD",
+    bill_ref: "",
+    discount_percent: "",
+    discount_date: ""
   });
   const [payBill, setPayBill] = useState(null);
   const [pay, setPay] = useState({
@@ -61,7 +64,10 @@ export default function Bills() {
         due_date: form.due_date || null,
         recurring: form.recurring,
         frequency: form.recurring ? form.frequency : null,
-        currency: form.currency || "USD"
+        currency: form.currency || "USD",
+        bill_ref: form.bill_ref || null,
+        discount_percent: form.discount_percent ? parseFloat(form.discount_percent) : null,
+        discount_date: form.discount_date || null
       });
       toast.success(t("bills.billCreated"));
       setOpen(false);
@@ -72,7 +78,10 @@ export default function Bills() {
         due_date: "",
         recurring: false,
         frequency: "monthly",
-        currency: "USD"
+        currency: "USD",
+        bill_ref: "",
+        discount_percent: "",
+        discount_date: ""
       });
       load();
     } catch (e) {
@@ -122,7 +131,7 @@ export default function Bills() {
             <th className="px-4 py-3 text-start font-medium">{t("bills.status")}</th>{canManage && <th className="px-4 py-3 text-end font-medium">{t("bills.actions")}</th>}</tr></thead>
           <tbody>
             {bills.map(b => <tr key={b.id} className="border-b border-[#171c26] hover:bg-[#161b25]">
-                <td className="px-4 py-3 text-gray-100">{b.vendor}{b.recurring && <span className="ms-2 text-xs text-amber-500/70">↻ {b.frequency}</span>}</td>
+                <td className="px-4 py-3 text-gray-100">{b.vendor}{b.recurring && <span className="ms-2 text-xs text-amber-500/70">↻ {b.frequency}</span>}{(() => { const ap = (b.prep_history || []).filter(h => h.state === "approved").pop(); return ap ? <div className="text-xs text-emerald-400/80 mt-0.5" data-testid="bill-approved-trail">Approved by {ap.actor} · {fmtDate(ap.at?.slice(0, 10))}</div> : (b.prep_state ? <div className="text-xs text-gray-500 mt-0.5 capitalize">{b.prep_state}</div> : null); })()}</td>
                 <td className="px-4 py-3 text-gray-400">{fmtDate(b.due_date)}</td>
                 <td className="px-4 py-3 text-end font-mono text-gray-300">{moneyFor(b.amount_cents, b.currency)}</td>
                 <td className="px-4 py-3 text-end font-mono text-amber-400">{moneyFor(b.balance_cents, b.currency)}</td>
@@ -173,6 +182,11 @@ export default function Bills() {
               <SelectTrigger data-testid="bill-code" className="bg-[#0F1218] border-[#222838]"><SelectValue /></SelectTrigger>
               <SelectContent className="bg-[#14171E] border-[#222838] text-gray-100 max-h-72">{expenseAccts.map(c => <SelectItem key={c.code} value={c.code}>{c.code} · {c.name}</SelectItem>)}</SelectContent>
             </Select></div>
+          <div className="grid grid-cols-2 gap-3">
+            <div><Label className="text-xs">Bill reference (vendor's no.)</Label><Input data-testid="bill-ref" value={form.bill_ref} onChange={e => setForm({ ...form, bill_ref: e.target.value })} className="bg-[#0F1218] border-[#222838]" /></div>
+            <div><Label className="text-xs">Early-pay discount % (optional)</Label><Input data-testid="bill-discount" type="number" step="0.1" value={form.discount_percent} onChange={e => setForm({ ...form, discount_percent: e.target.value })} className="bg-[#0F1218] border-[#222838] font-mono" /></div>
+          </div>
+          {form.discount_percent && <div><Label className="text-xs">Pay by (for the discount)</Label><Input data-testid="bill-discount-date" type="date" value={form.discount_date} onChange={e => setForm({ ...form, discount_date: e.target.value })} className="bg-[#0F1218] border-[#222838]" /></div>}
           <div className="flex items-center gap-2"><Checkbox data-testid="bill-recurring" checked={form.recurring} onCheckedChange={c => setForm({
             ...form,
             recurring: !!c

@@ -28,7 +28,7 @@ from routers import (auth, federated_auth, ledger, products, pos, invoices, cash
                      developers, invoice_payments, procurement_sync,
                      dataclean_api, dataclean_admin, dataclean_jobs,
                      dataclean_connectors, dataclean_billing,
-                     integration_events, platform_entitlements, cat_review, receipt_match, migration)
+                     integration_events, platform_entitlements, cat_review, receipt_match, migration, billpay)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("mindatease")
@@ -55,7 +55,7 @@ async def health():
 for r in (auth.router, federated_auth.router, password_reset.router, ledger.router, products.router, pos.router,
           referrals.router,
           invoices.router, cashclose.router, dashboard.router,
-          bills.router, billing.router, aging.router, giftcards.router, commissions.router,
+          bills.router, billpay.router, billing.router, aging.router, giftcards.router, commissions.router,
           customers.router, jobs.router, banking.router, vendors.router,
           reports.router, estimates.router,
           recurring_invoices.router, reminders.router, backup.router,
