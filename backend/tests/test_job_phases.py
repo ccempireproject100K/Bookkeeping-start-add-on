@@ -203,7 +203,8 @@ def env(monkeypatch):
     # alerts + committed-cost config through those libs' own db handles.
     from lib import jobalerts as _JA, jobcosting as _JC
     from lib import retainage as _RT
-    for mod in (jobs, receipts, time_router, JP, _JA, _JC, _RT):
+    from lib import jobforecast as _JF  # merge-train: forecast hook in add_cost
+    for mod in (jobs, receipts, time_router, JP, _JA, _JC, _RT, _JF):
         monkeypatch.setattr(mod, "db", fake)
 
     counter = {"n": 0}

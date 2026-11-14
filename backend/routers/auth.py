@@ -1,5 +1,6 @@
 """Auth: register (new workspace), login, logout, me, demo role switch."""
 import os
+from typing import Optional
 from datetime import datetime, timezone, timedelta
 from typing import Optional
 from fastapi import APIRouter, Response, HTTPException, Depends, Request

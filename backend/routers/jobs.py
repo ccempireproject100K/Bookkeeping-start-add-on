@@ -15,6 +15,7 @@ from lib import jobalerts as JA
 from lib import jobcosting as JC
 from lib import jobphases as JP
 from lib import retainage as R
+from lib import jobforecast as JF
 
 router = APIRouter(prefix="/jobs", tags=["jobs"])
 
@@ -640,9 +641,15 @@ async def update_status(job_id: str, body: StatusBody, user: dict = Depends(requ
     j = await jobs(user).find_one({"id": job_id})
     if not j:
         raise HTTPException(status_code=404, detail="Job not found")
+    was_completed = j.get("status") in JF.COMPLETED_STATUSES
     await jobs(user).update_one({"id": job_id}, {"$set": {"status": body.status}})
     await L.audit(db, user["tenant_id"], user, "job.status", {"job": j["job_number"], "status": body.status})
     j = await jobs(user).find_one({"id": job_id})
+    # Job-costing #10 feature F: closing a job freezes the trail's end —
+    # a final forecast snapshot (history then reports final actuals).
+    if body.status in JF.COMPLETED_STATUSES and not was_completed:
+        fc = await JF.load_forecast(user["tenant_id"], j)
+        await JF.take_snapshot(user["tenant_id"], user, j, fc, "final")
     _, res = await _evaluate(user, j)
     return {"status": body.status, "budget": res["budget"],
             "alerts_fired": res["fired"]}
@@ -813,6 +820,11 @@ async def add_cost(job_id: str, body: CostBody, user: dict = Depends(require("op
         view = await _phase_view(user, j, await _profit(user, j))
         doc["phase_drift"] = [pv for pv in view["phases"]
                               if pv["phase_id"] == body.phase_id and pv["drift"]]
+
+    # Job-costing #10 features C/F: the forecast is live — check for a
+    # material move right here as the cost lands and snapshot it.
+    fc = await JF.load_forecast(user["tenant_id"], j)
+    await JF.maybe_snapshot(user["tenant_id"], user, j, fc)
     return doc
 
 

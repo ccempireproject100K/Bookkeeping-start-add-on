@@ -195,8 +195,9 @@ def env(monkeypatch):
     # ja_mod included: in the merged tree jobs.add_cost also evaluates
     # budget alerts (job-overrun lane), which reads jobalerts' own db.
     from lib import jobphases as jp_mod, retainage as rt_mod
+    from lib import jobforecast as jf_mod  # merge-train: forecast hook in add_cost
     for mod in (JC, jobs_router, jc_router, po_router, time_router,
-                audit_mod, ja_mod, jp_mod, rt_mod):
+                audit_mod, ja_mod, jp_mod, rt_mod, jf_mod):
         monkeypatch.setattr(mod, "db", fake)
     return fake
 

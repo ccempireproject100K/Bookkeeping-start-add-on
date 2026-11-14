@@ -138,7 +138,7 @@ export default function Receipts() {
       expense_date: ex.date || "",
       description: ex.description || "",
       payment_method: "bank",
-      bank_transaction_id: ""
+      bank_transaction_id: "",
       job_id: r.job_id || "",
     });
     setReview(r);

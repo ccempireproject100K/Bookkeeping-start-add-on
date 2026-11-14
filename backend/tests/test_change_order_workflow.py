@@ -183,6 +183,8 @@ def env(monkeypatch):
     from lib import jobphases as jobphases_lib, retainage as retainage_lib
     monkeypatch.setattr(jobphases_lib, "db", fake)
     monkeypatch.setattr(retainage_lib, "db", fake)
+    from lib import jobforecast as jobforecast_lib  # merge-train: forecast hook in add_cost
+    monkeypatch.setattr(jobforecast_lib, "db", fake)
     return fake
 
 

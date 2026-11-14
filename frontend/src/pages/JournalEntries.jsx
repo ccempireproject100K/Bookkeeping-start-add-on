@@ -42,7 +42,6 @@ export default function JournalEntries() {
   const [date, setDate] = useState(today());
   const [memo, setMemo] = useState("");
   const [overrideReason, setOverrideReason] = useState("");
-  const [overrideReason, setOverrideReason] = useState("");
   const [lines, setLines] = useState(emptyLines());
   const canPost = user?.role === "owner";
   const canDraft = user?.role === "owner" || user?.role === "bookkeeper";

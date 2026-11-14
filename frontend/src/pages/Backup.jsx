@@ -116,8 +116,7 @@ export default function Backup() {
       </div>
 
       <FullDataOut />
-    </div>
-  );
+    </div>;
 }
 
 function fmtBytes(n) {

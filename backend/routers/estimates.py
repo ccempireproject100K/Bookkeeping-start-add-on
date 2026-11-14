@@ -1,6 +1,16 @@
 """Estimates / quotes with estimate→invoice conversion, and recurring-invoice
 templates (manual generate; no scheduler). Estimates do not touch the GL until
-converted into an invoice."""
+converted into an invoice.
+
+Job-costing #10 (2026-11-14): an estimate may also carry its expected
+COSTS — per line (`cost_amount` + `category` + optional `phase`) or as
+an `estimated_costs` category map — so accepting it can create the
+JOB with its budget pre-filled in one action, no re-typing. The
+estimate then lives on the job as its immutable BASELINE
+(lib/jobforecast). Line-level costs win when present; the category
+map is the fallback. Converting to a job and converting to an
+invoice are independent doors.
+"""
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from typing import Optional, List
@@ -10,6 +20,7 @@ from lib.base import Scoped, new_id, now_iso, today_str, to_cents, cents_to_doll
 from lib.auth import require, get_current_user
 from lib import ledger as L
 from lib import posting as P
+from lib import jobforecast as JF
 from routers.invoices import InvoiceBody, InvLine, issue_invoice
 
 router = APIRouter(prefix="/estimates", tags=["estimates"])
@@ -28,6 +39,13 @@ class EstLine(BaseModel):
     name: str
     revenue_code: str = "4020"
     amount: float
+    # Job-costing #10: optional expected cost for this line, its cost
+    # category (material|labor|equipment|subcontractor|other) and an
+    # optional phase name. All optional — revenue-only estimates
+    # behave exactly as before.
+    category: Optional[str] = None
+    cost_amount: Optional[float] = None
+    phase: Optional[str] = None
 
 
 class EstimateBody(BaseModel):
@@ -40,6 +58,7 @@ class EstimateBody(BaseModel):
     deposit_amount: float = 0
     deposit_due_date: Optional[str] = None
     terms: str = "Net 30"
+    estimated_costs: dict = {}   # category -> dollars (fallback budget)
 
 
 @router.get("")
@@ -61,6 +80,9 @@ async def create_estimate(body: EstimateBody, user: dict = Depends(require("ops:
         "deposit_due_date": body.deposit_due_date,
         "terms": body.terms,
         "invoice_id": None, "created_at": now_iso(),
+        "estimated_costs_cents": {c: to_cents((body.estimated_costs or {}).get(c, 0))
+                                  for c in JF.CATEGORIES},
+        "job_id": None,
     }
     await coll(user).insert_one(doc)
     doc.pop("_id", None)
@@ -159,6 +181,109 @@ async def record_deposit(estimate_id: str, body: DepositBody,
            "payment_method": body.payment_method,
            "entry_number": entry["number"], "created_at": now_iso()}
     await deposits(user).insert_one(doc)
+    doc.pop("_id", None)
+    return doc
+
+
+# ---------------- Estimate -> job budget (job-costing #10) ----------------
+def derive_budget(estimate):
+    """(costs_cents, phases) carried from an estimate with NO re-keying:
+    exact cent figures from the estimate's own lines / cost map.
+    Line-level costs win; the estimate-level category map is the
+    fallback. Phases group line costs by phase name (phases-lane doc
+    shape: {id, name, budget_cents{category}})."""
+    line_costs = [l for l in estimate.get("lines", [])
+                  if l.get("cost_amount") is not None]
+    if line_costs:
+        costs = {c: 0 for c in JF.CATEGORIES}
+        phase_map = {}
+        for l in line_costs:
+            cat = l.get("category") if l.get("category") in JF.CATEGORIES else "other"
+            amt = to_cents(l["cost_amount"])
+            costs[cat] += amt
+            pname = (l.get("phase") or "").strip()
+            if pname:
+                ph = phase_map.setdefault(
+                    pname, {"id": new_id(), "name": pname,
+                            "budget_cents": {c: 0 for c in JF.CATEGORIES}})
+                ph["budget_cents"][cat] += amt
+        return costs, list(phase_map.values())
+    stored = estimate.get("estimated_costs_cents") or {}
+    return {c: int(stored.get(c, 0)) for c in JF.CATEGORIES}, []
+
+
+@router.get("/{estimate_id}/budget-suggestion")
+async def budget_suggestion(estimate_id: str, user: dict = Depends(get_current_user)):
+    """Feature B: the shop's own completed-job history, offered as an
+    adjusted budget with the evidence. Silent (<3 jobs) by design."""
+    e = await coll(user).find_one({"id": estimate_id})
+    if not e:
+        raise HTTPException(status_code=404, detail="Estimate not found")
+    costs, _ = derive_budget(e)
+    return await JF.budget_suggestion(user["tenant_id"], costs)
+
+
+class ConvertJobBody(BaseModel):
+    job_type: str = "installation"
+    service_location: str = ""
+    description: str = ""
+    apply_suggestion: bool = False
+
+
+@router.post("/{estimate_id}/convert-to-job")
+async def convert_to_job(estimate_id: str, body: ConvertJobBody = ConvertJobBody(),
+                         user: dict = Depends(require("ops:manage"))):
+    """One action: create the job with its budget pre-filled from the
+    estimate. The estimate's figures are snapshotted onto the job as
+    the immutable BASELINE; if the user accepts the history-smart
+    suggestion, the WORKING budget carries the adjusted figures and
+    the acceptance (with its evidence) is recorded on the job — the
+    baseline is never touched."""
+    e = await coll(user).find_one({"id": estimate_id})
+    if not e:
+        raise HTTPException(status_code=404, detail="Estimate not found")
+    if e.get("job_id"):
+        raise HTTPException(status_code=409, detail="Estimate already converted to a job")
+
+    costs, phases = derive_budget(e)
+    working = dict(costs)
+    adjustment = None
+    if body.apply_suggestion:
+        sugg = await JF.budget_suggestion(user["tenant_id"], costs)
+        if sugg["available"]:
+            for cat, s in sugg["per_category"].items():
+                working[cat] = s["suggested_cents"]
+            adjustment = {"accepted": True, "accepted_at": now_iso(),
+                          "accepted_by": user.get("id"),
+                          "evidence": sugg["per_category"]}
+
+    tid = user["tenant_id"]
+    seq = await Scoped(db.jobs, tid).next_seq(db.counters, "job")
+    doc = {
+        "id": new_id(), "job_number": f"JOB-{seq:04d}",
+        "customer_id": e.get("customer_id"), "customer_name": e["client_name"],
+        "service_location": body.service_location, "job_type": body.job_type,
+        "description": body.description or e.get("notes", ""), "status": "active",
+        "estimated_revenue_cents": int(e.get("subtotal_cents", 0)),
+        "estimated_costs_cents": working, "change_orders": [],
+        "phases": phases,
+        "source_estimate_id": e["id"],
+        "baseline_estimate_id": e["id"],
+        "baseline_revenue_cents": int(e.get("subtotal_cents", 0)),
+        "baseline_costs_cents": costs,
+        "baseline_phases": [dict(p, budget_cents=dict(p["budget_cents"]))
+                            for p in phases],
+        "baseline_created_at": now_iso(),
+        "budget_adjustment": adjustment,
+        "created_at": now_iso(),
+    }
+    await Scoped(db.jobs, tid).insert_one(doc)
+    await coll(user).update_one({"id": estimate_id},
+                                {"$set": {"job_id": doc["id"],
+                                          "job_number": doc["job_number"]}})
+    # Feature F: the trail starts at creation (baseline -> first forecast).
+    fc = await JF.load_forecast(tid, doc)
+    await JF.take_snapshot(tid, user, doc, fc, "created")
     doc.pop("_id", None)
     return doc
 

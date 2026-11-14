@@ -9,8 +9,10 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Plus, Trash2, FilePlus, ArrowRightLeft, RefreshCw } from "lucide-react";
+import { Plus, Trash2, FilePlus, ArrowRightLeft, RefreshCw, Briefcase, Lightbulb } from "lucide-react";
 import { useTranslation } from "react-i18next";
+
+const COST_CATS = ["material", "labor", "equipment", "subcontractor", "other"];
 const STATUS_CLS = {
   draft: "bg-gray-500/10 text-gray-400 border-gray-500/20",
   sent: "bg-sky-500/10 text-sky-400 border-sky-500/20",
@@ -34,6 +36,7 @@ export default function Estimates() {
   const [client, setClient] = useState("");
   const [tax, setTax] = useState("");
   const [terms, setTerms] = useState("Net 30");
+  const [jobPrompt, setJobPrompt] = useState(null);   // {est, suggestion} — estimate->job prompt
     const [lines, setLines] = useState([{
     name: "",
     revenue_code: "4020",
@@ -221,6 +224,30 @@ export default function Estimates() {
           <div><Label className="text-xs">Tax ($)</Label><Input data-testid="est-tax" value={tax} onChange={(e) => setTax(e.target.value)} className="bg-[#0F1218] border-[#222838] w-32 font-mono" /></div>
           <div><Label className="text-xs">Terms (carry to the invoice when converted)</Label><Input data-testid="est-terms" value={terms} onChange={(e) => setTerms(e.target.value)} className="bg-[#0F1218] border-[#222838]" placeholder="Net 30" /></div>
           <DialogFooter><Button data-testid="est-save" onClick={create} className="bg-amber-600 hover:bg-amber-500 text-black">Create Estimate</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* History-smart suggestion (job-costing #10, feature B) */}
+      <Dialog open={!!jobPrompt} onOpenChange={(o) => !o && setJobPrompt(null)}>
+        <DialogContent className="bg-[#14171E] border-[#222838] max-w-lg">
+          <DialogHeader><DialogTitle className="flex items-center gap-2"><Lightbulb size={17} className="text-amber-400" />Your history suggests a budget tweak</DialogTitle></DialogHeader>
+          {jobPrompt && (
+            <div className="space-y-2 text-sm" data-testid="suggestion-card">
+              <p className="text-gray-400">From your own completed jobs — the estimate itself stays untouched either way; the baseline on the job is always the original estimate.</p>
+              {Object.entries(jobPrompt.suggestion.per_category).map(([cat, s]) => (
+                <div key={cat} className="flex items-center justify-between rounded-lg bg-[#0F1218] border border-[#222838] px-3 py-2">
+                  <span className="capitalize text-gray-200">{cat}</span>
+                  <span className="text-xs text-gray-400">usually lands <span className={s.avg_variance_pct > 0 ? "text-rose-400" : "text-emerald-400"}>{s.avg_variance_pct > 0 ? "+" : ""}{s.avg_variance_pct}%</span> vs estimate · {s.jobs} jobs</span>
+                  <span className="font-mono text-gray-500 line-through">{money(s.estimate_cents)}</span>
+                  <span className="font-mono text-amber-300">{money(s.suggested_cents)}</span>
+                </div>
+              ))}
+            </div>
+          )}
+          <DialogFooter className="gap-2">
+            <Button variant="outline" className="border-[#222838]" data-testid="suggestion-keep" onClick={() => jobPrompt && convertToJob(jobPrompt.est, false)}>Use estimate as-is</Button>
+            <Button className="bg-amber-600 hover:bg-amber-500 text-black" data-testid="suggestion-accept" onClick={() => jobPrompt && convertToJob(jobPrompt.est, true)}>Use suggested budget</Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 
