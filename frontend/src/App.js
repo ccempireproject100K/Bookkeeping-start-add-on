@@ -71,6 +71,7 @@ import Backup from "@/pages/Backup";
 import Copilot from "@/pages/Copilot";
 import Time from "@/pages/Time";
 import PortalView from "@/pages/PortalView";
+import ClientPage from "@/pages/ClientPage";
 import Payroll from "@/pages/Payroll";
 import Budget from "@/pages/Budget";
 import Tax from "@/pages/Tax";
@@ -113,6 +114,7 @@ function App() {
             <Route path="/dataclean-demo" element={<DataCleanDemo />} />
             <Route path="/invite" element={<InviteAccept />} />
             <Route path="/p/:token" element={<PortalView />} />
+            <Route path="/c/:token" element={<ClientPage />} />
             <Route path="/" element={<Protected><Layout /></Protected>}>
               <Route index element={<Dashboard />} />
               <Route path="jobs" element={<Jobs />} />

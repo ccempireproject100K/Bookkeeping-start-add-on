@@ -234,6 +234,9 @@ def env(monkeypatch):
     # lane) through those lib modules' own db handles.
     monkeypatch.setattr(jobalerts_lib, "db", fake)
     monkeypatch.setattr(jobcosting_lib, "db", fake)
+    from lib import jobphases as jobphases_lib, retainage as retainage_lib
+    monkeypatch.setattr(jobphases_lib, "db", fake)
+    monkeypatch.setattr(retainage_lib, "db", fake)
     return fake
 
 

@@ -33,7 +33,8 @@ export default function Estimates() {
   const [recOpen, setRecOpen] = useState(false);
   const [client, setClient] = useState("");
   const [tax, setTax] = useState("");
-  const [lines, setLines] = useState([{
+  const [terms, setTerms] = useState("Net 30");
+    const [lines, setLines] = useState([{
     name: "",
     revenue_code: "4020",
     amount: ""
@@ -217,6 +218,9 @@ export default function Estimates() {
           </div>
           <div><Label className="text-xs">{t("estimates.tax")}</Label><Input data-testid="est-tax" value={tax} onChange={e => setTax(e.target.value)} className="bg-[#0F1218] border-[#222838] w-32 font-mono" /></div>
           <DialogFooter><Button data-testid="est-save" onClick={create} className="bg-amber-600 hover:bg-amber-500 text-black">{t("estimates.createEstimate")}</Button></DialogFooter>
+          <div><Label className="text-xs">Tax ($)</Label><Input data-testid="est-tax" value={tax} onChange={(e) => setTax(e.target.value)} className="bg-[#0F1218] border-[#222838] w-32 font-mono" /></div>
+          <div><Label className="text-xs">Terms (carry to the invoice when converted)</Label><Input data-testid="est-terms" value={terms} onChange={(e) => setTerms(e.target.value)} className="bg-[#0F1218] border-[#222838]" placeholder="Net 30" /></div>
+          <DialogFooter><Button data-testid="est-save" onClick={create} className="bg-amber-600 hover:bg-amber-500 text-black">Create Estimate</Button></DialogFooter>
         </DialogContent>
       </Dialog>
 

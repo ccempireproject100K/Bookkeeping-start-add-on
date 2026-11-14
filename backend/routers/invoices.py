@@ -59,6 +59,10 @@ class InvoiceBody(BaseModel):
     due_date: Optional[str] = None
     terms: Optional[str] = "Net 30"
     currency: str = "USD"          # ISO 4217; validated on issue
+    # Early-pay discount override (percent + pay-within days). None means
+    # "use the tenant's pay-config default"; 0 turns it off for this one.
+    early_pay_percent: Optional[float] = None
+    early_pay_days: Optional[int] = None
 
 
 def _compute_invoice_tax(*, body, jur, customer, engine_lines, subtotal):
@@ -220,6 +224,18 @@ async def issue_invoice(body: InvoiceBody,
         tax_cents, snapshot = _compute_invoice_tax(
             body=body, jur=jur, customer=customer,
             engine_lines=engine_lines, subtotal=subtotal)
+        # Early-pay discount (InvoiceEase fold-in): per-invoice override
+        # wins, else the tenant's pay-config default (itself default OFF).
+        # Stored on the invoice so later config changes never rewrite an
+        # issued invoice's offer.
+        from lib import invoice_pay as IP
+        if body.early_pay_percent is not None or body.early_pay_days is not None:
+            ep_percent = float(body.early_pay_percent or 0)
+            ep_days = int(body.early_pay_days or 0)
+        else:
+            cfg = await IP.get_pay_config(user["tenant_id"], db_override=db)
+            ep_percent = float(cfg.get("early_pay_percent") or 0)
+            ep_days = int(cfg.get("early_pay_days") or 0)
         gross = subtotal + tax_cents
         inv_id = new_id()
         entry = await L.post_journal_entry(db, user["tenant_id"], user, P.build_invoice_issue(
@@ -240,6 +256,7 @@ async def issue_invoice(body: InvoiceBody,
             "tax_reversed_cents": 0, "tax_adjustments": [],
             "status": "issued", "paid_cents": 0, "payments": [], "due_date": body.due_date,
             "terms": body.terms, "issue_entry": entry["number"], "created_at": now_iso(),
+            "early_pay": {"percent": ep_percent, "days": ep_days},
             "issue_date": today_str(),  # accounting date; KPIs filter on this
         }
         if idem_key:
@@ -348,14 +365,27 @@ async def _pay_invoice_inner(invoice_id: str, body: PayBody, user: dict,
         credit_applied = min(c.get("remaining_cents", 0), balance)
 
     cash = P._cash_account(body.payment_method)
-    applied_to_ar = min(cash_received + credit_applied, balance)
-    overpay = (cash_received + credit_applied) - applied_to_ar
+    # Early-pay discount: paying the full (discounted) balance inside the
+    # window earns the discount, recorded HONESTLY as a contra-revenue
+    # line (4900 Discounts & Promos) — never a silent total change.
+    from lib import invoice_pay as IP
+    discount_applied = 0
+    ep = IP.early_pay_info(inv, body.pay_date or today_str())
+    settled = cash_received + credit_applied
+    if (ep["active"] and ep["discount_cents"] > 0
+            and ep["discounted_balance_cents"] <= settled < balance):
+        discount_applied = balance - settled
+
+    applied_to_ar = min(settled + discount_applied, balance)
+    overpay = (settled + discount_applied) - applied_to_ar
 
     jl = []
     if cash_received > 0:
         jl.append(P.dr(cash, cash_received, "Invoice payment"))
     if credit_applied > 0:
         jl.append(P.dr("2210", credit_applied, "Customer credit applied"))
+    if discount_applied > 0:
+        jl.append(P.dr("4900", discount_applied, "Early-pay discount"))
     jl.append(P.cr("1200", applied_to_ar, "AR cleared"))
     if overpay > 0:
         jl.append(P.cr("2210", overpay, "Overpayment → customer credit"))
@@ -393,20 +423,25 @@ async def _pay_invoice_inner(invoice_id: str, body: PayBody, user: dict,
     status = "paid" if new_paid >= inv["total_cents"] else "partial"
     pmt = {"date": pay_date, "amount_cents": applied_to_ar,
            "cash_cents": cash_received - overpay, "credit_cents": credit_applied,
+           "discount_cents": discount_applied,
            "method": body.payment_method, "pay_currency": pay_currency,
            "entry": entry["number"]}
     result = {"status": status, "paid_cents": new_paid,
               "balance_cents": inv["total_cents"] - new_paid,
               "entry_number": entry["number"],
               "credit_applied_cents": credit_applied,
+              "discount_applied_cents": discount_applied,
               "overpayment_cents": overpay}
     if idem_key:
         # Stamp the payment with its sync key + full result so an
         # interrupted-then-retried push can be answered from the stamp.
         pmt["sync_key"] = idem_key
         pmt["sync_result"] = result
-    await coll(user).update_one({"id": invoice_id}, {"$set": {"status": status, "paid_cents": new_paid},
-                                                     "$push": {"payments": pmt}})
+    upd = {"$set": {"status": status, "paid_cents": new_paid},
+           "$push": {"payments": pmt}}
+    if discount_applied > 0:
+        upd["$inc"] = {"discount_applied_cents": discount_applied}
+    await coll(user).update_one({"id": invoice_id}, upd)
     await dev.emit_event(user["tenant_id"], "payment.received", {
         "invoice_id": invoice_id, "amount_cents": pmt["amount_cents"],
         "paid_cents": result["paid_cents"],

@@ -500,8 +500,61 @@ async def autopilot_run(user: dict = Depends(require("ops:manage"))):
                 if action in ("nudge", "firm", "final"):
                     msg = _render(s.get("template") or "", inv, days)
                     await _record_reminder(user, inv, msg, s.get("stage", action), days)
+                    # InvoiceEase fold-in (2026-11-14): reminders now actually
+                    # SEND via the Resend lane. Honors the tenant kill switch,
+                    # per-client / per-invoice pause flags, and auto-pauses
+                    # the moment the balance is paid (checked live here).
+                    delivery = {"status": "not_attempted"}
+                    deliveries = []
+                    try:
+                        from lib import invoice_pay as IP
+                        pay_cfg = await IP.get_pay_config(user["tenant_id"])
+                        fresh = await Scoped(db.invoices, user["tenant_id"]).find_one(
+                            {"id": inv["id"]})
+                        if pay_cfg.get("nudges_paused"):
+                            delivery = {"status": "skipped",
+                                        "error": "Nudges paused for this business"}
+                        elif fresh and await IP.reminders_paused_for(user["tenant_id"], fresh):
+                            delivery = {"status": "skipped",
+                                        "error": "Reminders paused for this client/invoice"}
+                        elif fresh and fresh["total_cents"] - fresh.get("paid_cents", 0) <= 0:
+                            delivery = {"status": "skipped",
+                                        "error": "Invoice already paid"}
+                        elif fresh:
+                            # STRONGER ALERTS (owner addition 2026-11-14): a
+                            # step may fire ALL channels at once. Channels
+                            # come from the step's `channels` list, else the
+                            # customer's `reminder_channels` override, else
+                            # email only. Ladder stays configurable per
+                            # client and per invoice (pause flags above).
+                            channels = s.get("channels")
+                            if not channels and fresh.get("customer_id"):
+                                cust = await Scoped(db.customers, user["tenant_id"]).find_one(
+                                    {"id": fresh["customer_id"]})
+                                channels = (cust or {}).get("reminder_channels")
+                            channels = channels or ["email"]
+                            senders = {"email": IP.send_invoice_email,
+                                       "sms": IP.send_invoice_sms,
+                                       "whatsapp": IP.send_invoice_whatsapp}
+                            for ch in channels:
+                                fn = senders.get(ch)
+                                if not fn:
+                                    continue
+                                if ch == "email":
+                                    rec = await fn(user["tenant_id"], fresh,
+                                                   "reminder", user,
+                                                   message_override=msg)
+                                else:
+                                    rec = await fn(user["tenant_id"], fresh, "reminder")
+                                deliveries.append({"channel": ch,
+                                                   "status": rec["status"],
+                                                   "error": rec.get("error")})
+                            delivery = deliveries[0] if deliveries else delivery
+                    except Exception as exc:
+                        delivery = {"status": "failed", "error": str(exc)[:200]}
                     done.append({"invoice_id": inv["id"], "action": action,
-                                 "stage": s.get("stage", action)})
+                                 "stage": s.get("stage", action),
+                                 "delivery": delivery, "deliveries": deliveries})
                 if action == "final" and days >= cfg["late_fee_days"]:
                     res = await _apply_late_fee(user, inv, cfg)
                     if res["applied"]:

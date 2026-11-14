@@ -259,8 +259,10 @@ def fdb(monkeypatch):
     # jobalerts/jobcosting included: in the merged tree (2026-11-14)
     # jobs.get_job also reads the budget-alert config and the committed-
     # costs config through those lib modules' own db handles.
+    from lib import jobphases as jobphases_mod, retainage as retainage_mod
     for mod in (proc_r, jobs_r, integrations_r, idem, iauth,
-                auth_mod, audit_mod, jobalerts_mod, jobcosting_mod):
+                auth_mod, audit_mod, jobalerts_mod, jobcosting_mod,
+                jobphases_mod, retainage_mod):
         monkeypatch.setattr(mod, "db", fake)
     return fake
 

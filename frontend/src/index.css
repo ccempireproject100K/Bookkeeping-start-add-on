@@ -71,6 +71,31 @@ h1, h2, h3, h4, .font-display { font-family: 'Outfit', sans-serif; }
   border-radius: var(--radius);
 }
 
+/* Invoice Assistant mascot (cash register monster) */
+@keyframes mascot-bob-kf {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+.mascot-bob { animation: mascot-bob-kf 3s ease-in-out infinite; }
+@keyframes mascot-chomp-kf {
+  0%, 100% { transform: scaleY(1); }
+  50% { transform: scaleY(1.7); }
+}
+.mascot-chomp { animation: mascot-chomp-kf 0.55s ease-in-out infinite; }
+@keyframes mascot-paper-kf {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2.5px); }
+}
+.mascot-paper { animation: mascot-paper-kf 0.55s ease-in-out infinite; }
+.mascot-drawer-open { transform: translateY(3px); transition: transform 0.3s ease; }
+@keyframes mascot-pop-kf {
+  0% { transform: scale(0.4); opacity: 0; }
+  70% { transform: scale(1.15); }
+  100% { transform: scale(1); opacity: 1; }
+}
+.mascot-pop { animation: mascot-pop-kf 0.45s ease both; transform-origin: 168px 40px; }
+
+
 @keyframes rise {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
@@ -271,3 +296,16 @@ table thead th {
   .card-surface:not(.animate-pulse) { animation: none; }
   .ledger-page h1::after, .app-bg h1::after { animation: none; }
 }
+/* Invoice-history tiles: cascade drop-in (owner design order 2026-11-14).
+   Cards start slightly raised and transparent, then settle into the grid
+   with a per-card delay set inline. Reduced-motion users get no cascade —
+   cards simply appear. */
+@keyframes hist-card-in-kf {
+  from { opacity: 0; transform: translateY(-16px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.hist-card-in { animation: hist-card-in-kf 0.55s cubic-bezier(0.22, 0.9, 0.32, 1) both; }
+@media (prefers-reduced-motion: reduce) {
+  .hist-card-in { animation: none; }
+}
+

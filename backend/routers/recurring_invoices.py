@@ -62,6 +62,7 @@ class RecurringInvoiceBody(BaseModel):
     auto_send: bool = False
     catch_up: bool = True
     due_offset_days: Optional[int] = None  # invoice due = run date + offset
+    autopay: bool = False               # charge saved payment method on generation
 
 
 def _add_months(d: date, months: int) -> date:
@@ -244,6 +245,29 @@ async def run_due_for_user(user: dict) -> dict:
             made_for_template += 1
             if t.get("auto_send"):
                 await _auto_send(user, t, inv)
+            # InvoiceEase fold-in (2026-11-14): if the template is flagged
+            # autopay and the client has an active enrollment, charge the
+            # saved payment method for the new invoice immediately.
+            # Failures land in the collections pipeline (see
+            # _autopay_failure), never silent.
+            if t.get("autopay"):
+                try:
+                    from routers.invoice_delivery import autopay_charge
+                    try:
+                        res = await autopay_charge(inv["id"], user)
+                        await _audit(user, "recurring_invoice.autopay", "invoice", inv["id"],
+                                     {"template_id": t["id"], "result": res.get("status")})
+                    except Exception as ce:
+                        # autopay_charge already records charge failures
+                        # into the collections pipeline itself; here we
+                        # only audit the miss (e.g. 409 = not enrolled).
+                        detail = getattr(ce, "detail", str(ce))
+                        await _audit(user, "recurring_invoice.autopay_missed", "invoice",
+                                     inv["id"], {"template_id": t["id"],
+                                                 "error": str(detail)[:200]})
+                except Exception as e:
+                    await _audit(user, "recurring_invoice.autopay_error", "invoice",
+                                 inv["id"], {"error": str(e)[:200]})
             nxt = _advance(next_run, t.get("frequency", "monthly"), t.get("interval_days"))
             await _audit(user, "recurring_invoice.generated", "invoice", inv["id"],
                          {"template": t["name"], "template_id": t["id"],

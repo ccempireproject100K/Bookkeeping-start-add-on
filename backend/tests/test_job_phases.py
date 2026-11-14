@@ -202,7 +202,8 @@ def env(monkeypatch):
     # Merged tree (2026-11-14): get_job/add_cost also consult the overrun
     # alerts + committed-cost config through those libs' own db handles.
     from lib import jobalerts as _JA, jobcosting as _JC
-    for mod in (jobs, receipts, time_router, JP, _JA, _JC):
+    from lib import retainage as _RT
+    for mod in (jobs, receipts, time_router, JP, _JA, _JC, _RT):
         monkeypatch.setattr(mod, "db", fake)
 
     counter = {"n": 0}

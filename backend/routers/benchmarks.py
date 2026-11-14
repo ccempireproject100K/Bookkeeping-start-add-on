@@ -118,3 +118,49 @@ async def benchmarks(user: dict = Depends(require("ledger:read"))):
         cards.append(card)
     return {"trade": pack.get("trade", "General"), "niche_id": niche, "month": month,
             "min_pool": MIN_POOL, "cards": cards}
+
+
+# ---------------- Trade benchmark line (InvoiceEase, 2026-11-14) --------
+# "Others in your trade charge about $X for this kind of work" — computed
+# ONLY from the platform's own anonymized aggregate invoice data: invoices
+# belonging to tenants in the same niche who OPTED IN to benchmarks (the
+# data-release consent posture). Aggregates only — a median and a count;
+# no tenant is identifiable. Below the sample floor the line shows
+# NOTHING — a number is never fabricated. It starts thin and grows with
+# platform data.
+MIN_TRADE_INVOICES = 10  # sample floor for the trade line
+
+
+@router.get("/trade-line")
+async def trade_line(user: dict = Depends(require("ledger:read"))):
+    tenant = await db.tenants.find_one({"id": user["tenant_id"]},
+                                       {"_id": 0}) or {}
+    niche = tenant.get("niche_id", "general")
+    pack = get_pack(niche)
+    label = pack.get("name") or pack.get("label") or niche
+    pool = await db.tenants.find(
+        {"niche_id": niche, "benchmark_opt_in": True},
+        {"id": 1}).to_list(None)
+    pool_ids = [t["id"] for t in pool]
+    totals = []
+    if pool_ids:
+        rows = await db.invoices.find(
+            {"tenant_id": {"$in": pool_ids},
+             "status": {"$in": ["issued", "partial", "paid"]}},
+            {"total_cents": 1}).to_list(None)
+        totals = sorted(r["total_cents"] for r in rows
+                        if r.get("total_cents"))
+    sample = len(totals)
+    if sample < MIN_TRADE_INVOICES:
+        return {"available": False, "niche_id": niche,
+                "niche_label": label, "sample": sample,
+                "min_sample": MIN_TRADE_INVOICES, "median_cents": None,
+                "line": None}
+    mid = sample // 2
+    median = totals[mid] if sample % 2 else (totals[mid - 1] + totals[mid]) // 2
+    return {"available": True, "niche_id": niche, "niche_label": label,
+            "sample": sample, "min_sample": MIN_TRADE_INVOICES,
+            "median_cents": median,
+            "line": (f"Others in your trade charge about "
+                     f"${median / 100:,.2f} for this kind of work "
+                     f"(median of {sample} invoices, anonymized).")}

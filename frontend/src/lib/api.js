@@ -24,6 +24,7 @@ export const api = {
   get: (p, cfg) => client.get(p, cfg).then((r) => r.data),
   post: (p, b, cfg) => client.post(p, b, cfg).then((r) => r.data),
   patch: (p, b) => client.patch(p, b).then((r) => r.data),
+  put: (p, b, cfg) => client.put(p, b, cfg).then((r) => r.data),
   del: (p) => client.delete(p).then((r) => r.data),
 };
 
