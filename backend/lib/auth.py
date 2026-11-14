@@ -105,6 +105,7 @@ PERMISSIONS = {
     "ledger:post_draft": {"owner", "bookkeeper"},
     "ledger:approve": {"owner"},
     "ledger:admin": {"owner"},            # accounts, periods, migration, cutover
+    "period:reopen": {"owner", "accountant"},  # reopen a closed period (reason + timer apparatus)
     "ops:sell": {"owner", "barber"},
     "ops:manage": {"owner"},              # products, invoices, cash close
     "dashboard:read": {"owner", "accountant", "bookkeeper", "barber"},

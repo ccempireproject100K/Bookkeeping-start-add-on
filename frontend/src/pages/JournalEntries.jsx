@@ -41,6 +41,8 @@ export default function JournalEntries() {
   const [detail, setDetail] = useState(null);
   const [date, setDate] = useState(today());
   const [memo, setMemo] = useState("");
+  const [overrideReason, setOverrideReason] = useState("");
+  const [overrideReason, setOverrideReason] = useState("");
   const [lines, setLines] = useState(emptyLines());
   const canPost = user?.role === "owner";
   const canDraft = user?.role === "owner" || user?.role === "bookkeeper";
@@ -66,6 +68,7 @@ export default function JournalEntries() {
   const reset = () => {
     setDate(today());
     setMemo("");
+    setOverrideReason("");
     setLines(emptyLines());
   };
   const save = async post => {
@@ -79,7 +82,8 @@ export default function JournalEntries() {
         entry_date: date,
         memo,
         lines: payloadLines,
-        post
+        post,
+        period_override_reason: overrideReason || undefined
       });
       toast.success(post ? "Entry posted" : "Draft saved");
       setOpen(false);
@@ -176,6 +180,10 @@ export default function JournalEntries() {
               <Input data-testid="input-entry-date" type="date" value={date} onChange={e => setDate(e.target.value)} className="bg-[#0F1218] border-[#222838]" /></div>
             <div><Label className="text-xs">{t("journalentries.description")}</Label>
               <Input data-testid="input-entry-description" value={memo} onChange={e => setMemo(e.target.value)} placeholder={t("journalentries.memo")} className="bg-[#0F1218] border-[#222838]" /></div>
+          </div>
+          <div>
+            <Label className="text-xs">Soft-closed period override reason</Label>
+            <Input data-testid="input-period-override-reason" value={overrideReason} onChange={(e) => setOverrideReason(e.target.value)} placeholder="Only needed if the date falls in a soft-closed month — the reason is written to the audit log" className="bg-[#0F1218] border-[#222838]" />
           </div>
 
           <div className="mt-2 space-y-2 max-h-[320px] overflow-y-auto pe-1">

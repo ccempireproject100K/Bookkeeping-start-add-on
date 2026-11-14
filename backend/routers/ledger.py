@@ -9,6 +9,7 @@ from lib.auth import require
 from lib.coa import ACCOUNT_TYPE_OF, NORMAL_BALANCE_OF
 from lib import ledger as L
 from lib import posting as P
+from lib import periods as PC
 
 router = APIRouter(prefix="/ledger", tags=["ledger"])
 
@@ -143,6 +144,7 @@ class EntryBody(BaseModel):
     # their own. Used only by the consolidated multi-entity view.
     intercompany: bool = False
     counterparty_tenant_id: Optional[str] = None
+    period_override_reason: Optional[str] = None
 
 
 @router.post("/journal-entries")
@@ -160,13 +162,20 @@ async def create_entry(body: EntryBody, user: dict = Depends(require("ledger:pos
         "memo": body.memo, "lines": draft_lines,
         "intercompany": body.intercompany,
         "counterparty_tenant_id": body.counterparty_tenant_id,
+        "period_override_reason": body.period_override_reason,
     }, status=status)
     return entry
 
 
+class PostEntryBody(BaseModel):
+    period_override_reason: Optional[str] = None
+
+
 @router.post("/journal-entries/{entry_id}/post")
-async def post_entry(entry_id: str, user: dict = Depends(require("ledger:approve"))):
-    return await L.post_draft(db, user["tenant_id"], user, entry_id)
+async def post_entry(entry_id: str, body: Optional[PostEntryBody] = None,
+                     user: dict = Depends(require("ledger:approve"))):
+    return await L.post_draft(db, user["tenant_id"], user, entry_id,
+                              period_override_reason=body.period_override_reason if body else None)
 
 
 @router.post("/journal-entries/{entry_id}/reverse")
@@ -223,7 +232,10 @@ async def general_ledger(account: str, date_from: Optional[str] = None,
 # ---------------- Fiscal periods ----------------
 @router.get("/periods")
 async def list_periods(user: dict = Depends(require("ledger:read"))):
-    return await Scoped(db.fiscal_periods, user["tenant_id"]).find_list(sort=[("key", -1)])
+    rows = await Scoped(db.fiscal_periods, user["tenant_id"]).find_list(sort=[("key", -1)])
+    # Resolve time-based transitions (grace elapsed -> hard lock; reopen
+    # window expired -> re-lock) so the list never shows a stale status.
+    return [await L.resolve_period(db, user["tenant_id"], p) for p in rows]
 
 
 class PeriodAction(BaseModel):
@@ -232,39 +244,131 @@ class PeriodAction(BaseModel):
 
 @router.post("/periods/{key}/status")
 async def set_period_status(key: str, body: PeriodAction, user: dict = Depends(require("ledger:admin"))):
+    """Legacy status setter, kept for compatibility — it now delegates to
+    the period-close workflow (lib/periods.py) so there is no silent way
+    around the checklist, the snapshot, or the reopen rules."""
     if body.status not in ("open", "soft_closed", "locked"):
         raise HTTPException(status_code=422, detail="Invalid status")
-    s = Scoped(db.fiscal_periods, user["tenant_id"])
-    p = await s.find_one({"key": key})
-    if not p:
-        await L.ensure_period(db, user["tenant_id"], f"{key}-01")
-    upd = {"status": body.status}
-    if body.status == "locked":
-        # Bake-off #5: a period cannot lock over a FAILED, unwaived balance
-        # assertion whose statement date falls inside it. Waive the
-        # assertion (named + reasoned, audited) or fix the books first.
-        pdoc = await s.find_one({"key": key})
-        if pdoc:
-            failed = []
-            async for a in db.balance_assertions.find(
-                    {"tenant_id": user["tenant_id"],
-                     "statement_date": {"$gte": pdoc["start_date"], "$lte": pdoc["end_date"]}},
-                    {"_id": 0}):
-                if a.get("status") == "failed" and not a.get("waived"):
-                    failed.append({"id": a["id"], "bank_account_id": a.get("bank_account_id"),
-                                   "statement_date": a.get("statement_date"),
-                                   "difference_cents": a.get("difference_cents")})
-            if failed:
-                raise HTTPException(status_code=409, detail={
-                    "error": "Period has failed balance assertions",
-                    "failed_assertions": failed})
-        upd["locked_by"] = user["email"]
-        upd["locked_at"] = now_iso()
-    await s.update_one({"key": key}, {"$set": upd})
-    await L.audit(db, user["tenant_id"], user, f"period.{body.status}", {"period": key})
-    result = await s.find_one({"key": key})
-    result.pop("_id", None)
-    return result
+    tid = user["tenant_id"]
+    await L.ensure_period(db, tid, f"{key}-01")
+    s = Scoped(db.fiscal_periods, tid)
+    period = await L.resolve_period(db, tid, await s.find_one({"key": key}))
+    reopen = period.get("reopen") or {}
+
+    if body.status == "open":
+        if period["status"] == "open" and reopen.get("status") != "active":
+            return period
+        settings = await PC.get_settings(db, tid)
+        if settings["reopen_apparatus"]:
+            raise HTTPException(
+                status_code=409,
+                detail=(f"Period {key} is closed. Reopen it via "
+                        f"POST /ledger/periods/{key}/reopen — a written reason is required."))
+        # Apparatus OFF: plain reopen, as the workflow itself would do.
+        await s.update_one({"key": key}, {"$set": {"status": "open", "reopen": None}})
+        await L._period_audit(db, tid, user, "period.reopened", key,
+                              {"apparatus": False, "via": "legacy_status"})
+        result = await s.find_one({"key": key})
+        result.pop("_id", None)
+        return result
+    if body.status == "soft_closed":
+        if period["status"] != "open" or reopen.get("status") == "active":
+            return period
+        result = await PC.close_period(db, tid, user, key, via="legacy_status")
+        return result["period"]
+    # locked
+    # Bake-off #5 (main): a period cannot lock over a FAILED, unwaived
+    # balance assertion whose statement date falls inside it — on any
+    # lock path through this endpoint. Waive the assertion (named +
+    # reasoned, audited) or fix the books first.
+    if period.get("start_date") and period.get("end_date"):
+        failed = []
+        async for a in db.balance_assertions.find(
+                {"tenant_id": tid,
+                 "statement_date": {"$gte": period["start_date"],
+                                    "$lte": period["end_date"]}},
+                {"_id": 0}):
+            if a.get("status") == "failed" and not a.get("waived"):
+                failed.append({"id": a["id"],
+                               "bank_account_id": a.get("bank_account_id"),
+                               "statement_date": a.get("statement_date"),
+                               "difference_cents": a.get("difference_cents")})
+        if failed:
+            raise HTTPException(status_code=409, detail={
+                "error": "Period has failed balance assertions",
+                "failed_assertions": failed})
+    if period["status"] == "locked" and reopen.get("status") != "active":
+        return period
+    if period["status"] == "soft_closed" and reopen.get("status") != "active":
+        return await PC.lock_now(db, tid, user, key)
+    result = await PC.close_period(db, tid, user, key, via="legacy_status", force_hard=True)
+    return result["period"]
+
+
+# ---------------- Period-close workflow (Top-20 #19) ----------------
+class PeriodSettingsBody(BaseModel):
+    snapshot_on_close: Optional[bool] = None
+    soft_close_stage: Optional[bool] = None
+    reopen_apparatus: Optional[bool] = None
+    grace_days: Optional[int] = None
+    reopen_window_hours: Optional[int] = None
+
+
+@router.get("/period-settings")
+async def get_period_settings(user: dict = Depends(require("ledger:read"))):
+    return await PC.get_settings(db, user["tenant_id"])
+
+
+@router.put("/period-settings")
+async def put_period_settings(body: PeriodSettingsBody,
+                              user: dict = Depends(require("settings:write"))):
+    return await PC.update_settings(db, user["tenant_id"], user,
+                                    body.model_dump(exclude_none=True))
+
+
+@router.get("/periods/{key}/checklist")
+async def period_checklist(key: str, user: dict = Depends(require("ledger:read"))):
+    return await PC.compute_checklist(db, user["tenant_id"], key)
+
+
+class CloseBody(BaseModel):
+    acknowledge: List[str] = []
+    grace_days: Optional[int] = None
+
+
+@router.post("/periods/{key}/close")
+async def close_period(key: str, body: CloseBody,
+                       user: dict = Depends(require("ledger:admin"))):
+    return await PC.close_period(db, user["tenant_id"], user, key,
+                                 acknowledge=body.acknowledge,
+                                 grace_days=body.grace_days)
+
+
+@router.post("/periods/{key}/lock")
+async def lock_period(key: str, user: dict = Depends(require("ledger:admin"))):
+    return await PC.lock_now(db, user["tenant_id"], user, key)
+
+
+class ReopenBody(BaseModel):
+    reason: Optional[str] = None
+    window_hours: Optional[int] = None
+
+
+@router.post("/periods/{key}/reopen")
+async def reopen_period(key: str, body: ReopenBody,
+                        user: dict = Depends(require("period:reopen"))):
+    return await PC.reopen_period(db, user["tenant_id"], user, key,
+                                  reason=body.reason, window_hours=body.window_hours)
+
+
+@router.post("/periods/{key}/reopen/end")
+async def end_reopen(key: str, user: dict = Depends(require("period:reopen"))):
+    return await PC.end_reopen(db, user["tenant_id"], user, key)
+
+
+@router.get("/periods/{key}/snapshots")
+async def period_snapshots(key: str, user: dict = Depends(require("ledger:read"))):
+    return await PC.list_snapshots(db, user["tenant_id"], key)
 
 
 # ---------------- Opening balances migration (idempotent) ----------------

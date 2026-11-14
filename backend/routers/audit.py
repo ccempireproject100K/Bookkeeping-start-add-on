@@ -36,3 +36,15 @@ async def list_audit(
     cur = db.audit_log.find(q, {"_id": 0}).sort("created_at", -1).limit(limit)
     rows = await cur.to_list(length=limit)
     return {"rows": rows, "count": len(rows), "limit": limit}
+
+
+@router.get("/changes-after-close")
+async def changes_after_close(
+    period: str = Query("", description="Period key YYYY-MM; empty = all periods"),
+    user: dict = Depends(require("audit:read")),
+):
+    """Spotlight view: for every reopen window of a closed period, the
+    reason, the actor, the window — and every journal entry created or
+    posted while the window was open (entries carry the reopen tag)."""
+    from lib import periods as PC
+    return await PC.changes_after_close(db, user["tenant_id"], period or None)
