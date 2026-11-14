@@ -12,10 +12,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { Upload, ScanLine, CheckCircle2, Trash2, Link2, Camera } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import ReceiptMatchPanel from "@/components/ReceiptMatchPanel";
 function Thumb({
   id
-}) {
-  const [url, setUrl] = useState(null);
+}) {  const [url, setUrl] = useState(null);
   useEffect(() => {
     let live = true;
     api.get(`/receipts/${id}/image`, {
@@ -202,6 +202,8 @@ export default function Receipts() {
         </table>
       </Card>
 
+      <ReceiptMatchPanel canManage={canManage} onResolved={reload} />
+
       <Dialog open={!!review} onOpenChange={() => setReview(null)}>
         <DialogContent className="max-w-lg">
           <DialogHeader><DialogTitle>{t("receipts.reviewReceipt")}</DialogTitle></DialogHeader>
@@ -247,12 +249,12 @@ export default function Receipts() {
             })}>
                 <SelectTrigger className="bg-[#0F1218] border-[#222838]"><SelectValue placeholder={t("receipts.noMatch")} /></SelectTrigger>
                 <SelectContent><SelectItem value="none">{t("receipts.noMatch")}</SelectItem>
-                  {matches.map(m => <SelectItem key={m.id} value={m.id}>{fmtDate(m.txn_date)} — {money(m.amount_cents)} — {m.description.slice(0, 30)}</SelectItem>)}
+                  {matches.map(m => <SelectItem key={m.id} value={m.id}>{fmtDate(m.txn_date)} — {money(m.amount_cents)} — {m.description.slice(0, 30)}{m.score != null ? ` (${Math.round(m.score * 100)}%)` : ""}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
           </div>
-          {!!matches.length && <p className="text-xs text-gray-500 flex items-center gap-1"><Link2 size={12} /> {matches.length} {t("receipts.bankTransaction")}{matches.length > 1 ? "s" : ""} {t("receipts.lookLikeThisReceiptPickOne")}</p>}
+          {!!matches.length && <p className="text-xs text-gray-500 flex items-center gap-1"><Link2 size={12} /> {matches.length} {t("receipts.bankTransaction")}{matches.length > 1 ? "s" : ""} scored against this receipt — best first. {matches[0].reason}</p>}
           <DialogFooter>
             <Button variant="ghost" onClick={() => setReview(null)}>{t("receipts.cancel")}</Button>
             <Button onClick={post} data-testid="receipt-post">{t("receipts.postAsExpense")}</Button>

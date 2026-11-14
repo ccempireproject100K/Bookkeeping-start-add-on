@@ -25,6 +25,7 @@ from lib.pii import scrub_secrets
 from lib.base import Scoped, new_id, now_iso, today_str, to_cents
 from lib import ledger as L
 from lib import posting as P
+from lib import receiptmatch as RM
 from lib.coa import ACCOUNT_TYPE_OF, NAME_OF
 from lib.niches import get_pack
 
@@ -252,24 +253,67 @@ async def scan_receipt(rid: str, user: dict = Depends(require("ops:manage"))):
 
 
 # ---------------- Bank-feed matching ----------------
+async def claimed_bank_txn_ids(user, exclude_receipt_id=None) -> set:
+    """Bank transactions already claimed by a receipt of this tenant —
+    posted (matched_bank_txn), linked by the matcher (match_link), or
+    recorded on an expense. One bank line can back exactly one receipt;
+    this set is what enforces it."""
+    ids = set()
+    for r in await receipts(user).find_list({}, limit=5000):
+        if exclude_receipt_id and r.get("id") == exclude_receipt_id:
+            continue
+        if r.get("status") == "posted" and r.get("matched_bank_txn"):
+            ids.add(r["matched_bank_txn"])
+        link = r.get("match_link") or {}
+        if link.get("txn_id"):
+            ids.add(link["txn_id"])
+    for e in await Scoped(db.expenses, user["tenant_id"]).find_list(
+            {}, limit=5000):
+        if e.get("bank_transaction_id"):
+            ids.add(e["bank_transaction_id"])
+    return ids
+
+
+async def scored_candidates(user, doc, claimed=None) -> list:
+    """Every bank line inside the candidate window, scored by
+    lib/receiptmatch (amount tiers + date distance + vendor similarity),
+    best first. Transactions already claimed by another receipt are not
+    offered again."""
+    ex = doc.get("extracted") or {}
+    amt = to_cents(ex.get("amount") or 0)
+    rdate = (ex.get("date") or "")[:10]
+    if not amt or not rdate:
+        return []
+    if claimed is None:
+        claimed = await claimed_bank_txn_ids(
+            user, exclude_receipt_id=doc.get("id"))
+    txns = await Scoped(db.bank_transactions, user["tenant_id"]).find_list(
+        {"txn_date": {"$gte": _shift(rdate, -RM.CANDIDATE_WINDOW_DAYS),
+                      "$lte": _shift(rdate, RM.CANDIDATE_WINDOW_DAYS)}},
+        sort=[("txn_date", -1)], limit=200)
+    out = []
+    for t in txns:
+        if t["id"] in claimed:
+            continue
+        s = RM.score_candidate(ex, t)
+        s.update({"id": t["id"], "txn_date": t["txn_date"],
+                  "description": t.get("description", ""),
+                  "account": t.get("bank_account_id", "")})
+        out.append(s)
+    out.sort(key=lambda s: s["score"], reverse=True)
+    return out
+
+
 @router.get("/{rid}/matches")
 async def receipt_matches(rid: str, user: dict = Depends(require("ledger:read"))):
-    """Suggest bank transactions that look like this receipt (amount + date proximity)."""
+    """Bank transactions that could be this receipt, scored (amount tiers,
+    date distance, vendor similarity) with a plain-words reason each.
+    Extends the original exact-amount/+-4-day suggestion list."""
     doc = await receipts(user).find_one({"id": rid})
     if not doc or not doc.get("extracted"):
         raise HTTPException(404, "Scan the receipt first")
-    amt = to_cents(doc["extracted"].get("amount") or 0)
-    rdate = (doc["extracted"].get("date") or "")[:10]
-    if not amt or not rdate:
-        return []
-    # bank outflows are stored negative; receipt amounts are positive
-    cands = await Scoped(db.bank_transactions, user["tenant_id"]).find_list(
-        {"amount_cents": {"$in": [amt, -amt]},
-         "txn_date": {"$gte": _shift(rdate, -4), "$lte": _shift(rdate, 4)}},
-        sort=[("txn_date", -1)], limit=20)
-    return [{"id": c["id"], "txn_date": c["txn_date"], "description": c.get("description", ""),
-             "amount_cents": c["amount_cents"], "account": c.get("bank_account_id", "")}
-            for c in cands]
+    scored = await scored_candidates(user, doc)
+    return [s for s in scored if s["score"] >= 0.35][:20]
 
 
 def _shift(iso_date: str, days: int) -> str:
@@ -302,6 +346,25 @@ async def post_receipt(rid: str, body: PostBody, user: dict = Depends(require("o
     amount = to_cents(body.amount)
     if amount <= 0:
         raise HTTPException(422, "Amount must be positive")
+    # The bank transaction this expense claims: the one picked in the
+    # review dialog, or the matcher's recorded link when none was picked.
+    txn_id = body.bank_transaction_id or \
+        (doc.get("match_link") or {}).get("txn_id")
+    if txn_id:
+        # FIX-IT-FIRST (receipt-matching screen, 2026-11-14): posting had
+        # NO uniqueness check — the same bank transaction could be posted
+        # against two receipts, double-counting the expense. One bank
+        # line backs exactly one receipt.
+        claimed = await claimed_bank_txn_ids(user, exclude_receipt_id=rid)
+        if txn_id in claimed:
+            raise HTTPException(
+                409, "That bank transaction is already linked to another "
+                     "posted receipt — unlink it there first, or pick a "
+                     "different transaction.")
+        txn = await Scoped(db.bank_transactions, user["tenant_id"]).find_one(
+            {"id": txn_id})
+        if not txn:
+            raise HTTPException(422, "Bank transaction not found")
     cash = P._cash_account(body.payment_method)
     exp_id = new_id()
     edate = body.expense_date or today_str()
@@ -315,13 +378,13 @@ async def post_receipt(rid: str, body: PostBody, user: dict = Depends(require("o
                "category_name": NAME_OF.get(body.category_code), "amount_cents": amount,
                "payment_method": body.payment_method, "expense_date": edate,
                "description": body.description, "entry_number": entry["number"],
-               "receipt_id": rid, "bank_transaction_id": body.bank_transaction_id,
+               "receipt_id": rid, "bank_transaction_id": txn_id,
                "created_at": now_iso()}
     await Scoped(db.expenses, user["tenant_id"]).insert_one(exp_doc)
     await receipts(user).update_one(
         {"id": rid},
         {"$set": {"status": "posted", "expense_id": exp_id,
-                  "matched_bank_txn": body.bank_transaction_id}})
+                  "matched_bank_txn": txn_id}})
     await audit(user, "receipt.post", "receipt", rid,
                 {"expense_id": exp_id, "amount": amount, "vendor": body.vendor})
     exp_doc.pop("_id", None)
