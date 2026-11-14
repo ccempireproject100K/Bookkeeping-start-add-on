@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { NicheProvider } from "@/context/NicheContext";
+import { OfflineQueueProvider } from "@/context/OfflineQueueContext";
 import Layout from "@/components/Layout";
 import InstallPrompt from "@/components/InstallPrompt";
 import InventoryGate from "@/components/InventoryGate";
@@ -103,6 +104,7 @@ function App() {
   return <div className="App app-bg">
       <AuthProvider>
         <NicheProvider>
+        <OfflineQueueProvider>
         <BrowserRouter>
           <Routes>
             <Route path="/login" element={<Login />} />
@@ -187,6 +189,7 @@ function App() {
             </Route>
           </Routes>
         </BrowserRouter>
+        </OfflineQueueProvider>
         </NicheProvider>
         <InstallPrompt />
         <Toaster position="top-right" theme="dark" richColors />

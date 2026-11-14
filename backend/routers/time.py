@@ -193,6 +193,9 @@ class ClockInBody(BaseModel):
     rate: Optional[float] = Field(default=None, ge=0, le=10000)   # $/hr override
     billable_rate: Optional[float] = Field(default=None, ge=0, le=10000)  # $/hr charged to the client
     phase_id: Optional[str] = None
+    # Offline field capture: a stable per-item client_key so a retried
+    # sync returns the entry it already created instead of a duplicate.
+    client_key: Optional[str] = Field(default=None, max_length=80)
 
 
 class ManualEntryBody(BaseModel):
@@ -205,6 +208,15 @@ class ManualEntryBody(BaseModel):
     rate: Optional[float] = Field(default=None, ge=0, le=10000)   # $/hr override
     billable_rate: Optional[float] = Field(default=None, ge=0, le=10000)  # $/hr charged to the client
     phase_id: Optional[str] = None
+    # Offline field capture: a stable per-item client_key so a retried
+    # sync returns the entry it already created instead of a duplicate.
+    client_key: Optional[str] = Field(default=None, max_length=80)
+
+
+class ClockOutBody(BaseModel):
+    # Offline field capture: a retried clock-out sync carries the queue
+    # item's client_key and returns the entry it already closed.
+    client_key: Optional[str] = Field(default=None, max_length=80)
 
 
 class EntryPatchBody(BaseModel):
@@ -222,7 +234,7 @@ class EntryPatchBody(BaseModel):
 def _out(d: dict) -> dict:
     out = {k: d.get(k) for k in ("id", "user_id", "user_name", "date", "clock_in",
                                  "clock_out", "hours", "notes", "client_name", "billable",
-                                 "job_id", "phase_id", "status", "approved_by", "approved_at",
+                                 "job_id", "phase_id", "client_key", "status", "approved_by", "approved_at",
                                  "closed_at", "created_at",
                                  "job_cost_id", "job_cost_posted_cents",
                                  "burden_percent", "billed_invoice_id", "billed_at",
@@ -249,7 +261,9 @@ async def _new_entry_fields(user, body) -> dict:
             raise HTTPException(status_code=422,
                                 detail="Phase not found on this job")
     rate_cents = to_cents(body.rate) if body.rate is not None else await _default_rate_cents(user)
-    return {"job_id": job_id, "phase_id": phase_id, "rate_cents": rate_cents,
+    return {"job_id": job_id, "phase_id": phase_id,
+            "client_key": getattr(body, "client_key", None),
+            "rate_cents": rate_cents,
             "billable_rate_cents": (to_cents(body.billable_rate)
                                     if getattr(body, "billable_rate", None) else None),
             "billed_invoice_id": None, "billed_at": None, "billed_rate_cents": None,
@@ -259,6 +273,10 @@ async def _new_entry_fields(user, body) -> dict:
 
 @router.post("/clock-in")
 async def clock_in(body: ClockInBody, user: dict = Depends(require("time:manage"))):
+    if body.client_key:
+        prior = await coll(user).find_one({"user_id": user["id"], "client_key": body.client_key})
+        if prior:
+            return _out(prior)  # retried offline sync — the entry already exists
     if await coll(user).find_one({"user_id": user["id"], "status": "open"}):
         raise HTTPException(status_code=409, detail="Already clocked in")
     doc = {
@@ -276,17 +294,29 @@ async def clock_in(body: ClockInBody, user: dict = Depends(require("time:manage"
 
 
 @router.post("/clock-out")
-async def clock_out(user: dict = Depends(require("time:manage"))):
+async def clock_out(body: Optional[ClockOutBody] = None,
+                    user: dict = Depends(require("time:manage"))):
+    if isinstance(body, dict):
+        # Direct-call compat: older suites call clock_out(user) with the
+        # user dict in the first position (pre-offline signature).
+        user, body = body, None
+    key = body.client_key if body else None
+    if key:
+        prior = await coll(user).find_one({"user_id": user["id"], "offline_key": key})
+        if prior:
+            return _out(prior)  # retried offline sync — this clock-out already landed
     doc = await coll(user).find_one({"user_id": user["id"], "status": "open"})
     if not doc:
         raise HTTPException(status_code=404, detail="Not clocked in")
     out = datetime.now(timezone.utc)
     inn = datetime.fromisoformat(doc["clock_in"])
     hours = round((out - inn).total_seconds() / 3600, 2)
-    await coll(user).update_one({"id": doc["id"]}, {"$set": {
-        "clock_out": out.isoformat(), "hours": hours, "status": "logged"}})
+    patch = {"clock_out": out.isoformat(), "hours": hours, "status": "logged"}
+    if key:
+        patch["offline_key"] = key
+    await coll(user).update_one({"id": doc["id"]}, {"$set": patch})
     await _audit(user, "time.clock_out", "time_entry", doc["id"], {"hours": hours})
-    doc.update(clock_out=out.isoformat(), hours=hours, status="logged")
+    doc.update(patch)
     return _out(doc)
 
 
@@ -308,6 +338,10 @@ async def list_entries(user_id: Optional[str] = None, date_from: Optional[str] =
 
 @router.post("/entries")
 async def log_entry(body: ManualEntryBody, user: dict = Depends(require("time:manage"))):
+    if body.client_key:
+        prior = await coll(user).find_one({"user_id": user["id"], "client_key": body.client_key})
+        if prior:
+            return _out(prior)  # retried offline sync — the entry already exists
     doc = {
         "id": new_id(), "user_id": user["id"], "user_name": user.get("name"),
         "date": body.date, "clock_in": None, "clock_out": None, "hours": round(body.hours, 2),

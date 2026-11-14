@@ -8,6 +8,7 @@ import { errMsg } from "@/lib/api";
 import MusicPlayer from "./MusicPlayer";
 import WorkspaceSwitcher from "./WorkspaceSwitcher";
 import LanguageSwitcher from "./LanguageSwitcher";
+import SyncStatus from "./SyncStatus";
 import { useNiche } from "@/context/NicheContext";
 import { useTranslation } from "react-i18next";
 // Pip File Door (Phase 1): lazy-loaded so the shell pays nothing for it
@@ -544,6 +545,7 @@ export default function Layout() {
             <span className="font-display font-semibold text-gray-100 truncate">{user?.tenant?.name || "Workspace"}</span>
           </div>
           <div className="flex items-center gap-3">
+            <SyncStatus />
             <WorkspaceSwitcher />
             <LanguageSwitcher compact />
             <div className="hidden sm:flex items-center gap-2 text-xs text-gray-400">

@@ -70,8 +70,11 @@ describe("service worker and offline fallback", () => {
     expect(sw).toContain("/offline.html");
     const offline = readPublic("offline.html");
     expect(offline.toLowerCase()).toContain("offline");
-    // Honest posture: the page must not promise silent background sync.
-    expect(offline).toContain("Nothing is queued");
+    // Honest posture (feat/offline-field-capture): field capture may be
+    // saved on the phone, but only as a listed, visible queue — the page
+    // must say items are NOT on the books until the panel says they sent.
+    expect(offline).toContain("listed in the sync panel");
+    expect(offline).toContain("not on your books");
   });
 });
 

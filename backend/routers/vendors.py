@@ -176,6 +176,9 @@ class ExpenseBody(BaseModel):
     description: str = ""
     billable_job_id: Optional[str] = None
     receipt: Optional[ReceiptMeta] = None
+    # Offline field capture: stable per-item key — a retried sync returns
+    # the expense it already created instead of double-posting it.
+    client_key: Optional[str] = None
 
 
 @router.get("/expenses/list")
@@ -185,6 +188,11 @@ async def list_expenses(user: dict = Depends(require("ledger:read"))):
 
 @router.post("/expenses")
 async def create_expense(body: ExpenseBody, user: dict = Depends(require("ops:manage"))):
+    if body.client_key:
+        prior = await expenses(user).find_one({"client_key": body.client_key})
+        if prior:
+            prior.pop("_id", None)
+            return prior  # retried offline sync — already posted
     if body.category_code not in ACCOUNT_TYPE_OF:
         raise HTTPException(status_code=422, detail="Unknown category account")
     amount = to_cents(body.amount)
@@ -205,6 +213,7 @@ async def create_expense(body: ExpenseBody, user: dict = Depends(require("ops:ma
         "amount_cents": amount, "payment_method": body.payment_method, "expense_date": edate,
         "description": body.description, "billable_job_id": body.billable_job_id,
         "receipt": body.receipt.model_dump() if body.receipt else None,
+        "client_key": body.client_key,
         "entry_number": entry["number"], "created_at": now_iso(),
     }
     await expenses(user).insert_one(doc)

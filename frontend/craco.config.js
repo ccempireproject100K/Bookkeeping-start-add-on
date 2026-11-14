@@ -66,6 +66,21 @@ if (config.enableHealthCheck) {
 }
 
 let webpackConfig = {
+  jest: {
+    configure: {
+      moduleNameMapper: {
+        // Several ui components exist as .jsx (radix — what the app
+        // builds against) and .tsx (base-ui) twins; jest's default
+        // extension order picks the .tsx ones, which don't resolve.
+        // Pin the twins used by tested components to their .jsx files.
+        "^@/components/ui/dialog$": "<rootDir>/src/components/ui/dialog.jsx",
+        "^@/components/ui/button$": "<rootDir>/src/components/ui/button.jsx",
+        "^@/components/ui/input$": "<rootDir>/src/components/ui/input.jsx",
+        "^@/components/ui/label$": "<rootDir>/src/components/ui/label.jsx",
+        "^@/(.*)$": "<rootDir>/src/$1",
+      },
+    },
+  },
   eslint: {
     configure: {
       extends: ["plugin:react-hooks/recommended"],

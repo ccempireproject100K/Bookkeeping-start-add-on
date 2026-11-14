@@ -3,6 +3,7 @@ import { api, errMsg } from "@/lib/api";
 import { fmtDate, today, money } from "@/lib/format";
 import { PageHeader, Card, Loading } from "@/components/Page";
 import { useAuth } from "@/context/AuthContext";
+import { useOfflineQueue } from "@/context/OfflineQueueContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -32,7 +33,9 @@ export default function Time() {
   const {
     user
   } = useAuth();
+  const oq = useOfflineQueue();
   const isOwner = user?.role === "owner";
+  const [jobs, setJobs] = useState([]);
   const [entries, setEntries] = useState(null);
   const [sheet, setSheet] = useState(null);
   const [period, setPeriod] = useState(today().slice(0, 7));
@@ -68,12 +71,20 @@ export default function Time() {
   useEffect(() => {
     load();
   }, []);
+  useEffect(() => { if (oq.counts.total === 0) load(); }, [oq.counts.total]);
   useEffect(() => {
     api.get(`/time/timesheet?period=${period}`).then(setSheet).catch(() => setSheet(null));
     loadTeam(period);
   }, [period]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const open = entries?.find(e => e.status === "open");
+  const serverOpen = entries?.find((e) => e.status === "open");
+  // A clock-in captured offline lives in the field-capture queue until it
+  // syncs; show it as the open shift so the tech can clock out against it.
+  const pendingIn = !serverOpen && oq.pendingClockIn
+    ? { id: oq.pendingClockIn.id, clock_in: oq.pendingClockIn.payload.client_in_at || oq.pendingClockIn.created_at,
+        client_name: oq.pendingClockIn.payload.client_name || "", pending: true }
+    : null;
+  const open = serverOpen || pendingIn;
   useEffect(() => {
     if (!open) return;
     const t = setInterval(() => setTick(x => x + 1), 30000);
@@ -81,18 +92,30 @@ export default function Time() {
   }, [open?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const clockIn = async () => {
-    try {
-      await api.post("/time/clock-in", {
-        notes: clockNote,
-        job_id: clockJob || null
-      });
-      setClockNote("");
-      setClockJob("");
-      toast.success(t("time.clockedIn"));
-      load();
-    } catch (e) {
-      toast.error(errMsg(e));
+    await oq.captureClockIn({ notes: clockNote, client_name: "", job_id: clockJob || null, client_in_at: new Date().toISOString() });
+    setClockNote("");
+    setClockJob("");
+    toast.success(oq.online ? t("time.clockedIn") : "Clocked in on this phone — it will send when signal returns");
+    setTimeout(load, 900);
+  };
+  const clockOut = async () => {
+    if (pendingIn) {
+      // The clock-in never reached the server: fold the pair into one
+      // manual entry built from the phone's own timestamps (true hours).
+      await oq.convertPendingClockInToEntry(new Date().toISOString());
+      toast.success(oq.online ? "Clocked out — entry sent" : "Clocked out on this phone — the entry will send when signal returns");
+    } else {
+      await oq.captureClockOut();
+      toast.success(oq.online ? "Clocked out" : "Clock-out saved on this phone — it will send when signal returns");
     }
+    setTimeout(() => { load(); loadTeam(period); }, 900);
+  };
+  const logManual = async () => {
+    const { job_id, ...rest } = m;
+    await oq.captureTimeEntry({ ...rest, hours: parseFloat(m.hours), job_id: job_id || null, rate: m.rate === "" ? null : parseFloat(m.rate) });
+    toast.success(oq.online ? t("time.timeLogged") : "Saved on this phone — it will send when signal returns");
+    setM({ date: today(), hours: "", client_name: "", notes: "", billable: true, job_id: "", rate: "" });
+    setTimeout(() => { load(); loadTeam(period); }, 900);
   };
   const linkJob = async (entry, jobId) => {
     try {
@@ -100,40 +123,6 @@ export default function Time() {
       toast.success(jobId ? "Linked to job — labor posts to the job when approved" : "Job link removed");
       load(); loadTeam(period);
     } catch (e) { toast.error(errMsg(e)); }
-  };
-  const clockOut = async () => {
-    try {
-      const r = await api.post("/time/clock-out", {});
-      toast.success(`Clocked out — ${r.hours}h logged`);
-      load();
-      loadTeam(period);
-    } catch (e) {
-      toast.error(errMsg(e));
-    }
-  };
-  const logManual = async () => {
-    try {
-      await api.post("/time/entries", {
-        ...m,
-        hours: parseFloat(m.hours),
-        job_id: m.job_id || null,
-        rate: m.rate === "" ? null : parseFloat(m.rate)
-      });
-      toast.success(t("time.timeLogged"));
-      setM({
-        date: today(),
-        hours: "",
-        client_name: "",
-        notes: "",
-        billable: true,
-        job_id: "",
-        rate: ""
-      });
-      load();
-      loadTeam(period);
-    } catch (e) {
-      toast.error(errMsg(e));
-    }
   };
   const approve = async id => {
     try {
@@ -239,7 +228,7 @@ export default function Time() {
               <div className="text-3xl font-mono font-semibold text-sky-400 tabular-nums" data-testid="time-elapsed">
                 {elapsed(open.clock_in)}<span className="hidden">{tick}</span>
               </div>
-              <div className="text-xs text-gray-500">{t("time.clockedIn")}{open.client_name ? ` · ${open.client_name}` : ""}</div>
+              <div className="text-xs text-gray-500">{t("time.clockedIn")}{open.client_name ? ` · ${open.client_name}` : ""}{open.pending && <span className="text-amber-400"> · saved on this phone, not sent yet</span>}</div>
               <Button onClick={clockOut} className="bg-rose-600 hover:bg-rose-500 text-black font-semibold" data-testid="time-clock-out">
                 <Square size={16} className="me-1" /> {t("time.clockOut")}</Button>
             </div> : <div className="space-y-3">
@@ -251,6 +240,7 @@ export default function Time() {
                   <option value="">No job</option>
                   {jobs.map(j => <option key={j.id} value={j.id}>{j.job_number} — {j.customer_name}</option>)}
                 </select></div>
+              {!oq.online && <p className="text-[11px] text-amber-400/90">No signal — clocking in still works; it stays on this phone until it can send.</p>}
               <Button onClick={clockIn} className="bg-emerald-600 hover:bg-emerald-500 text-black font-semibold" data-testid="time-clock-in">
                 <Play size={16} className="me-1" /> {t("time.clockIn")}</Button>
             </div>}
