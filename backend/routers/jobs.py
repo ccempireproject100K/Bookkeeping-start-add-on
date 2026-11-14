@@ -308,6 +308,20 @@ async def get_job(job_id: str, user: dict = Depends(get_current_user)):
     budget = await JC.budget_view(user["tenant_id"], j, j["profit"])
     if budget.get("enabled"):
         j["budget"] = {**j["budget"], **budget}
+
+    # Field-capture freshness: actuals update the moment a time entry is
+    # approved or a receipt posts (no batch step), so the newest field cost's
+    # timestamp IS the freshness of the field portion of this job's numbers.
+    field_costs = [c for c in j["costs"] if c.get("source") in ("time_entry", "receipt")]
+    if field_costs:
+        last = max(c["created_at"] for c in field_costs)
+        j["field_capture"] = {
+            "last_field_cost_at": last,
+            "includes_today": last[:10] == today_str(),
+            "field_cost_count": len(field_costs),
+        }
+    else:
+        j["field_capture"] = None
     return j
 
 
@@ -383,6 +397,124 @@ async def update_status(job_id: str, body: StatusBody, user: dict = Depends(requ
 
 
 # ---------------- Costs ----------------
+async def record_job_cost(user, job, *, category, description="", amount_cents=None,
+                          amount=None, hours=0.0, rate_cents=0, product_id=None, qty=1,
+                          technician_id=None, paid=False, source="manual", source_ref=None,
+                          burden_percent=None, extra=None, commitment_id=None):
+    """THE job cost-posting path: exactly one journal entry + one job_costs row.
+
+    The manual POST /jobs/{id}/costs endpoint and field capture (approved time
+    entries, posted receipts) all land job actuals through here, so a cost
+    behaves identically however it arrived. The GL always posts the BASE
+    amount; when `burden_percent` is given for a labor line, the fully-loaded
+    figure is stored alongside (`burdened_amount_cents`) for the burden lane —
+    never overwriting `amount_cents` (see lib/burden.py).
+
+    Amount resolution when `amount_cents` is None mirrors the manual endpoint:
+    material+product draws down inventory at unit cost; labor falls back to
+    hours x rate_cents; otherwise `amount` (dollars) is used.
+    """
+    tenant_id = user["tenant_id"]
+    if category not in CATEGORY_ACCOUNT:
+        raise HTTPException(status_code=422, detail="Invalid category")
+    debit_code = CATEGORY_ACCOUNT[category]
+    credit_code = "1020" if paid else "2010"
+
+    if category == "material" and product_id:
+        prod = await Scoped(db.products, tenant_id).find_one({"id": product_id})
+        if not prod:
+            raise HTTPException(status_code=404, detail="Product not found")
+        res = await Scoped(db.products, tenant_id).update_one(
+            {"id": product_id, "quantity_on_hand": {"$gte": qty}},
+            {"$inc": {"quantity_on_hand": -qty}})
+        if res.matched_count == 0:
+            raise HTTPException(status_code=409, detail=f"{prod['name']} is out of stock")
+        amount_cents = prod["unit_cost_cents"] * qty
+        credit_code = "1300"   # relieve inventory
+    elif category == "labor":
+        credit_code = "1020" if paid else "2320"   # wages payable
+        if amount_cents is None:
+            amount_cents = int(round(hours * rate_cents)) if hours else (
+                to_cents(amount) if amount is not None else None)
+    elif amount_cents is None:
+        amount_cents = to_cents(amount) if amount is not None else None
+
+    if not amount_cents or amount_cents <= 0:
+        raise HTTPException(status_code=422, detail="Cost amount must be positive")
+
+    # Job-costing overlay (manual endpoint only): burdened labor via the
+    # tenant's burden templates. Field-capture paths carry their own
+    # burden_percent snapshot and never resolve templates here.
+    jc_burden = None
+    if source == "manual" and category == "labor" and burden_percent is None:
+        pct, tpl = await JC.resolve_burden(tenant_id, technician_id)
+        amts = JC.labor_amounts(amount_cents, pct)
+        jc_burden = {"burden_pct": amts["burden_pct"],
+                     "burden_cents": amts["burden_cents"],
+                     "burdened_cents": amts["burdened_cents"],
+                     "burden_template_id": tpl["id"] if tpl else None,
+                     "burden_template_name": tpl["name"] if tpl else None}
+
+    cost_id = new_id()
+    entry = await L.post_journal_entry(db, tenant_id, user, {
+        "entry_date": today_str(), "source": "job_cost", "source_ref": cost_id,
+        "memo": f"{job['job_number']} {category}: {description}".strip(),
+        "lines": [P.dr(debit_code, amount_cents, description or category),
+                  P.cr(credit_code, amount_cents, "Job cost")],
+    }, status="posted")
+
+    if category == "labor" and burden_percent is not None:
+        from lib.burden import burdened_cents
+        burden_pct = float(burden_percent)
+        burdened = burdened_cents(amount_cents, burden_pct)
+    else:
+        burden_pct = None
+        burdened = None
+
+    doc = {
+        "id": cost_id, "job_id": job["id"], "job_number": job["job_number"],
+        "category": category, "description": description,
+        "amount_cents": amount_cents, "hours": hours, "rate": rate_cents,
+        "product_id": product_id, "qty": qty, "technician_id": technician_id,
+        "entry_number": entry["number"], "journal_entry_id": entry.get("id"),
+        "source": source, "source_ref": source_ref,
+        "burden_percent": burden_pct, "burdened_amount_cents": burdened,
+        "created_at": now_iso(),
+        **(jc_burden or {}),
+    }
+    if extra:
+        doc.update(extra)
+    await jobcosts(user).insert_one(doc)
+
+    if source == "manual":
+        # Subcontract commitment fulfilment (job-costing lane): posting a
+        # subcontractor cost against a commitment fulfils it down.
+        if category == "subcontractor" and commitment_id:
+            cfg = await JC.get_config(tenant_id)
+            if cfg["committed_costs_enabled"]:
+                coll = Scoped(db.job_commitments, tenant_id)
+                com = await coll.find_one({"id": commitment_id,
+                                           "job_id": job["id"]})
+                if com and com.get("status") == "approved":
+                    fulfilled = min(com["amount_cents"],
+                                    (com.get("fulfilled_cents") or 0) + amount_cents)
+                    await coll.update_one({"id": com["id"]}, {"$set": {
+                        "fulfilled_cents": fulfilled,
+                        "status": "fulfilled" if fulfilled >= com["amount_cents"]
+                                  else "approved"}})
+                    doc["commitment_fulfilled_cents"] = fulfilled
+        # Burden overrun flag: burdened labor tipping the job over its
+        # estimate raises the shared budget-alert notification once.
+        if category == "labor" and jc_burden and jc_burden["burden_cents"] > 0:
+            j2 = await jobs(user).find_one({"id": job["id"]})
+            profit = await _profit(user, j2)
+            doc["burden_overrun"] = await JC.evaluate_burden_overrun(
+                tenant_id, j2, profit, actor_id=user.get("id"))
+
+    doc.pop("_id", None)
+    return doc
+
+
 class CostBody(BaseModel):
     category: str
     description: str = ""
@@ -398,7 +530,6 @@ class CostBody(BaseModel):
 
 @router.post("/{job_id}/costs")
 async def add_cost(job_id: str, body: CostBody, user: dict = Depends(require("ops:manage"))):
-    tenant_id = user["tenant_id"]
     j = await jobs(user).find_one({"id": job_id})
     if not j:
         raise HTTPException(status_code=404, detail="Job not found")
@@ -406,94 +537,18 @@ async def add_cost(job_id: str, body: CostBody, user: dict = Depends(require("op
         raise HTTPException(status_code=409, detail="Convert the estimate to an active job before logging costs")
     if body.category not in CATEGORY_ACCOUNT:
         raise HTTPException(status_code=422, detail="Invalid category")
-
-    debit_code = CATEGORY_ACCOUNT[body.category]
-    credit_code = "1020" if body.paid else "2010"
-    hours = body.hours
-    product_id = body.product_id
-
-    if body.category == "material" and product_id:
-        prod = await Scoped(db.products, tenant_id).find_one({"id": product_id})
-        if not prod:
-            raise HTTPException(status_code=404, detail="Product not found")
-        res = await Scoped(db.products, tenant_id).update_one(
-            {"id": product_id, "quantity_on_hand": {"$gte": body.qty}},
-            {"$inc": {"quantity_on_hand": -body.qty}})
-        if res.matched_count == 0:
-            raise HTTPException(status_code=409, detail=f"{prod['name']} is out of stock")
-        amount_cents = prod["unit_cost_cents"] * body.qty
-        credit_code = "1300"   # relieve inventory
-    elif body.category == "labor":
-        amount_cents = to_cents(body.hours * body.rate) if body.hours else to_cents(body.amount)
-        credit_code = "1020" if body.paid else "2320"   # wages payable
-    else:
-        amount_cents = to_cents(body.amount)
-
-    if amount_cents <= 0:
-        raise HTTPException(status_code=422, detail="Cost amount must be positive")
-
-    # Burdened labor: resolve the rate for this worker (assigned
-    # template wins, then tenant default). The journal entry below
-    # still posts the base wage exactly as before — burden rides on
-    # the cost line as a costing overlay.
-    burden = {"burden_pct": 0.0, "burden_cents": 0,
-              "burdened_cents": amount_cents,
-              "burden_template_id": None, "burden_template_name": None}
+    # Manual path keeps its historical amount math exactly (Decimal dollars).
+    amount_cents = None
     if body.category == "labor":
-        pct, tpl = await JC.resolve_burden(tenant_id, body.technician_id)
-        amts = JC.labor_amounts(amount_cents, pct)
-        burden = {"burden_pct": amts["burden_pct"],
-                  "burden_cents": amts["burden_cents"],
-                  "burdened_cents": amts["burdened_cents"],
-                  "burden_template_id": tpl["id"] if tpl else None,
-                  "burden_template_name": tpl["name"] if tpl else None}
-
-    cost_id = new_id()
-    entry = await L.post_journal_entry(db, tenant_id, user, {
-        "entry_date": today_str(), "source": "job_cost", "source_ref": cost_id,
-        "memo": f"{j['job_number']} {body.category}: {body.description}".strip(),
-        "lines": [P.dr(debit_code, amount_cents, body.description or body.category),
-                  P.cr(credit_code, amount_cents, "Job cost")],
-    }, status="posted")
-
-    doc = {
-        "id": cost_id, "job_id": job_id, "job_number": j["job_number"],
-        "category": body.category, "description": body.description,
-        "amount_cents": amount_cents, "hours": hours, "rate": to_cents(body.rate),
-        "product_id": product_id, "qty": body.qty, "technician_id": body.technician_id,
-        "entry_number": entry["number"], "created_at": now_iso(),
-        **burden,
-    }
-    await jobcosts(user).insert_one(doc)
-
-    # Subcontract commitment fulfilment: posting a subcontractor cost
-    # against a commitment fulfils it down (committed -> actual, the
-    # fulfilled part already lives in actual costs — never both).
-    if body.category == "subcontractor" and body.commitment_id:
-        cfg = await JC.get_config(tenant_id)
-        if cfg["committed_costs_enabled"]:
-            coll = Scoped(db.job_commitments, tenant_id)
-            com = await coll.find_one({"id": body.commitment_id,
-                                       "job_id": job_id})
-            if com and com.get("status") == "approved":
-                fulfilled = min(com["amount_cents"],
-                                (com.get("fulfilled_cents") or 0) + amount_cents)
-                await coll.update_one({"id": com["id"]}, {"$set": {
-                    "fulfilled_cents": fulfilled,
-                    "status": "fulfilled" if fulfilled >= com["amount_cents"]
-                              else "approved"}})
-                doc["commitment_fulfilled_cents"] = fulfilled
-
-    # Burden overrun flag: if burdened labor just tipped this job over
-    # its estimate, raise the shared budget-alert notification once.
-    if body.category == "labor" and burden["burden_cents"] > 0:
-        j2 = await jobs(user).find_one({"id": job_id})
-        profit = await _profit(user, j2)
-        flag = await JC.evaluate_burden_overrun(
-            tenant_id, j2, profit, actor_id=user.get("id"))
-        doc["burden_overrun"] = flag
-
-    doc.pop("_id", None)
+        amount_cents = to_cents(body.hours * body.rate) if body.hours else to_cents(body.amount)
+    elif not (body.category == "material" and body.product_id):
+        amount_cents = to_cents(body.amount)
+    doc = await record_job_cost(
+        user, j, category=body.category, description=body.description,
+        amount_cents=amount_cents, hours=body.hours, rate_cents=to_cents(body.rate),
+        product_id=body.product_id, qty=body.qty, technician_id=body.technician_id,
+        paid=body.paid, source="manual", source_ref=None,
+        commitment_id=body.commitment_id)
     _, res = await _evaluate(user, j)
     doc["budget"] = res["budget"]
     doc["alerts_fired"] = res["fired"]

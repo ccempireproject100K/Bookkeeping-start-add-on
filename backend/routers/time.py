@@ -4,6 +4,14 @@ Old-style port of the public time-tracking feature. Flow:
   clock in -> open entry -> clock out -> logged -> approve -> approved -> close -> closed
 Owners (role in the `time:approve` permission) can view everyone's entries and
 approve/close them; everyone else sees only their own.
+
+Field capture (job-costing requests #3): an entry may carry an optional job
+link (`job_id`). When a job-linked entry is APPROVED, its labor cost
+(hours x the entry's rate) posts into that job's actual labor costs through
+the jobs module's one cost-posting path (routers.jobs.record_job_cost) — the
+job's numbers are current the moment the approval lands, no re-keying.
+Editing an approved entry re-syncs its job cost line (reverse + repost, never
+a duplicate); unlinking removes it. Unlinked entries behave exactly as before.
 """
 from datetime import datetime, timezone
 
@@ -13,8 +21,10 @@ from typing import Optional
 
 from db import db
 from lib.audit import append_audit
-from lib.base import Scoped, new_id, now_iso, today_str
+from lib.base import Scoped, new_id, now_iso, today_str, to_cents, cents_to_dollars
 from lib.auth import PERMISSIONS, require
+from lib import ledger as L
+from lib import burden as BURDEN
 from lib import jobcosting as JC
 
 router = APIRouter(prefix="/time", tags=["time"])
@@ -53,6 +63,106 @@ def coll(user):
     return Scoped(db.time_entries, user["tenant_id"])
 
 
+def jobcosts(user):
+    return Scoped(db.job_costs, user["tenant_id"])
+
+
+async def _resolve_job(user, job_id):
+    """Tenant-scoped job lookup for a link target; None when absent."""
+    if not job_id:
+        return None
+    return await Scoped(db.jobs, user["tenant_id"]).find_one({"id": job_id})
+
+
+async def _default_rate_cents(user) -> int:
+    """The entry's labor rate: the worker's pay-settings hourly rate, if set."""
+    ps = user.get("pay_settings") or {}
+    if ps.get("hourly_rate_cents"):
+        return int(ps["hourly_rate_cents"])
+    doc = await db.users.find_one(
+        {"tenant_id": user["tenant_id"], "id": user["id"]}, {"_id": 0}) or {}
+    return int((doc.get("pay_settings") or {}).get("hourly_rate_cents") or 0)
+
+
+# ---------------- Job-cost sync (field capture) ----------------
+async def _unpost_job_cost(user, entry):
+    """Reverse the journal entry behind the entry's job cost line and drop the
+    line, so an edit/unlink never leaves a stale or duplicate cost behind."""
+    cost_id = entry.get("job_cost_id")
+    if not cost_id:
+        return
+    row = await jobcosts(user).find_one({"id": cost_id})
+    if row:
+        entry_id = row.get("journal_entry_id")
+        if entry_id:
+            je = await Scoped(db.journal_entries, user["tenant_id"]).find_one({"id": entry_id})
+            if je and je.get("status") == "posted":
+                await L.reverse_entry(db, user["tenant_id"], user, entry_id)
+        await jobcosts(user).c.delete_one(
+            {"tenant_id": user["tenant_id"], "id": cost_id})
+    await coll(user).update_one({"id": entry["id"]}, {"$set": {
+        "job_cost_id": None, "job_cost_posted_cents": None, "burden_percent": None}})
+    entry["job_cost_id"] = None
+    entry["job_cost_posted_cents"] = None
+    entry["burden_percent"] = None
+
+
+async def sync_entry_job_cost(user, entry):
+    """Make the job's actual labor match this entry's current state.
+
+    Posts exactly one job cost line for an approved, job-linked entry with
+    hours and a rate; removes the line when the entry no longer qualifies;
+    reverse + reposts when hours/rate/job changed since posting. Idempotent —
+    calling it on an unchanged entry is a no-op (returns the entry unchanged).
+    """
+    from routers.jobs import record_job_cost
+
+    job_id = entry.get("job_id")
+    eligible = bool(
+        job_id
+        and entry.get("status") in ("approved", "closed")
+        and (entry.get("hours") or 0) > 0
+        and (entry.get("rate_cents") or 0) > 0
+    )
+    if not eligible:
+        if entry.get("job_cost_id"):
+            await _unpost_job_cost(user, entry)
+        return entry
+
+    job = await _resolve_job(user, job_id)
+    if not job:
+        # The job was deleted out from under the entry — drop the stale line.
+        if entry.get("job_cost_id"):
+            await _unpost_job_cost(user, entry)
+        return entry
+
+    amount = int(round(entry["hours"] * entry["rate_cents"]))
+    if entry.get("job_cost_id"):
+        row = await jobcosts(user).find_one({"id": entry["job_cost_id"]})
+        if (row and row.get("job_id") == job_id
+                and row.get("amount_cents") == amount
+                and row.get("hours") == entry["hours"]
+                and row.get("rate") == entry["rate_cents"]):
+            return entry   # already posted, unchanged — never duplicate
+        await _unpost_job_cost(user, entry)
+
+    burden_pct = await BURDEN.tenant_burden_percent(db, user["tenant_id"])
+    desc = (entry.get("notes") or entry.get("client_name") or "Field time").strip()
+    doc = await record_job_cost(
+        user, job, category="labor",
+        description=f"{entry.get('user_name') or 'Tech'} — {desc}",
+        amount_cents=amount, hours=entry["hours"], rate_cents=entry["rate_cents"],
+        technician_id=entry.get("user_id"), paid=False,
+        source="time_entry", source_ref=entry["id"], burden_percent=burden_pct)
+    await coll(user).update_one({"id": entry["id"]}, {"$set": {
+        "job_cost_id": doc["id"], "job_cost_posted_cents": amount,
+        "burden_percent": burden_pct}})
+    entry["job_cost_id"] = doc["id"]
+    entry["job_cost_posted_cents"] = amount
+    entry["burden_percent"] = burden_pct
+    return entry
+
+
 def _can_approve(user) -> bool:
     return user.get("role") in PERMISSIONS.get("time:approve", set())
 
@@ -61,6 +171,7 @@ class ClockInBody(BaseModel):
     notes: str = Field(default="", max_length=300)
     client_name: str = Field(default="", max_length=160)
     job_id: Optional[str] = Field(default=None, max_length=64)  # optional job link
+    rate: Optional[float] = Field(default=None, ge=0, le=10000)   # $/hr override
 
 
 class ManualEntryBody(BaseModel):
@@ -70,13 +181,39 @@ class ManualEntryBody(BaseModel):
     client_name: str = Field(default="", max_length=160)
     billable: bool = True
     job_id: Optional[str] = Field(default=None, max_length=64)  # optional job link
+    rate: Optional[float] = Field(default=None, ge=0, le=10000)   # $/hr override
+
+
+class EntryPatchBody(BaseModel):
+    hours: Optional[float] = Field(default=None, gt=0, le=24)
+    notes: Optional[str] = Field(default=None, max_length=300)
+    client_name: Optional[str] = Field(default=None, max_length=160)
+    billable: Optional[bool] = None
+    rate: Optional[float] = Field(default=None, ge=0, le=10000)
+    job_id: Optional[str] = None     # link/relink to this job
+    clear_job: bool = False          # unlink from the job
 
 
 def _out(d: dict) -> dict:
-    return {k: d.get(k) for k in ("id", "user_id", "user_name", "date", "clock_in",
+    out = {k: d.get(k) for k in ("id", "user_id", "user_name", "date", "clock_in",
                                  "clock_out", "hours", "notes", "client_name", "billable",
                                  "job_id", "status", "approved_by", "approved_at",
-                                 "closed_at", "created_at")}
+                                 "closed_at", "created_at",
+                                 "job_cost_id", "job_cost_posted_cents",
+                                 "burden_percent")}
+    out["rate"] = cents_to_dollars(d.get("rate_cents") or 0)
+    out["rate_cents"] = d.get("rate_cents") or 0
+    return out
+
+
+async def _new_entry_fields(user, body) -> dict:
+    """Shared job-link + rate resolution for clock-in and manual entries."""
+    job_id = body.job_id or None
+    if job_id and not await _resolve_job(user, job_id):
+        raise HTTPException(status_code=404, detail="Job not found")
+    rate_cents = to_cents(body.rate) if body.rate is not None else await _default_rate_cents(user)
+    return {"job_id": job_id, "rate_cents": rate_cents,
+            "job_cost_id": None, "job_cost_posted_cents": None, "burden_percent": None}
 
 
 @router.post("/clock-in")
@@ -90,6 +227,7 @@ async def clock_in(body: ClockInBody, user: dict = Depends(require("time:manage"
         "job_id": body.job_id or None,
         "status": "open", "approved_by": None, "approved_at": None,
         "closed_at": None, "created_at": now_iso(),
+        **await _new_entry_fields(user, body),
     }
     await coll(user).insert_one(doc)
     await _audit(user, "time.clock_in", "time_entry", doc["id"], {"client": body.client_name})
@@ -136,9 +274,47 @@ async def log_entry(body: ManualEntryBody, user: dict = Depends(require("time:ma
         "job_id": body.job_id or None,
         "status": "logged", "approved_by": None, "approved_at": None,
         "closed_at": None, "created_at": now_iso(),
+        **await _new_entry_fields(user, body),
     }
     await coll(user).insert_one(doc)
     await _audit(user, "time.create", "time_entry", doc["id"], {"hours": doc["hours"]})
+    return _out(doc)
+
+
+@router.patch("/entries/{entry_id}")
+async def update_entry(entry_id: str, body: EntryPatchBody, user: dict = Depends(require("time:manage"))):
+    """Edit an entry (hours/notes/client/rate/job link). Non-approvers may only
+    edit their own entries. Editing an APPROVED entry re-syncs its job cost
+    line — the line is updated (reverse + repost), never duplicated."""
+    doc = await coll(user).find_one({"id": entry_id})
+    if not doc or (not _can_approve(user) and doc["user_id"] != user["id"]):
+        raise HTTPException(status_code=404, detail="Entry not found")
+    if doc["status"] == "closed":
+        raise HTTPException(status_code=409, detail="Closed entries can't be edited")
+    patch = {}
+    if body.hours is not None:
+        if doc["status"] == "open":
+            raise HTTPException(status_code=409, detail="Clock out before setting hours")
+        patch["hours"] = round(body.hours, 2)
+    if body.notes is not None:
+        patch["notes"] = body.notes
+    if body.client_name is not None:
+        patch["client_name"] = body.client_name
+    if body.billable is not None:
+        patch["billable"] = body.billable
+    if body.rate is not None:
+        patch["rate_cents"] = to_cents(body.rate)
+    if body.clear_job:
+        patch["job_id"] = None
+    elif body.job_id is not None:
+        if not await _resolve_job(user, body.job_id):
+            raise HTTPException(status_code=404, detail="Job not found")
+        patch["job_id"] = body.job_id
+    if patch:
+        await coll(user).update_one({"id": entry_id}, {"$set": patch})
+        doc.update(patch)
+        await _audit(user, "time.update", "time_entry", entry_id, {"fields": sorted(patch)})
+        doc = await sync_entry_job_cost(user, doc)
     return _out(doc)
 
 
@@ -180,6 +356,10 @@ async def approve_entry(entry_id: str, user: dict = Depends(require("time:approv
     await coll(user).update_one({"id": entry_id}, {"$set": {
         "status": "approved", "approved_by": user.get("name"), "approved_at": now_iso()}})
     await _audit(user, "time.approve", "time_entry", entry_id, {})
+    # Field capture: a job-linked entry's labor lands on the job's actuals
+    # the moment it is approved — same request, no batch step.
+    doc["status"] = "approved"
+    await sync_entry_job_cost(user, doc)
     return {"ok": True}
 
 

@@ -83,8 +83,12 @@ class Scoped:
             await self.c.insert_many(out)
         return out
 
-    async def update_one(self, q, update):
-        return await self.c.update_one(self._q(q), update)
+    async def update_one(self, q, update, upsert=False):
+        # FIX (2026-11-14, InvoiceEase fold-in test crew): callers
+        # (lib/invoice_pay.set_pay_config, routers/collections.write_config,
+        # routers/taxforecast) already passed upsert=True, which the old
+        # two-arg signature rejected with TypeError — config writes crashed.
+        return await self.c.update_one(self._q(q), update, upsert=upsert)
 
     async def count(self, q=None):
         return await self.c.count_documents(self._q(q))

@@ -51,6 +51,12 @@ export default function Receipts() {
   const [scanning, setScanning] = useState(null);
   const [review, setReview] = useState(null); // receipt being reviewed
   const [matches, setMatches] = useState([]);
+  const [jobs, setJobs] = useState([]);
+  const [uploadJob, setUploadJob] = useState("");
+  const jobLabel = id => {
+    const j = jobs.find(x => x.id === id);
+    return j ? `${j.job_number} — ${j.customer_name}` : "";
+  };
   const [form, setForm] = useState({
     vendor: "",
     category_code: "5700",
@@ -58,7 +64,8 @@ export default function Receipts() {
     expense_date: "",
     description: "",
     payment_method: "bank",
-    bank_transaction_id: ""
+    bank_transaction_id: "",
+    job_id: ""
   });
   const fileRef = useRef(null);
   // Pip File Door deep link: /receipts?receipt=<id> highlights the row
@@ -72,6 +79,7 @@ export default function Receipts() {
   const reload = () => {
     api.get("/receipts").then(setReceipts).catch(() => {});
     api.get("/ledger/accounts").then(setCoa).catch(() => {});
+    api.get("/jobs").then(setJobs).catch(() => {});
   };
   useEffect(() => {
     reload();
@@ -84,6 +92,7 @@ export default function Receipts() {
       for (const f of files) {
         const fd = new FormData();
         fd.append("file", f);
+        if (uploadJob) fd.append("job_id", uploadJob);
         await api.post("/receipts/upload", fd);
       }
       toast.success(files.length === 1 ? "Receipt uploaded" : `${files.length} receipts uploaded`);
@@ -119,6 +128,7 @@ export default function Receipts() {
       description: ex.description || "",
       payment_method: "bank",
       bank_transaction_id: ""
+      job_id: r.job_id || "",
     });
     setReview(r);
     try {
@@ -135,7 +145,8 @@ export default function Receipts() {
     try {
       await api.post(`/receipts/${review.id}/post`, {
         ...form,
-        amount: parseFloat(form.amount)
+        amount: parseFloat(form.amount),
+        job_id: form.job_id || null
       });
       toast.success(t("receipts.postedAsExpense"));
       setReview(null);
@@ -168,6 +179,15 @@ export default function Receipts() {
             <Button onClick={() => fileRef.current?.click()} disabled={uploading} data-testid="receipt-upload">
               <Upload size={14} className="me-1" />{uploading ? "Uploading…" : "Upload receipts"}
             </Button>
+            <div className="mt-4 max-w-sm mx-auto text-left">
+              <Label className="text-xs">Tag uploads to a job (optional)</Label>
+              <select value={uploadJob} onChange={(e) => setUploadJob(e.target.value)} data-testid="receipt-upload-job"
+                className="w-full bg-[#0F1218] border border-[#222838] rounded-md px-2 py-2 text-sm text-gray-200">
+                <option value="">No job — regular expense</option>
+                {jobs.map((j) => <option key={j.id} value={j.id}>{j.job_number} — {j.customer_name}</option>)}
+              </select>
+              <p className="text-[11px] text-gray-600 mt-1">Job-tagged receipts land on the job's costs when posted.</p>
+            </div>
           </div>
         </Card>}
       <Card className="p-0 overflow-hidden">
@@ -175,7 +195,7 @@ export default function Receipts() {
           <thead><tr className="text-start text-gray-500 border-b border-[#222838]">
             <th className="px-4 py-3 font-medium">{t("receipts.receipt")}</th><th className="px-4 py-3 font-medium">{t("receipts.vendor")}</th>
             <th className="px-4 py-3 font-medium">{t("receipts.date")}</th><th className="px-4 py-3 font-medium text-end">{t("receipts.amount")}</th>
-            <th className="px-4 py-3 font-medium">{t("receipts.status")}</th><th className="px-4 py-3"></th>
+            <th className="px-4 py-3 font-medium">{t("receipts.status")}</th><th className="px-4 py-3 font-medium">Job</th><th className="px-4 py-3"></th>
           </tr></thead>
           <tbody>
             {receipts.map(r => <tr key={r.id} id={`receipt-row-${r.id}`} data-highlighted={highlightId === r.id || undefined} className={`border-b border-[#1a2030] hover:bg-[#141926] ${highlightId === r.id ? "bg-amber-500/10 ring-1 ring-inset ring-amber-500/50" : ""}`}>
@@ -188,6 +208,9 @@ export default function Receipts() {
                 <td className="px-4 py-3">
                   <span className={`text-xs px-2 py-0.5 rounded-full ${STATUS_STYLE[r.status] || ""}`}>{r.status}</span>
                 </td>
+                <td className="px-4 py-3">
+                  {r.job_id ? <span className="text-xs px-2 py-0.5 rounded-full bg-violet-500/15 text-violet-300" title={jobLabel(r.job_id)}>{jobLabel(r.job_id).split(" — ")[0]}</span> : <span className="text-xs text-gray-600">—</span>}
+                </td>
                 <td className="px-4 py-3 text-end whitespace-nowrap">
                   {canManage && r.status === "uploaded" && <Button size="sm" variant="outline" className="me-1" disabled={scanning === r.id} onClick={() => scan(r)} data-testid={`scan-${r.id}`}>
                       <ScanLine size={13} className="me-1" />{scanning === r.id ? "Reading…" : "AI scan"}
@@ -197,7 +220,7 @@ export default function Receipts() {
                   {canManage && r.status !== "posted" && <Button size="sm" variant="ghost" onClick={() => del(r.id)}><Trash2 size={13} /></Button>}
                 </td>
               </tr>)}
-            {!receipts.length && <tr><td colSpan={6} className="px-4 py-8 text-center text-gray-500 text-sm">{t("receipts.noReceiptsYetUploadYourFirst")}</td></tr>}
+            {!receipts.length && <tr><td colSpan={7} className="px-4 py-8 text-center text-gray-500 text-sm">{t("receipts.noReceiptsYetUploadYourFirst")}</td></tr>}
           </tbody>
         </table>
       </Card>
@@ -252,6 +275,15 @@ export default function Receipts() {
                   {matches.map(m => <SelectItem key={m.id} value={m.id}>{fmtDate(m.txn_date)} — {money(m.amount_cents)} — {m.description.slice(0, 30)}{m.score != null ? ` (${Math.round(m.score * 100)}%)` : ""}</SelectItem>)}
                 </SelectContent>
               </Select>
+            </div>
+            <div><Label className="text-xs">Job (optional)</Label>
+              <Select value={form.job_id || "none"} onValueChange={(v) => setForm({ ...form, job_id: v === "none" ? "" : v })}>
+                <SelectTrigger className="bg-[#0F1218] border-[#222838]" data-testid="receipt-job"><SelectValue placeholder="No job" /></SelectTrigger>
+                <SelectContent><SelectItem value="none">No job — regular expense</SelectItem>
+                  {jobs.map((j) => (<SelectItem key={j.id} value={j.id}>{j.job_number} — {j.customer_name}</SelectItem>))}
+                </SelectContent>
+              </Select>
+              {form.job_id && <p className="text-[11px] text-gray-500 mt-1">This amount will also land on the job's costs when posted.</p>}
             </div>
           </div>
           {!!matches.length && <p className="text-xs text-gray-500 flex items-center gap-1"><Link2 size={12} /> {matches.length} {t("receipts.bankTransaction")}{matches.length > 1 ? "s" : ""} scored against this receipt — best first. {matches[0].reason}</p>}

@@ -10,10 +10,11 @@ import base64
 import logging
 import os
 import uuid
+from pathlib import Path
 from typing import Optional
 
 import requests
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
+from fastapi import APIRouter, Depends, Form, HTTPException, UploadFile, File
 from fastapi.responses import Response
 from pydantic import BaseModel
 
@@ -28,11 +29,44 @@ from lib import posting as P
 from lib import receiptmatch as RM
 from lib.coa import ACCOUNT_TYPE_OF, NAME_OF
 from lib.niches import get_pack
+from routers.jobs import CATEGORY_ACCOUNT
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/receipts", tags=["receipts"])
 
+# ---------------- Job tagging (field capture, job-costing #3) ----------------
+_ACCOUNT_TO_JOB_CATEGORY = {acct: cat for cat, acct in CATEGORY_ACCOUNT.items()}
+
+
+def job_category_for_receipt(category_code: str, category_name: str = "") -> str:
+    """Map a receipt's expense category onto a job-cost category.
+
+    Direct hit when the expense account IS a job-cost account; otherwise a
+    keyword read of the category name; otherwise 'other'. Receipts are
+    overwhelmingly materials in the field, but an unrecognized category is
+    honestly 'other' rather than a guessed 'material'.
+    """
+    if category_code in _ACCOUNT_TO_JOB_CATEGORY:
+        return _ACCOUNT_TO_JOB_CATEGORY[category_code]
+    n = (category_name or "").lower()
+    if any(w in n for w in ("material", "suppl", "parts")):
+        return "material"
+    if "equipment" in n or "tool" in n:
+        return "equipment"
+    if "subcontract" in n:
+        return "subcontractor"
+    if "labor" in n or "labour" in n:
+        return "labor"
+    return "other"
+
+
+async def _resolve_job(user, job_id):
+    if not job_id:
+        return None
+    return await Scoped(db.jobs, user["tenant_id"]).find_one({"id": job_id})
+
+UPLOAD_ROOT = Path(__file__).parent / "uploads" / "receipts"
 ALLOWED_TYPES = {"image/jpeg", "image/png", "image/webp", "application/pdf"}
 MAX_BYTES = 10 * 1024 * 1024
 
@@ -74,7 +108,8 @@ def _trade_categories(pack: dict) -> list:
 
 # ---------------- Upload & inbox ----------------
 async def ingest_receipt(user: dict, filename: str, content_type: str,
-                         data: bytes, source: str = "upload") -> dict:
+                         data: bytes, source: str = "upload",
+                         job_id: str = None) -> dict:
     """Shared ingestion path: validate, store the file, create the inbox doc.
 
     Used by the manual upload endpoint and by the inbound-email webhook, so
@@ -83,6 +118,8 @@ async def ingest_receipt(user: dict, filename: str, content_type: str,
     """
     if content_type not in ALLOWED_TYPES:
         raise HTTPException(422, f"Unsupported file type: {content_type}. Use JPG, PNG, WEBP or PDF.")
+    if job_id and not await _resolve_job(user, job_id):
+        raise HTTPException(404, "Job not found")
     if len(data) > MAX_BYTES:
         raise HTTPException(422, "File too large (10 MB max).")
     if not data:
@@ -95,7 +132,7 @@ async def ingest_receipt(user: dict, filename: str, content_type: str,
     doc = {"id": rid, "filename": filename or stored, "stored": stored,
            "content_type": content_type, "size_bytes": len(data),
            "status": "uploaded", "extracted": None, "expense_id": None,
-           "source": source, "created_at": now_iso()}
+           "source": source, "job_id": job_id or None, "created_at": now_iso()}
     await receipts(user).insert_one(doc)
     await audit(user, f"receipt.{source}", "receipt", rid, {"filename": doc["filename"]})
     doc.pop("_id", None)
@@ -104,10 +141,33 @@ async def ingest_receipt(user: dict, filename: str, content_type: str,
 
 @router.post("/upload")
 async def upload_receipt(file: UploadFile = File(...),
+                         job_id: Optional[str] = Form(default=None),
                          user: dict = Depends(require("ops:manage"))):
     data = await file.read()
     return await ingest_receipt(user, file.filename, file.content_type, data,
-                                source="upload")
+                                source="upload", job_id=job_id)
+
+class JobTagBody(BaseModel):
+    job_id: Optional[str] = None     # null clears the tag
+
+
+@router.post("/{rid}/job")
+async def tag_receipt_job(rid: str, body: JobTagBody,
+                          user: dict = Depends(require("ops:manage"))):
+    """Tag (or untag) a receipt to a job from the review screen. The cost
+    lands on the job when the receipt is posted; retagging after posting is
+    not allowed (reverse the expense instead)."""
+    doc = await receipts(user).find_one({"id": rid})
+    if not doc:
+        raise HTTPException(404, "Receipt not found")
+    if doc.get("status") == "posted":
+        raise HTTPException(409, "Already posted — the job tag is locked")
+    if body.job_id and not await _resolve_job(user, body.job_id):
+        raise HTTPException(404, "Job not found")
+    await receipts(user).update_one({"id": rid}, {"$set": {"job_id": body.job_id or None}})
+    await audit(user, "receipt.job_tag", "receipt", rid, {"job_id": body.job_id})
+    doc["job_id"] = body.job_id or None
+    return doc
 
 
 @router.get("")
@@ -331,11 +391,17 @@ class PostBody(BaseModel):
     description: str = ""
     payment_method: str = "bank"
     bank_transaction_id: Optional[str] = None
+    job_id: Optional[str] = None     # overrides the receipt's stored job tag
 
 
 @router.post("/{rid}/post")
 async def post_receipt(rid: str, body: PostBody, user: dict = Depends(require("ops:manage"))):
-    """Turn a scanned receipt into a posted expense (one balanced journal entry)."""
+    """Turn a scanned receipt into a posted expense (one balanced journal entry).
+
+    Field capture: when the receipt is job-tagged, the same amount also lands
+    on the job's actuals as a job_costs row pointing at THIS expense's journal
+    entry — still exactly one journal entry, no double count in the GL.
+    """
     doc = await receipts(user).find_one({"id": rid})
     if not doc:
         raise HTTPException(404, "Receipt not found")
@@ -365,6 +431,11 @@ async def post_receipt(rid: str, body: PostBody, user: dict = Depends(require("o
             {"id": txn_id})
         if not txn:
             raise HTTPException(422, "Bank transaction not found")
+
+    job_id = body.job_id if body.job_id is not None else doc.get("job_id")
+    job = await _resolve_job(user, job_id) if job_id else None
+    if job_id and not job:
+        raise HTTPException(404, "Job not found")
     cash = P._cash_account(body.payment_method)
     exp_id = new_id()
     edate = body.expense_date or today_str()
@@ -379,13 +450,32 @@ async def post_receipt(rid: str, body: PostBody, user: dict = Depends(require("o
                "payment_method": body.payment_method, "expense_date": edate,
                "description": body.description, "entry_number": entry["number"],
                "receipt_id": rid, "bank_transaction_id": txn_id,
+               "job_id": job["id"] if job else None,
                "created_at": now_iso()}
     await Scoped(db.expenses, user["tenant_id"]).insert_one(exp_doc)
+    if job:
+        extracted = doc.get("extracted") or {}
+        category = job_category_for_receipt(
+            body.category_code,
+            NAME_OF.get(body.category_code, "") or extracted.get("category_name", ""))
+        await Scoped(db.job_costs, user["tenant_id"]).insert_one({
+            "id": new_id(), "job_id": job["id"], "job_number": job["job_number"],
+            "category": category,
+            "description": (body.description or body.vendor or "Receipt").strip(),
+            "amount_cents": amount, "hours": 0, "rate": 0,
+            "product_id": None, "qty": 1, "technician_id": None,
+            "entry_number": entry["number"], "journal_entry_id": entry["id"],
+            "source": "receipt", "source_ref": rid,
+            "receipt_id": rid, "expense_id": exp_id,
+            "burden_percent": None, "burdened_amount_cents": None,
+            "created_at": now_iso()})
     await receipts(user).update_one(
         {"id": rid},
         {"$set": {"status": "posted", "expense_id": exp_id,
+                  "job_id": job["id"] if job else doc.get("job_id"),
                   "matched_bank_txn": txn_id}})
     await audit(user, "receipt.post", "receipt", rid,
-                {"expense_id": exp_id, "amount": amount, "vendor": body.vendor})
+                {"expense_id": exp_id, "amount": amount, "vendor": body.vendor,
+                 "job_id": job["id"] if job else None})
     exp_doc.pop("_id", None)
     return exp_doc
