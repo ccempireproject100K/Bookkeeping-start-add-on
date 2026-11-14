@@ -1,0 +1,4 @@
+# The keystore and its password are NEVER committed. Only README.md is.
+*
+!README.md
+!.gitignore

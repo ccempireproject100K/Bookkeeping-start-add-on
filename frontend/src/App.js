@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { NicheProvider } from "@/context/NicheContext";
 import Layout from "@/components/Layout";
+import InstallPrompt from "@/components/InstallPrompt";
 import InventoryGate from "@/components/InventoryGate";
 import Login from "@/pages/Login";
 import Register from "@/pages/Register";
@@ -187,6 +188,7 @@ function App() {
           </Routes>
         </BrowserRouter>
         </NicheProvider>
+        <InstallPrompt />
         <Toaster position="top-right" theme="dark" richColors />
       </AuthProvider>
     </div>;
