@@ -25,6 +25,7 @@ def _iso_date(d):
         return d
     res = _dc_date(d)
     return res["normalized"] if res["ok"] else d
+from lib import catconfidence
 
 router = APIRouter(prefix="/banking", tags=["banking"])
 
@@ -163,6 +164,55 @@ async def _apply_rules(user, description):
     return None
 
 
+# ---------------- Categorization confidence (gap #7) ----------------
+def learned_patterns(user):
+    return Scoped(db.cat_learned_patterns, user["tenant_id"])
+
+
+def review_queue(user):
+    return Scoped(db.cat_review_queue, user["tenant_id"])
+
+
+async def cat_learning_enabled(user):
+    """Tenant setting (default ON): when OFF, nothing is ever learned —
+    no pattern is read or stored, and every doubtful item is flag-and-fix."""
+    tenant = await db.tenants.find_one({"id": user["tenant_id"]}, {"_id": 0})
+    settings = (tenant or {}).get("settings") or {}
+    return bool(settings.get("cat_learning_enabled", True))
+
+
+async def assess_categorization(user, description):
+    """Confidence verdict for one description: bank rules + the patterns
+    this tenant taught us (only when learning is on). Deterministic."""
+    rule_list = await rules(user).find_list()
+    learned = {}
+    if await cat_learning_enabled(user):
+        for p in await learned_patterns(user).find_list(limit=5000):
+            learned[p["pattern"]] = p
+    return catconfidence.evaluate(description, rule_list, learned)
+
+
+async def flag_for_review(user, txn_doc, assessment):
+    """Park a genuinely-unsure transaction in the review queue instead of
+    letting it sit with a silent, possibly-wrong suggestion."""
+    item = {
+        "id": new_id(), "txn_id": txn_doc["id"],
+        "bank_account_id": txn_doc["bank_account_id"],
+        "txn_date": txn_doc["txn_date"], "description": txn_doc["description"],
+        "amount_cents": txn_doc["amount_cents"],
+        "guess_code": assessment["guess_code"],
+        "guess_name": NAME_OF.get(assessment["guess_code"]) if assessment["guess_code"] else None,
+        "reason": assessment["reason"], "score": assessment["score"],
+        "status": "pending", "resolution_code": None, "learned": False,
+        "created_at": now_iso(), "resolved_at": None,
+    }
+    await review_queue(user).insert_one(item)
+    item.pop("_id", None)
+    return item
+
+
+
+
 # ---------------- Bank rules engine v2 (bake-off #1) ----------------
 # Multi-condition rules, implemented independently in our stack (behavior
 # study: Firefly III docs — rules with combined triggers, ordered groups,
@@ -283,19 +333,27 @@ async def _insert_txn(user, bank_account_id, txn_date, description, amount, batc
                     merged[k] = v
             actions = merged
             matched_ids = matched_ids + [m for m in m2 if m not in matched_ids]
-    rule = None
-    if not actions.get("category_code"):
-        rule = await _apply_rules(user, description)
-        if not rule and ndesc and ndesc != (description or ""):
-            rule = await _apply_rules(user, ndesc)
-    category = actions.get("category_code") or (rule["category_code"] if rule else None)
+    # Categorization confidence (gap #7): a v2-rule hit is authoritative.
+    # Legacy single-"contains" rules are weighed by the confidence
+    # assessment itself (it sees the same rule list): a clean single match
+    # is confident, a conflict or a merely-fuzzy match is NOT — the item is
+    # flagged for review with the best guess instead of silently landing.
+    a = await assess_categorization(user, description)
+    if actions.get("category_code"):
+        a = {**a, "category_code": actions["category_code"],
+             "guess_code": actions["category_code"],
+             "confident": True, "source": "rule", "reason": None}
     doc = {
         "id": new_id(), "bank_account_id": bank_account_id, "txn_date": txn_date,
         "description": description,
         "description_normalized": ndesc or None,
         "amount_cents": amount_cents, "dedupe_hash": h,
-        "status": "unmatched", "category_code": category,
-        "suggested_code": category,
+        "status": "unmatched",
+        "category_code": a["category_code"] if a["confident"] else None,
+        "suggested_code": a["category_code"] or a["guess_code"],
+        "cat_confidence": "confident" if a["confident"] else "unsure",
+        "cat_source": a["source"], "cat_reason": a["reason"],
+        "needs_review": not a["confident"],
         "vendor": actions.get("vendor"), "tags": actions.get("tags", []),
         "external_ref": external_ref,
         "rule_ids": matched_ids,
@@ -304,6 +362,8 @@ async def _insert_txn(user, bank_account_id, txn_date, description, amount, batc
     }
     await txns(user).insert_one(doc)
     doc.pop("_id", None)
+    if not a["confident"]:
+        await flag_for_review(user, doc, a)
     return doc
 
 

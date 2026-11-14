@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { api, errMsg } from "@/lib/api";
 import { money, dollars, fmtDate, today } from "@/lib/format";
 import { PageHeader, Card, Loading } from "@/components/Page";
+import CatReviewPanel from "@/components/CatReviewPanel";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -71,6 +72,8 @@ export default function Banking() {
   const [matchTxn, setMatchTxn] = useState(null);
   const [candidates, setCandidates] = useState([]);
   const [matchId, setMatchId] = useState("");
+  const [reviewCount, setReviewCount] = useState(0);
+  const loadReviewCount = () => api.get("/cat-review/stats").then(s => setReviewCount(s.pending || 0)).catch(() => {});
   const loadAccounts = () => api.get("/banking/accounts").then(a => {
     setAccounts(a);
     if (a.length && !selected) setSelected(a[0].id);
@@ -144,6 +147,7 @@ export default function Banking() {
   useEffect(() => {
     loadAccounts();
     loadFeed();
+    loadReviewCount();
     api.get("/ledger/accounts").then(setCoa).catch(() => {});
     api.get("/banking/rules").then(setRules).catch(() => {});
   }, []);
@@ -375,7 +379,7 @@ export default function Banking() {
 
       {acct && <>
           <div className="flex items-center gap-2 mb-4">
-            {["transactions", "rules", "reconciliations"].map(t => <button key={t} data-testid={`tab-${t}`} onClick={() => setTab(t)} className={`px-3 py-1.5 rounded-lg text-sm capitalize ${tab === t ? "bg-amber-500/10 text-amber-400 border border-amber-500/30" : "text-gray-400 border border-transparent hover:bg-[#161b25]"}`}>{t}</button>)}
+            {["transactions", "review", "rules", "reconciliations"].map(t => <button key={t} data-testid={`tab-${t}`} onClick={() => setTab(t)} className={`px-3 py-1.5 rounded-lg text-sm capitalize ${tab === t ? "bg-amber-500/10 text-amber-400 border border-amber-500/30" : "text-gray-400 border border-transparent hover:bg-[#161b25]"}`}>{t}{t === "review" && reviewCount > 0 ? ` (${reviewCount})` : ""}</button>)}
             <div className="flex-1" />
             {canManage && tab === "transactions" && <>
               <Button data-testid="btn-add-txn" variant="outline" size="sm" onClick={() => {
@@ -412,7 +416,7 @@ export default function Banking() {
                 <tbody>
                   {txns.map(t => <tr key={t.id} className="border-b border-[#171c26] hover:bg-[#161b25]">
                       <td className="px-4 py-3 text-gray-400">{fmtDate(t.txn_date)}</td>
-                      <td className="px-4 py-3 text-gray-100">{t.description}{t.suggested_code && !t.category_code && <span className="ms-2 text-xs text-amber-500/70">{t("banking.rule")}{t.suggested_code}</span>}</td>
+                      <td className="px-4 py-3 text-gray-100">{t.description}{t.suggested_code && !t.category_code && <span className="ms-2 text-xs text-amber-500/70">{t("banking.rule")}{t.suggested_code}</span>}{t.needs_review && <span className="ms-2 px-2 py-0.5 rounded-full text-xs border bg-amber-500/10 text-amber-400 border-amber-500/30">Needs your eye</span>}</td>
                       <td className={`px-4 py-3 text-end font-mono ${t.amount_cents < 0 ? "text-rose-400" : "text-emerald-400"}`}>{money(t.amount_cents)}</td>
                       <td className="px-4 py-3 text-gray-400">{t.category_code || "—"}</td>
                       <td className="px-4 py-3"><span className={`px-2 py-0.5 rounded-full text-xs border capitalize ${STATUS_CLS[t.status] || ""}`}>{t.reconciled ? "reconciled" : t.status}</span></td>
@@ -430,6 +434,8 @@ export default function Banking() {
                 </tbody>
               </table>
             </Card>}
+
+          {tab === "review" && <CatReviewPanel coa={coa} canManage={canManage} onResolved={() => { if (selected) loadTxns(selected); loadAccounts(); loadReviewCount(); }} />}
 
           {tab === "rules" && <Card>
               {canManage && <div className="flex flex-wrap items-end gap-3 mb-4">

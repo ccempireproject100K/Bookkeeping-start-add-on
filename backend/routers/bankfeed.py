@@ -35,6 +35,7 @@ from lib.plaid_webhook import verify_plaid_webhook
 from lib.coa import NAME_OF, ACCOUNT_TYPE_OF
 from routers.banking import (
     accounts as _accounts, txns as _txns, _apply_rules,
+    assess_categorization, flag_for_review,
     BANK_CODES, CARD_CODES,
 )
 
@@ -118,12 +119,16 @@ async def _insert_plaid_txn_doc(user, bank_account_id, plaid_txn_id, txn_date, d
     dedupe_hash = hashlib.sha1(f"plaid|{plaid_txn_id}".encode()).hexdigest()
     if await _txns(user).find_one({"dedupe_hash": dedupe_hash}):
         return None
-    rule = await _apply_rules(user, description)
+    a = await assess_categorization(user, description)
     doc = {
         "id": new_id(), "bank_account_id": bank_account_id, "txn_date": txn_date,
         "description": description, "amount_cents": amount_cents, "dedupe_hash": dedupe_hash,
-        "status": "unmatched", "category_code": rule["category_code"] if rule else None,
-        "suggested_code": rule["category_code"] if rule else None,
+        "status": "unmatched",
+        "category_code": a["category_code"] if a["confident"] else None,
+        "suggested_code": a["category_code"] or a["guess_code"],
+        "cat_confidence": "confident" if a["confident"] else "unsure",
+        "cat_source": a["source"], "cat_reason": a["reason"],
+        "needs_review": not a["confident"],
         "entry_id": None, "matched_entry_id": None, "reconciled": False,
         "import_batch": "plaid", "source": "plaid",
         "plaid_account_id": plaid_account_id, "plaid_category": plaid_category,
@@ -131,6 +136,8 @@ async def _insert_plaid_txn_doc(user, bank_account_id, plaid_txn_id, txn_date, d
     }
     await _txns(user).insert_one(doc)
     doc.pop("_id", None)
+    if not a["confident"]:
+        await flag_for_review(user, doc, a)
     return doc
 
 
