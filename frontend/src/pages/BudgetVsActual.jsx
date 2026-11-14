@@ -24,7 +24,7 @@ export default function BudgetVsActual() {
   const [coa, setCoa] = useState([]);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({
-    account_code: "4300",
+    account_code: "4000",
     amount: ""
   });
   const load = () => api.get(`/reports/budget-vs-actual?year=${year}`).then(setData).catch(e => toast.error(errMsg(e)));
@@ -43,7 +43,7 @@ export default function BudgetVsActual() {
       toast.success(t("budgetvsactual.budgetSet"));
       setOpen(false);
       setForm({
-        account_code: "4300",
+        account_code: "4000",
         amount: ""
       });
       load();

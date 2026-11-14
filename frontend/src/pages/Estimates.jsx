@@ -35,7 +35,7 @@ export default function Estimates() {
   const [tax, setTax] = useState("");
   const [lines, setLines] = useState([{
     name: "",
-    revenue_code: "4300",
+    revenue_code: "4020",
     amount: ""
   }]);
   const [recForm, setRecForm] = useState({
@@ -43,7 +43,7 @@ export default function Estimates() {
     frequency: "monthly",
     lines: [{
       name: "",
-      revenue_code: "4300",
+      revenue_code: "4020",
       amount: ""
     }]
   });
@@ -69,7 +69,7 @@ export default function Estimates() {
       setTax("");
       setLines([{
         name: "",
-        revenue_code: "4300",
+        revenue_code: "4020",
         amount: ""
       }]);
       load();
@@ -116,7 +116,7 @@ export default function Estimates() {
         frequency: "monthly",
         lines: [{
           name: "",
-          revenue_code: "4300",
+          revenue_code: "4020",
           amount: ""
         }]
       });
@@ -211,7 +211,7 @@ export default function Estimates() {
               </div>)}
             <Button variant="ghost" size="sm" onClick={() => setLines([...lines, {
             name: "",
-            revenue_code: "4300",
+            revenue_code: "4020",
             amount: ""
           }])} className="text-amber-400 hover:bg-amber-500/10"><FilePlus size={14} className="me-1" />{t("estimates.addLine")}</Button>
           </div>
@@ -250,7 +250,7 @@ export default function Estimates() {
             ...recForm,
             lines: [...recForm.lines, {
               name: "",
-              revenue_code: "4300",
+              revenue_code: "4020",
               amount: ""
             }]
           })} className="text-amber-400 hover:bg-amber-500/10"><FilePlus size={14} className="me-1" />{t("estimates.addLine")}</Button>

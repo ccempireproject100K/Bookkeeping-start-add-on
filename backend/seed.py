@@ -25,10 +25,10 @@ COLLECTIONS = ["tenants", "users", "accounts", "journal_entries", "journal_lines
                "vendors", "expenses", "vendor_credits", "customer_credits",
                "budgets", "estimates", "recurring_invoices"]
 
-SERVICES = [("service", "AC Diagnostic", 12900, "4300"),
+SERVICES = [("service", "AC Diagnostic", 12900, "4020"),
             ("service", "Filter Replacement", 4900, "4020"),
-            ("service", "AC Tune-Up", 18900, "4300"),
-            ("service", "Thermostat Install", 24900, "4300")]
+            ("service", "AC Tune-Up", 18900, "4020"),
+            ("service", "Thermostat Install", 24900, "4020")]
 
 
 async def make_user(tenant_id, email, name, role, pw, rate=0):
@@ -221,12 +221,12 @@ async def seed_demo():
     async def add_job_invoice(job, amount_cents, days_ago=3):
         inv_id = new_id()
         e = await L.post_journal_entry(db, tid, owner, P.build_invoice_issue(
-            revenue_lines=[{"revenue_code": "4300", "amount_cents": amount_cents}], tax_cents=0, cogs_cents=0,
+            revenue_lines=[{"revenue_code": "4000", "amount_cents": amount_cents}], tax_cents=0, cogs_cents=0,
             gross_cents=amount_cents, entry_date=(today - timedelta(days=days_ago)).isoformat(),
             source_ref=inv_id, memo=f"{job['job_number']} — {job['customer_name']}"), status="posted")
         await db.invoices.insert_one({"id": inv_id, "tenant_id": tid, "job_id": job["id"],
             "client_name": job["customer_name"], "lines": [{"kind": "job", "name": f"{job['job_number']} contract",
-            "revenue_code": "4300", "amount": amount_cents / 100}], "subtotal_cents": amount_cents, "tax_cents": 0,
+            "revenue_code": "4000", "amount": amount_cents / 100}], "subtotal_cents": amount_cents, "tax_cents": 0,
             "total_cents": amount_cents, "status": "issued", "due_date": None, "issue_entry": e["number"],
             "paid_entry": None, "created_at": now_iso()})
 
@@ -292,7 +292,7 @@ async def seed_demo():
             "created_at": now_iso()})
 
     # ---- Budgets (annual) ----
-    for code, amt in [("4300", 5000000), ("5000", 1200000), ("5005", 900000), ("5400", 300000)]:
+    for code, amt in [("4000", 5000000), ("5000", 1200000), ("5005", 900000), ("5400", 300000)]:
         await db.budgets.insert_one({"id": new_id(), "tenant_id": tid, "year": str(today.year),
             "account_code": code, "account_name": None, "amount_cents": amt, "created_at": now_iso()})
     print("  Mind at Ease Solutions HVAC: + banking (2 accts), 3 vendors, 2 expenses, 4 budgets")
