@@ -118,6 +118,12 @@ async def _write_lines(s, entry, lines, status):
             "debit": int(ln.get("debit", 0) or 0),
             "credit": int(ln.get("credit", 0) or 0),
             "memo": ln.get("memo"),
+            # Intercompany marking: a line may carry its own flag /
+            # counterparty; otherwise it inherits the entry's. The
+            # consolidated view (lib/eliminations.py) pairs on these.
+            "intercompany": bool(ln.get("intercompany", entry.get("intercompany", False))),
+            "counterparty_tenant_id": ln.get("counterparty_tenant_id",
+                                             entry.get("counterparty_tenant_id")),
             "status": status,
             "created_at": now_iso(),
         })
@@ -159,6 +165,8 @@ async def post_journal_entry(db, tenant_id, user, draft, status="posted", idempo
         "created_by": (user or {}).get("email", "system"),
         "posted_by": (user or {}).get("email") if status == "posted" else None,
         "posted_at": now_iso() if status == "posted" else None,
+        "intercompany": bool(draft.get("intercompany", False)),
+        "counterparty_tenant_id": draft.get("counterparty_tenant_id"),
         "reverses_entry_id": draft.get("reverses_entry_id"),
         "reversed_by_entry_id": None,
         "period_key": period["key"],
@@ -220,6 +228,10 @@ async def reverse_entry(db, tenant_id, user, entry_id):
         "debit": ln["credit"],
         "credit": ln["debit"],
         "memo": f"Reversal of {orig['number']}",
+        # Keep the intercompany marking on the reversal so consolidated
+        # eliminations net the reversed amounts instead of orphaning them.
+        "intercompany": bool(ln.get("intercompany", False)),
+        "counterparty_tenant_id": ln.get("counterparty_tenant_id"),
     } for ln in lines]
     rev = await post_journal_entry(db, tenant_id, user, {
         "entry_date": today_str(),
