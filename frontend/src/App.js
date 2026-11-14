@@ -58,6 +58,7 @@ import SetupGuide from "@/pages/SetupGuide";
 import DataCleanDemo from "@/pages/DataCleanDemo";
 import DataCleanCheckout from "@/pages/DataCleanCheckout";
 import DataCleanLanding from "@/pages/DataCleanLanding";
+import MoveIn from "@/pages/MoveIn";
 import PurchaseOrders from "@/pages/PurchaseOrders";
 import Estimates from "@/pages/Estimates";
 import CashFlow from "@/pages/CashFlow";
@@ -156,6 +157,7 @@ function App() {
               <Route path="dataclean-checkout" element={<DataCleanCheckout />} />
             <Route path="welcome-gift" element={<WelcomeGift />} />
             <Route path="setup-guide" element={<SetupGuide />} />
+          <Route path="move-in" element={<MoveIn />} />
               <Route path="purchase-orders" element={<PurchaseOrders />} />
               <Route path="aging" element={<Aging />} />
               <Route path="gift-cards" element={<GiftCards />} />
