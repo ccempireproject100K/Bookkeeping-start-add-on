@@ -310,6 +310,13 @@ const NAV = [{
   roles: ALL,
   groupKey: "navGroup.tools"
 }, {
+  to: "/move-in",
+  labelKey: "nav.moveIn",
+  icon: Sparkles,
+  testid: "nav-move-in",
+  roles: ALL,
+  groupKey: "navGroup.tools"
+}, {
   to: "/purchase-orders",
   labelKey: "nav.purchaseOrders",
   icon: ClipboardList,
