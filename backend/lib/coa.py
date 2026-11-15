@@ -24,6 +24,11 @@ BASE_COA = [
     ("1800", "Furniture & Equipment", "asset", "debit"),
     ("1850", "Accumulated Depreciation", "asset", "credit"),  # contra-asset
     ("2010", "Accounts Payable", "liability", "credit"),
+    # GRNI — purchase_orders.receive_po posts against this code; without it
+    # in the base chart the ledger's static line validation rejects every
+    # PO receipt ("Unknown account 2020") on main. Added by the job-costing
+    # lane as a FIX-IT-FIRST foundation repair.
+    ("2020", "Goods Received Not Invoiced", "liability", "credit"),
     ("2100", "Sales Tax Payable", "liability", "credit"),
     ("2120", "Payroll Liabilities", "liability", "credit"),
     ("2200", "Unearned Revenue — Prepaid Packages", "liability", "credit"),

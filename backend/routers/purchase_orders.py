@@ -95,7 +95,7 @@ async def create_po(body: POCreate, user: dict = Depends(require("ops:manage")))
         lines.append({"product_id": ln.product_id, "product_name": prod.get("name"),
                       "quantity": ln.quantity, "received_qty": 0,
                       "unit_cost_cents": to_cents(ln.unit_cost)})
-    doc = {"id": new_id(), "number": f"PO-{(await _pos(user).count_documents({})) + 1:04d}",
+    doc = {"id": new_id(), "number": f"PO-{(await _pos(user).count({})) + 1:04d}",
            "vendor": body.vendor.strip(), "vendor_id": body.vendor_id,
            "expected_date": body.expected_date, "notes": body.notes.strip(),
            "lines": lines, "status": "draft", "bill_id": None,

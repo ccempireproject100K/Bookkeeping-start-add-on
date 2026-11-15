@@ -368,13 +368,13 @@ async def invoice_job(job_id: str, body: JobInvoiceBody, user: dict = Depends(re
     gross = subtotal + tax_cents
     inv_id = new_id()
     entry = await L.post_journal_entry(db, tenant_id, user, P.build_invoice_issue(
-        revenue_lines=[{"revenue_code": "4300", "amount_cents": subtotal}],
+        revenue_lines=[{"revenue_code": "4000", "amount_cents": subtotal}],
         tax_cents=tax_cents, cogs_cents=0, gross_cents=gross,
         entry_date=today_str(), source_ref=inv_id, memo=f"{j['job_number']} — {j['customer_name']}",
     ), status="posted")
     doc = {
         "id": inv_id, "job_id": job_id, "client_name": j["customer_name"],
-        "lines": [{"kind": "job", "name": f"{j['job_number']} contract", "revenue_code": "4300", "amount": body.amount}],
+        "lines": [{"kind": "job", "name": f"{j['job_number']} contract", "revenue_code": "4000", "amount": body.amount}],
         "subtotal_cents": subtotal, "tax_cents": tax_cents, "total_cents": gross,
         "status": "issued", "due_date": None, "issue_entry": entry["number"],
         "paid_entry": None, "created_at": now_iso(),
