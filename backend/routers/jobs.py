@@ -32,6 +32,109 @@ def jobcosts(user):
     return Scoped(db.job_costs, user["tenant_id"])
 
 
+# ---------------- Change orders ----------------
+# Workflow (owner-approved 2026-11-14, job-costing requests item #6):
+# a change order is born PENDING and never touches the job budget until
+# it is APPROVED — approval revises the estimate the same day, by
+# category. REJECTED keeps the record, budget untouched. Legacy change
+# orders written before the workflow have no "state" field: they are
+# treated as approved iff their legacy "approved" flag is truthy
+# (exactly how the profit math read them before), so existing data
+# behaves identically.
+
+CO_STATES = ("pending", "approved", "rejected")
+
+
+def co_state(co: dict) -> str:
+    """Effective workflow state of a change order (legacy-safe)."""
+    st = co.get("state")
+    if st in CO_STATES:
+        return st
+    return "approved" if co.get("approved") else "pending"
+
+
+def co_cost_delta_cents(co: dict) -> int:
+    """Total cost delta: the per-category impact when one was recorded,
+    otherwise the legacy single lump delta."""
+    impact = co.get("cost_impact_cents") or {}
+    if impact:
+        return sum(impact.get(c, 0) for c in CATEGORIES)
+    return co.get("cost_delta_cents", 0)
+
+
+def public_co(co: dict) -> dict:
+    """Change order as the API serves it: state always explicit."""
+    out = {k: v for k, v in co.items()}
+    out["state"] = co_state(co)
+    out["approved"] = out["state"] == "approved"
+    out["cost_delta_cents"] = co_cost_delta_cents(co)
+    out.setdefault("reason", "")
+    out.setdefault("cost_impact_cents", {})
+    out.setdefault("delay_days", 0)
+    out.setdefault("history", [])
+    return out
+
+
+def co_summary(job: dict) -> dict:
+    """Pending/approved/rejected roll-up for the job screen block."""
+    s = {"pending_count": 0, "pending_revenue_cents": 0,
+         "pending_cost_cents": 0, "approved_count": 0, "rejected_count": 0}
+    for co in job.get("change_orders", []):
+        st = co_state(co)
+        s[f"{st}_count"] += 1
+        if st == "pending":
+            s["pending_revenue_cents"] += co.get("revenue_delta_cents", 0)
+            s["pending_cost_cents"] += co_cost_delta_cents(co)
+    return s
+
+
+def co_history(job: dict) -> list:
+    """Flattened per-job change-order history: every creation and state
+    change with actor + timestamp + amounts, oldest first."""
+    entries = []
+    for co in job.get("change_orders", []):
+        for h in co.get("history", []):
+            entries.append({
+                "co_id": co["id"], "description": co.get("description", ""),
+                "event": h.get("event"), "by_id": h.get("by_id"),
+                "by_name": h.get("by_name"), "at": h.get("at"),
+                "revenue_delta_cents": co.get("revenue_delta_cents", 0),
+                "cost_delta_cents": co_cost_delta_cents(co),
+            })
+        if not co.get("history"):
+            # Legacy CO: synthesize its creation entry from what exists.
+            entries.append({
+                "co_id": co["id"], "description": co.get("description", ""),
+                "event": "created", "by_id": None, "by_name": None,
+                "at": co.get("created_at"),
+                "revenue_delta_cents": co.get("revenue_delta_cents", 0),
+                "cost_delta_cents": co_cost_delta_cents(co),
+            })
+    entries.sort(key=lambda e: e.get("at") or "")
+    return entries
+
+
+async def _notify_co_approved(user, job: dict, co: dict):
+    """In-app notification (app_notifications store, same shape as the
+    sibling lanes): the team learns the budget moved. The approve
+    endpoint's state guard makes this fire exactly once per CO."""
+    rev = co.get("revenue_delta_cents", 0)
+    cost = co_cost_delta_cents(co)
+    await Scoped(db.app_notifications, user["tenant_id"]).insert_one({
+        "id": new_id(), "user_id": None, "tenant_wide": True,
+        "kind": "change_order_approved",
+        "title": f"{job['job_number']} change order approved",
+        "body": (f"“{co.get('description', '')}” approved by "
+                 f"{user.get('name') or user.get('email', '')} — job "
+                 f"estimate revised: revenue {cents_to_dollars(rev):+}, "
+                 f"cost {cents_to_dollars(cost):+}."),
+        "link": "/jobs", "read": False,
+        "dedupe_key": f"co-approved:{co['id']}",
+        "job_id": job["id"], "job_number": job["job_number"],
+        "co_id": co["id"], "created_at": now_iso(),
+    })
+
+
 # ---------------- Profitability ----------------
 async def _team_rates(user):
     """{user_id: hourly_rate_cents} for valuing time entries as labor."""
@@ -76,13 +179,22 @@ async def _profit(user, job, team_rates=None):
     invoices = await Scoped(db.invoices, tenant_id).find_list({"job_id": job["id"]})
     actual_revenue = sum(i.get("subtotal_cents", 0) for i in invoices)
 
-    # estimate incl. approved change orders
+    # estimate incl. APPROVED change orders only (pending/rejected
+    # never move the budget — the overrun-alert lane reads this math)
     est_rev = job.get("estimated_revenue_cents", 0)
-    est_cost = sum(job.get("estimated_costs_cents", {}).values())
+    est_by_cat = {c: (job.get("estimated_costs_cents", {}) or {}).get(c, 0)
+                  for c in CATEGORIES}
+    est_cost = sum(est_by_cat.values())
     for co in job.get("change_orders", []):
-        if co.get("approved"):
+        if co_state(co) == "approved":
             est_rev += co.get("revenue_delta_cents", 0)
-            est_cost += co.get("cost_delta_cents", 0)
+            impact = co.get("cost_impact_cents") or {}
+            if impact:
+                for c in CATEGORIES:
+                    est_by_cat[c] += impact.get(c, 0)
+                est_cost += sum(impact.get(c, 0) for c in CATEGORIES)
+            else:
+                est_cost += co.get("cost_delta_cents", 0)
 
     gp = actual_revenue - actual_cost
     margin = round(gp / actual_revenue * 100, 2) if actual_revenue else 0.0
@@ -99,6 +211,8 @@ async def _profit(user, job, team_rates=None):
         "burdened_by_category_cents": burdened_by_cat,
         "gross_profit_cents": gp, "gross_margin_pct": margin,
         "estimated_revenue_cents": est_rev, "estimated_cost_cents": est_cost,
+        "estimated_by_category_cents": est_by_cat,
+        "estimated_by_category": {k: cents_to_dollars(v) for k, v in est_by_cat.items()},
         "estimated_gp_cents": est_gp, "estimated_margin_pct": est_margin,
         "cost_variance_cents": actual_cost - est_cost,
         "revenue": cents_to_dollars(actual_revenue), "cost": cents_to_dollars(actual_cost),
@@ -157,20 +271,35 @@ async def update_alert_settings(body: AlertSettingsBody,
     return cfg
 
 
+# Job-related notification kinds served by this one feed: budget alerts
+# (overrun lane), change-order approvals (CO lane), phase drift (phase lane).
+JOB_NOTIFICATION_KINDS = ("job_budget_alert", "change_order_approved",
+                          "job_phase_drift")
+
+
 @router.get("/notifications")
 async def list_job_notifications(user: dict = Depends(get_current_user)):
     rows = await JA._notif_coll(user["tenant_id"]).find_list(
-        {"kind": "job_budget_alert"}, sort=[("created_at", -1)], limit=50)
+        {"kind": {"$in": list(JOB_NOTIFICATION_KINDS)}},
+        sort=[("created_at", -1)], limit=50)
     return {"notifications": rows,
             "unread": sum(1 for r in rows if not r.get("read"))}
+
+
+# Alias: the change-order lane's tests/clients call the feed by this name.
+list_notifications = list_job_notifications
 
 
 @router.post("/notifications/{notif_id}/read")
 async def mark_job_notification_read(notif_id: str,
                                      user: dict = Depends(get_current_user)):
     await JA._notif_coll(user["tenant_id"]).update_one(
-        {"id": notif_id, "kind": "job_budget_alert"}, {"$set": {"read": True}})
+        {"id": notif_id, "kind": {"$in": list(JOB_NOTIFICATION_KINDS)}},
+        {"$set": {"read": True}})
     return {"ok": True}
+
+
+mark_notification_read = mark_job_notification_read
 
 
 # ---------------- CRUD ----------------
@@ -194,7 +323,7 @@ async def list_jobs(user: dict = Depends(get_current_user)):
     out = []
     for j in rows:
         p = await _profit(user, j, rates)
-        out.append({**j, "profit": p, "budget": JA.budget_state(j, p, cfg)})
+        out.append({**j, "profit": p, "budget": JA.budget_state(j, p, cfg), "co_summary": co_summary(j)})
     return out
 
 
@@ -313,6 +442,9 @@ async def get_job(job_id: str, user: dict = Depends(get_current_user)):
     if not j:
         raise HTTPException(status_code=404, detail="Job not found")
     j = {k: v for k, v in j.items() if k != "_id"}
+    j["change_orders"] = [public_co(co) for co in j.get("change_orders", [])]
+    j["co_summary"] = co_summary(j)
+    j["co_history"] = co_history(j)
     j["profit"] = await _profit(user, j, await _team_rates(user))
     j["budget"] = await _budget_for(user, j, j["profit"])
     j["phase_variance"] = await _phase_view(user, j, j["profit"])
@@ -712,29 +844,93 @@ async def preview_cost(job_id: str, body: CostBody, user: dict = Depends(require
 # ---------------- Change orders ----------------
 class ChangeOrderBody(BaseModel):
     description: str
+    reason: str = ""
     revenue_delta: float = 0
-    cost_delta: float = 0
-    approved: bool = True
+    cost_delta: float = 0                 # legacy lump (used only when no breakdown sent)
+    cost_impact: dict = {}                # {material, labor, equipment, subcontractor, other} dollars
+    delay_days: int = 0
 
 
 @router.post("/{job_id}/change-orders")
 async def add_change_order(job_id: str, body: ChangeOrderBody, user: dict = Depends(require("ops:manage"))):
+    """Create a change order as PENDING — it never touches the job
+    budget until approved. Any client-sent approval is ignored."""
     j = await jobs(user).find_one({"id": job_id})
     if not j:
         raise HTTPException(status_code=404, detail="Job not found")
+    impact = {c: to_cents(body.cost_impact.get(c, 0)) for c in CATEGORIES
+              if body.cost_impact.get(c)}
+    actor = {"by_id": user.get("id"), "by_name": user.get("name") or user.get("email")}
     co = {
         "id": new_id(), "description": body.description,
+        "reason": body.reason,
         "revenue_delta_cents": to_cents(body.revenue_delta),
-        "cost_delta_cents": to_cents(body.cost_delta),
-        "approved": body.approved, "created_at": now_iso(),
+        "cost_delta_cents": (sum(impact.values()) if impact
+                             else to_cents(body.cost_delta)),
+        "cost_impact_cents": impact,
+        "delay_days": int(body.delay_days or 0),
+        "state": "pending", "approved": False,
+        "created_at": now_iso(), "created_by": actor,
+        "decided_by": None, "decided_at": None,
+        "history": [{"event": "created", **actor, "at": now_iso()}],
     }
     await jobs(user).update_one({"id": job_id}, {"$push": {"change_orders": co}})
-    # An approved change order moves the estimate, so the budget watch
-    # re-evaluates: an increase can clear a fired threshold (re-crossing
-    # may fire again); a decrease can cross one right now.
+    await L.audit(db, user["tenant_id"], user, "job.change_order.create",
+                  {"job": j["job_number"], "co": co["id"],
+                   "revenue_delta_cents": co["revenue_delta_cents"],
+                   "cost_delta_cents": co["cost_delta_cents"]})
+    return public_co(co)
+
+
+async def _decide_change_order(job_id: str, co_id: str, user, approve: bool):
     j = await jobs(user).find_one({"id": job_id})
-    _, res = await _evaluate(user, j)
-    return {**co, "budget": res["budget"], "alerts_fired": res["fired"]}
+    if not j:
+        raise HTTPException(status_code=404, detail="Job not found")
+    cos = j.get("change_orders", [])
+    idx = next((i for i, c in enumerate(cos) if c.get("id") == co_id), None)
+    if idx is None:
+        raise HTTPException(status_code=404, detail="Change order not found")
+    co = cos[idx]
+    if co_state(co) != "pending":
+        raise HTTPException(status_code=409,
+                            detail=f"Change order already {co_state(co)}")
+    actor = {"by_id": user.get("id"), "by_name": user.get("name") or user.get("email")}
+    now = now_iso()
+    co["state"] = "approved" if approve else "rejected"
+    co["approved"] = approve
+    co["decided_by"] = actor
+    co["decided_at"] = now
+    co.setdefault("history", []).append(
+        {"event": co["state"], **actor, "at": now})
+    cos[idx] = co
+    await jobs(user).update_one({"id": job_id}, {"$set": {"change_orders": cos}})
+    await L.audit(db, user["tenant_id"], user,
+                  "job.change_order.approve" if approve else "job.change_order.reject",
+                  {"job": j["job_number"], "co": co_id})
+    if approve:
+        # Approval revises the budget in this same request (the stored
+        # job now carries an approved CO, and _profit reads it
+        # immediately) and notifies the team — exactly once, guarded
+        # by the pending-state check above.
+        await _notify_co_approved(user, j, co)
+        # An approved change order moves the estimate, so the budget watch
+        # re-evaluates: an increase can clear a fired threshold (re-crossing
+        # may fire again); a decrease can cross one right now.
+        j = await jobs(user).find_one({"id": job_id})
+        _, res = await _evaluate(user, j)
+        return {**public_co(co), "budget": res["budget"],
+                "alerts_fired": res["fired"]}
+    return public_co(co)
+
+
+@router.post("/{job_id}/change-orders/{co_id}/approve")
+async def approve_change_order(job_id: str, co_id: str, user: dict = Depends(require("ops:manage"))):
+    return await _decide_change_order(job_id, co_id, user, approve=True)
+
+
+@router.post("/{job_id}/change-orders/{co_id}/reject")
+async def reject_change_order(job_id: str, co_id: str, user: dict = Depends(require("ops:manage"))):
+    return await _decide_change_order(job_id, co_id, user, approve=False)
 
 
 # ---------------- Job invoice (revenue) ----------------
