@@ -69,7 +69,7 @@ class FakeCollection:
         self.docs.append(dict(doc))
         return SimpleNamespace(inserted_id=doc.get("id"))
 
-    async def update_one(self, query, update):
+    async def update_one(self, query, update, upsert=False):
         for d in self.docs:
             if _matches(d, query):
                 for k, v in (update.get("$set") or {}).items():
