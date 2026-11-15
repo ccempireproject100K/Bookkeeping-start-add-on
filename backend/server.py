@@ -16,7 +16,7 @@ from routers import referrals
 from routers import password_reset
 from routers import (auth, federated_auth, ledger, products, pos, invoices, cashclose, dashboard,
                      pdftools, onboarding, welcome_gift, trial, guide, importer, autopay, taxpacket, dedupe,
-                     bills, billing, aging, giftcards, commissions, customers, jobs,
+                     bills, billing, aging, giftcards, commissions, customers, wip, jobs,
                      banking, vendors, reports, estimates,
                      recurring_invoices, reminders, backup, bankfeed, copilot,
                      time, time_billing, portal, payroll, budget, tax, sales_tax, edition, totp, audit,
@@ -56,7 +56,7 @@ for r in (auth.router, federated_auth.router, password_reset.router, ledger.rout
           referrals.router,
           invoices.router, cashclose.router, dashboard.router,
           bills.router, billpay.router, billing.router, aging.router, giftcards.router, commissions.router,
-          customers.router, jobs.router, banking.router, vendors.router,
+          customers.router, wip.router, jobs.router, banking.router, vendors.router,
           reports.router, estimates.router,
           recurring_invoices.router, reminders.router, backup.router,
           bankfeed.router, copilot.router, time.router, time_billing.router, portal.router,

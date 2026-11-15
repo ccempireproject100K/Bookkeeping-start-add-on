@@ -2256,5 +2256,6 @@
   "platformCredentials.done": "Done",
   "platformCredentials.mintedToast": "Credential minted",
   "platformCredentials.rotatedToast": "Credential rotated",
-  "platformCredentials.revokedToast": "Credential revoked"
+  "platformCredentials.revokedToast": "Credential revoked",
+  "nav.wipSchedule": "WIP Schedule"
 }

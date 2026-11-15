@@ -37,6 +37,13 @@ const NAV = [{
   roles: ALL,
   groupKey: "navGroup.jobCosting"
 }, {
+  to: "/wip-schedule",
+  labelKey: "nav.wipSchedule",
+  icon: ClipboardList,
+  testid: "nav-wip-schedule",
+  roles: ALL,
+  groupKey: "navGroup.jobCosting"
+}, {
   to: "/customers",
   labelKey: "nav.customers",
   icon: Users,

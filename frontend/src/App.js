@@ -28,6 +28,7 @@ import GiftCards from "@/pages/GiftCards";
 import Commissions from "@/pages/Commissions";
 import Jobs from "@/pages/Jobs";
 import JobProfitability from "@/pages/JobProfitability";
+import WipSchedule from "@/pages/WipSchedule";
 import Customers from "@/pages/Customers";
 import Banking from "@/pages/Banking";
 import Bills from "@/pages/Bills";
@@ -116,6 +117,7 @@ function App() {
               <Route index element={<Dashboard />} />
               <Route path="jobs" element={<Jobs />} />
               <Route path="job-profitability" element={<JobProfitability />} />
+              <Route path="wip-schedule" element={<WipSchedule />} />
               <Route path="customers" element={<Customers />} />
               <Route path="estimates" element={<Estimates />} />
               <Route path="accounts" element={<ChartOfAccounts />} />
