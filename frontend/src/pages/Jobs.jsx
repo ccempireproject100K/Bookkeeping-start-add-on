@@ -48,7 +48,7 @@ export default function Jobs() {
   const [settingsOpen, setSettingsOpen] = useState(false);
 
   const [form, setForm] = useState({ customer_name: "", job_type: "installation", description: "", estimated_revenue: "", material: "", labor: "", equipment: "", subcontractor: "", other: "" });
-  const [cost, setCost] = useState({ category: "material", description: "", amount: "", hours: "", rate: "", technician_id: "", paid: false, product_id: "", qty: "1", commitment_id: "" });
+  const [cost, setCost] = useState({ category: "material", description: "", amount: "", hours: "", rate: "", technician_id: "", paid: false, product_id: "", qty: "1", commitment_id: "", phase_id: "" });
   const [co, setCo] = useState({ description: "", revenue_delta: "", cost_delta: "" });
   const [notifs, setNotifs] = useState([]);
   const [alertCfg, setAlertCfg] = useState(null);
@@ -198,7 +198,8 @@ export default function Jobs() {
         paid: cost.paid,
         product_id: useStock ? cost.product_id : null,
         qty: useStock ? parseInt(cost.qty) || 1 : 1,
-        commitment_id: cost.category === "subcontractor" && cost.commitment_id ? cost.commitment_id : null
+        commitment_id: cost.category === "subcontractor" && cost.commitment_id ? cost.commitment_id : null,
+        phase_id: cost.phase_id || null
       });
       toast.success(useStock ? "Material pulled from stock & posted to GL" : "Cost logged & posted to GL");
       setCost({
@@ -211,7 +212,8 @@ export default function Jobs() {
         paid: false,
         product_id: "",
         qty: "1",
-        commitment_id: ""
+        commitment_id: "",
+        phase_id: ""
       });
       openDetail(detail.id);
       load();
@@ -635,6 +637,9 @@ function JobDetail({
         </table>
       </div>
 
+      {/* Phases / cost codes */}
+      <PhaseSection detail={detail} isOwner={isOwner} refresh={refresh} />
+
       {/* Add cost */}
       {isOwner && detail.status !== "estimate" && <div className="mt-2 p-3 rounded-lg bg-[#0F1218] border border-[#222838]">
           <h4 className="text-xs uppercase tracking-wider text-gray-500 mb-2">{t("jobs.logACost")}</h4>
@@ -683,6 +688,17 @@ function JobDetail({
                     {budget.commitments?.filter(c => c.status === "approved").map(c => <SelectItem key={c.id} value={c.id}>{c.vendor_name} — {money(c.amount_cents - (c.fulfilled_cents || 0))} open</SelectItem>)}
                   </SelectContent>
                 </Select></div>}
+            {(detail.phases || []).length > 0 && <div><Label className="text-[10px]">Phase (optional)</Label>
+                <Select value={cost.phase_id || "none"} onValueChange={v => setCost({
+            ...cost,
+            phase_id: v === "none" ? "" : v
+          })}>
+                  <SelectTrigger data-testid="cost-phase" className="bg-[#14171E] border-[#222838] h-8 text-xs"><SelectValue placeholder="No phase" /></SelectTrigger>
+                  <SelectContent className="bg-[#14171E] border-[#222838]">
+                    <SelectItem value="none">No phase</SelectItem>
+                    {(detail.phases || []).map(ph => <SelectItem key={ph.id} value={ph.id}>{ph.name}</SelectItem>)}
+                  </SelectContent>
+                </Select></div>}
             <Button size="sm" data-testid="cost-save" onClick={addCost} className="bg-emerald-600 hover:bg-emerald-500 text-black h-8">{t("jobs.logCost")}</Button>
           </div>
                   {cost.category === "labor" && preview && <div className="mt-2 text-xs" data-testid="labor-cost-preview">
@@ -699,7 +715,7 @@ function JobDetail({
             <tbody>
               {detail.costs.map(c => <tr key={c.id} className="border-b border-[#171c26]">
                   <td className="py-1.5 capitalize text-gray-400 w-28">{c.category}</td>
-                  <td className="py-1.5 text-gray-300">{c.description || "—"}
+                  <td className="py-1.5 text-gray-300">{c.description || "—"}{c.phase_id && <span className="ms-2 px-1.5 py-0.5 rounded text-[10px] bg-sky-500/10 text-sky-400 border border-sky-500/20">{(detail.phases || []).find(ph => ph.id === c.phase_id)?.name || "phase"}</span>}
                     {c.category === "labor" && c.burden_cents > 0 && (
                       <span className="block text-[11px] text-gray-500">
                         {view === "base" && <>burden +{c.burden_pct}% = {money(c.burdened_cents)} true cost</>}
@@ -847,6 +863,101 @@ function JobCostingSettings({ jc, saveJc, suggestion, allTeam, reloadJc }) {
         Labor view (base wage / burdened / both, side by side) is set per job from the job detail — it's a display
         choice and never changes stored numbers. Burden is a costing overlay: journal entries still post base wages.
       </p>
+    </div>
+  );
+}
+
+const PHASE_LEVEL = {
+  overrun: ["Over budget", "bg-rose-500/10 text-rose-400 border-rose-500/20"],
+  warning: ["Closing in", "bg-amber-500/10 text-amber-400 border-amber-500/20"],
+  drift: ["Running hot", "bg-orange-500/10 text-orange-400 border-orange-500/20"],
+};
+
+function PhaseSection({ detail, isOwner, refresh }) {
+  const pv = detail.phase_variance;
+  const [phForm, setPhForm] = useState({ name: "", material: "", labor: "", equipment: "", subcontractor: "", other: "" });
+  if (!pv) return null;
+  const check = pv.budget_check || {};
+  const hasPhases = (pv.phases || []).length > 0;
+
+  const addPhase = async () => {
+    try {
+      const r = await api.post(`/jobs/${detail.id}/phases`, {
+        name: phForm.name,
+        budget: Object.fromEntries(CATS.map((c) => [c, parseFloat(phForm[c]) || 0])),
+      });
+      if (r.budget_check?.warning) toast.warning(r.budget_check.warning);
+      else toast.success("Phase added");
+      setPhForm({ name: "", material: "", labor: "", equipment: "", subcontractor: "", other: "" });
+      refresh();
+    } catch (e) { toast.error(errMsg(e)); }
+  };
+
+  const delPhase = async (phaseId) => {
+    try { await api.delete(`/jobs/${detail.id}/phases/${phaseId}`); toast.success("Phase removed"); refresh(); }
+    catch (e) { toast.error(errMsg(e)); }
+  };
+
+  return (
+    <div className="mt-4" data-testid="job-phases">
+      <h4 className="text-xs uppercase tracking-wider text-gray-500 mb-2">Phases / Cost Codes</h4>
+      {check.warning && (
+        <div className="flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 mb-2 text-xs text-amber-300" data-testid="phase-budget-warning">
+          <AlertTriangle size={14} className="mt-0.5 shrink-0" /><span>{check.warning}</span>
+        </div>
+      )}
+      {hasPhases ? (
+        <table className="w-full text-sm" data-testid="table-job-phases">
+          <thead><tr className="text-[10px] uppercase text-gray-500 border-b border-[#222838]">
+            <th className="py-1.5 text-left">Phase</th><th className="py-1.5 text-right">Budget</th>
+            <th className="py-1.5 text-right">Committed</th><th className="py-1.5 text-right">Actual</th>
+            <th className="py-1.5 text-right">% Used</th><th className="py-1.5 text-right">Status</th>
+            {isOwner && <th className="py-1.5"></th>}
+          </tr></thead>
+          <tbody>
+            {pv.phases.map((ph) => {
+              const lvl = ph.level ? PHASE_LEVEL[ph.level] : null;
+              return (
+                <tr key={ph.phase_id} className={`border-b border-[#171c26] ${ph.level === "overrun" ? "bg-rose-500/5" : ""}`} data-testid={`phase-row-${ph.phase_id}`}>
+                  <td className="py-1.5 text-gray-200">{ph.name}</td>
+                  <td className="py-1.5 text-right font-mono text-gray-500">{money(ph.budget_cents)}</td>
+                  <td className="py-1.5 text-right font-mono text-gray-500">{money(ph.committed_cents)}</td>
+                  <td className="py-1.5 text-right font-mono text-gray-200">{money(ph.actual_cents)}</td>
+                  <td className={`py-1.5 text-right font-mono ${ph.pct_used == null ? "text-gray-600" : ph.pct_used >= 100 ? "text-rose-400" : ph.pct_used >= 90 ? "text-amber-400" : "text-gray-300"}`}>{ph.pct_used == null ? "—" : `${ph.pct_used}%`}</td>
+                  <td className="py-1.5 text-right">{lvl ? <span className={`px-2 py-0.5 rounded-full text-[10px] border ${lvl[1]}`}>{lvl[0]}</span> : <span className="text-gray-600 text-xs">On track</span>}</td>
+                  {isOwner && <td className="py-1.5 text-right"><button data-testid={`phase-del-${ph.phase_id}`} onClick={() => delPhase(ph.phase_id)} className="text-gray-600 hover:text-rose-400 text-xs">✕</button></td>}
+                </tr>
+              );
+            })}
+            {pv.unphased?.actual_cents > 0 && (
+              <tr className="border-b border-[#171c26]">
+                <td className="py-1.5 text-gray-500 italic">No phase ({pv.unphased.cost_count} cost{pv.unphased.cost_count === 1 ? "" : "s"})</td>
+                <td className="py-1.5 text-right font-mono text-gray-600">—</td>
+                <td className="py-1.5 text-right font-mono text-gray-600">—</td>
+                <td className="py-1.5 text-right font-mono text-gray-400">{money(pv.unphased.actual_cents)}</td>
+                <td className="py-1.5 text-right font-mono text-gray-600">—</td>
+                <td></td>{isOwner && <td></td>}
+              </tr>
+            )}
+          </tbody>
+        </table>
+      ) : (
+        <div className="text-xs text-gray-600 mb-2">No phases yet — split this job into phases (rough-in, trim-out…) to see which one is making or losing money.</div>
+      )}
+      {isOwner && (
+        <div className="mt-2 p-3 rounded-lg bg-[#0F1218] border border-[#222838]">
+          <h5 className="text-[10px] uppercase tracking-wider text-gray-500 mb-2">Add a Phase — budget drawn from the job estimate</h5>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 items-end">
+            <div className="sm:col-span-2"><Label className="text-[10px]">Phase name</Label>
+              <Input data-testid="phase-name" value={phForm.name} onChange={(e) => setPhForm({ ...phForm, name: e.target.value })} placeholder="e.g. Rough-in" className="bg-[#14171E] border-[#222838] h-8 text-xs" /></div>
+            {CATS.map((c) => (
+              <div key={c}><Label className="text-[10px] capitalize">{c} $</Label>
+                <Input data-testid={`phase-budget-${c}`} value={phForm[c]} onChange={(e) => setPhForm({ ...phForm, [c]: e.target.value })} className="bg-[#14171E] border-[#222838] h-8 text-xs font-mono" placeholder="0" /></div>
+            ))}
+            <Button size="sm" data-testid="phase-save" onClick={addPhase} className="bg-sky-600 hover:bg-sky-500 text-black h-8">Add Phase</Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
