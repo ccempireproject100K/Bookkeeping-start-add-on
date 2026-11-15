@@ -31,10 +31,12 @@ export default function PurchaseOrders() {
   const [detail, setDetail] = useState(null);
   const [createOpen, setCreateOpen] = useState(false);
   const [products, setProducts] = useState([]);
+  const [jobs, setJobs] = useState([]);
   const [po, setPo] = useState({
     vendor: "",
     expected_date: "",
     notes: "",
+    job_id: "",
     lines: [{
       product_id: "",
       quantity: 1,
@@ -44,6 +46,7 @@ export default function PurchaseOrders() {
   const reload = () => {
     api.get("/purchase-orders").then(setPos).catch(e => toast.error(errMsg(e)));
     api.get("/products").then(setProducts).catch(() => {});
+    api.get("/jobs").then(setJobs).catch(() => {});
   };
   useEffect(() => {
     reload();
@@ -67,6 +70,7 @@ export default function PurchaseOrders() {
     try {
       const r = await api.post("/purchase-orders", {
         ...po,
+        job_id: po.job_id || null,
         lines: lines.map(l => ({
           ...l,
           unit_cost: parseFloat(l.unit_cost)
@@ -78,6 +82,7 @@ export default function PurchaseOrders() {
         vendor: "",
         expected_date: "",
         notes: "",
+        job_id: "",
         lines: [{
           product_id: "",
           quantity: 1,
@@ -165,6 +170,24 @@ export default function PurchaseOrders() {
                       <X size={13} className="me-1" />{t("purchaseorders.cancel")}</Button>}
                 </div>}
               {detail.bill_id && <p className="text-xs text-emerald-400">{t("purchaseorders.billedSeeBills")}</p>}
+              <div className="flex items-center gap-2 text-xs">
+                <span className="text-gray-500">Job:</span>
+                {canManage ? <select value={detail.job_id || ""} data-testid="po-job-link" onChange={async e => {
+              try {
+                const r = await api.patch(`/purchase-orders/${detail.id}/job`, {
+                  job_id: e.target.value || null
+                });
+                setDetail(r);
+                reload();
+                toast.success(e.target.value ? "Linked to job" : "Job link removed");
+              } catch (err) {
+                toast.error(errMsg(err));
+              }
+            }} className="bg-[#0F1218] border border-[#222838] rounded-md h-7 text-xs px-2">
+                    <option value="">No job</option>
+                    {jobs.map(j => <option key={j.id} value={j.id}>{j.job_number} — {j.customer_name}</option>)}
+                  </select> : <span className="text-gray-300">{detail.job_id ? (jobs.find(j => j.id === detail.job_id)?.job_number || "linked") : "none"}</span>}
+              </div>
               {detail.notes && <p className="text-xs text-gray-600">{detail.notes}</p>}
             </Card>}
         </div>
@@ -182,6 +205,14 @@ export default function PurchaseOrders() {
               ...po,
               expected_date: e.target.value
             })} className="bg-[#0F1218] border-[#222838]" /></div>
+            <div className="col-span-2"><Label className="text-xs">Job (optional — counts as a committed cost on that job when committed costs are on)</Label>
+              <select value={po.job_id} onChange={e => setPo({
+              ...po,
+              job_id: e.target.value
+            })} data-testid="po-job" className="w-full bg-[#0F1218] border border-[#222838] rounded-md h-9 text-xs px-2">
+                <option value="">No job</option>
+                {jobs.map(j => <option key={j.id} value={j.id}>{j.job_number} — {j.customer_name}</option>)}
+              </select></div>
             <div className="col-span-2"><Label className="text-xs">{t("purchaseorders.notes")}</Label><Input value={po.notes} onChange={e => setPo({
               ...po,
               notes: e.target.value

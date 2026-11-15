@@ -12,6 +12,7 @@ from lib import ledger as L
 from lib import posting as P
 from lib import timeutil as T
 from lib import jobalerts as JA
+from lib import jobcosting as JC
 
 router = APIRouter(prefix="/jobs", tags=["jobs"])
 
@@ -63,9 +64,13 @@ async def _profit(user, job, team_rates=None):
     tenant_id = user["tenant_id"]
     costs = await jobcosts(user).find_list({"job_id": job["id"]})
     actual_by_cat = {c: 0 for c in CATEGORIES}
+    burden_by_cat = {c: 0 for c in CATEGORIES}
     for c in costs:
         actual_by_cat[c["category"]] = actual_by_cat.get(c["category"], 0) + c["amount_cents"]
+        burden_by_cat[c["category"]] = burden_by_cat.get(c["category"], 0) + (c.get("burden_cents") or 0)
     actual_cost = sum(actual_by_cat.values())
+    labor_burden = burden_by_cat.get("labor", 0)
+    burdened_by_cat = {c: actual_by_cat[c] + burden_by_cat[c] for c in CATEGORIES}
 
     invoices = await Scoped(db.invoices, tenant_id).find_list({"job_id": job["id"]})
     actual_revenue = sum(i.get("subtotal_cents", 0) for i in invoices)
@@ -88,6 +93,9 @@ async def _profit(user, job, team_rates=None):
         "actual_by_category": {k: cents_to_dollars(v) for k, v in actual_by_cat.items()},
         "actual_by_category_cents": actual_by_cat,
         **time_block,
+        "labor_burden_cents": labor_burden,
+        "burdened_cost_cents": actual_cost + labor_burden,
+        "burdened_by_category_cents": burdened_by_cat,
         "gross_profit_cents": gp, "gross_margin_pct": margin,
         "estimated_revenue_cents": est_rev, "estimated_cost_cents": est_cost,
         "estimated_gp_cents": est_gp, "estimated_margin_pct": est_margin,
@@ -291,6 +299,15 @@ async def get_job(job_id: str, user: dict = Depends(get_current_user)):
     j["budget"] = await _budget_for(user, j, j["profit"])
     j["costs"] = await jobcosts(user).find_list({"job_id": job_id}, sort=[("created_at", -1)])
     j["invoices"] = await Scoped(db.invoices, user["tenant_id"]).find_list({"job_id": job_id}, sort=[("created_at", -1)])
+    # Committed-costs budget view — shares the "budget" key with the
+    # job-alerts budget_state set above (both lanes named it "budget";
+    # merged 2026-11-14): when the tenant has the (optional) committed-
+    # costs feature on, its fields merge INTO the alert view — the two
+    # agree on estimated/actual cents, and JC adds committed / remaining
+    # / commitments / purchase_orders. Off = alert view exactly as before.
+    budget = await JC.budget_view(user["tenant_id"], j, j["profit"])
+    if budget.get("enabled"):
+        j["budget"] = {**j["budget"], **budget}
     return j
 
 
@@ -376,6 +393,7 @@ class CostBody(BaseModel):
     qty: int = 1
     technician_id: Optional[str] = None
     paid: bool = False    # True -> cash; False -> payable
+    commitment_id: Optional[str] = None   # subcontract commitment this cost fulfils
 
 
 @router.post("/{job_id}/costs")
@@ -414,6 +432,22 @@ async def add_cost(job_id: str, body: CostBody, user: dict = Depends(require("op
     if amount_cents <= 0:
         raise HTTPException(status_code=422, detail="Cost amount must be positive")
 
+    # Burdened labor: resolve the rate for this worker (assigned
+    # template wins, then tenant default). The journal entry below
+    # still posts the base wage exactly as before — burden rides on
+    # the cost line as a costing overlay.
+    burden = {"burden_pct": 0.0, "burden_cents": 0,
+              "burdened_cents": amount_cents,
+              "burden_template_id": None, "burden_template_name": None}
+    if body.category == "labor":
+        pct, tpl = await JC.resolve_burden(tenant_id, body.technician_id)
+        amts = JC.labor_amounts(amount_cents, pct)
+        burden = {"burden_pct": amts["burden_pct"],
+                  "burden_cents": amts["burden_cents"],
+                  "burdened_cents": amts["burdened_cents"],
+                  "burden_template_id": tpl["id"] if tpl else None,
+                  "burden_template_name": tpl["name"] if tpl else None}
+
     cost_id = new_id()
     entry = await L.post_journal_entry(db, tenant_id, user, {
         "entry_date": today_str(), "source": "job_cost", "source_ref": cost_id,
@@ -428,13 +462,79 @@ async def add_cost(job_id: str, body: CostBody, user: dict = Depends(require("op
         "amount_cents": amount_cents, "hours": hours, "rate": to_cents(body.rate),
         "product_id": product_id, "qty": body.qty, "technician_id": body.technician_id,
         "entry_number": entry["number"], "created_at": now_iso(),
+        **burden,
     }
     await jobcosts(user).insert_one(doc)
+
+    # Subcontract commitment fulfilment: posting a subcontractor cost
+    # against a commitment fulfils it down (committed -> actual, the
+    # fulfilled part already lives in actual costs — never both).
+    if body.category == "subcontractor" and body.commitment_id:
+        cfg = await JC.get_config(tenant_id)
+        if cfg["committed_costs_enabled"]:
+            coll = Scoped(db.job_commitments, tenant_id)
+            com = await coll.find_one({"id": body.commitment_id,
+                                       "job_id": job_id})
+            if com and com.get("status") == "approved":
+                fulfilled = min(com["amount_cents"],
+                                (com.get("fulfilled_cents") or 0) + amount_cents)
+                await coll.update_one({"id": com["id"]}, {"$set": {
+                    "fulfilled_cents": fulfilled,
+                    "status": "fulfilled" if fulfilled >= com["amount_cents"]
+                              else "approved"}})
+                doc["commitment_fulfilled_cents"] = fulfilled
+
+    # Burden overrun flag: if burdened labor just tipped this job over
+    # its estimate, raise the shared budget-alert notification once.
+    if body.category == "labor" and burden["burden_cents"] > 0:
+        j2 = await jobs(user).find_one({"id": job_id})
+        profit = await _profit(user, j2)
+        flag = await JC.evaluate_burden_overrun(
+            tenant_id, j2, profit, actor_id=user.get("id"))
+        doc["burden_overrun"] = flag
+
     doc.pop("_id", None)
     _, res = await _evaluate(user, j)
     doc["budget"] = res["budget"]
     doc["alerts_fired"] = res["fired"]
     return doc
+
+
+@router.post("/{job_id}/costs/preview")
+async def preview_cost(job_id: str, body: CostBody, user: dict = Depends(require("ops:manage"))):
+    """Pre-post preview for the cost form: for labor, the burdened
+    (true) cost of the line BEFORE it posts, and whether burdened
+    labor would tip the job over its estimate. Writes nothing."""
+    j = await jobs(user).find_one({"id": job_id})
+    if not j:
+        raise HTTPException(status_code=404, detail="Job not found")
+    if body.category not in CATEGORY_ACCOUNT:
+        raise HTTPException(status_code=422, detail="Invalid category")
+    if body.category == "labor":
+        base = to_cents(body.hours * body.rate) if body.hours else to_cents(body.amount)
+        pct, tpl = await JC.resolve_burden(user["tenant_id"], body.technician_id)
+        amts = JC.labor_amounts(base, pct)
+    else:
+        amts = {"base_cents": to_cents(body.amount), "burden_pct": 0.0,
+                "burden_cents": 0, "burdened_cents": to_cents(body.amount)}
+        tpl = None
+    profit = await _profit(user, j)
+    est = profit["estimated_cost_cents"]
+    burdened_after = profit["burdened_cost_cents"] + amts["burdened_cents"] \
+        if body.category == "labor" else profit["burdened_cost_cents"] + amts["base_cents"]
+    actual_after = profit["actual_cost_cents"] + amts["base_cents"]
+    return {
+        **amts,
+        "burden_template_name": tpl["name"] if tpl else None,
+        "estimated_cost_cents": est,
+        "actual_cost_cents": profit["actual_cost_cents"],
+        "actual_after_cents": actual_after,
+        "burdened_after_cents": burdened_after,
+        "would_cross_estimate": bool(
+            est > 0 and profit["actual_cost_cents"] <= est < actual_after),
+        "burden_would_tip_over": bool(
+            est > 0 and actual_after <= est < burdened_after),
+    }
 
 
 # ---------------- Change orders ----------------

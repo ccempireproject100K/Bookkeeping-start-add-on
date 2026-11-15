@@ -70,6 +70,9 @@ class POCreate(BaseModel):
     expected_date: Optional[str] = None
     notes: str = ""
     lines: List[POLineIn]
+    # Optional job link — when committed costs are on for the tenant,
+    # an approved PO linked to a job counts against that job's budget.
+    job_id: Optional[str] = None
 
 
 @router.get("")
@@ -85,6 +88,10 @@ async def create_po(body: POCreate, user: dict = Depends(require("ops:manage")))
         raise HTTPException(422, "Vendor is required")
     if not body.lines:
         raise HTTPException(422, "Add at least one line")
+    if body.job_id:
+        job = await Scoped(db.jobs, user["tenant_id"]).find_one({"id": body.job_id})
+        if not job:
+            raise HTTPException(404, "Job not found")
     lines = []
     for ln in body.lines:
         if ln.quantity <= 0 or ln.unit_cost < 0:
@@ -99,6 +106,7 @@ async def create_po(body: POCreate, user: dict = Depends(require("ops:manage")))
            "vendor": body.vendor.strip(), "vendor_id": body.vendor_id,
            "expected_date": body.expected_date, "notes": body.notes.strip(),
            "lines": lines, "status": "draft", "bill_id": None,
+           "job_id": body.job_id, "billed_cents": None,
            "created_at": now_iso()}
     await _pos(user).insert_one(doc)
     await audit(user, "po.create", "purchase_order", doc["id"],
@@ -214,11 +222,36 @@ async def convert_to_bill(po_id: str, body: ConvertBody,
                         description=f"PO {po['number']} — {l['product_name']} x{l['received_qty']}",
                         amount=l["received_qty"] * l["unit_cost_cents"] / 100)
                for l in recv_lines]), user)
+    # Record the billed amount: a job-linked PO's money now moves from
+    # committed to actual in the job budget view (never both).
+    billed_cents = sum(l["received_qty"] * l["unit_cost_cents"] for l in recv_lines)
     await _pos(user).update_one({"id": po_id}, {"$set": {"status": "billed",
-                                                        "bill_id": bill["id"]}})
+                                                        "bill_id": bill["id"],
+                                                        "billed_cents": billed_cents}})
     await audit(user, "po.convert_to_bill", "purchase_order", po_id,
                 {"bill_id": bill["id"]})
     return {"po": _enrich(await _pos(user).find_one({"id": po_id})), "bill": bill}
+
+
+class JobLinkBody(BaseModel):
+    job_id: Optional[str] = None   # null unlinks
+
+
+@router.patch("/{po_id}/job")
+async def link_job(po_id: str, body: JobLinkBody,
+                   user: dict = Depends(require("ops:manage"))):
+    """Link (or unlink) a PO to a job for committed-cost tracking."""
+    po = await _pos(user).find_one({"id": po_id})
+    if not po:
+        raise HTTPException(404, "Purchase order not found")
+    if body.job_id:
+        job = await Scoped(db.jobs, user["tenant_id"]).find_one({"id": body.job_id})
+        if not job:
+            raise HTTPException(404, "Job not found")
+    await _pos(user).update_one({"id": po_id}, {"$set": {"job_id": body.job_id}})
+    await audit(user, "po.link_job", "purchase_order", po_id,
+                {"job_id": body.job_id})
+    return _enrich(await _pos(user).find_one({"id": po_id}))
 
 
 @router.post("/{po_id}/cancel")

@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Plus, AlertTriangle, ArrowRight, Briefcase, BellRing, Settings2 } from "lucide-react";
+import { Plus, AlertTriangle, ArrowRight, Briefcase, BellRing, Settings2, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 const CATS = ["material", "labor", "equipment", "subcontractor", "other"];
 const STATUS_CLS = {
@@ -42,6 +42,14 @@ export default function Jobs() {
   const [supplies, setSupplies] = useState([]);
   const [createOpen, setCreateOpen] = useState(false);
   const [detail, setDetail] = useState(null);
+  const [jc, setJc] = useState(null);               // job-costing config + templates
+  const [suggestion, setSuggestion] = useState(null);
+  const [allTeam, setAllTeam] = useState([]);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+
+  const [form, setForm] = useState({ customer_name: "", job_type: "installation", description: "", estimated_revenue: "", material: "", labor: "", equipment: "", subcontractor: "", other: "" });
+  const [cost, setCost] = useState({ category: "material", description: "", amount: "", hours: "", rate: "", technician_id: "", paid: false, product_id: "", qty: "1", commitment_id: "" });
+  const [co, setCo] = useState({ description: "", revenue_delta: "", cost_delta: "" });
   const [notifs, setNotifs] = useState([]);
   const [alertCfg, setAlertCfg] = useState(null);
   const [cfgForm, setCfgForm] = useState({
@@ -79,6 +87,25 @@ export default function Jobs() {
   });
   const [invAmt, setInvAmt] = useState("");
   const load = () => api.get("/jobs").then(setRows).catch(() => setRows([]));
+  const loadJc = useCallback(() => {
+    api.get("/job-costing/config").then(setJc).catch(() => {});
+    api.get("/job-costing/burden-suggestion").then(setSuggestion).catch(() => {});
+  }, []);
+  useEffect(() => {
+    load();
+    loadJc();
+    api.get("/customers").then(setCustomers);
+    api.get("/products").then(setSupplies).catch(() => {});
+    api.get("/auth/team").then((t) => { setAllTeam(t); setTeam(t.filter((u) => u.role === "barber")); });
+  }, [loadJc]);
+
+  const saveJc = async (patch) => {
+    try { const cfg = await api.patch("/job-costing/config", patch); setJc(cfg); toast.success("Job costing settings saved"); }
+    catch (e) { toast.error(errMsg(e)); }
+  };
+
+  const openDetail = useCallback((id) => api.get(`/jobs/${id}`).then(setDetail), []);
+
   const loadNotifs = useCallback(() => {
     api.get("/jobs/notifications").then((r) => setNotifs(r.notifications || [])).catch(() => {});
     api.get("/jobs/alert-settings").then((cfg) => {
@@ -170,7 +197,8 @@ export default function Jobs() {
         technician_id: cost.technician_id || null,
         paid: cost.paid,
         product_id: useStock ? cost.product_id : null,
-        qty: useStock ? parseInt(cost.qty) || 1 : 1
+        qty: useStock ? parseInt(cost.qty) || 1 : 1,
+        commitment_id: cost.category === "subcontractor" && cost.commitment_id ? cost.commitment_id : null
       });
       toast.success(useStock ? "Material pulled from stock & posted to GL" : "Cost logged & posted to GL");
       setCost({
@@ -182,7 +210,8 @@ export default function Jobs() {
         technician_id: "",
         paid: false,
         product_id: "",
-        qty: "1"
+        qty: "1",
+        commitment_id: ""
       });
       openDetail(detail.id);
       load();
@@ -229,9 +258,17 @@ export default function Jobs() {
   if (!rows) return <Loading />;
   return <div className="animate-rise">
       <PageHeader title={t("jobs.jobs")} subtitle="Estimate, track costs, and see profit on every job" testid="jobs-page">
+        {isOwner && <Button data-testid="btn-job-costing-settings" variant="outline" onClick={() => setSettingsOpen(true)} className="border-[#222838] text-gray-300 me-2"><Settings2 size={16} className="me-1" />Job Costing</Button>}
         {isOwner && <Button data-testid="btn-alert-settings" variant="outline" onClick={() => setCfgOpen(true)} className="border-[#222838] text-gray-300 me-2"><Settings2 size={16} className="me-1" />Budget Alerts{alertCfg ? ` (${alertCfg.warning_pct}% / ${alertCfg.overrun_pct}%)` : ""}</Button>}
         {isOwner && <Button data-testid="btn-new-job" onClick={() => setCreateOpen(true)} className="bg-amber-600 hover:bg-amber-500 text-black font-semibold"><Plus size={16} className="me-1" />{t("jobs.newJob")}</Button>}
       </PageHeader>
+
+      {/* Job costing settings */}
+      <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
+        <DialogContent className="bg-[#14171E] border-[#222838] max-w-xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader><DialogTitle>Job Costing Settings</DialogTitle></DialogHeader>
+          {jc && <JobCostingSettings jc={jc} saveJc={saveJc} suggestion={suggestion} allTeam={allTeam} reloadJc={loadJc} />}
+
 
       {/* Budget alert notifications */}
       {notifs.length > 0 && (
@@ -360,7 +397,7 @@ export default function Jobs() {
         openDetail(detail.id);
         load();
         loadNotifs();
-      }} cost={cost} setCost={setCost} addCost={addCost} co={co} setCo={setCo} addCo={addCo} invAmt={invAmt} setInvAmt={setInvAmt} invoice={invoice} />}
+      }} jc={jc} saveJc={saveJc} reloadDetail={() => openDetail(detail.id)} cost={cost} setCost={setCost} addCost={addCost} co={co} setCo={setCo} addCo={addCo} invAmt={invAmt} setInvAmt={setInvAmt} invoice={invoice} />}
         </DialogContent>
       </Dialog>
     </div>;
@@ -371,6 +408,9 @@ function JobDetail({
   team,
   advance,
   refreshDetail,
+  jc,
+  saveJc,
+  reloadDetail,
   cost,
   setCost,
   addCost,
@@ -402,7 +442,48 @@ function JobDetail({
       refreshDetail && refreshDetail();
     } catch (e) { toast.error(errMsg(e)); }
   };
-  return <>
+    const view = jc?.labor_view || "base";
+  const budget = detail.budget;
+  const [preview, setPreview] = useState(null);
+  const [cf, setCf] = useState({ vendor_name: "", description: "", amount: "" });
+
+  // Live burdened-cost preview for the labor line, before it posts.
+  useEffect(() => {
+    if (cost.category !== "labor" || !(parseFloat(cost.hours) > 0 && parseFloat(cost.rate) > 0)) { setPreview(null); return; }
+    const t = setTimeout(() => {
+      api.post(`/jobs/${detail.id}/costs/preview`, {
+        category: "labor", hours: parseFloat(cost.hours) || 0, rate: parseFloat(cost.rate) || 0,
+        technician_id: cost.technician_id || null,
+      }).then(setPreview).catch(() => setPreview(null));
+    }, 350);
+    return () => clearTimeout(t);
+  }, [cost.category, cost.hours, cost.rate, cost.technician_id, detail.id]);
+
+  const addCommitment = async () => {
+    try {
+      await api.post(`/job-costing/jobs/${detail.id}/commitments`, {
+        vendor_name: cf.vendor_name, description: cf.description, amount: parseFloat(cf.amount) || 0,
+      });
+      toast.success("Commitment recorded — it counts against this job's budget");
+      setCf({ vendor_name: "", description: "", amount: "" });
+      reloadDetail();
+    } catch (e) { toast.error(errMsg(e)); }
+  };
+  const cancelCommitment = async (cid) => {
+    try { await api.post(`/job-costing/commitments/${cid}/cancel`, {}); toast.success("Commitment cancelled"); reloadDetail(); }
+    catch (e) { toast.error(errMsg(e)); }
+  };
+
+  // Labor figures per the tenant's view option (base / burdened / both).
+  const laborActual = (cat) => {
+    const base = p.actual_by_category_cents[cat] || 0;
+    if (cat !== "labor") return money(base);
+    const burdened = (p.burdened_by_category_cents || {})[cat] ?? base;
+    if (view === "burdened") return money(burdened);
+    if (view === "both") return `${money(base)} / ${money(burdened)}`;
+    return money(base);
+  };
+    return <>
       <DialogHeader>
         <DialogTitle className="flex items-center gap-3 font-display">
           <Briefcase size={18} className="text-amber-400" />
@@ -455,6 +536,75 @@ function JobDetail({
         </div>
       )}
 
+      {/* Labor view option — display only, never changes stored numbers */}
+      {jc && (
+        <div className="flex items-center gap-2 mt-1" data-testid="labor-view-toggle">
+          <span className="text-[10px] uppercase tracking-wider text-gray-500">Labor view</span>
+          {["base", "burdened", "both"].map((v) => (
+            <button key={v} disabled={!isOwner} data-testid={`labor-view-${v}`}
+              onClick={() => saveJc({ labor_view: v })}
+              className={`px-2 py-0.5 rounded-full text-xs border capitalize ${view === v ? "bg-amber-500/15 text-amber-400 border-amber-500/30" : "text-gray-500 border-[#222838]"} ${isOwner ? "cursor-pointer" : "cursor-default"}`}>
+              {v === "base" ? "Base wage" : v === "burdened" ? "Burdened" : "Both"}
+            </button>
+          ))}
+          {view !== "base" && p.labor_burden_cents > 0 && (
+            <span className="text-xs text-gray-500">burden on this job: {money(p.labor_burden_cents)}</span>
+          )}
+        </div>
+      )}
+
+      {/* Budget view — committed costs (optional feature) */}
+      {budget?.enabled && (
+        <div className="mt-2" data-testid="job-budget-view">
+          <h4 className="text-xs uppercase tracking-wider text-gray-500 mb-2">Budget — Estimated / Committed / Actual / Remaining</h4>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {[["Estimated", money(budget.estimated_cost_cents), "text-gray-100"],
+              ["Committed", money(budget.committed_cents), "text-sky-400"],
+              ["Actual", money(budget.actual_total_cents), "text-gray-300"],
+              ["Remaining", money(budget.remaining_cents), budget.remaining_cents < 0 ? "text-rose-400" : "text-emerald-400"]].map(([l, v, c]) => (
+              <div key={l} className="rounded-lg bg-[#0F1218] border border-[#222838] px-3 py-2" data-testid={`budget-${l.toLowerCase()}`}>
+                <div className="text-[10px] uppercase tracking-wider text-gray-500">{l}</div>
+                <div className={`font-mono text-lg mt-0.5 ${c}`}>{v}</div>
+              </div>
+            ))}
+          </div>
+          <div className="text-xs text-gray-500 mt-2 space-y-0.5">
+            <div>Committed: purchase orders {money(budget.committed_po_cents)} · subcontracts {money(budget.committed_subcontract_cents)}</div>
+            <div>Actual: posted job costs {money(budget.actual_cost_cents)}{budget.billed_commitment_cents > 0 ? ` · billed POs ${money(budget.billed_commitment_cents)}` : ""}</div>
+            {budget.purchase_orders?.map((po) => (
+              <div key={po.po_id} className="flex justify-between max-w-md">
+                <span>{po.number} — {po.vendor} <span className="text-gray-600 capitalize">({po.status.replace("_", " ")})</span></span>
+                <span className="font-mono">{po.bucket === "committed" ? "committed " : "actual "}{money(po.amount_cents)}</span>
+              </div>
+            ))}
+          </div>
+          {/* Subcontract commitments */}
+          <div className="mt-3 p-3 rounded-lg bg-[#0F1218] border border-[#222838]">
+            <h5 className="text-xs uppercase tracking-wider text-gray-500 mb-2">Subcontract Commitments</h5>
+            {budget.commitments?.filter((c) => c.status !== "cancelled").map((c) => (
+              <div key={c.id} className="flex items-center justify-between text-sm py-1 border-b border-[#171c26]">
+                <span className="text-gray-300">{c.vendor_name}{c.description ? ` — ${c.description}` : ""}</span>
+                <span className="font-mono text-gray-400 text-xs">
+                  {money(c.amount_cents)} · fulfilled {money(c.fulfilled_cents || 0)} · open {money(c.amount_cents - (c.fulfilled_cents || 0))}
+                  <span className="text-gray-600 capitalize"> · {c.status}</span>
+                </span>
+                {isOwner && c.status === "approved" && (
+                  <Button size="sm" variant="ghost" className="h-6 text-xs" onClick={() => cancelCommitment(c.id)}>Cancel</Button>
+                )}
+              </div>
+            ))}
+            {isOwner && (
+              <div className="flex gap-2 mt-2">
+                <Input data-testid="commitment-vendor" value={cf.vendor_name} onChange={(e) => setCf({ ...cf, vendor_name: e.target.value })} placeholder="Subcontractor" className="bg-[#14171E] border-[#222838] h-8 text-xs" />
+                <Input data-testid="commitment-description" value={cf.description} onChange={(e) => setCf({ ...cf, description: e.target.value })} placeholder="Scope (optional)" className="bg-[#14171E] border-[#222838] h-8 text-xs" />
+                <Input data-testid="commitment-amount" value={cf.amount} onChange={(e) => setCf({ ...cf, amount: e.target.value })} placeholder="Amount ($)" className="bg-[#14171E] border-[#222838] h-8 text-xs font-mono w-32" />
+                <Button size="sm" data-testid="commitment-save" onClick={addCommitment} disabled={!cf.vendor_name || !cf.amount} className="bg-sky-600 hover:bg-sky-500 text-black h-8">Commit</Button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Estimate vs actual */}
       <div className="mt-2">
         <h4 className="text-xs uppercase tracking-wider text-gray-500 mb-2">{t("jobs.estimateVsActual")}</h4>
@@ -464,11 +614,12 @@ function JobDetail({
             {CATS.map(c => {
             const est = estCents[c] || 0;
             const act = p.actual_by_category_cents[c] || 0;
-            const v = act - est;
+            const actShown = c === "labor" && view !== "base" ? ((p.burdened_by_category_cents || {})[c] ?? act) : act;
+            const v = actShown - est;
             return <tr key={c} className="border-b border-[#171c26]">
-                  <td className="py-1.5 capitalize text-gray-300">{c}</td>
+                  <td className="py-1.5 capitalize text-gray-300">{c}{c === "labor" && view === "both" ? " (base / burdened)" : ""}</td>
                   <td className="py-1.5 text-end font-mono text-gray-500">{money(est)}</td>
-                  <td className="py-1.5 text-end font-mono text-gray-200">{money(act)}</td>
+                  <td className="py-1.5 text-end font-mono text-gray-200">{laborActual(c)}</td>
                   <td className={`py-1.5 text-end font-mono ${v > 0 ? "text-rose-400" : v < 0 ? "text-emerald-400" : "text-gray-500"}`}>{v > 0 ? "+" : ""}{money(v)}</td>
                 </tr>;
           })}
@@ -513,8 +664,24 @@ function JobDetail({
                   <SelectTrigger data-testid="cost-technician" className="bg-[#14171E] border-[#222838] h-8 text-xs"><SelectValue placeholder={t("jobs.assign")} /></SelectTrigger>
                   <SelectContent className="bg-[#14171E] border-[#222838]">{team.map(t => <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>)}</SelectContent>
                 </Select></div>}
+            {cost.category === "subcontractor" && budget?.enabled && <div className="sm:col-span-2"><Label className="text-[10px]">Fulfils commitment (optional)</Label>
+                <Select value={cost.commitment_id || "none"} onValueChange={v => setCost({
+            ...cost,
+            commitment_id: v === "none" ? "" : v
+          })}>
+                  <SelectTrigger data-testid="cost-commitment" className="bg-[#14171E] border-[#222838] h-8 text-xs"><SelectValue placeholder="None" /></SelectTrigger>
+                  <SelectContent className="bg-[#14171E] border-[#222838]">
+                    <SelectItem value="none">None</SelectItem>
+                    {budget.commitments?.filter(c => c.status === "approved").map(c => <SelectItem key={c.id} value={c.id}>{c.vendor_name} — {money(c.amount_cents - (c.fulfilled_cents || 0))} open</SelectItem>)}
+                  </SelectContent>
+                </Select></div>}
             <Button size="sm" data-testid="cost-save" onClick={addCost} className="bg-emerald-600 hover:bg-emerald-500 text-black h-8">{t("jobs.logCost")}</Button>
           </div>
+                  {cost.category === "labor" && preview && <div className="mt-2 text-xs" data-testid="labor-cost-preview">
+              <span className="text-gray-400">Base wage {money(preview.base_cents)}</span>
+              {preview.burden_cents > 0 ? <span className="text-gray-400"> · burden +{preview.burden_pct}%{preview.burden_template_name ? ` (${preview.burden_template_name})` : ""} {money(preview.burden_cents)} · <span className="text-amber-400 font-mono">true cost {money(preview.burdened_cents)}</span></span> : <span className="text-gray-600"> · no burden rate configured</span>}
+              {preview.burden_would_tip_over && <span className="text-rose-400 flex items-center gap-1 mt-1"><AlertTriangle size={12} /> Burdened, this line pushes the job over its estimate — you'll be flagged when it posts.</span>}
+            </div>}
         </div>}
 
       {/* Costs list */}
@@ -524,9 +691,17 @@ function JobDetail({
             <tbody>
               {detail.costs.map(c => <tr key={c.id} className="border-b border-[#171c26]">
                   <td className="py-1.5 capitalize text-gray-400 w-28">{c.category}</td>
-                  <td className="py-1.5 text-gray-300">{c.description || "—"}</td>
+                  <td className="py-1.5 text-gray-300">{c.description || "—"}
+                    {c.category === "labor" && c.burden_cents > 0 && (
+                      <span className="block text-[11px] text-gray-500">
+                        {view === "base" && <>burden +{c.burden_pct}% = {money(c.burdened_cents)} true cost</>}
+                        {view === "burdened" && <>base wage {money(c.amount_cents)} · burden {money(c.burden_cents)}</>}
+                        {view === "both" && <>base {money(c.amount_cents)} + burden {money(c.burden_cents)} = {money(c.burdened_cents)}</>}
+                      </span>
+                    )}
+                  </td>
                   <td className="py-1.5 font-mono text-amber-400 w-32">{c.entry_number}</td>
-                  <td className="py-1.5 text-end font-mono text-gray-200">{money(c.amount_cents)}</td>
+                  <td className="py-1.5 text-end font-mono text-gray-200">{c.category === "labor" && view === "burdened" && c.burdened_cents != null ? money(c.burdened_cents) : money(c.amount_cents)}</td>
                 </tr>)}
             </tbody>
           </table>
@@ -562,4 +737,105 @@ function JobDetail({
           </div>
         </div>}
     </>;
+}
+
+function JobCostingSettings({ jc, saveJc, suggestion, allTeam, reloadJc }) {
+  const [defaultPct, setDefaultPct] = useState(String(jc.default_burden_pct ?? 0));
+  const [tpl, setTpl] = useState({ name: "", kind: "employee", pct: "", member_user_ids: [] });
+
+  const toggleMember = (id) =>
+    setTpl((t) => ({ ...t, member_user_ids: t.member_user_ids.includes(id)
+      ? t.member_user_ids.filter((m) => m !== id) : [...t.member_user_ids, id] }));
+
+  const createTemplate = async () => {
+    try {
+      await api.post("/job-costing/burden-templates", { ...tpl, pct: parseFloat(tpl.pct) || 0 });
+      toast.success("Burden template saved");
+      setTpl({ name: "", kind: "employee", pct: "", member_user_ids: [] });
+      reloadJc();
+    } catch (e) { toast.error(errMsg(e)); }
+  };
+  const deleteTemplate = async (id) => {
+    try { await api.del(`/job-costing/burden-templates/${id}`); toast.success("Template deleted"); reloadJc(); }
+    catch (e) { toast.error(errMsg(e)); }
+  };
+
+  return (
+    <div className="space-y-5 text-sm">
+      {/* Committed costs — optional, owner-ruled */}
+      <div className="p-3 rounded-lg bg-[#0F1218] border border-[#222838]" data-testid="jc-committed-toggle">
+        <label className="flex items-start gap-3 cursor-pointer">
+          <input type="checkbox" className="mt-1" checked={!!jc.committed_costs_enabled}
+            onChange={(e) => saveJc({ committed_costs_enabled: e.target.checked })} />
+          <span>
+            <span className="text-gray-100 font-medium">Committed costs</span>
+            <span className="block text-xs text-gray-500 mt-0.5">
+              Off by default — not every shop runs purchase orders. When on, approved POs linked to a job and
+              signed subcontract commitments count against the job's budget before the bills land
+              (estimated / committed / actual / remaining).
+            </span>
+          </span>
+        </label>
+      </div>
+
+      {/* Burdened labor */}
+      <div className="p-3 rounded-lg bg-[#0F1218] border border-[#222838]">
+        <h4 className="text-xs uppercase tracking-wider text-gray-500 mb-2">Burdened Labor — true cost of an hour</h4>
+        {suggestion?.suggested_burden_pct != null && (
+          <div className="mb-3 p-2 rounded bg-amber-500/10 border border-amber-500/20 text-xs" data-testid="jc-burden-suggestion">
+            <span className="text-amber-300">Your real burden from {suggestion.basis} was {suggestion.suggested_burden_pct}%</span>
+            <span className="text-gray-400"> — {suggestion.note} </span>
+            <button className="text-amber-400 underline" data-testid="jc-burden-apply"
+              onClick={() => { setDefaultPct(String(suggestion.suggested_burden_pct)); saveJc({ default_burden_pct: suggestion.suggested_burden_pct }); }}>
+              Use {suggestion.suggested_burden_pct}% as the default
+            </button>
+          </div>
+        )}
+        <div className="flex items-end gap-2">
+          <div><Label className="text-[10px]">Default burden % (taxes, comp, insurance, benefits)</Label>
+            <Input data-testid="jc-default-burden" value={defaultPct} onChange={(e) => setDefaultPct(e.target.value)} className="bg-[#14171E] border-[#222838] h-8 text-xs font-mono w-32" /></div>
+          <Button size="sm" className="h-8 bg-amber-600 hover:bg-amber-500 text-black"
+            onClick={() => saveJc({ default_burden_pct: parseFloat(defaultPct) || 0 })}>Save rate</Button>
+        </div>
+
+        {/* Templates */}
+        <h5 className="text-[11px] uppercase tracking-wider text-gray-500 mt-4 mb-2">Burden templates — per crew or worker</h5>
+        {(jc.templates || []).map((t) => (
+          <div key={t.id} className="flex items-center justify-between py-1.5 border-b border-[#171c26]">
+            <span className="text-gray-200">{t.name} <span className="text-gray-600 capitalize">({t.kind})</span></span>
+            <span className="font-mono text-gray-400 text-xs">{t.pct}% · {(t.member_user_ids || []).length} member(s)</span>
+            <Button size="sm" variant="ghost" className="h-6" onClick={() => deleteTemplate(t.id)}><Trash2 size={13} className="text-rose-400" /></Button>
+          </div>
+        ))}
+        <div className="grid grid-cols-3 gap-2 mt-3">
+          <div><Label className="text-[10px]">Name</Label><Input data-testid="tpl-name" value={tpl.name} onChange={(e) => setTpl({ ...tpl, name: e.target.value })} placeholder="Employees" className="bg-[#14171E] border-[#222838] h-8 text-xs" /></div>
+          <div><Label className="text-[10px]">Kind</Label>
+            <Select value={tpl.kind} onValueChange={(v) => setTpl({ ...tpl, kind: v })}>
+              <SelectTrigger className="bg-[#14171E] border-[#222838] h-8 text-xs"><SelectValue /></SelectTrigger>
+              <SelectContent className="bg-[#14171E] border-[#222838]">
+                <SelectItem value="employee">Employees</SelectItem>
+                <SelectItem value="sub">Subcontractors</SelectItem>
+                <SelectItem value="custom">Custom</SelectItem>
+              </SelectContent>
+            </Select></div>
+          <div><Label className="text-[10px]">Burden %</Label><Input data-testid="tpl-pct" value={tpl.pct} onChange={(e) => setTpl({ ...tpl, pct: e.target.value })} className="bg-[#14171E] border-[#222838] h-8 text-xs font-mono" /></div>
+        </div>
+        {allTeam.length > 0 && (
+          <div className="flex flex-wrap gap-2 mt-2">
+            {allTeam.map((u) => (
+              <label key={u.id} className="flex items-center gap-1 text-xs text-gray-400 cursor-pointer">
+                <input type="checkbox" checked={tpl.member_user_ids.includes(u.id)} onChange={() => toggleMember(u.id)} /> {u.name}
+              </label>
+            ))}
+          </div>
+        )}
+        <Button size="sm" data-testid="tpl-save" onClick={createTemplate} disabled={!tpl.name || !tpl.pct} className="mt-3 bg-sky-600 hover:bg-sky-500 text-black h-8">Add template</Button>
+      </div>
+
+      <p className="text-[11px] text-gray-600">
+        Labor view (base wage / burdened / both, side by side) is set per job from the job detail — it's a display
+        choice and never changes stored numbers. Burden is a costing overlay: journal entries still post base wages.
+      </p>
+    </div>
+  );
 }

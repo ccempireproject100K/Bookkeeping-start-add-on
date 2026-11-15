@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { api, errMsg } from "@/lib/api";
-import { fmtDate, today } from "@/lib/format";
+import { fmtDate, today, money } from "@/lib/format";
 import { PageHeader, Card, Loading } from "@/components/Page";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -172,6 +172,12 @@ export default function Time() {
               </td>
               <td className="px-5 py-3 text-end font-mono text-gray-200">
                 {e.status === "open" ? elapsed(e.clock_in) : `${e.hours}h`}
+                {e.labor_cost && e.status !== "open" && (
+                  <div className="text-[10px] font-sans text-gray-500" data-testid={`labor-cost-${e.id}`}>
+                    labor {money(e.labor_cost.base_cents)} → <span className="text-amber-400">{money(e.labor_cost.burdened_cents)}</span> true cost
+                    <span className="text-gray-600"> (+{e.labor_cost.burden_pct}% burden{e.labor_cost.template_name ? ` · ${e.labor_cost.template_name}` : ""})</span>
+                  </div>
+                )}
               </td>
               <td className="px-5 py-3 text-gray-500 text-xs max-w-[200px] truncate">{e.notes || "—"}</td>
               <td className="px-5 py-3"><span className={`px-2 py-0.5 rounded-full text-xs border capitalize ${STATUS_CLS[e.status] || ""}`}>{e.status}</span></td>
