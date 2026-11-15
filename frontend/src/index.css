@@ -341,3 +341,35 @@ table thead th {
   background-image: repeating-linear-gradient(0deg, rgba(245,158,11,0.07) 0 9px, transparent 9px 22px);
 }
 
+/* PASS 3 (R2) — "Ledger Flip-In + Gloss Sweep" (transitional;
+   tie: opening the bound ledger — the top sheet flips up off
+   the stack and the light catches its gloss once). One-shot on
+   view entry: cards flip in with real 3D depth (perspective +
+   rotateX off the stack) instead of Round 1's flat rise, and a
+   single gloss sweep crosses each card as it lands. Nothing
+   loops; fully disabled under prefers-reduced-motion. This
+   supersedes the Round-1 ledger-post entry animation. */
+@keyframes ledger-flip {
+  from { opacity: 0; transform: perspective(900px) rotateX(7deg) translateY(10px); }
+  to { opacity: 1; transform: perspective(900px) rotateX(0deg) translateY(0); }
+}
+.card-surface:not(.animate-pulse) { animation: ledger-flip 0.55s cubic-bezier(0.22,1,0.36,1) both; }
+.card-surface::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(105deg, transparent 42%, rgba(255,255,255,0.075) 50%, transparent 58%);
+  background-size: 260% 100%;
+  background-position: 130% 0;
+  animation: gloss-sweep 1.15s cubic-bezier(0.22,1,0.36,1) 0.12s both;
+  pointer-events: none;
+}
+@keyframes gloss-sweep {
+  from { background-position: 130% 0; }
+  to { background-position: -130% 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .card-surface:not(.animate-pulse) { animation: none; }
+  .card-surface::after { animation: none; }
+}
