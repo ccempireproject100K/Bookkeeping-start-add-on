@@ -138,7 +138,7 @@ class FakeCollection:
         return FakeCursor([_project(copy.deepcopy(d), projection)
                            for d in self.docs if _matches(d, q)])
 
-    async def update_one(self, q, update):
+    async def update_one(self, q, update, upsert=False):
         for d in self.docs:
             if _matches(d, q):
                 self._apply(d, update)
