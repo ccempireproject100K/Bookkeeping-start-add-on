@@ -38,16 +38,25 @@ export default function Time() {
   const [team, setTeam] = useState([]);
   const [tick, setTick] = useState(0);
   const [clockNote, setClockNote] = useState("");
+  const [clockJob, setClockJob] = useState("");
+  const [jobs, setJobs] = useState([]);
+  const jobLabel = id => {
+    const j = jobs.find(x => x.id === id);
+    return j ? `${j.job_number} — ${j.customer_name}` : "";
+  };
   const [m, setM] = useState({
     date: today(),
     hours: "",
     client_name: "",
     notes: "",
-    billable: true
+    billable: true,
+    job_id: "",
+    rate: ""
   });
   const load = () => {
     api.get("/time/entries").then(setEntries).catch(() => setEntries([]));
     api.get(`/time/timesheet?period=${period}`).then(setSheet).catch(() => setSheet(null));
+    api.get("/jobs").then(setJobs).catch(() => setJobs([]));
   };
   const loadTeam = p => {
     if (!isOwner) return;
@@ -73,14 +82,23 @@ export default function Time() {
   const clockIn = async () => {
     try {
       await api.post("/time/clock-in", {
-        notes: clockNote
+        notes: clockNote,
+        job_id: clockJob || null
       });
       setClockNote("");
+      setClockJob("");
       toast.success(t("time.clockedIn"));
       load();
     } catch (e) {
       toast.error(errMsg(e));
     }
+  };
+  const linkJob = async (entry, jobId) => {
+    try {
+      await api.patch(`/time/entries/${entry.id}`, jobId ? { job_id: jobId } : { clear_job: true });
+      toast.success(jobId ? "Linked to job — labor posts to the job when approved" : "Job link removed");
+      load(); loadTeam(period);
+    } catch (e) { toast.error(errMsg(e)); }
   };
   const clockOut = async () => {
     try {
@@ -96,7 +114,9 @@ export default function Time() {
     try {
       await api.post("/time/entries", {
         ...m,
-        hours: parseFloat(m.hours)
+        hours: parseFloat(m.hours),
+        job_id: m.job_id || null,
+        rate: m.rate === "" ? null : parseFloat(m.rate)
       });
       toast.success(t("time.timeLogged"));
       setM({
@@ -104,7 +124,9 @@ export default function Time() {
         hours: "",
         client_name: "",
         notes: "",
-        billable: true
+        billable: true,
+        job_id: "",
+        rate: ""
       });
       load();
       loadTeam(period);
@@ -150,6 +172,7 @@ export default function Time() {
           <th className="px-5 py-3 text-start font-medium">Date</th>
           {showWho && <th className="px-5 py-3 text-start font-medium">Who</th>}
           <th className="px-5 py-3 text-start font-medium">Client</th>
+          <th className="px-5 py-3 text-start font-medium">Job</th>
           <th className="px-5 py-3 text-start font-medium">In → Out</th>
           <th className="px-5 py-3 text-end font-medium">Hours</th>
           <th className="px-5 py-3 text-start font-medium">Notes</th>
@@ -161,6 +184,19 @@ export default function Time() {
               <td className="px-5 py-3 text-gray-300 whitespace-nowrap">{fmtDate(e.date)}</td>
               {showWho && <td className="px-5 py-3 text-gray-100">{e.user_name}</td>}
               <td className="px-5 py-3 text-gray-400">{e.client_name || "—"}</td>
+              <td className="px-5 py-3">
+                {e.status === "closed" ? (
+                  <span className="text-xs text-gray-400">{e.job_id ? jobLabel(e.job_id) : "—"}</span>
+                ) : (
+                  <select value={e.job_id || ""} onChange={(ev) => linkJob(e, ev.target.value)}
+                    className="bg-[#0F1218] border border-[#222838] rounded text-xs text-gray-300 px-1.5 py-1 max-w-[170px]"
+                    title="Link this entry to a job — its labor cost posts to the job on approval">
+                    <option value="">No job</option>
+                    {jobs.map((j) => <option key={j.id} value={j.id}>{j.job_number} — {j.customer_name}</option>)}
+                  </select>
+                )}
+                {e.job_cost_id && <div className="text-[10px] text-emerald-400 mt-0.5">labor on job ✓</div>}
+              </td>
               <td className="px-5 py-3 text-gray-400 text-xs">
                 {e.clock_in ? `${new Date(e.clock_in).toLocaleTimeString([], {
               hour: "2-digit",
@@ -209,6 +245,11 @@ export default function Time() {
               <p className="text-sm text-gray-500">{t("time.youReClockedOut")}</p>
               <div><Label className="text-xs">{t("time.noteOptional")}</Label>
                 <Input value={clockNote} onChange={e => setClockNote(e.target.value)} className={IN} placeholder={t("time.shiftNotes")} /></div>
+              <div><Label className="text-xs">Job (optional)</Label>
+                <select value={clockJob} onChange={e => setClockJob(e.target.value)} className={`${IN} w-full rounded-md px-2 py-2 text-sm text-gray-200`}>
+                  <option value="">No job</option>
+                  {jobs.map(j => <option key={j.id} value={j.id}>{j.job_number} — {j.customer_name}</option>)}
+                </select></div>
               <Button onClick={clockIn} className="bg-emerald-600 hover:bg-emerald-500 text-black font-semibold" data-testid="time-clock-in">
                 <Play size={16} className="me-1" /> {t("time.clockIn")}</Button>
             </div>}
@@ -239,6 +280,20 @@ export default function Time() {
               ...m,
               client_name: e.target.value
             })} className={IN} /></div>
+            <div className="flex gap-2">
+              <div className="flex-1"><Label className="text-xs">Job (optional)</Label>
+                <select value={m.job_id} onChange={e => setM({
+              ...m,
+              job_id: e.target.value
+            })} className={`${IN} w-full rounded-md px-2 py-2 text-sm text-gray-200`}>
+                  <option value="">No job</option>
+                  {jobs.map(j => <option key={j.id} value={j.id}>{j.job_number} — {j.customer_name}</option>)}
+                </select></div>
+              <div className="w-24"><Label className="text-xs">Rate $/hr</Label><Input type="number" step="0.01" min="0" value={m.rate} onChange={e => setM({
+              ...m,
+              rate: e.target.value
+            })} className={`${IN} font-mono`} placeholder="pay rate" /></div>
+            </div>
             <div><Label className="text-xs">{t("time.notes")}</Label><Input value={m.notes} onChange={e => setM({
               ...m,
               notes: e.target.value

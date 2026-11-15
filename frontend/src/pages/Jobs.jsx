@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Plus, AlertTriangle, ArrowRight, Briefcase, BellRing, Settings2, Trash2 } from "lucide-react";
+import { Plus, AlertTriangle, ArrowRight, Briefcase, BellRing, Settings2, Trash2, Zap } from "lucide-react";
 import { useTranslation } from "react-i18next";
 const CATS = ["material", "labor", "equipment", "subcontractor", "other"];
 const STATUS_CLS = {
@@ -605,6 +605,14 @@ function JobDetail({
         </div>
       )}
 
+      {detail.field_capture && (
+        <p className="text-xs text-gray-500 flex items-center gap-1.5 mt-1" data-testid="job-field-freshness">
+          <Zap size={12} className="text-emerald-400 shrink-0" />
+          Includes field entries through {new Date(detail.field_capture.last_field_cost_at).toLocaleString()}
+          {detail.field_capture.includes_today ? " (today)" : ""} — job costs update the moment time is approved or a receipt posts, no office re-keying.
+        </p>
+      )}
+
       {/* Estimate vs actual */}
       <div className="mt-2">
         <h4 className="text-xs uppercase tracking-wider text-gray-500 mb-2">{t("jobs.estimateVsActual")}</h4>
@@ -699,6 +707,9 @@ function JobDetail({
                         {view === "both" && <>base {money(c.amount_cents)} + burden {money(c.burden_cents)} = {money(c.burdened_cents)}</>}
                       </span>
                     )}
+                    {c.source === "time_entry" && <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300">field · time</span>}
+                    {c.source === "receipt" && <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded-full bg-violet-500/15 text-violet-300">field · receipt</span>}
+                    {c.burdened_amount_cents != null && <span className="ml-2 text-[10px] text-gray-500">burdened {money(c.burdened_amount_cents)}</span>}
                   </td>
                   <td className="py-1.5 font-mono text-amber-400 w-32">{c.entry_number}</td>
                   <td className="py-1.5 text-end font-mono text-gray-200">{c.category === "labor" && view === "burdened" && c.burdened_cents != null ? money(c.burdened_cents) : money(c.amount_cents)}</td>
