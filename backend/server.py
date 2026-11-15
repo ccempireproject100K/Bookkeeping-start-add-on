@@ -143,6 +143,8 @@ async def startup():
         (db.journal_lines, [("tenant_id", 1), ("account_code", 1), ("entry_date", 1)], {}),
         (db.fiscal_periods, [("tenant_id", 1), ("key", 1)], {"unique": True}),
         (db.jobs, [("tenant_id", 1), ("job_number", 1)], {"unique": True}),
+        (db.job_alert_state, [("tenant_id", 1), ("job_id", 1)], {"unique": True}),
+        (db.app_notifications, [("tenant_id", 1), ("kind", 1), ("created_at", -1)], {}),
         (db.bank_transactions, [("tenant_id", 1), ("dedupe_hash", 1)], {"unique": True}),
         (db.bank_accounts, [("tenant_id", 1), ("gl_code", 1)], {}),
         (db.rates, [("base", 1), ("quote", 1), ("date", 1)], {"unique": True}),

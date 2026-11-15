@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Plus, AlertTriangle, ArrowRight, Briefcase } from "lucide-react";
+import { Plus, AlertTriangle, ArrowRight, Briefcase, BellRing, Settings2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 const CATS = ["material", "labor", "equipment", "subcontractor", "other"];
 const STATUS_CLS = {
@@ -42,6 +42,14 @@ export default function Jobs() {
   const [supplies, setSupplies] = useState([]);
   const [createOpen, setCreateOpen] = useState(false);
   const [detail, setDetail] = useState(null);
+  const [notifs, setNotifs] = useState([]);
+  const [alertCfg, setAlertCfg] = useState(null);
+  const [cfgForm, setCfgForm] = useState({
+    warning_pct: "90",
+    overrun_pct: "100",
+    enabled: true
+  });
+  const [cfgOpen, setCfgOpen] = useState(false);
   const [form, setForm] = useState({
     customer_name: "",
     job_type: "installation",
@@ -71,12 +79,42 @@ export default function Jobs() {
   });
   const [invAmt, setInvAmt] = useState("");
   const load = () => api.get("/jobs").then(setRows).catch(() => setRows([]));
+  const loadNotifs = useCallback(() => {
+    api.get("/jobs/notifications").then((r) => setNotifs(r.notifications || [])).catch(() => {});
+    api.get("/jobs/alert-settings").then((cfg) => {
+      setAlertCfg(cfg);
+      setCfgForm({ warning_pct: String(cfg.warning_pct), overrun_pct: String(cfg.overrun_pct), enabled: cfg.enabled });
+    }).catch(() => {});
+  }, []);
   useEffect(() => {
     load();
+    loadNotifs();
     api.get("/customers").then(setCustomers);
     api.get("/products").then(setSupplies).catch(() => {});
     api.get("/auth/team").then(t => setTeam(t.filter(u => u.role === "barber")));
-  }, []);
+  }, [loadNotifs]);
+  const markNotifRead = async id => {
+    try {
+      await api.post(`/jobs/notifications/${id}/read`);
+      loadNotifs();
+    } catch (e) {
+      toast.error(errMsg(e));
+    }
+  };
+  const saveAlertCfg = async () => {
+    try {
+      await api.put("/jobs/alert-settings", {
+        warning_pct: parseFloat(cfgForm.warning_pct),
+        overrun_pct: parseFloat(cfgForm.overrun_pct),
+        enabled: cfgForm.enabled
+      });
+      toast.success("Budget alert settings saved");
+      setCfgOpen(false);
+      loadNotifs();
+    } catch (e) {
+      toast.error(errMsg(e));
+    }
+  };
   const openDetail = useCallback(id => api.get(`/jobs/${id}`).then(setDetail), []);
   const createJob = async () => {
     try {
@@ -115,6 +153,7 @@ export default function Jobs() {
       toast.success(`Status → ${next}`);
       openDetail(job.id);
       load();
+      loadNotifs();
     } catch (e) {
       toast.error(errMsg(e));
     }
@@ -147,6 +186,7 @@ export default function Jobs() {
       });
       openDetail(detail.id);
       load();
+      loadNotifs();
       api.get("/products").then(setSupplies);
     } catch (e) {
       toast.error(errMsg(e));
@@ -168,6 +208,7 @@ export default function Jobs() {
       });
       openDetail(detail.id);
       load();
+      loadNotifs();
     } catch (e) {
       toast.error(errMsg(e));
     }
@@ -188,8 +229,49 @@ export default function Jobs() {
   if (!rows) return <Loading />;
   return <div className="animate-rise">
       <PageHeader title={t("jobs.jobs")} subtitle="Estimate, track costs, and see profit on every job" testid="jobs-page">
+        {isOwner && <Button data-testid="btn-alert-settings" variant="outline" onClick={() => setCfgOpen(true)} className="border-[#222838] text-gray-300 me-2"><Settings2 size={16} className="me-1" />Budget Alerts{alertCfg ? ` (${alertCfg.warning_pct}% / ${alertCfg.overrun_pct}%)` : ""}</Button>}
         {isOwner && <Button data-testid="btn-new-job" onClick={() => setCreateOpen(true)} className="bg-amber-600 hover:bg-amber-500 text-black font-semibold"><Plus size={16} className="me-1" />{t("jobs.newJob")}</Button>}
       </PageHeader>
+
+      {/* Budget alert notifications */}
+      {notifs.length > 0 && (
+        <Card className="mb-4 p-0 overflow-hidden" >
+          <div data-testid="job-alert-notifications">
+            {notifs.slice(0, 5).map((n) => (
+              <div key={n.id} data-testid={`job-alert-${n.level}`}
+                className={`flex items-center gap-3 px-4 py-2.5 border-b border-[#171c26] text-sm ${n.read ? "opacity-60" : ""} ${n.level === "overrun" ? "bg-rose-500/10" : "bg-amber-500/10"}`}>
+                <BellRing size={15} className={n.level === "overrun" ? "text-rose-400 shrink-0" : "text-amber-400 shrink-0"} />
+                <div className="flex-1 min-w-0">
+                  <span className={`font-semibold ${n.level === "overrun" ? "text-rose-300" : "text-amber-300"}`}>{n.title}</span>
+                  <span className="text-gray-400"> — {n.body}</span>
+                </div>
+                {!n.read && (
+                  <Button size="sm" variant="ghost" data-testid="job-alert-mark-read" onClick={(e) => { e.stopPropagation(); markNotifRead(n.id); }} className="text-xs text-gray-400 shrink-0">Mark read</Button>
+                )}
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
+
+      {/* Alert settings dialog */}
+      <Dialog open={cfgOpen} onOpenChange={setCfgOpen}>
+        <DialogContent className="bg-[#14171E] border-[#222838] max-w-sm">
+          <DialogHeader><DialogTitle>Budget Alert Settings</DialogTitle></DialogHeader>
+          <div className="grid gap-3 text-sm">
+            <p className="text-xs text-gray-500">Alerts fire once when a job's costs cross a threshold of its estimate. Warning fires while the job is active; overrun also fires on completed jobs.</p>
+            <div><Label className="text-xs">Warning at (% of estimate)</Label>
+              <Input data-testid="alert-warning-pct" type="number" value={cfgForm.warning_pct} onChange={(e) => setCfgForm({ ...cfgForm, warning_pct: e.target.value })} className="bg-[#0F1218] border-[#222838] font-mono" /></div>
+            <div><Label className="text-xs">Overrun at (% of estimate)</Label>
+              <Input data-testid="alert-overrun-pct" type="number" value={cfgForm.overrun_pct} onChange={(e) => setCfgForm({ ...cfgForm, overrun_pct: e.target.value })} className="bg-[#0F1218] border-[#222838] font-mono" /></div>
+            <label className="flex items-center gap-2 text-gray-300 text-xs">
+              <input data-testid="alert-enabled" type="checkbox" checked={cfgForm.enabled} onChange={(e) => setCfgForm({ ...cfgForm, enabled: e.target.checked })} />
+              Budget alert notifications on
+            </label>
+          </div>
+          <DialogFooter><Button data-testid="alert-settings-save" onClick={saveAlertCfg} className="bg-amber-600 hover:bg-amber-500 text-black">Save</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Card className="p-0 overflow-hidden">
         <div className="overflow-x-auto">
@@ -213,7 +295,11 @@ export default function Jobs() {
                   <td className="px-5 py-3 capitalize text-gray-300">{j.job_type}</td>
                   <td className="px-5 py-3"><span className={`px-2 py-0.5 rounded-full text-xs border capitalize ${STATUS_CLS[j.status]}`}>{j.status}</span></td>
                   <td className="px-5 py-3 text-end font-mono text-gray-300">{dollars(j.profit.revenue)}</td>
-                  <td className="px-5 py-3 text-end font-mono text-gray-400">{dollars(j.profit.cost)}</td>
+<td className="px-5 py-3 text-end font-mono">
+                    <span className={j.budget?.level === "overrun" ? "text-rose-400 font-semibold" : j.budget?.level === "warning" ? "text-amber-400 font-semibold" : "text-gray-400"}>{dollars(j.profit.cost)}</span>
+                    {j.budget?.has_estimate && j.budget?.level && <span data-testid={`job-budget-badge-${j.job_number}`} className={`ms-2 inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] border ${j.budget.level === "overrun" ? "bg-rose-500/10 text-rose-400 border-rose-500/30" : "bg-amber-500/10 text-amber-400 border-amber-500/30"}`}><AlertTriangle size={10} />{j.budget.pct_used}% of estimate</span>}
+                    {j.budget?.has_estimate && !j.budget?.level && <span className="ms-2 text-[10px] text-gray-600">{j.budget.pct_used}% of est.</span>}
+                  </td>
                   <td className={`px-5 py-3 text-end font-mono ${j.profit.gross_profit < 0 ? "text-rose-400" : "text-emerald-400"}`}>{dollars(j.profit.gross_profit)}</td>
                   <td className="px-5 py-3 text-end font-mono flex items-center justify-end gap-1">
                     {j.profit.is_unprofitable && <AlertTriangle size={13} className="text-rose-400" />}
@@ -270,7 +356,11 @@ export default function Jobs() {
       {/* Detail modal */}
       <Dialog open={!!detail} onOpenChange={o => !o && setDetail(null)}>
         <DialogContent className="bg-[#14171E] border-[#222838] max-w-3xl max-h-[90vh] overflow-y-auto">
-          {detail && <JobDetail detail={detail} isOwner={isOwner} team={team} advance={advance} cost={cost} setCost={setCost} addCost={addCost} co={co} setCo={setCo} addCo={addCo} invAmt={invAmt} setInvAmt={setInvAmt} invoice={invoice} />}
+          {detail && <JobDetail detail={detail} isOwner={isOwner} team={team} advance={advance} refreshDetail={() => {
+        openDetail(detail.id);
+        load();
+        loadNotifs();
+      }} cost={cost} setCost={setCost} addCost={addCost} co={co} setCo={setCo} addCo={addCo} invAmt={invAmt} setInvAmt={setInvAmt} invoice={invoice} />}
         </DialogContent>
       </Dialog>
     </div>;
@@ -280,6 +370,7 @@ function JobDetail({
   isOwner,
   team,
   advance,
+  refreshDetail,
   cost,
   setCost,
   addCost,
@@ -294,7 +385,23 @@ function JobDetail({
     t
   } = useTranslation();
   const p = detail.profit;
+  const b = detail.budget || {};
   const estCents = detail.estimated_costs_cents || {};
+  const [ovr, setOvr] = useState({
+    warning: detail.alert_warning_pct != null ? String(detail.alert_warning_pct) : "",
+    overrun: detail.alert_overrun_pct != null ? String(detail.alert_overrun_pct) : "",
+  });
+
+  const saveOverride = async () => {
+    try {
+      await api.patch(`/jobs/${detail.id}/alert-thresholds`, {
+        alert_warning_pct: ovr.warning === "" ? null : parseFloat(ovr.warning),
+        alert_overrun_pct: ovr.overrun === "" ? null : parseFloat(ovr.overrun),
+      });
+      toast.success("Job alert thresholds saved");
+      refreshDetail && refreshDetail();
+    } catch (e) { toast.error(errMsg(e)); }
+  };
   return <>
       <DialogHeader>
         <DialogTitle className="flex items-center gap-3 font-display">
@@ -317,6 +424,36 @@ function JobDetail({
       {isOwner && NEXT[detail.status] && <Button size="sm" onClick={() => advance(detail)} data-testid="btn-advance-status" className="w-fit bg-amber-600 hover:bg-amber-500 text-black mt-1">
           {NEXT_LABEL[detail.status]} <ArrowRight size={14} className="ms-1 rtl:-scale-x-100" />
         </Button>}
+
+      {/* Budget watch banner — only when an estimate exists */}
+      {b.has_estimate && b.level && (
+        <div data-testid={`job-budget-banner-${b.level}`}
+          className={`mt-2 flex items-center gap-2 rounded-lg border px-3 py-2 text-sm ${b.level === "overrun" ? "bg-rose-500/10 border-rose-500/30 text-rose-300" : "bg-amber-500/10 border-amber-500/30 text-amber-300"}`}>
+          <AlertTriangle size={15} className="shrink-0" />
+          <span>
+            {b.level === "overrun"
+              ? <>Over budget: costs are at <b>{b.pct_used}%</b> of the {money(b.estimated_cost_cents)} estimate ({money(b.actual_cost_cents)} spent).</>
+              : <>Closing in on the estimate: costs are at <b>{b.pct_used}%</b> of the {money(b.estimated_cost_cents)} estimate ({money(b.actual_cost_cents)} spent).</>}
+          </span>
+        </div>
+      )}
+      {b.has_estimate && !b.level && (
+        <div className="mt-2 text-xs text-gray-500" data-testid="job-budget-ok">
+          Budget watch: costs at {b.pct_used}% of the {money(b.estimated_cost_cents)} estimate — alert at {b.warning_pct}%, overrun at {b.overrun_pct}%.
+        </div>
+      )}
+
+      {/* Per-job threshold override */}
+      {isOwner && (
+        <div className="mt-2 flex items-end gap-2 text-xs text-gray-400" data-testid="job-threshold-override">
+          <span className="pb-1 text-gray-500">Alert thresholds for this job (blank = use shop defaults):</span>
+          <div><Label className="text-[10px]">Warn %</Label>
+            <Input data-testid="job-alert-warning-pct" type="number" value={ovr.warning} onChange={(e) => setOvr({ ...ovr, warning: e.target.value })} placeholder={String(b.warning_pct ?? 90)} className="bg-[#0F1218] border-[#222838] h-8 w-20 font-mono text-xs" /></div>
+          <div><Label className="text-[10px]">Overrun %</Label>
+            <Input data-testid="job-alert-overrun-pct" type="number" value={ovr.overrun} onChange={(e) => setOvr({ ...ovr, overrun: e.target.value })} placeholder={String(b.overrun_pct ?? 100)} className="bg-[#0F1218] border-[#222838] h-8 w-20 font-mono text-xs" /></div>
+          <Button size="sm" data-testid="job-alert-save" onClick={saveOverride} className="bg-[#222838] hover:bg-[#2b3247] text-gray-200 h-8">Save</Button>
+        </div>
+      )}
 
       {/* Estimate vs actual */}
       <div className="mt-2">
