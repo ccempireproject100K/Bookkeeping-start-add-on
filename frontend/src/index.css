@@ -373,3 +373,19 @@ table thead th {
   .card-surface:not(.animate-pulse) { animation: none; }
   .card-surface::after { animation: none; }
 }
+
+/* FIX (R2 screenshot proof, pre-existing at base): the language
+   switcher <select> carried no colours of its own, so on the
+   dark ledger pages it rendered as the browser's light pill
+   with the page's near-white inherited text — white on white,
+   unreadable (visible top-right of the DataClean landing).
+   Give it the ledger's own card colours. */
+#language-select, select[data-testid="language-switcher"] {
+  background-color: #14171e;
+  color: #e5e7eb;
+  border: 1px solid #2a3040;
+}
+#language-select option, select[data-testid="language-switcher"] option {
+  background-color: #14171e;
+  color: #e5e7eb;
+}
