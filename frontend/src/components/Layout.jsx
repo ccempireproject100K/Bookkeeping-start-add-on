@@ -149,6 +149,13 @@ const NAV = [{
   roles: ALL,
   groupKey: "navGroup.operations"
 }, {
+  to: "/bill-pay",
+  labelKey: "nav.billPay",
+  icon: Landmark,
+  testid: "nav-billpay",
+  roles: ALL,
+  groupKey: "navGroup.operations"
+}, {
   to: "/expenses",
   labelKey: "nav.expensesVendors",
   icon: Coins,

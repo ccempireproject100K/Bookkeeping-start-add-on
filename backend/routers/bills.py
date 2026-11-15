@@ -48,6 +48,10 @@ class BillBody(BaseModel):
     recurring: bool = False
     frequency: Optional[str] = None     # monthly | weekly | quarterly
     currency: str = "USD"               # ISO 4217; validated on create
+    bill_ref: Optional[str] = None      # vendor's own bill / invoice number
+    job_id: Optional[str] = None        # optional link to a job (pay-queue filter)
+    discount_percent: Optional[float] = None   # early-pay terms, if the vendor offers them
+    discount_date: Optional[str] = None        # pay on/before this date to earn the discount
 
 
 def _enrich(b):
@@ -95,6 +99,9 @@ async def create_bill(body: BillBody, user: dict = Depends(require("ops:manage")
         "line_items": line_items, "bill_date": bdate, "due_date": due, "status": "open",
         "paid_cents": 0, "payments": [], "recurring": body.recurring, "frequency": body.frequency,
         "issue_entry": entry["number"], "created_at": now_iso(),
+        "bill_ref": body.bill_ref, "job_id": body.job_id,
+        "discount_percent": body.discount_percent, "discount_date": body.discount_date,
+        "prep_state": None, "prep_history": [], "pay_date_planned": None,
     }
     await coll(user).insert_one(doc)
     doc.pop("_id", None)
@@ -107,6 +114,7 @@ class PayBody(BaseModel):
     credit_id: Optional[str] = None      # apply a vendor credit
     pay_date: Optional[str] = None
     payment_currency: Optional[str] = None  # currency actually moved; defaults to the bill currency
+    reference: Optional[str] = None      # check no. / transfer ref for a payment made outside Books
 
 
 @router.post("/{bill_id}/pay")
@@ -195,7 +203,7 @@ async def pay_bill(bill_id: str, body: PayBody, user: dict = Depends(require("op
     pmt = {"date": pay_date, "amount_cents": target,
            "cash_cents": cash_portion, "credit_cents": credit_applied,
            "method": body.payment_method, "pay_currency": pay_currency,
-           "entry": entry_number}
+           "entry": entry_number, "reference": body.reference}
     await coll(user).update_one({"id": bill_id}, {"$set": {"status": status, "paid_cents": new_paid},
                                                   "$push": {"payments": pmt}})
     return {"status": status, "paid_cents": new_paid, "balance_cents": bill["amount_cents"] - new_paid,
@@ -216,7 +224,10 @@ async def generate_recurring(bill_id: str, user: dict = Depends(require("ops:man
                     lines=[BillLine(expense_code=li["expense_code"], description=li.get("description", ""),
                                     amount=cents_to_dollars(li["amount_cents"])) for li in bill.get("line_items", [])] or None,
                     amount=cents_to_dollars(bill["amount_cents"]),
-                    bill_date=bdate, recurring=True, frequency=freq)
+                    bill_date=bdate, recurring=True, frequency=freq,
+                    job_id=bill.get("job_id"),
+                    discount_percent=bill.get("discount_percent"),
+                    discount_date=None)
     return await create_bill(body, user)
 
 
