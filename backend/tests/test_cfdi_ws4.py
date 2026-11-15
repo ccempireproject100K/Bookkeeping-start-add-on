@@ -110,7 +110,7 @@ class _FakeCollection:
         for d in docs:
             self.docs.append(dict(d))
 
-    async def update_one(self, q, update):
+    async def update_one(self, q, update, upsert=False):
         n = 0
         for d in self.docs:
             if _matches(d, q):

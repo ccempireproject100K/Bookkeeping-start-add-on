@@ -119,7 +119,7 @@ class _Coll:
         for d in docs:
             await self.insert_one(d)
 
-    async def update_one(self, q, update):
+    async def update_one(self, q, update, upsert=False):
         n = 0
         for d in self.docs:
             if _matches(d, q):
