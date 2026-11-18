@@ -128,6 +128,10 @@ class LineIn(BaseModel):
     debit: float = 0
     credit: float = 0
     memo: Optional[str] = None
+    # Optional intercompany marking: this line is a deal with a sister
+    # business (same owner). counterparty_tenant_id names that business.
+    intercompany: bool = False
+    counterparty_tenant_id: Optional[str] = None
 
 
 class EntryBody(BaseModel):
@@ -135,12 +139,18 @@ class EntryBody(BaseModel):
     memo: Optional[str] = None
     lines: List[LineIn]
     post: bool = False
+    # Entry-level intercompany marking; lines inherit unless they set
+    # their own. Used only by the consolidated multi-entity view.
+    intercompany: bool = False
+    counterparty_tenant_id: Optional[str] = None
 
 
 @router.post("/journal-entries")
 async def create_entry(body: EntryBody, user: dict = Depends(require("ledger:post_draft"))):
     draft_lines = [{"account_code": l.account_code, "debit": to_cents(l.debit),
-                    "credit": to_cents(l.credit), "memo": l.memo} for l in body.lines]
+                    "credit": to_cents(l.credit), "memo": l.memo,
+                    "intercompany": l.intercompany,
+                    "counterparty_tenant_id": l.counterparty_tenant_id} for l in body.lines]
     status = "posted" if body.post else "draft"
     if status == "posted" and user["role"] not in ("owner",):
         # bookkeepers create drafts; only owner can post directly
@@ -148,6 +158,8 @@ async def create_entry(body: EntryBody, user: dict = Depends(require("ledger:pos
     entry = await L.post_journal_entry(db, user["tenant_id"], user, {
         "entry_date": body.entry_date or today_str(), "source": "manual",
         "memo": body.memo, "lines": draft_lines,
+        "intercompany": body.intercompany,
+        "counterparty_tenant_id": body.counterparty_tenant_id,
     }, status=status)
     return entry
 
