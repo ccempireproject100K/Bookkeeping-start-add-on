@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { api, errMsg } from "@/lib/api";
+import AiaBilling from "@/components/AiaBilling";
 import { money, dollars, fmtDate } from "@/lib/format";
 import { PageHeader, Card, Loading } from "@/components/Page";
 import { useAuth } from "@/context/AuthContext";
@@ -781,6 +782,26 @@ function JobDetail({
               </div>
             ))}
           </div>
+      {detail.status !== "estimate" && (
+        <AiaBilling job={detail} isOwner={isOwner} onRefresh={onRefresh} />
+      )}
+
+      {/* Costs list */}
+      {detail.costs?.length > 0 && (
+        <div className="mt-2">
+          <h4 className="text-xs uppercase tracking-wider text-gray-500 mb-2">Logged Costs</h4>
+          <table className="w-full text-sm" data-testid="table-job-costs">
+            <tbody>
+              {detail.costs.map((c) => (
+                <tr key={c.id} className="border-b border-[#171c26]">
+                  <td className="py-1.5 capitalize text-gray-400 w-28">{c.category}</td>
+                  <td className="py-1.5 text-gray-300">{c.description || "—"}</td>
+                  <td className="py-1.5 font-mono text-amber-400 w-32">{c.entry_number}</td>
+                  <td className="py-1.5 text-right font-mono text-gray-200">{money(c.amount_cents)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
 
