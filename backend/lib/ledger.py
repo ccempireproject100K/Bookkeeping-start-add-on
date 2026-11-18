@@ -34,6 +34,105 @@ async def audit(db, tenant_id, user, action, detail):
     })
 
 
+# ---------------- Period-close lock (Top-20 #19) ----------------
+# Enforcement lives here, at the posting chokepoint, so EVERY path that
+# posts (manual journal, invoices, bills, payments, bank posting,
+# reversals) is gated identically. The workflow itself (close checklist,
+# snapshots, reopen) lives in lib/periods.py; tenant switches for those
+# enhancements are read there. The gate itself needs no settings: it acts
+# only on state stored on the period doc (status, hard_lock_at, reopen).
+
+async def _period_audit(db, tenant_id, user, action, period_key, details):
+    """Audit row in the rich shape the owner/accountant viewer reads
+    (same fields as lib/audit.py / the routers' _audit helpers)."""
+    await Scoped(db.audit_log, tenant_id).insert_one({
+        "id": new_id(),
+        "actor_id": (user or {}).get("id", "system"),
+        "actor_name": (user or {}).get("name") or (user or {}).get("email") or "system",
+        "actor_role": (user or {}).get("role", "system"),
+        "action": action,
+        "entity": "fiscal_period",
+        "entity_id": period_key,
+        "details": details or {},
+        "created_at": now_iso(),
+    })
+
+
+async def resolve_period(db, tenant_id, period, now=None):
+    """Apply time-based transitions to a fiscal_periods doc and return the
+    up-to-date doc: a soft-closed period hard-locks once its grace passes;
+    an active reopen window that has expired re-locks the period."""
+    if not period:
+        return period
+    now = now or now_iso()
+    s = _scoped(db, tenant_id)
+    updates = {}
+    reopen = period.get("reopen") or {}
+    if reopen.get("status") == "active" and reopen.get("closes_at") and now >= reopen["closes_at"]:
+        prev = reopen.get("previous_status") or "locked"
+        new_status = prev
+        if prev == "soft_closed" and period.get("hard_lock_at") and now >= period["hard_lock_at"]:
+            new_status = "locked"
+        updates["reopen"] = {**reopen, "status": "expired",
+                             "ended_at": now, "end_reason": "window_expired"}
+        updates["status"] = new_status
+        if new_status == "locked" and period.get("status") != "locked":
+            updates["locked_by"] = period.get("locked_by") or "system (reopen window expired)"
+            updates["locked_at"] = now
+        await Scoped(db.period_reopens, tenant_id).update_one(
+            {"id": reopen["id"]},
+            {"$set": {"status": "expired", "ended_at": now, "end_reason": "window_expired"}})
+        await _period_audit(db, tenant_id, None, "period.auto_relocked", period["key"],
+                            {"reopen_id": reopen["id"], "back_to": new_status})
+    elif (period.get("status") == "soft_closed" and period.get("hard_lock_at")
+          and now >= period["hard_lock_at"]):
+        updates["status"] = "locked"
+        updates["locked_by"] = period.get("locked_by") or period.get("closed_by") or "system (grace elapsed)"
+        updates["locked_at"] = period["hard_lock_at"]
+        updates["auto_locked"] = True
+        await _period_audit(db, tenant_id, None, "period.auto_locked", period["key"],
+                            {"hard_lock_at": period["hard_lock_at"]})
+    if updates:
+        await s["periods"].update_one({"key": period["key"]}, {"$set": updates})
+        period = {**period, **updates}
+    return period
+
+
+async def _posting_gate(db, tenant_id, user, period, override_reason=None):
+    """Decide whether a POSTED entry may land in `period` right now.
+
+    Returns tags to stamp on the entry: {} for an open period,
+    {'reopen_id': ...} inside a reopen window, or
+    {'period_override_reason': ...} for a soft-close override.
+    Raises 423 (hard lock) / 409 (soft close, no reason) when refused.
+    """
+    period = await resolve_period(db, tenant_id, period)
+    reopen = period.get("reopen") or {}
+    if reopen.get("status") == "active":
+        return {"reopen_id": reopen["id"]}
+    status = period.get("status")
+    if status == "locked":
+        who = period.get("locked_by") or "the owner"
+        when = (period.get("locked_at") or "")[:10]
+        raise HTTPException(
+            status_code=423,
+            detail=(f"Period {period['key']} is locked — {who} locked it"
+                    f"{f' on {when}' if when else ''}. Nothing can be posted into a "
+                    "locked period. Reopen it first (owner or accountant, with a reason)."))
+    if status == "soft_closed":
+        if override_reason and str(override_reason).strip():
+            reason = str(override_reason).strip()
+            await _period_audit(db, tenant_id, user, "period.soft_override", period["key"],
+                                {"reason": reason, "period": period["key"]})
+            return {"period_override_reason": reason}
+        raise HTTPException(
+            status_code=409,
+            detail=(f"Period {period['key']} is soft-closed. Posting into it needs an "
+                    "override reason (it will be written to the audit log) — or reopen "
+                    "the period instead."))
+    return {}
+
+
 async def ensure_period(db, tenant_id, entry_date):
     s = _scoped(db, tenant_id)
     key = period_key_of(entry_date)
@@ -150,8 +249,18 @@ async def post_journal_entry(db, tenant_id, user, draft, status="posted", idempo
             return dup
 
     period = await ensure_period(db, tenant_id, entry_date)
-    if status == "posted" and period["status"] == "locked":
-        raise HTTPException(status_code=423, detail=f"Period {period['key']} is locked")
+    tags = {}
+    if status == "posted":
+        tags = await _posting_gate(db, tenant_id, user, period,
+                                   override_reason=draft.get("period_override_reason"))
+    else:
+        # Drafts carry no ledger effect, so they are never blocked — but a
+        # draft created during a reopen window is part of that window's
+        # record, so it carries the reopen tag too.
+        period = await resolve_period(db, tenant_id, period)
+        reopen = period.get("reopen") or {}
+        if reopen.get("status") == "active":
+            tags = {"reopen_id": reopen["id"]}
 
     number = await _assign_number(s, entry_date) if status == "posted" else None
     entry = {
@@ -162,6 +271,8 @@ async def post_journal_entry(db, tenant_id, user, draft, status="posted", idempo
         "source": draft.get("source", "manual"),
         "source_ref": draft.get("source_ref"),
         "memo": draft.get("memo"),
+        "reopen_id": tags.get("reopen_id"),
+        "period_override_reason": tags.get("period_override_reason"),
         "created_by": (user or {}).get("email", "system"),
         "posted_by": (user or {}).get("email") if status == "posted" else None,
         "posted_at": now_iso() if status == "posted" else None,
@@ -185,7 +296,7 @@ async def post_journal_entry(db, tenant_id, user, draft, status="posted", idempo
     return entry
 
 
-async def post_draft(db, tenant_id, user, entry_id):
+async def post_draft(db, tenant_id, user, entry_id, period_override_reason=None):
     s = _scoped(db, tenant_id)
     entry = await s["entries"].find_one({"id": entry_id})
     if not entry:
@@ -196,13 +307,16 @@ async def post_draft(db, tenant_id, user, entry_id):
     _validate_lines(lines)
     await _assert_accounts_active(s, lines)
     period = await ensure_period(db, tenant_id, entry["entry_date"])
-    if period["status"] == "locked":
-        raise HTTPException(status_code=423, detail=f"Period {period['key']} is locked")
+    tags = await _posting_gate(db, tenant_id, user, period,
+                               override_reason=period_override_reason)
     number = await _assign_number(s, entry["entry_date"])
     await s["entries"].update_one({"id": entry_id}, {"$set": {
         "status": "posted", "number": number,
         "posted_by": user.get("email"), "posted_at": now_iso(),
+        "reopen_id": tags.get("reopen_id") or entry.get("reopen_id"),
+        "period_override_reason": tags.get("period_override_reason") or entry.get("period_override_reason"),
     }})
+    entry.update(tags)
     await s["lines"].c.update_many(
         {"tenant_id": tenant_id, "entry_id": entry_id},
         {"$set": {"status": "posted", "entry_number": number}},
