@@ -16,7 +16,7 @@
  * store is pluggable so tests can drive the same engine in memory.
  */
 
-export const QUEUE_KINDS = ["time_entry", "time_clock_in", "time_clock_out", "receipt", "expense_note"];
+export const QUEUE_KINDS = ["time_entry", "time_clock_in", "time_clock_out", "receipt", "expense_note", "stock_scan"];
 
 let counter = 0;
 export function newItemId() {
@@ -116,6 +116,12 @@ export function describeItem(item) {
       const bits = ["Expense note"];
       if (p.amount) bits.push(`$${p.amount}`);
       if (p.note) bits.push(p.note);
+      return bits.join(" — ");
+    }
+    case "stock_scan": {
+      const bits = ["Stock scan"];
+      if (p.action) bits.push(p.action);
+      if (p.code) bits.push(p.code);
       return bits.join(" — ");
     }
     default:
@@ -341,6 +347,10 @@ async function deliver(item, transport, saveProgress) {
         ...key,
       });
     }
+    case "stock_scan":
+      // Scan-to-move (lot/serial lane): the /inventory/scan endpoint is
+      // idempotent on client_key, so a retried sync replays safely.
+      return transport.postStockScan({ ...p, ...key });
     default:
       throw new Error(`Unknown queue kind: ${item.kind}`);
   }
