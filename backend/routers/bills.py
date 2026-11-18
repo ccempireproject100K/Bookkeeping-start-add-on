@@ -19,6 +19,7 @@ from lib import fx as FX
 from lib import fx_posting as FXP
 from lib import currencies as C
 from lib.currencies import normalize as normalize_currency
+from lib import retainage as R
 
 router = APIRouter(prefix="/bills", tags=["bills"])
 
@@ -52,6 +53,8 @@ class BillBody(BaseModel):
     job_id: Optional[str] = None        # optional link to a job (pay-queue filter)
     discount_percent: Optional[float] = None   # early-pay terms, if the vendor offers them
     discount_date: Optional[str] = None        # pay on/before this date to earn the discount
+    job_id: Optional[str] = None        # link the bill to a job (retainage source)
+    retainage_pct: Optional[float] = None   # % we hold back from this vendor (None = the job's payable %)
 
 
 def _enrich(b):
@@ -85,16 +88,42 @@ async def create_bill(body: BillBody, user: dict = Depends(require("ops:manage")
     amount = sum(li["amount_cents"] for li in line_items)
     if amount <= 0:
         raise HTTPException(status_code=422, detail="Bill amount must be positive")
+
+    # Retainage (payable side): a holdback we keep from a sub is
+    # RECORDED, never paid out by this lane. The net rides regular AP
+    # (2010) — that is what the normal bill-pay flow settles — and the
+    # held slice rides retainage payable (2030) + the sub-ledger.
+    job = None
+    pct = body.retainage_pct
+    if body.job_id:
+        job = await Scoped(db.jobs, user["tenant_id"]).find_one({"id": body.job_id})
+        if not job and body.retainage_pct is not None:
+            # A holdback was explicitly requested against a job that does
+            # not exist — that is a client error. A bare job link with no
+            # holdback stays a soft link (bill-pay queue filtering).
+            raise HTTPException(status_code=404, detail="Job not found")
+        if job and pct is None:
+            pct = R.pct_for_job(job, side="payable")
+    held = R.held_cents_for(amount, pct) if pct else 0
+
     bill_id = new_id()
     jl = [P.dr(li["expense_code"], li["amount_cents"], li["description"]) for li in line_items]
-    jl.append(P.cr("2010", amount, "Accounts payable"))
+    if held > 0:
+        await R.ensure_accounts(user["tenant_id"])
+        jl.append(P.cr("2010", amount - held, "Accounts payable — net of retainage"))
+        jl.append(P.cr(R.RET_PAYABLE, held, f"Retainage held ({pct}%)"))
+    else:
+        jl.append(P.cr("2010", amount, "Accounts payable"))
     entry = await L.post_journal_entry(db, user["tenant_id"], user, {
         "entry_date": bdate, "source": "bill", "source_ref": bill_id,
         "memo": f"Bill — {body.vendor}", "lines": jl, "currency": currency,
     }, status="posted")
     doc = {
         "id": bill_id, "vendor": body.vendor, "vendor_id": body.vendor_id,
-        "amount_cents": amount, "currency": currency,
+        "amount_cents": amount - held, "gross_cents": amount,
+        "currency": currency,
+        "retainage_pct": pct if held > 0 else 0,
+        "retainage_held_cents": held,
         "expense_code": line_items[0]["expense_code"],
         "line_items": line_items, "bill_date": bdate, "due_date": due, "status": "open",
         "paid_cents": 0, "payments": [], "recurring": body.recurring, "frequency": body.frequency,
@@ -104,6 +133,15 @@ async def create_bill(body: BillBody, user: dict = Depends(require("ops:manage")
         "prep_state": None, "prep_history": [], "pay_date_planned": None,
     }
     await coll(user).insert_one(doc)
+    if held > 0 and job is not None:
+        hold = await R.record_hold(
+            user["tenant_id"], side="payable", job=job, phase_id=None,
+            source_type="bill", source_id=bill_id,
+            gross_cents=amount, held_cents=held, pct=pct,
+            counterparty=body.vendor)
+        doc["retainage_entry_id"] = hold["id"]
+        await coll(user).update_one({"id": bill_id},
+                                    {"$set": {"retainage_entry_id": hold["id"]}})
     doc.pop("_id", None)
     return _enrich(doc)
 
