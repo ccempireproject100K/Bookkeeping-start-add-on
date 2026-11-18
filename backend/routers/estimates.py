@@ -39,6 +39,7 @@ class EstimateBody(BaseModel):
     # Bake-off #8: a deposit ask on the quote, with its own due date.
     deposit_amount: float = 0
     deposit_due_date: Optional[str] = None
+    terms: str = "Net 30"
 
 
 @router.get("")
@@ -58,6 +59,7 @@ async def create_estimate(body: EstimateBody, user: dict = Depends(require("ops:
         "total": cents_to_dollars(subtotal + tax), "status": "draft", "notes": body.notes,
         "deposit_cents": to_cents(body.deposit_amount),
         "deposit_due_date": body.deposit_due_date,
+        "terms": body.terms,
         "invoice_id": None, "created_at": now_iso(),
     }
     await coll(user).insert_one(doc)
@@ -92,8 +94,17 @@ async def convert_to_invoice(estimate_id: str, user: dict = Depends(require("ops
         lines=[InvLine(**{k: li.get(k) for k in ("kind", "name", "revenue_code", "amount") if li.get(k) is not None})
                for li in e["lines"]],
         tax=cents_to_dollars(e.get("tax_cents", 0)),
+        terms=e.get("terms") or "Net 30",
     )
     inv = await issue_invoice(body, user)
+    # Link BOTH ways: estimate -> invoice (below) and invoice -> estimate,
+    # and carry the estimate's notes onto the invoice record. No retyping:
+    # lines, client, tax and terms all came over above.
+    await Scoped(db.invoices, user["tenant_id"]).update_one(
+        {"id": inv["id"]},
+        {"$set": {"estimate_id": estimate_id,
+                  "notes": e.get("notes", "")}})
+    inv["estimate_id"] = estimate_id
     await coll(user).update_one({"id": estimate_id}, {"$set": {"status": "converted", "invoice_id": inv["id"]}})
     # Bake-off #8: held deposits for this quote apply to the new invoice,
     # restating its balance (paid_cents/status/payments move together).

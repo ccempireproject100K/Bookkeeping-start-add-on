@@ -19,12 +19,26 @@ from lib.base import Scoped, cents_to_dollars, today_str
 router = APIRouter(prefix="/whitelabel", tags=["whitelabel"], dependencies=[Depends(require_feature("white_label"))])
 
 
+BRANDING_LAYOUTS = ("classic", "modern", "bold")
+
+
 class BrandingBody(BaseModel):
     firm_name: Optional[str] = None
     logo_url: Optional[str] = None
     accent_color: Optional[str] = None
     support_email: Optional[str] = None
     tagline: Optional[str] = None
+    # Invoice Design Shop (2026-11-14): the business's invoice face.
+    layout: Optional[str] = None          # classic | modern | bold
+    banner_url: Optional[str] = None      # company photo / banner image URL
+    default_message: Optional[str] = None  # saved default invoice message
+    footer_note: Optional[str] = None     # PO / disclaimer / job-notes line
+
+
+def _check_url(field: str, value: str):
+    v = (value or "").strip()
+    if v and not (v.startswith("http://") or v.startswith("https://")):
+        raise HTTPException(422, f"{field} must be an http(s) URL or empty")
 
 
 @router.get("/branding")
@@ -38,8 +52,13 @@ async def set_branding(body: BrandingBody, user: dict = Depends(require("ledger:
     upd = {k: v for k, v in body.model_dump().items() if v is not None}
     if "accent_color" in upd:
         c = upd["accent_color"].strip()
-        if not (c.startswith("#") and len(c) in (4, 7)):
+        if c and not (c.startswith("#") and len(c) in (4, 7)):
             raise HTTPException(422, "accent_color must be a hex color like #f59e0b")
+    if "layout" in upd and upd["layout"] not in BRANDING_LAYOUTS:
+        raise HTTPException(422, f"layout must be one of {BRANDING_LAYOUTS}")
+    for f in ("logo_url", "banner_url"):
+        if f in upd:
+            _check_url(f, upd[f])
     await db.tenants.update_one({"id": user["tenant_id"]},
                                 {"$set": {"branding": upd}})
     await audit(user, "whitelabel.branding", "tenant", user["tenant_id"], upd)

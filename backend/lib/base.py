@@ -88,7 +88,11 @@ class Scoped:
         # (lib/invoice_pay.set_pay_config, routers/collections.write_config,
         # routers/taxforecast) already passed upsert=True, which the old
         # two-arg signature rejected with TypeError — config writes crashed.
-        return await self.c.update_one(self._q(q), update, upsert=upsert)
+        # Merge-train note: only forward the kwarg when True — strict
+        # two-arg collection doubles (and older drivers) reject it.
+        if upsert:
+            return await self.c.update_one(self._q(q), update, upsert=True)
+        return await self.c.update_one(self._q(q), update)
 
     async def count(self, q=None):
         return await self.c.count_documents(self._q(q))

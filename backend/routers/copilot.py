@@ -702,7 +702,9 @@ async def approve_action(action_id: str, user: dict = Depends(get_current_user))
 
 
 async def _exec_chase_invoice(user, payload: dict) -> str:
-    """Create a reminder record for an overdue invoice (no email is sent)."""
+    """Create a reminder record for an overdue invoice and SEND it via the
+    Resend lane (InvoiceEase fold-in, 2026-11-14 — previously this recorded
+    the reminder and sent nothing). The send result rides in the reply."""
     inv_id = str(payload.get("invoice_id") or "")
     inv = await Scoped(db.invoices, user["tenant_id"]).find_one({"id": inv_id})
     if not inv or inv.get("status") != "issued":
@@ -717,7 +719,14 @@ async def _exec_chase_invoice(user, payload: dict) -> str:
         "status": "pending", "created_by": user.get("email"), "created_at": now_iso(),
     }
     await Scoped(db.reminders, user["tenant_id"]).insert_one(rec)
-    return f"Reminder created for {inv.get('client_name')} — ${cents_to_dollars(bal):.2f} overdue"
+    delivery = ""
+    try:
+        from lib import invoice_pay as IP
+        sent = await IP.send_invoice_email(user["tenant_id"], inv, "reminder", user)
+        delivery = f" Email {sent['status']}" + (f" ({sent['error']})" if sent.get("error") else "") + "."
+    except Exception as exc:
+        delivery = f" Email failed ({str(exc)[:120]})."
+    return f"Reminder created for {inv.get('client_name')} — ${cents_to_dollars(bal):.2f} overdue.{delivery}"
 
 
 async def _exec_pay_bill(user, payload: dict) -> str:

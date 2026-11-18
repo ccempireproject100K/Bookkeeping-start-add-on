@@ -32,7 +32,8 @@ export default function RecurringInvoices() {
     tax: "",
     frequency: "monthly",
     next_run: today(),
-    active: true
+    active: true,
+    autopay: false
   });
   const [lines, setLines] = useState([{
     name: "",
@@ -47,7 +48,8 @@ export default function RecurringInvoices() {
       tax: "",
       frequency: "monthly",
       next_run: today(),
-      active: true
+      active: true,
+      autopay: false
     });
     setLines([{
       name: "",
@@ -67,6 +69,7 @@ export default function RecurringInvoices() {
       frequency: form.frequency,
       next_run: form.next_run || null,
       active: form.active,
+      autopay: form.autopay,
       lines: lines.filter(l => l.name && l.amount).map(l => ({
         kind: "service",
         name: l.name,
@@ -97,7 +100,8 @@ export default function RecurringInvoices() {
       tax: t.tax || "",
       frequency: t.frequency || "monthly",
       next_run: t.next_run || today(),
-      active: t.active !== false
+      active: t.active !== false,
+      autopay: !!t.autopay
     });
     setLines((t.lines || []).map(l => ({
       name: l.name || "",
@@ -230,6 +234,11 @@ export default function RecurringInvoices() {
             ...form,
             active: e.target.checked
           })} className="accent-amber-500" data-testid="tpl-active" />{t("recurringinvoices.activeGenerateInvoicesOnSchedule")}</label>
+          <label className="flex items-center gap-2 text-sm text-gray-300">
+            <input type="checkbox" checked={form.autopay} onChange={e => setForm({
+            ...form,
+            autopay: e.target.checked
+          })} className="accent-amber-500" data-testid="tpl-autopay" />Autopay — charge the client's saved payment method when an invoice is generated</label>
           <DialogFooter><Button data-testid="tpl-save" onClick={save} className="bg-amber-600 hover:bg-amber-500 text-black">{editing ? "Save changes" : "Save Template"}</Button></DialogFooter>
         </DialogContent>
       </Dialog>

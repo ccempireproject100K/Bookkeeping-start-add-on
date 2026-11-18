@@ -194,8 +194,9 @@ def env(monkeypatch):
     fake = FakeDB()
     # ja_mod included: in the merged tree jobs.add_cost also evaluates
     # budget alerts (job-overrun lane), which reads jobalerts' own db.
+    from lib import jobphases as jp_mod, retainage as rt_mod
     for mod in (JC, jobs_router, jc_router, po_router, time_router,
-                audit_mod, ja_mod):
+                audit_mod, ja_mod, jp_mod, rt_mod):
         monkeypatch.setattr(mod, "db", fake)
     return fake
 
