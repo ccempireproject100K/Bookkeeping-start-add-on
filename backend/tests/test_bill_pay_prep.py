@@ -21,6 +21,7 @@ os.environ.setdefault("DB_NAME", "test")
 import pytest
 from fastapi import HTTPException
 
+from lib.base import today_str
 from routers import bills as bills_router
 from routers import billpay as bp_router
 
@@ -30,7 +31,14 @@ USER = {"id": "user-1", "email": "owner@test.com", "name": "Olivia Owner",
         "role": "owner", "tenant_id": TID}
 USER2 = {"id": "user-2", "email": "other@test.com", "name": "Other",
          "role": "owner", "tenant_id": TID2}
-TODAY = date.today()
+# Use the app's clock, not the local clock: the app derives "today" from
+# UTC via lib.base.today_str() (datetime.now(timezone.utc).date()), which
+# routers/billpay.py passes to lib/billpay.py discount_info()/bucket_for().
+# Local date.today() is one day behind UTC during the local-evening window
+# (e.g. 18:00-23:59 America/Chicago = next day UTC), which made
+# test_discount_math_computed_never_applied assert days_left == 5 against
+# an app-computed 4 and flake depending on the time of day the suite ran.
+TODAY = date.fromisoformat(today_str())
 D = lambda days: (TODAY + timedelta(days=days)).isoformat()  # noqa: E731
 
 
