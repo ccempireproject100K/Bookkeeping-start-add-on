@@ -8,15 +8,18 @@
  *    when the network is gone, and to /offline.html if the shell itself
  *    was never cached.
  *  - Non-GET requests and cross-origin non-API requests pass through.
- *  - Nothing is queued silently while offline: writes fail visibly in the
- *    app, exactly like they would without a service worker.
+ *  - Writes are never queued BY THE WORKER. Field capture (time, receipt
+ *    photos, expense notes) queues in the app itself — visibly, in the
+ *    sync panel, item by item (feat/offline-field-capture). Everything
+ *    else, money movement included, fails honestly offline with the 503
+ *    below, exactly like it would without a service worker.
  *
  * Restored from the PWA that shipped with the October Capacitor branch
  * (feature/capacitor-mobile-apps) and extended with the offline fallback
  * page. Bump CACHE_VERSION whenever the shell strategy changes; old
  * caches are deleted on activate.
  */
-const CACHE_VERSION = "mae-books-v2";
+const CACHE_VERSION = "mae-books-v3";
 const APP_SHELL = [
   "/",
   "/index.html",

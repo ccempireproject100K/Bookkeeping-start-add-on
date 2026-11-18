@@ -4,6 +4,7 @@ import { api, errMsg } from "@/lib/api";
 import { money, fmtDate } from "@/lib/format";
 import { PageHeader, Card, Loading } from "@/components/Page";
 import { useAuth } from "@/context/AuthContext";
+import { useOfflineQueue } from "@/context/OfflineQueueContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -43,6 +44,7 @@ export default function Receipts() {
   const {
     user
   } = useAuth();
+  const oq = useOfflineQueue();
   const canManage = user?.role === "owner";
   const [receipts, setReceipts] = useState([]);
   const [coa, setCoa] = useState([]);
@@ -87,6 +89,15 @@ export default function Receipts() {
   }, []);
   const upload = async files => {
     if (!files?.length) return;
+    if (!oq.online) {
+      // Offline: the photo goes into the visible field-capture queue and
+      // lands in this inbox when signal returns — never silently dropped.
+      for (const f of files) {
+        await oq.captureReceipt({ blob: f, filename: f.name, vendor: "", amount: "", date: "" });
+      }
+      toast.success(`Saved on this phone — ${files.length === 1 ? "receipt" : `${files.length} receipts`} will send when signal returns (see the sync chip, top right)`);
+      return;
+    }
     setUploading(true);
     try {
       for (const f of files) {
@@ -172,6 +183,7 @@ export default function Receipts() {
           <div className="border-2 border-dashed border-[#222838] rounded-xl p-8 text-center">
             <Camera size={28} className="mx-auto text-gray-500 mb-2" />
             <p className="text-sm text-gray-400 mb-3">{t("receipts.dropReceiptPhotosHereOrTap")}</p>
+            {!oq.online && <p className="text-xs text-amber-400/90 mb-3">No signal — photos are saved on this phone and listed in the sync panel (top right) until they send.</p>}
             <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp,application/pdf" multiple className="hidden" onChange={e => {
           upload(e.target.files);
           e.target.value = "";

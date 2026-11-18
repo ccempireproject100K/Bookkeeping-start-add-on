@@ -110,7 +110,7 @@ def _trade_categories(pack: dict) -> list:
 # ---------------- Upload & inbox ----------------
 async def ingest_receipt(user: dict, filename: str, content_type: str,
                          data: bytes, source: str = "upload",
-                         job_id: str = None) -> dict:
+                         job_id: str = None, client_key: str = None) -> dict:
     """Shared ingestion path: validate, store the file, create the inbox doc.
 
     Used by the manual upload endpoint and by the inbound-email webhook, so
@@ -133,7 +133,8 @@ async def ingest_receipt(user: dict, filename: str, content_type: str,
     doc = {"id": rid, "filename": filename or stored, "stored": stored,
            "content_type": content_type, "size_bytes": len(data),
            "status": "uploaded", "extracted": None, "expense_id": None,
-           "source": source, "job_id": job_id or None, "created_at": now_iso()}
+           "source": source, "job_id": job_id or None, "client_key": client_key,
+           "created_at": now_iso()}
     await receipts(user).insert_one(doc)
     await audit(user, f"receipt.{source}", "receipt", rid, {"filename": doc["filename"]})
     doc.pop("_id", None)
@@ -143,10 +144,25 @@ async def ingest_receipt(user: dict, filename: str, content_type: str,
 @router.post("/upload")
 async def upload_receipt(file: UploadFile = File(...),
                          job_id: Optional[str] = Form(default=None),
+                         client_key: Optional[str] = Form(default=None),
                          user: dict = Depends(require("ops:manage"))):
+    # Direct calls (tests, internal callers) bypass FastAPI's form
+    # parsing, leaving the Form() sentinels in place of values — normalize.
+    if not isinstance(job_id, str):
+        job_id = None
+    if not isinstance(client_key, str):
+        client_key = None
+    # Offline field capture: a stable per-item client_key makes a retried
+    # sync return the receipt it already uploaded instead of a duplicate.
+    if client_key:
+        prior = await receipts(user).find_one({"client_key": client_key})
+        if prior:
+            prior.pop("_id", None)
+            return prior
     data = await file.read()
     return await ingest_receipt(user, file.filename, file.content_type, data,
-                                source="upload", job_id=job_id)
+                                source="upload", job_id=job_id,
+                                client_key=client_key)
 
 class JobTagBody(BaseModel):
     job_id: Optional[str] = None     # null clears the tag
