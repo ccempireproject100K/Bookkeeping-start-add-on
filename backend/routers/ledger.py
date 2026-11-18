@@ -174,6 +174,11 @@ class PostEntryBody(BaseModel):
 @router.post("/journal-entries/{entry_id}/post")
 async def post_entry(entry_id: str, body: Optional[PostEntryBody] = None,
                      user: dict = Depends(require("ledger:approve"))):
+    if isinstance(body, dict) and "tenant_id" in body:
+        # Direct-call compat: main's suites call post_entry(entry_id,
+        # user) with the user dict in the body position (pre-override
+        # signature); FastAPI always passes a PostEntryBody or None.
+        user, body = body, None
     return await L.post_draft(db, user["tenant_id"], user, entry_id,
                               period_override_reason=body.period_override_reason if body else None)
 

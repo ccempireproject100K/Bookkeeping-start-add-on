@@ -260,9 +260,10 @@ def fdb(monkeypatch):
     # jobs.get_job also reads the budget-alert config and the committed-
     # costs config through those lib modules' own db handles.
     from lib import jobphases as jobphases_mod, retainage as retainage_mod
+    from lib import jobforecast as jobforecast_mod  # merge-train: forecast hook in add_cost
     for mod in (proc_r, jobs_r, integrations_r, idem, iauth,
                 auth_mod, audit_mod, jobalerts_mod, jobcosting_mod,
-                jobphases_mod, retainage_mod):
+                jobphases_mod, retainage_mod, jobforecast_mod):
         monkeypatch.setattr(mod, "db", fake)
     return fake
 

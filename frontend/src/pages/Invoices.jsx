@@ -269,6 +269,11 @@ export default function Invoices() {
         tax: parseFloat(tax) || 0,
         tax_jurisdiction_id: jurisId || null,
         currency: invCurrency,
+        // Early-pay override for this invoice only; blank = tenant default
+        ...(epPercent !== "" || epDays !== "" ? {
+          early_pay_percent: parseFloat(epPercent) || 0,
+          early_pay_days: parseInt(epDays) || 0
+        } : {}),
         lines: lines.filter(l => l.name && l.amount).map(l => ({
           kind: "service",
           name: l.name,
@@ -282,6 +287,8 @@ export default function Invoices() {
       setTax("");
       setJurisId("");
       setInvCurrency("USD");
+      setEpPercent("");
+      setEpDays("");
       setLines([{
         name: "",
         revenue_code: "4020",
@@ -291,16 +298,6 @@ export default function Invoices() {
     } catch (e) {
       toast.error(errMsg(e));
     }
-        // Early-pay override for this invoice only; blank = tenant default
-        ...(epPercent !== "" || epDays !== "" ? {
-          early_pay_percent: parseFloat(epPercent) || 0,
-          early_pay_days: parseInt(epDays) || 0,
-        } : {}),
-        lines: lines.filter((l) => l.name && l.amount).map((l) => ({ kind: "service", name: l.name, revenue_code: l.revenue_code, amount: parseFloat(l.amount) || 0 })),
-      });
-      toast.success("Invoice issued");
-      setOpen(false); setClient(""); setTax(""); setJurisId(""); setEpPercent(""); setEpDays(""); setLines([{ name: "", revenue_code: "4020", amount: "" }]); load();
-    } catch (e) { toast.error(errMsg(e)); }
   };
   const openNewInvoice = () => {
     setOpen(true);
@@ -509,7 +506,8 @@ export default function Invoices() {
         <TabsContent value="reminders" className="mt-4">
           <RemindersTab isOwner={isOwner} />
         </TabsContent>
-        {isOwner && <TabsContent value="links" className="mt-4">
+        {isOwner && (
+          <TabsContent value="links" className="mt-4">
             <PortalLinksTab invoices={invoices} />
           </TabsContent>
         )}

@@ -34,8 +34,6 @@ const CO_CLS = {
   approved: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
   rejected: "bg-rose-500/10 text-rose-400 border-rose-500/20",
 };
-const NEXT = { estimate: "active", active: "completed", completed: "closed" };
-const NEXT_LABEL = { estimate: "Convert to Job", active: "Mark Completed", completed: "Close Job" };
 
 export default function Jobs() {
   const {
@@ -256,7 +254,8 @@ export default function Jobs() {
         <DialogContent className="bg-[#14171E] border-[#222838] max-w-xl max-h-[90vh] overflow-y-auto">
           <DialogHeader><DialogTitle>Job Costing Settings</DialogTitle></DialogHeader>
           {jc && <JobCostingSettings jc={jc} saveJc={saveJc} suggestion={suggestion} allTeam={allTeam} reloadJc={loadJc} />}
-
+        </DialogContent>
+      </Dialog>
 
       {/* Budget alert notifications */}
       {notifs.length > 0 && (
@@ -275,6 +274,9 @@ export default function Jobs() {
                 )}
               </div>
             ))}
+          </div>
+        </Card>
+      )}
       {retRollup && (retRollup.receivable.outstanding_cents > 0 || retRollup.payable.outstanding_cents > 0) && (
         <Card className="mb-4 px-5 py-3" data-testid="retainage-rollup">
           <div className="flex flex-wrap gap-x-8 gap-y-1 text-sm">
@@ -399,6 +401,125 @@ export default function Jobs() {
       </Dialog>
     </div>;
 }
+function ForecastPanel({ jobId }) {
+  const [fc, setFc] = useState(null);
+  const [hist, setHist] = useState(null);
+  const [wi, setWi] = useState({});   // category -> remaining $ (what-if sandbox)
+
+  const loadAll = useCallback(() => {
+    api.get(`/jobs/${jobId}/forecast`).then(setFc).catch(() => setFc(null));
+    api.get(`/jobs/${jobId}/forecast/history`).then(setHist).catch(() => setHist(null));
+  }, [jobId]);
+  useEffect(() => { setWi({}); loadAll(); }, [loadAll]);
+
+  if (!fc) return null;
+  const t = fc.totals;
+  const driftCls = (v) => v > 0 ? "text-rose-400" : v < 0 ? "text-emerald-400" : "text-gray-500";
+
+  const applyWhatIf = async () => {
+    const remaining = {};
+    Object.entries(wi).forEach(([c, v]) => { if (v !== "") remaining[c] = parseFloat(v) || 0; });
+    try { setFc(await api.post(`/jobs/${jobId}/forecast/what-if`, { remaining })); }
+    catch (e) { toast.error(errMsg(e)); }
+  };
+  const snapshot = async () => {
+    try { await api.post(`/jobs/${jobId}/forecast/snapshot`, {}); toast.success("Forecast snapshot saved"); loadAll(); }
+    catch (e) { toast.error(errMsg(e)); }
+  };
+
+  return (
+    <div className="mt-3 p-3 rounded-lg bg-[#0F1218] border border-[#222838]" data-testid="forecast-panel">
+      <div className="flex items-center justify-between mb-2">
+        <h4 className="text-xs uppercase tracking-wider text-gray-500 flex items-center gap-1.5">
+          <TrendingUp size={13} className="text-amber-400" /> Baseline vs Forecast
+          <span className="normal-case tracking-normal text-gray-600">
+            ({fc.baseline.source === "estimate" ? "baseline = original estimate" : "baseline = original job estimate"})
+          </span>
+        </h4>
+        <div className="flex gap-2">
+          {fc.what_if && <Button size="sm" variant="outline" className="h-7 border-[#222838] text-xs" data-testid="btn-whatif-reset" onClick={loadAll}>Reset</Button>}
+          <Button size="sm" variant="outline" className="h-7 border-[#222838] text-xs" data-testid="btn-snapshot" onClick={snapshot}><Camera size={12} className="mr-1" />Snapshot</Button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-3 gap-3 mb-2">
+        {[["Baseline (original estimate)", money(fc.baseline_total_cents), "text-gray-300"],
+          ["Forecast at completion", money(t.forecast_cents), "text-amber-300"],
+          ["Drift", `${t.drift_cents > 0 ? "+" : ""}${money(t.drift_cents)}`, driftCls(t.drift_cents)]].map(([l, v, c]) => (
+          <div key={l} className="rounded-lg bg-[#14171E] border border-[#222838] px-3 py-2">
+            <div className="text-[10px] uppercase tracking-wider text-gray-500">{l}</div>
+            <div className={`font-mono text-base mt-0.5 ${c}`}>{v}</div>
+          </div>
+        ))}
+      </div>
+
+      <table className="w-full text-sm" data-testid="table-forecast">
+        <thead><tr className="text-[10px] uppercase text-gray-500 border-b border-[#222838]">
+          <th className="py-1.5 text-left">Category</th><th className="py-1.5 text-right">Baseline</th>
+          <th className="py-1.5 text-right">Actual</th><th className="py-1.5 text-right">Committed</th>
+          <th className="py-1.5 text-right">Remaining</th><th className="py-1.5 text-right">Forecast</th>
+          <th className="py-1.5 text-right">Drift</th></tr></thead>
+        <tbody>
+          {fc.rows.map((r) => (
+            <tr key={r.category} className="border-b border-[#171c26]">
+              <td className="py-1.5 capitalize text-gray-300">{r.category}</td>
+              <td className="py-1.5 text-right font-mono text-gray-500">{money(r.baseline_cents)}</td>
+              <td className="py-1.5 text-right font-mono text-gray-200">{money(r.actual_cents)}</td>
+              <td className="py-1.5 text-right font-mono text-gray-400">{fc.committed_enabled ? money(r.committed_cents) : "—"}</td>
+              <td className="py-1.5 text-right">
+                <Input data-testid={`whatif-${r.category}`} value={wi[r.category] ?? (r.remaining_cents / 100).toFixed(2)}
+                  onChange={(e) => setWi({ ...wi, [r.category]: e.target.value })}
+                  className="bg-[#14171E] border-[#222838] h-7 text-xs font-mono text-right w-24 ml-auto" />
+              </td>
+              <td className="py-1.5 text-right font-mono text-amber-200">{money(r.forecast_cents)}</td>
+              <td className={`py-1.5 text-right font-mono ${driftCls(r.drift_cents)}`}>{r.drift_cents > 0 ? "+" : ""}{money(r.drift_cents)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <div className="flex items-center gap-2 mt-2">
+        <Button size="sm" className="bg-amber-600 hover:bg-amber-500 text-black h-7 text-xs" data-testid="btn-whatif-apply" onClick={applyWhatIf}>Preview what-if</Button>
+        <span className="text-[11px] text-gray-600">Edit any Remaining figure and preview — nothing is saved unless you log the real cost.</span>
+        {!fc.committed_enabled && <span className="text-[11px] text-gray-600 ml-auto">Committed costs are off for this shop.</span>}
+      </div>
+
+      {fc.drift_drivers.length > 0 && (
+        <div className="mt-2 text-xs" data-testid="drift-drivers">
+          <span className="text-gray-500 uppercase tracking-wider text-[10px]">What's driving the drift: </span>
+          {fc.drift_drivers.map((d, i) => (
+            <span key={d.category} className="text-gray-300 capitalize">{i > 0 ? " • " : ""}{d.category} <span className={`font-mono ${driftCls(d.drift_cents)}`}>{d.drift_cents > 0 ? "+" : ""}{money(d.drift_cents)}</span></span>
+          ))}
+        </div>
+      )}
+
+      {fc.phases.length > 0 && (
+        <div className="mt-2 text-xs text-gray-400" data-testid="forecast-phases">
+          {fc.phases.map((p) => (
+            <div key={p.phase_id} className="flex justify-between border-b border-[#171c26] py-1">
+              <span>{p.name}</span>
+              <span className="font-mono">baseline {money(p.baseline_cents)} → forecast {money(p.forecast_cents)}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {hist && hist.snapshots.length > 0 && (
+        <div className="mt-2" data-testid="forecast-history">
+          <div className="text-[10px] uppercase tracking-wider text-gray-500 flex items-center gap-1 mb-1"><History size={11} /> Budget evolution</div>
+          <div className="flex flex-wrap items-center gap-1 text-[11px] font-mono text-gray-400">
+            <span className="text-gray-300">Baseline {money(hist.baseline_total_cents)}</span>
+            {hist.snapshots.map((s) => (
+              <span key={s.id}> → <span className="text-amber-200">{money(s.forecast_total_cents)}</span> <span className="text-gray-600">({s.reason})</span></span>
+            ))}
+            {hist.final_actual_cents !== null && <span> → <span className="text-emerald-300">final actual {money(hist.final_actual_cents)}</span></span>}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
 function JobDetail({
   detail,
   isOwner,
@@ -490,6 +611,11 @@ function JobDetail({
         </DialogTitle>
       </DialogHeader>
       <div className="text-sm text-gray-500 -mt-2 mb-2 capitalize">{detail.job_type} • {detail.service_location} • {detail.description}</div>
+      {detail.budget_adjustment?.accepted && (
+        <div className="text-[11px] text-amber-300/80 -mt-1 mb-1" data-testid="budget-adjustment-note">
+          Working budget uses your history-adjusted figures (accepted {String(detail.budget_adjustment.accepted_at || "").slice(0, 10)}) — the baseline above stays the original estimate.
+        </div>
+      )}
 
       {/* Profit summary */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -609,6 +735,9 @@ function JobDetail({
           {detail.field_capture.includes_today ? " (today)" : ""} — job costs update the moment time is approved or a receipt posts, no office re-keying.
         </p>
       )}
+
+      {/* Baseline vs forecast (job-costing #10) */}
+      <ForecastPanel jobId={detail.id} />
 
       {/* Estimate vs actual */}
       <div className="mt-2">
@@ -782,6 +911,8 @@ function JobDetail({
               </div>
             ))}
           </div>
+        </div>
+      )}
       {detail.status !== "estimate" && (
         <AiaBilling job={detail} isOwner={isOwner} onRefresh={onRefresh} />
       )}

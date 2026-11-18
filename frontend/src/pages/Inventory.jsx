@@ -42,9 +42,6 @@ export default function Inventory() {
     reason: ""
   });
 
-  const [form, setForm] = useState({ name: "", type: "retail", price: "", unit_cost: "", quantity_on_hand: "", tracking_mode: "none", warranty_months: "" });
-  const [restock, setRestock] = useState({ quantity: "", unit_cost: "" });
-  const [adjust, setAdjust] = useState({ quantity_delta: "", reason: "" });
   const [lowStock, setLowStock] = useState([]);
   const load = () => {
     api.get("/products").then(setProducts).catch(() => setProducts([]));
@@ -80,14 +77,6 @@ export default function Inventory() {
     } catch (e) {
       toast.error(errMsg(e));
     }
-        name: form.name, type: form.type, revenue_code: form.type === "retail" ? "4100" : "4100",
-        price: parseFloat(form.price) || 0, unit_cost: parseFloat(form.unit_cost) || 0,
-        quantity_on_hand: parseInt(form.quantity_on_hand) || 0,
-        tracking_mode: form.tracking_mode, warranty_months: parseInt(form.warranty_months) || 0,
-      });
-      toast.success("Product added");
-      setAddOpen(false); setForm({ name: "", type: "retail", price: "", unit_cost: "", quantity_on_hand: "", tracking_mode: "none", warranty_months: "" }); load();
-    } catch (e) { toast.error(errMsg(e)); }
   };
   const doRestock = async () => {
     try {
@@ -160,8 +149,6 @@ export default function Inventory() {
               </tr>
             </thead>
             <tbody>
-              {products.map(p => <tr key={p.id} className="border-b border-[#171c26] hover:bg-[#161b25]">
-                  <td className="px-5 py-3 text-gray-100">{p.name}{p.tracking_mode && p.tracking_mode !== "none" && <span className="ml-2 text-[11px] px-2 py-0.5 rounded-full border border-sky-500/40 bg-sky-500/10 text-sky-300 capitalize">{p.tracking_mode}-tracked</span>}</td>
               {products.map((p) => (
                 <tr key={p.id} className="border-b border-[#171c26] hover:bg-[#161b25]">
                   <td className="px-5 py-3 text-gray-100">{p.name}{p.tracking_mode && p.tracking_mode !== "none" && <span className="ml-2 text-[11px] px-2 py-0.5 rounded-full border border-sky-500/40 bg-sky-500/10 text-sky-300 capitalize">{p.tracking_mode}-tracked</span>}</td>
@@ -174,7 +161,7 @@ export default function Inventory() {
                       <Button size="sm" variant="ghost" className="h-7 text-emerald-400 hover:bg-emerald-500/10" onClick={() => setRestockFor(p)} data-testid={`restock-${p.id}`}><PackagePlus size={14} className="me-1" />{t("inventory.restock")}</Button>
                       <Button size="sm" variant="ghost" className="h-7 text-amber-400 hover:bg-amber-500/10" onClick={() => setAdjustFor(p)} data-testid={`adjust-${p.id}`}><Sliders size={14} className="me-1" />{t("inventory.adjust")}</Button>
                     </td>}
-                </tr>)}
+                </tr>))}
               {products.length === 0 && <tr><td colSpan={isOwner ? 7 : 6} className="px-5 py-12 text-center text-gray-500">{t("inventory.noProducts")}</td></tr>}
             </tbody>
           </table>

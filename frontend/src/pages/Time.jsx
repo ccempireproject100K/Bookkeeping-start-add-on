@@ -43,7 +43,6 @@ export default function Time() {
   const [tick, setTick] = useState(0);
   const [clockNote, setClockNote] = useState("");
   const [clockJob, setClockJob] = useState("");
-  const [jobs, setJobs] = useState([]);
   const jobLabel = id => {
     const j = jobs.find(x => x.id === id);
     return j ? `${j.job_number} — ${j.customer_name}` : "";
