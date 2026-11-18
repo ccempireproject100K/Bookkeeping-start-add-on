@@ -1,0 +1,42 @@
+apply plugin: "com.android.application"
+
+android {
+    namespace "com.mindatease.bookkeeping"
+    compileSdk 35
+
+    defaultConfig {
+        applicationId "com.mindatease.bookkeeping"
+        minSdk 23
+        targetSdk 35
+        versionCode 1
+        versionName "1.0.0"
+    }
+
+    signingConfigs {
+        release {
+            // The keystore itself lives in ../../keys/ and is never
+            // committed. Passwords arrive via environment variables so no
+            // secret is ever written into this repository:
+            //   TWA_STORE_PASSWORD, TWA_KEY_PASSWORD
+            storeFile rootProject.file("../keys/mindatease-books-release.keystore")
+            storePassword System.getenv("TWA_STORE_PASSWORD")
+            keyAlias "mindatease-books"
+            keyPassword System.getenv("TWA_KEY_PASSWORD")
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            // Only sign when the keystore password is actually present
+            // (CI/release builds), so a plain checkout still configures.
+            if (System.getenv("TWA_STORE_PASSWORD")) {
+                signingConfig signingConfigs.release
+            }
+        }
+    }
+}
+
+dependencies {
+    implementation "com.google.androidbrowserhelper:androidbrowserhelper:2.5.0"
+}

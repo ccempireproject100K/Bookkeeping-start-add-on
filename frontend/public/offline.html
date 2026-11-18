@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="theme-color" content="#0B0D10" />
+        <title>You're offline — Mind at Ease</title>
+        <style>
+            html, body { margin: 0; padding: 0; background: #0B0D10; color: #E7EAEE;
+                font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+            .wrap { min-height: 100vh; display: flex; flex-direction: column;
+                align-items: center; justify-content: center; text-align: center;
+                padding: 32px 24px; box-sizing: border-box; }
+            .mark { width: 84px; height: 84px; border-radius: 20px; margin-bottom: 24px; }
+            h1 { font-size: 24px; margin: 0 0 12px; font-weight: 600; }
+            p { font-size: 15px; line-height: 1.55; color: #A7B0BA; max-width: 420px; margin: 0 0 14px; }
+            p strong { color: #E7EAEE; }
+            button { margin-top: 10px; background: #F59E0B; color: #0B0D10; border: 0;
+                font-size: 15px; font-weight: 600; padding: 12px 28px; border-radius: 10px;
+                cursor: pointer; }
+            button:active { background: #D97706; }
+        </style>
+    </head>
+    <body>
+        <div class="wrap">
+            <img class="mark" src="/icons/icon-192.png" alt="Mind at Ease" />
+            <h1>You're offline</h1>
+            <p>
+                The app itself is saved on this device, but <strong>your books live on
+                the server</strong> and need a connection to load. Nothing is queued,
+                stored, or made up on this phone while you're offline.
+            </p>
+            <p>
+                Everything you saved while connected is already on your books.
+                Reconnect — job-site signal counts — and tap below; the app will
+                pick right back up, fully current.
+            </p>
+            <button onclick="window.location.reload()">Try again</button>
+        </div>
+    </body>
+</html>

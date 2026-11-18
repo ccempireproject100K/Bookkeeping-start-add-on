@@ -5,19 +5,28 @@
  *    never cached — books data must be fresh or fail honestly, never stale.
  *  - The static app shell (HTML/JS/CSS/icons) is cache-first so the app
  *    installs and opens fast; navigations fall back to the cached shell
- *    when the network is gone.
+ *    when the network is gone, and to /offline.html if the shell itself
+ *    was never cached.
  *  - Non-GET requests and cross-origin non-API requests pass through.
+ *  - Nothing is queued silently while offline: writes fail visibly in the
+ *    app, exactly like they would without a service worker.
  *
- * Bump CACHE_VERSION whenever the shell strategy changes; old caches are
- * deleted on activate.
+ * Restored from the PWA that shipped with the October Capacitor branch
+ * (feature/capacitor-mobile-apps) and extended with the offline fallback
+ * page. Bump CACHE_VERSION whenever the shell strategy changes; old
+ * caches are deleted on activate.
  */
-const CACHE_VERSION = "mae-books-v1";
+const CACHE_VERSION = "mae-books-v2";
 const APP_SHELL = [
   "/",
   "/index.html",
+  "/offline.html",
   "/manifest.json",
   "/icons/icon.svg",
   "/icons/maskable.svg",
+  "/icons/icon-192.png",
+  "/icons/icon-512.png",
+  "/icons/maskable-512.png",
 ];
 
 self.addEventListener("install", (event) => {
@@ -69,8 +78,23 @@ self.addEventListener("fetch", (event) => {
   if (url.origin !== self.location.origin) return; // fonts/CDN: network's job
 
   if (request.mode === "navigate") {
-    // Fresh shell when online, cached shell when not.
-    event.respondWith(fetch(request).catch(() => caches.match("/index.html")));
+    // Fresh shell when online; cached shell when not; the offline page if
+    // the shell was never cached (first visit with no connection). A
+    // non-OK navigation response (e.g. a static host without an SPA
+    // rewrite answering 404 for a client-side route) is treated as a
+    // failure and falls back the same way.
+    event.respondWith(
+      fetch(request)
+        .then((res) => {
+          if (!res.ok) throw new Error(`Navigation failed: ${res.status}`);
+          return res;
+        })
+        .catch(() =>
+          caches
+            .match("/index.html")
+            .then((hit) => hit || caches.match("/offline.html"))
+        )
+    );
     return;
   }
 
