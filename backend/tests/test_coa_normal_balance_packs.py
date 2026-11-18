@@ -96,7 +96,7 @@ class FakeCollection:
         for d in docs:
             await self.insert_one(d)
 
-    async def update_one(self, filt, update):
+    async def update_one(self, filt, update, upsert=False):
         for d in self.docs:
             if _matches(d, filt):
                 d.update(update.get("$set", {}))

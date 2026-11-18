@@ -92,7 +92,7 @@ class _FakeCollection:
                 for f, v in changes.items():
                     d[f] = d.get(f, 0) + v
 
-    async def update_one(self, q, update):
+    async def update_one(self, q, update, upsert=False):
         for d in self.docs:
             if _matches(d, q):
                 self._apply(d, update)

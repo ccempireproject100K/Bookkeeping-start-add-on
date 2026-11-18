@@ -93,7 +93,7 @@ class FakeCollection:
     async def insert_one(self, doc):
         self.docs.append(dict(doc))
 
-    async def update_one(self, filt, update):
+    async def update_one(self, filt, update, upsert=False):
         n = 0
         for d in self.docs:
             if self._match(d, filt):
