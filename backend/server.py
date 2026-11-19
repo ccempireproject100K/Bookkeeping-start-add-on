@@ -134,6 +134,13 @@ async def startup():
         (db.referral_pay_batches, "id", {"unique": True}),
         (db.referral_payout_queue, [("referrer_id", 1), ("status", 1)], {}),
         (db.users, "email", {"unique": True}),
+        # Hot lookups that had no supporting index: tenant resolution by
+        # id (every authenticated request), the benchmark trade-line pool
+        # scan, and per-tenant invoice / customer listing by status.
+        (db.tenants, "id", {}),
+        (db.tenants, [("niche_id", 1), ("benchmark_opt_in", 1)], {}),
+        (db.invoices, [("tenant_id", 1), ("status", 1)], {}),
+        (db.customers, "tenant_id", {}),
         # Federated sign-in (PR #212): provider subject lookup + the
         # shared identities link list stamped by create_workspace.
         (db.users, "google_sub", {"unique": True, "sparse": True}),
