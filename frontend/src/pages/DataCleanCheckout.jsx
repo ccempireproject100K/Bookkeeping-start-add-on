@@ -367,7 +367,7 @@ export default function DataCleanCheckout() {
                                    savingsCents={c.savings_cents} />
                   )}
                   <p className="text-sm text-gray-400 flex-1">{t(BLURB_KEYS[c.id] || BLURB_KEYS.dataclean)}</p>
-                  <button type="button" role="radio" aria-checked={isChosen}
+                  <button type="button" role="radio" aria-checked={isChosen} aria-label={c.name}
                     disabled={!c.sellable}
                     onClick={() => { setSelected(c.id); setPayError(""); }}
                     data-testid={`checkout-select-${c.id}`}
