@@ -49,11 +49,14 @@ Environment (production):
                                   grandfathered until the owner
                                   turns charging on)
 """
+import logging
 import os
 
 from db import db
 from lib import dataclean_api as dca
 from lib.billing import iso_from_epoch, map_subscription_status
+
+logger = logging.getLogger(__name__)
 
 KIND = "dataclean_subscription"
 SOURCE = "dataclean_billing"
@@ -226,6 +229,14 @@ async def ensure_products() -> dict:
             "recurring": {"interval": c["interval"]},
             "metadata": {"mae_product": pid, "kind": KIND},
         })
+        live_amount = getattr(price, "unit_amount", None)
+        if isinstance(live_amount, int) and live_amount != c["amount_cents"]:
+            # Never mutate a Stripe Price (they are immutable, and the
+            # ladder owner decides): surface the drift for ops instead.
+            logger.warning(
+                "dataclean price drift: %s Stripe price %s is %s cents, "
+                "ladder says %s", pid, price.id, live_amount,
+                c["amount_cents"])
         row = {
             "product": pid,
             "stripe_product_id": prod.id,
