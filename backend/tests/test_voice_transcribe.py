@@ -258,6 +258,84 @@ def test_http_transcribe_rejects_bad_clips_before_any_provider_work(monkeypatch)
     assert fake.seen is None  # the transcriber was never invoked
 
 
+class _StubRequest:
+    """A request whose body is a counted stream, to observe how much of
+    the body the endpoint reads."""
+
+    def __init__(self, chunks, headers):
+        self.headers = headers
+        self.query_params = {}
+        self._chunks = chunks
+        self.read = 0
+
+    async def stream(self):
+        for chunk in self._chunks:
+            self.read += 1
+            yield chunk
+
+    async def body(self):  # pragma: no cover - must never be used
+        raise AssertionError("the endpoint must not buffer the whole body")
+
+
+def _call(monkeypatch, request):
+    import asyncio
+    fake = _FakeTranscriber(
+        {"cloudflare": True, "groq": False, "any_free_rung": True, "bank_enabled": False},
+        {"ok": True, "text": "x", "provider": "cloudflare", "rung": 2})
+    monkeypatch.setattr(voice_router, "_transcriber", fake)
+    return asyncio.run(voice_router.voice_transcribe(request)), fake
+
+
+def test_http_transcribe_rejects_an_oversize_content_length_without_reading(monkeypatch):
+    request = _StubRequest(
+        [b"\x01" * 1024] * 4,
+        {"content-type": "audio/webm",
+         "content-length": str(voice_router.MAX_BODY_BYTES + 1)})
+    response, fake = _call(monkeypatch, request)
+    assert response.status_code == 413
+    assert request.read == 0
+    assert fake.seen is None
+
+
+def test_http_transcribe_enforces_the_cap_while_reading(monkeypatch):
+    monkeypatch.setattr(voice_router, "MAX_BODY_BYTES", 4096)
+    # no Content-Length at all (chunked) and an understated one
+    for headers in ({"content-type": "audio/webm"},
+                    {"content-type": "audio/webm", "content-length": "10"}):
+        request = _StubRequest([b"\x01" * 1024] * 100, headers)
+        response, fake = _call(monkeypatch, request)
+        assert response.status_code == 413
+        assert request.read == 5  # stopped at the first chunk past the cap
+        assert fake.seen is None
+
+
+def test_http_transcribe_accepts_a_clip_at_the_cap(monkeypatch):
+    monkeypatch.setattr(voice_router, "MAX_BODY_BYTES", 4096)
+    request = _StubRequest([b"\x01" * 1024] * 4,
+                           {"content-type": "audio/webm",
+                            "content-length": "4096"})
+    response, fake = _call(monkeypatch, request)
+    assert response.status_code == 200
+    assert len(fake.seen["audio"]) == 4096
+
+
+def test_http_transcribe_chunked_oversize_over_http_is_413(monkeypatch):
+    fake = _FakeTranscriber(
+        {"cloudflare": True, "groq": False, "any_free_rung": True, "bank_enabled": False},
+        {"ok": True, "text": "x", "provider": "cloudflare", "rung": 2})
+    client = _client(monkeypatch, fake)
+    monkeypatch.setattr(voice_router, "MAX_BODY_BYTES", 4096)
+
+    def gen():
+        for _ in range(100):
+            yield b"\x01" * 1024
+
+    response = client.post("/api/voice/transcribe", content=gen(),
+                           headers={"Content-Type": "audio/webm"})
+    assert response.status_code == 413
+    assert fake.seen is None
+
+
 def test_http_unconfigured_cascade_answers_503_voice_not_configured(monkeypatch):
     fake = _FakeTranscriber(
         {"cloudflare": False, "groq": False, "any_free_rung": False,
