@@ -3,6 +3,7 @@
 Every mutating endpoint writes to `audit_log` (actor, action, entity,
 timestamp). This router exposes it for review — owner and accountant only.
 """
+import re
 from datetime import datetime, timezone, timedelta
 from typing import Optional
 
@@ -25,11 +26,11 @@ async def list_audit(
 ):
     q: dict = {"tenant_id": user["tenant_id"]}
     if action:
-        q["action"] = {"$regex": action, "$options": "i"}
+        q["action"] = {"$regex": re.escape(action), "$options": "i"}
     if entity:
         q["entity"] = entity
     if actor:
-        q["actor_name"] = {"$regex": actor, "$options": "i"}
+        q["actor_name"] = {"$regex": re.escape(actor), "$options": "i"}
     # created_at is an ISO-8601 string; lexicographic compare works.
     cutoff = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
     q["created_at"] = {"$gte": cutoff}
