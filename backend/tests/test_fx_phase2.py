@@ -228,11 +228,22 @@ def test_seed_backfill_uses_history_feed_then_daily(monkeypatch):
 
 
 def test_backfill_keeps_only_recent_days(monkeypatch):
-    old_xml = SAMPLE_XML.replace("2026-10-14", "2020-01-02")
+    # Dates are generated relative to today — the same wall clock
+    # backfill_history() cuts off from (today - days). The original
+    # version hard-coded the SAMPLE_XML dates (2026-10-15), which were
+    # "recent" when written but aged out of the 30-day window on
+    # 2026-11-14, turning this into a time bomb (2026-11-18 fix).
+    # Assertions are unchanged in strength: the old date is dropped,
+    # the recent date is kept, exactly one day x 3 currencies stored.
+    from datetime import date as _date, timedelta
+
+    recent = (_date.today() - timedelta(days=5)).isoformat()
+    old_xml = SAMPLE_XML.replace("2026-10-15", recent).replace(
+        "2026-10-14", "2020-01-02")
     monkeypatch.setattr(fx, "_fetch_url", lambda url: old_xml)
     db = _db_with()
     report = run(fx.backfill_history(days=30, db=db))
     dates = {d["date"] for d in db.rates.docs}
     assert "2020-01-02" not in dates
-    assert "2026-10-15" in dates
+    assert recent in dates
     assert report["fetched"] == 3

@@ -8,10 +8,23 @@ Smith (SM0/XMT) share the XMT code, so blocking on either code lands
 variant surnames in the same block. Golden vectors pinned in
 tests/test_dataclean_phase_a.py (Smith, Schmidt, architect, bajador).
 
-Fallback: if the package is not importable, a compact in-house
+Second source: the `doublemetaphone` package (DoubleMetaphone, the
+C++-backed implementation already pulled in by probablepeople, itself
+a direct dependency) exposes the same published algorithm and the
+same primary+secondary codes, so it is tried when `metaphone` is not
+importable. (2026-11-18 fix: environments that installed the rest of
+requirements.txt but not `metaphone` silently degraded to the
+fallback and failed the golden vectors — the import chain now uses
+either published implementation.)
+
+Fallback: if neither package is importable, a compact in-house
 implementation of the same published algorithm (Lawrence Philips,
 1990/2000 — original code written for this codebase) supplies the
-primary code only. Either way the contract is identical:
+primary code only. That last-resort path is therefore NOT identical:
+without a secondary code, pairs reachable only via a secondary code
+(e.g. Smith/Schmidt via XMT) cannot block together. The two package
+sources above both return primary+secondary and are the supported
+configuration.
 
 Keys are used exclusively to *generate candidate pairs* in linkage.
 They contribute nothing to any score — pair_evidence judges the pair
@@ -26,6 +39,24 @@ try:  # the Phase 0 ADOPT
     from metaphone import doublemetaphone as _dm_package
 except Exception:  # pragma: no cover - exercised only without the dep
     _dm_package = None
+
+if _dm_package is None:  # second published implementation, same codes
+    try:
+        from doublemetaphone import doublemetaphone as _dm_alt
+
+        def _dm_package(word):  # noqa: F811 - adapter to the ADOPT shape
+            primary, secondary = _dm_alt(str(word or ""))
+            if isinstance(primary, bytes):
+                primary = primary.decode("ascii", errors="ignore")
+            if isinstance(secondary, bytes):
+                secondary = secondary.decode("ascii", errors="ignore")
+            # This implementation repeats the primary when a word has
+            # no alternate code; the ADOPT package returns "" instead.
+            # phonetic_keys() dedupes, so both shapes agree downstream.
+            return primary or "", secondary or ""
+
+    except Exception:  # pragma: no cover - neither package installed
+        _dm_package = None
 
 _VOWELS = set("AEIOUY")
 _NON_ALPHA = re.compile(r"[^A-Z]")
@@ -212,7 +243,18 @@ def double_metaphone_primary(word):
                 primary.append("X")
                 i += 2
             elif s_pad[i:i + 3] in ("SCH",):
-                primary.append("SK")
+                # Published rule (same table the SC+H branch below
+                # uses): SCH before -OO/-ER/-EN/-UY/-ED/-EM- is SK,
+                # before a front vowel it is S, otherwise X — so
+                # SCHMIDT's primary is XMT, not SKMT (2026-11-18 fix:
+                # the unconditional SK broke SCH-surname blocking).
+                if s_pad[i + 3:i + 5] in ("OO", "ER", "EN", "UY",
+                                          "ED", "EM"):
+                    primary.append("SK")
+                elif s_pad[i + 3] in "EIY":
+                    primary.append("S")
+                else:
+                    primary.append("X")
                 i += 3
             elif i == 0 and s_pad[1] in "MNLW":
                 primary.append("S")

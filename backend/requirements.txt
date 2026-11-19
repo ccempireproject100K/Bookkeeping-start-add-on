@@ -61,3 +61,8 @@ usaddress>=0.5.16
 rapidfuzz>=3.14
 splink>=5.0
 metaphone>=0.6
+# Second Double Metaphone source for lib/dataclean/phonetic.py (same
+# published algorithm, same primary+secondary codes) — already pulled
+# in transitively by probablepeople; pinned here because phonetic.py
+# now imports it directly as the fallback package source (2026-11-18).
+DoubleMetaphone>=1.2
