@@ -433,11 +433,42 @@ def test_checkout_elements_mode_returns_client_secret(monkeypatch):
     asyncio.run(_run())
 
 
-def test_checkout_uses_env_price_id_when_set(monkeypatch):
+def _fake_price_api(monkeypatch, price=None, status=200, boom=False):
+    """Fake Stripe's HTTP price endpoint (no network): swaps the
+    httpx.AsyncClient the billing module builds for one backed by a
+    MockTransport. Returns the list of requests it served."""
+    import httpx
+    seen = []
+    real = httpx.AsyncClient
+
+    def _handler(request):
+        seen.append(request)
+        if boom:
+            raise httpx.ConnectError("down")
+        return httpx.Response(status, json=price or {})
+
+    def _client(*a, **kw):
+        kw["transport"] = httpx.MockTransport(_handler)
+        return real(*a, **kw)
+
+    monkeypatch.setattr(httpx, "AsyncClient", _client)
+    return seen
+
+
+def _ladder_price(**over):
+    p = {"id": "price_dashboard_1", "active": True, "currency": "usd",
+         "unit_amount": 1299, "recurring": {"interval": "month",
+                                            "interval_count": 1}}
+    p.update(over)
+    return p
+
+
+def test_checkout_uses_env_price_id_when_it_matches_the_ladder(monkeypatch):
     async def _run():
         fdb = _fx(monkeypatch, _fake_stripe())
         _set_keys(monkeypatch)
         monkeypatch.setenv("STRIPE_PRICE_DATACLEAN", "price_dashboard_1")
+        seen = _fake_price_api(monkeypatch, _ladder_price())
         _seed_tenant(fdb)
         out = await R.dataclean_checkout(
             R.CheckoutIn(product="dataclean",
@@ -447,6 +478,113 @@ def test_checkout_uses_env_price_id_when_set(monkeypatch):
         assert kw["line_items"][0] == {"price": "price_dashboard_1",
                                        "quantity": 1}
         assert out["session_id"] == "cs_dc_123"
+        assert str(seen[0].url).endswith("/v1/prices/price_dashboard_1")
+        assert seen[0].headers["authorization"] == "Bearer sk_test_fake"
+    asyncio.run(_run())
+
+
+@pytest.mark.parametrize("product,env,cents", [
+    ("dataclean", "STRIPE_PRICE_DATACLEAN", 1299),
+    ("security", "STRIPE_PRICE_SECURITY", 1899),
+    ("bundle", "STRIPE_PRICE_BUNDLE", 2799),
+])
+def test_env_price_is_verified_per_product_amount(monkeypatch, product,
+                                                  env, cents):
+    async def _run():
+        _fx(monkeypatch, _fake_stripe())
+        _set_keys(monkeypatch)
+        monkeypatch.setenv(env, "price_x")
+        _fake_price_api(monkeypatch, _ladder_price(unit_amount=cents))
+        assert await DCB.price_id_for(product) == "price_x"
+    asyncio.run(_run())
+
+
+@pytest.mark.parametrize("case", [
+    {"unit_amount": 99},
+    {"unit_amount": 1299 + 1},
+    {"currency": "eur"},
+    {"recurring": {"interval": "year", "interval_count": 1}},
+    {"recurring": {"interval": "month", "interval_count": 3}},
+    {"recurring": None},
+    {"active": False},
+])
+def test_env_price_mismatch_falls_back_to_ladder(monkeypatch, caplog, case):
+    async def _run():
+        fdb = _fx(monkeypatch, _fake_stripe())
+        _set_keys(monkeypatch)
+        monkeypatch.setenv("STRIPE_PRICE_DATACLEAN", "price_dashboard_1")
+        _fake_price_api(monkeypatch, _ladder_price(**case))
+        _seed_tenant(fdb)
+        with caplog.at_level("ERROR"):
+            await R.dataclean_checkout(
+                R.CheckoutIn(product="dataclean",
+                             origin_url="https://books.example.com"),
+                _Req(), USER)
+        item = sys.modules["stripe"].state["sessions"][0]["line_items"][0]
+        assert "price" not in item
+        assert item["price_data"]["unit_amount"] == 1299
+        assert item["price_data"]["currency"] == "usd"
+        assert item["price_data"]["recurring"] == {"interval": "month"}
+        assert "STRIPE_PRICE_DATACLEAN" in caplog.text
+        assert "sk_test_fake" not in caplog.text
+    asyncio.run(_run())
+
+
+def test_env_price_amount_mismatch_uses_recorded_ladder_price(monkeypatch):
+    async def _run():
+        fdb = _fx(monkeypatch, _fake_stripe())
+        _set_keys(monkeypatch)
+        monkeypatch.setenv("STRIPE_PRICE_DATACLEAN", "price_dashboard_1")
+        _fake_price_api(monkeypatch, _ladder_price(unit_amount=1))
+        await fdb.dataclean_stripe_products.update_one(
+            {"product": "dataclean"},
+            {"$set": {"product": "dataclean",
+                      "stripe_price_id": "mae_dataclean_monthly"}},
+            upsert=True)
+        assert await DCB.price_id_for("dataclean") == "mae_dataclean_monthly"
+    asyncio.run(_run())
+
+
+@pytest.mark.parametrize("fake_kw", [
+    {"boom": True},
+    {"status": 404},
+    {"status": 500},
+])
+def test_env_price_fetch_failure_falls_back_to_ladder(monkeypatch, caplog,
+                                                      fake_kw):
+    async def _run():
+        _fx(monkeypatch, _fake_stripe())
+        _set_keys(monkeypatch)
+        monkeypatch.setenv("STRIPE_PRICE_SECURITY", "price_sec_1")
+        _fake_price_api(monkeypatch, **fake_kw)
+        with caplog.at_level("ERROR"):
+            assert await DCB.price_id_for("security") == ""
+        assert "STRIPE_PRICE_SECURITY" in caplog.text
+        item = await DCB._line_item("security")
+        assert item["price_data"]["unit_amount"] == 1899
+    asyncio.run(_run())
+
+
+def test_env_price_not_configured_is_not_fetched(monkeypatch, caplog):
+    async def _run():
+        _fx(monkeypatch, _fake_stripe())
+        _set_keys(monkeypatch, with_key=False)
+        monkeypatch.setenv("STRIPE_PRICE_BUNDLE", "price_bundle_1")
+        seen = _fake_price_api(monkeypatch, _ladder_price(unit_amount=2799))
+        with caplog.at_level("ERROR"):
+            assert await DCB.price_id_for("bundle") == ""
+        assert seen == []
+        assert "STRIPE_PRICE_BUNDLE" in caplog.text
+    asyncio.run(_run())
+
+
+def test_unset_env_price_makes_no_fetch(monkeypatch):
+    async def _run():
+        _fx(monkeypatch, _fake_stripe())
+        _set_keys(monkeypatch)
+        seen = _fake_price_api(monkeypatch, _ladder_price())
+        assert await DCB.price_id_for("dataclean") == ""
+        assert seen == []
     asyncio.run(_run())
 
 
