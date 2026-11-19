@@ -311,7 +311,6 @@ class RunIn(BaseModel):
     file_name: Optional[str] = None  # original file name, kept on the run record
 
 
-@router.post("/run")
 async def _persist_import_run(user, body, run_id, status, mapped_count,
                               created, skipped, error_count, cleanup_info):
     """One durable row per import attempt that reached the cleanup
@@ -337,6 +336,7 @@ async def _persist_import_run(user, body, run_id, status, mapped_count,
         "created_at": now_iso(), "created_by": user["id"]})
 
 
+@router.post("/run")
 async def run_import(body: RunIn, user: dict = Depends(require("ops:manage"))):
     if body.kind not in FIELDS:
         raise HTTPException(status_code=422, detail=f"kind must be one of {sorted(FIELDS)}")
