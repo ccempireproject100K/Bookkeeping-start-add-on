@@ -103,6 +103,26 @@ export const FALLBACK_PRICING = {
   ],
 };
 
+/** The bundle saving in cents, derived from ladder values only: the
+ * catalog bundle's own savings when it carries them, otherwise the
+ * sum of the two single products minus the bundle price, reading
+ * each from the catalog (amount_cents) and falling back to
+ * FALLBACK_PRICING for any the catalog lacks. */
+export function bundleSavingsCents(catalog) {
+  const rows = Array.isArray(catalog) ? catalog : [];
+  const bundleRow = rows.find((c) => c?.id === "bundle");
+  if (Number.isFinite(bundleRow?.savings_cents)) return bundleRow.savings_cents;
+  const fallbackBundle = FALLBACK_PRICING.bundles[0];
+  const cents = (id) => {
+    const live = rows.find((c) => c?.id === id)?.amount_cents;
+    if (Number.isFinite(live)) return live;
+    return FALLBACK_PRICING.products.find((p) => p.id === id).monthly_price_cents;
+  };
+  const bundleCents = Number.isFinite(bundleRow?.amount_cents)
+    ? bundleRow.amount_cents : fallbackBundle.monthly_price_cents;
+  return Math.max(0, cents("dataclean") + cents("security") - bundleCents);
+}
+
 /** A product's display state, derived from the config's own
  * sellable flag — never from the product's identity. */
 export function productState(product) {

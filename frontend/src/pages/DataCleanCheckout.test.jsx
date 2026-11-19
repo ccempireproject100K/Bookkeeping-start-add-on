@@ -101,6 +101,16 @@ test("success return celebrates and reports the live entitlement", async () => {
   expect(screen.getByTestId("checkout-bundle-teaser").textContent).toContain("$3.99");
 });
 
+test("success teaser derives the saving from the ladder when the catalog lacks the bundle", async () => {
+  api.get.mockResolvedValue(status({
+    billing: { entitled: true, status: "active", product: "dataclean" },
+    catalog: CATALOG.filter((c) => c.id !== "bundle"),
+  }));
+  renderPage("/dataclean-checkout?checkout=success&session_id=cs_1");
+  expect(await screen.findByTestId("checkout-success")).toBeTruthy();
+  expect(screen.getByTestId("checkout-bundle-teaser").textContent).toContain("$3.99");
+});
+
 test("cancelled return is a gentle no-charge note", async () => {
   api.get.mockResolvedValue(status());
   renderPage("/dataclean-checkout?checkout=cancelled");

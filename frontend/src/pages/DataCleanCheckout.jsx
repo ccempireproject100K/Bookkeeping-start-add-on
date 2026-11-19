@@ -10,7 +10,7 @@ import {
   Sparkles, ShieldCheck, Lock, CalendarX2, Database, Check, Wand2, RefreshCw,
 } from "lucide-react";
 import { api, errMsg } from "@/lib/api";
-import { priceLabel } from "@/lib/datacleanApi";
+import { bundleSavingsCents, priceLabel } from "@/lib/datacleanApi";
 import successRings from "@/lib/successRings.json";
 
 /** The magical checkout (owner's word) for the DataClean family —
@@ -258,7 +258,7 @@ export default function DataCleanCheckout() {
           </h3>
           <p className="text-sm text-gray-400">
             {t("datacleanCheckout.bundleTeaserBody", {
-              amount: priceLabel(catalog.find((c) => c.id === "bundle")?.savings_cents ?? 399),
+              amount: priceLabel(bundleSavingsCents(catalog)),
             })}
           </p>
         </section>

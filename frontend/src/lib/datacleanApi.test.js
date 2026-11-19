@@ -1,6 +1,6 @@
 import {
   API_ENDPOINTS, ERROR_CODES, FALLBACK_CAPS, FALLBACK_PRICING, SAMPLE_CSV,
-  barFraction, bundleComponentState, keyStatus, priceLabel, productState,
+  barFraction, bundleComponentState, bundleSavingsCents, keyStatus, priceLabel, productState,
   usageSeries,
 } from "./datacleanApi";
 
@@ -144,5 +144,36 @@ describe("SAMPLE_CSV", () => {
     expect(lines[0]).toContain("Phone");
     expect(SAMPLE_CSV).toContain("(512) 555-0134");
     expect(SAMPLE_CSV).toContain("OPS@ACME.EXAMPLE");
+  });
+});
+
+describe("bundleSavingsCents", () => {
+  const single = (id, amount_cents) => ({ id, amount_cents });
+  test("uses the catalog bundle's own savings", () => {
+    expect(bundleSavingsCents([
+      single("dataclean", 1299), single("security", 1899),
+      { id: "bundle", amount_cents: 2799, savings_cents: 399 },
+    ])).toBe(399);
+  });
+  test("derives from the singles minus the bundle when savings are absent", () => {
+    expect(bundleSavingsCents([
+      single("dataclean", 1299), single("security", 1899),
+      { id: "bundle", amount_cents: 2799 },
+    ])).toBe(399);
+  });
+  test("a catalog without the bundle derives it from the shared fallback ladder", () => {
+    expect(bundleSavingsCents([single("dataclean", 1299), single("security", 1899)])).toBe(399);
+    expect(bundleSavingsCents([])).toBe(399);
+    expect(bundleSavingsCents(undefined)).toBe(399);
+    const f = FALLBACK_PRICING;
+    expect(bundleSavingsCents([])).toBe(
+      f.products[0].monthly_price_cents + f.products[1].monthly_price_cents
+        - f.bundles[0].monthly_price_cents);
+  });
+  test("never negative", () => {
+    expect(bundleSavingsCents([
+      single("dataclean", 100), single("security", 100),
+      { id: "bundle", amount_cents: 5000 },
+    ])).toBe(0);
   });
 });
