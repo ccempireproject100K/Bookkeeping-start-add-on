@@ -1,1 +1,1 @@
-[{"relation":["delegate_permission/common.handle_all_urls"],"target":{"namespace":"android_app","package_name":"com.mindatease.bookkeeping","sha256_cert_fingerprints":["CD:94:FC:37:C4:D9:2F:CC:3B:B9:B3:EE:E7:EC:DD:27:EB:AA:D3:4D:25:B2:FA:5F:CF:9D:F1:7A:F6:4E:73:41"]}}]
+[{"relation":["delegate_permission/common.handle_all_urls"],"target":{"namespace":"android_app","package_name":"com.mindatease.bookkeeping","sha256_cert_fingerprints":["5B:97:06:6B:11:19:D7:89:03:BB:CB:7A:9C:0B:4B:47:11:7B:E6:7F:4C:EE:F7:0E:46:65:14:1E:43:BC:E3:77"]}}]
