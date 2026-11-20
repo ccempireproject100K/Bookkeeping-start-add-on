@@ -87,3 +87,6 @@ android-sdk/
 credentials.json
 *.key
 .credentials
+
+# Test-generated uploads
+backend/uploads/
