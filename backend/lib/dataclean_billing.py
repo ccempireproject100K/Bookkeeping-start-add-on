@@ -36,9 +36,12 @@ Environment (production):
                                   checkout page for display/config
   STRIPE_PRICE_DATACLEAN / STRIPE_PRICE_SECURITY /
   STRIPE_PRICE_BUNDLE             optional dashboard-managed Price
-                                  ids; when unset, the ids recorded
-                                  by ensure_products() are used, and
-                                  failing that, inline price_data
+                                  ids; used only when the Price in
+                                  Stripe matches the ladder (usd,
+                                  monthly, ladder amount), else the
+                                  ids recorded by ensure_products()
+                                  are used, and failing that, inline
+                                  price_data
   SECURITY_PRODUCT_BUILT=1        set by the security wiring
                                   workstream when Security ships;
                                   flips Security + the bundle sellable
@@ -49,11 +52,14 @@ Environment (production):
                                   grandfathered until the owner
                                   turns charging on)
 """
+import logging
 import os
 
 from db import db
 from lib import dataclean_api as dca
 from lib.billing import iso_from_epoch, map_subscription_status
+
+logger = logging.getLogger(__name__)
 
 KIND = "dataclean_subscription"
 SOURCE = "dataclean_billing"
@@ -226,6 +232,14 @@ async def ensure_products() -> dict:
             "recurring": {"interval": c["interval"]},
             "metadata": {"mae_product": pid, "kind": KIND},
         })
+        live_amount = getattr(price, "unit_amount", None)
+        if isinstance(live_amount, int) and live_amount != c["amount_cents"]:
+            # Never mutate a Stripe Price (they are immutable, and the
+            # ladder owner decides): surface the drift for ops instead.
+            logger.warning(
+                "dataclean price drift: %s Stripe price %s is %s cents, "
+                "ladder says %s", pid, price.id, live_amount,
+                c["amount_cents"])
         row = {
             "product": pid,
             "stripe_product_id": prod.id,
@@ -239,12 +253,76 @@ async def ensure_products() -> dict:
     return out
 
 
+_STRIPE_PRICE_URL = "https://api.stripe.com/v1/prices/"
+
+
+async def _fetch_stripe_price(price_id: str) -> dict:
+    """GET one Price from Stripe's HTTP API with the platform key.
+    Raises on any transport or HTTP error; the caller treats a failure
+    as "not verified"."""
+    import httpx
+    async with httpx.AsyncClient(timeout=10.0) as client:
+        resp = await client.get(
+            _STRIPE_PRICE_URL + price_id,
+            headers={"Authorization": f"Bearer {secret()}"})
+        resp.raise_for_status()
+        return resp.json()
+
+
+def _price_mismatch(price: dict, c: dict) -> str:
+    """"" when the fetched Stripe Price matches the ladder entry `c`
+    (currency, monthly recurring interval, unit amount); otherwise a
+    short reason."""
+    if not isinstance(price, dict):
+        return "unreadable price object"
+    if price.get("active") is False:
+        return "price is inactive"
+    if str(price.get("currency") or "").lower() != c["currency"]:
+        return "currency does not match the ladder"
+    rec = price.get("recurring") or {}
+    if rec.get("interval") != c["interval"] \
+            or (rec.get("interval_count") or 1) != 1:
+        return "recurring interval is not monthly"
+    if price.get("unit_amount") != c["amount_cents"]:
+        return "unit amount does not match the ladder"
+    return ""
+
+
+async def _verified_env_price_id(product: str, c: dict) -> str:
+    """The env-configured Price id for `product` when it is set, a
+    Stripe key is configured and the Price in Stripe matches the
+    ladder; "" in every other case (the caller then uses the
+    ladder-derived price). A mismatch or a failed fetch is logged
+    with the env var name only."""
+    env_name = c["price_env"]
+    env = (os.environ.get(env_name) or "").strip()
+    if not env:
+        return ""
+    if not configured():
+        logger.error("%s is set but STRIPE_SECRET_KEY is not configured; "
+                     "ignoring it and using the ladder price", env_name)
+        return ""
+    try:
+        price = await _fetch_stripe_price(env)
+    except Exception as e:
+        logger.error("%s could not be verified against Stripe (%s); "
+                     "using the ladder price", env_name, type(e).__name__)
+        return ""
+    why = _price_mismatch(price, c)
+    if why:
+        logger.error("%s does not match the %s ladder (%s); using the "
+                     "ladder price", env_name, product, why)
+        return ""
+    return env
+
+
 async def price_id_for(product: str) -> str:
     """The Stripe Price id to charge for a product: the env-configured
-    dashboard id wins, then the id ensure_products() recorded, else
-    "" (the session then carries inline price_data)."""
+    dashboard id when it verifies against the ladder, then the id
+    ensure_products() recorded, else "" (the session then carries
+    inline price_data at the ladder amount)."""
     c = product_catalog()[product]
-    env = (os.environ.get(c["price_env"]) or "").strip()
+    env = await _verified_env_price_id(product, c)
     if env:
         return env
     coll = getattr(db, "dataclean_stripe_products", None)

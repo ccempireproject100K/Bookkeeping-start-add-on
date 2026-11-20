@@ -380,7 +380,9 @@ async def add_attachments(run_id: str, body: AttachmentsBody,
             try:
                 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
                 raw = base64.b64decode(f.content_base64)
-                stored_path = str(UPLOAD_DIR / f"{run_id}-{f.filename}")
+                safe_name = re.sub(r"[^A-Za-z0-9_.-]", "_",
+                                   os.path.basename(f.filename or ""))
+                stored_path = str(UPLOAD_DIR / f"{run_id}-{safe_name}")
                 with open(stored_path, "wb") as fh:
                     fh.write(raw)
             except Exception:

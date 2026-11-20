@@ -62,9 +62,26 @@ async def voice_transcribe(request: Request):
     if content_type not in ALLOWED_CONTENT_TYPES:
         return _fail(415, "invalid_request",
                      "An audio clip (webm, ogg, mp4, mpeg, wav or flac) is required.")
-    body = await request.body()
-    if len(body) > MAX_BODY_BYTES:
-        return _fail(413, "invalid_request", "The audio clip exceeds the size limit.")
+    too_large = _fail(413, "invalid_request",
+                      "The audio clip exceeds the size limit.")
+    # A declared length above the cap is refused before any of the body
+    # is read.
+    try:
+        declared = int(request.headers.get("content-length"))
+    except (TypeError, ValueError):
+        declared = None
+    if declared is not None and declared > MAX_BODY_BYTES:
+        return too_large
+    # The cap is also enforced while reading, so a body with no (or an
+    # understated) length is cut off at the cap instead of being buffered.
+    chunks = []
+    received = 0
+    async for chunk in request.stream():
+        received += len(chunk)
+        if received > MAX_BODY_BYTES:
+            return too_large
+        chunks.append(chunk)
+    body = b"".join(chunks)
     if not body:
         return _fail(400, "invalid_request", "The audio clip was empty.")
     try:
