@@ -130,6 +130,10 @@ def _materialize_body(t: dict, run_date: str = None) -> InvoiceBody:
         client_name=t["client_name"], customer_id=t.get("customer_id"),
         lines=[InvLine(**l) for l in t["lines"]], tax=t.get("tax", 0),
         due_date=due, terms=t.get("terms", "Net 30"),
+        # Scheduled materialization: every period's invoice is
+        # legitimately identical, and the template's next_run
+        # bookkeeping is the dedupe — exempt from the duplicate guard.
+        allow_duplicate=True,
     )
 
 

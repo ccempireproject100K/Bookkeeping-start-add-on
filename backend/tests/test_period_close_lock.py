@@ -423,7 +423,8 @@ def test_checklist_truth_and_acknowledgment_gate(env):
     cl = run(PC.compute_checklist(env, TID, JAN))
     counts = {i["key"]: i["count"] for i in cl["items"]}
     assert counts == {"draft_entries": 2, "unposted_bank_txns": 1,
-                      "unreconciled_bank_txns": 1, "open_bills": 1, "open_invoices": 0}
+                      "unreconciled_bank_txns": 1, "open_bills": 1, "open_invoices": 0,
+                      "out_of_balance_reconciliations": 0}
     assert any("cannot be checked" in n for n in cl["notes"])  # honest limits stated
 
     expect_status(422, lambda: run(PC.close_period(env, TID, OWNER, JAN)))
@@ -436,6 +437,39 @@ def test_checklist_truth_and_acknowledgment_gate(env):
     assert stored["acknowledged"] == ["draft_entries", "unposted_bank_txns",
                                       "unreconciled_bank_txns"]
     assert stored["acknowledged_by"] == "owner@test.com"
+
+
+def test_out_of_balance_reconciliation_blocks_close(env):
+    # Safeguard gap 5: a reconciliation dated in the period that
+    # finished out of balance (status in_progress, difference != 0)
+    # blocks the close like any other blocking checklist item.
+    run(Scoped(env.reconciliations, TID).insert_one({
+        "id": "rec-1", "bank_account_id": "ba-1",
+        "statement_date": "2026-01-31", "status": "in_progress",
+        "difference_cents": -1500, "created_at": T0}))
+    cl = run(PC.compute_checklist(env, TID, JAN))
+    item = next(i for i in cl["items"]
+                if i["key"] == "out_of_balance_reconciliations")
+    assert item["blocking"] is True and item["count"] == 1
+    expect_status(422, lambda: run(PC.close_period(env, TID, OWNER, JAN)))
+    res = run(PC.close_period(
+        env, TID, OWNER, JAN,
+        acknowledge=["out_of_balance_reconciliations"]))
+    assert res["period"]["close_checklist"]["acknowledged"] == [
+        "out_of_balance_reconciliations"]
+
+
+def test_completed_reconciliation_does_not_block_close(env):
+    run(Scoped(env.reconciliations, TID).insert_one({
+        "id": "rec-2", "bank_account_id": "ba-1",
+        "statement_date": "2026-01-31", "status": "completed",
+        "difference_cents": 0, "created_at": T0}))
+    cl = run(PC.compute_checklist(env, TID, JAN))
+    item = next(i for i in cl["items"]
+                if i["key"] == "out_of_balance_reconciliations")
+    assert item["count"] == 0
+    close_hard(env)
+    assert period(env)["status"] == "locked"
 
 
 # ==================== snapshots ====================

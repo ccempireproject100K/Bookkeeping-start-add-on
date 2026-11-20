@@ -12,6 +12,7 @@ from db import db
 from lib.base import Scoped, new_id, now_iso, today_str, to_cents, cents_to_dollars
 from lib.auth import require, get_current_user
 from lib.coa import NAME_OF, ACCOUNT_TYPE_OF
+from lib.audit import audit
 from lib import ledger as L
 from lib import posting as P
 from lib.currencies import normalize as normalize_currency
@@ -528,6 +529,29 @@ async def match(txn_id: str, entry_id: str, user: dict = Depends(require("ops:ma
     e = await Scoped(db.journal_entries, user["tenant_id"]).find_one({"id": entry_id})
     if not e:
         raise HTTPException(status_code=404, detail="Journal entry not found")
+    if e.get("status") != "posted":
+        raise HTTPException(status_code=422,
+                            detail="Only a posted journal entry can be matched to a bank transaction")
+    # Amount check (safeguard audit 2026-11-19, gap 5): the entry must
+    # actually carry this transaction's amount — as its total, or as
+    # one of its lines (a composite entry where the bank movement is
+    # one leg). Matching by bare ID linked unrelated records.
+    amt = abs(int(t.get("amount_cents") or 0))
+    if int(e.get("total_cents") or 0) != amt:
+        lines = await Scoped(db.journal_lines, user["tenant_id"]).find_list(
+            {"entry_id": entry_id})
+        leg_amounts = set()
+        for ln in lines:
+            d = ln.get("debit")
+            if d is None:
+                d = ln.get("debit_cents")
+            c = ln.get("credit")
+            if c is None:
+                c = ln.get("credit_cents")
+            leg_amounts.add(max(abs(int(d or 0)), abs(int(c or 0))))
+        if amt not in leg_amounts:
+            raise HTTPException(status_code=422,
+                                detail="Journal entry amount does not match the transaction amount")
     await txns(user).update_one({"id": txn_id}, {"$set": {
         "status": "matched", "matched_entry_id": entry_id, "entry_number": e.get("number"),
     }})
@@ -542,6 +566,13 @@ async def delete_txn(txn_id: str, user: dict = Depends(require("ops:manage"))):
     if t["status"] == "cleared":
         raise HTTPException(status_code=409, detail="Reverse the posted entry before deleting")
     await txns(user).c.delete_one({"tenant_id": user["tenant_id"], "id": txn_id})
+    # Hard deletes are audited (safeguard audit 2026-11-19, gap 4):
+    # the row is gone, so the chain is the only record it ever existed.
+    await audit(user, "bank_transaction.delete", "bank_transaction", txn_id,
+                {"amount_cents": t.get("amount_cents"),
+                 "txn_date": t.get("txn_date"),
+                 "status": t.get("status"),
+                 "description": t.get("description")})
     return {"deleted": True}
 
 

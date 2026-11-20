@@ -366,16 +366,48 @@ def test_validate_endpoint_is_dry_run(env):
 
 # ============================ Scheduled backups ============================
 
-def test_schedule_default_off_then_due(env):
-    assert run(FX.maybe_run_scheduled(env, TID)) is None  # default OFF
-    run(dataout.put_settings(dataout.ScheduleBody(enabled=True, cadence_days=7,
-                                                  keep=8), user=USER))
-    # Enabling runs the first one straight away (never ran before)
+def test_schedule_default_on_daily(env):
+    # Default ON, daily cadence (safeguard gap 3): never ran before →
+    # due immediately, with NO settings write by the owner.
+    doc = run(FX.maybe_run_scheduled(env, TID))
+    assert doc is not None and doc["kind"] == "scheduled"
     assert len(env.full_backups.docs) == 1
-    assert env.full_backups.docs[0]["kind"] == "scheduled"
-    # Not due again immediately
+    # The run persisted the effective settings — the default must not
+    # silently read back as off on the next check.
+    settings = run(FX.get_settings(env, TID))
+    assert settings["enabled"] is True and settings["cadence_days"] == 1
+    # Not due again immediately (daily cadence).
     assert run(FX.maybe_run_scheduled(env, TID)) is None
     assert len(env.full_backups.docs) == 1
+    # Opting out through settings stops scheduled runs entirely.
+    run(dataout.put_settings(dataout.ScheduleBody(enabled=False, cadence_days=7,
+                                                  keep=8), user=USER))
+    assert run(FX.maybe_run_scheduled(env, TID)) is None
+    assert len(env.full_backups.docs) == 1
+
+
+def test_scheduler_backup_job(env, monkeypatch):
+    """The real scheduler path (lib/scheduler.run_scheduled_backups)
+    creates the default-ON backup for every tenant, once per day."""
+    from pymongo.errors import DuplicateKeyError
+    from lib import scheduler as SCHED
+
+    class UniqueRuns(FakeCollection):
+        async def insert_one(self, doc):
+            if any(d.get("id") == doc.get("id") for d in self.docs):
+                raise DuplicateKeyError("duplicate run claim")
+            return await super().insert_one(doc)
+
+    env._cols["scheduler_runs"] = UniqueRuns()
+    monkeypatch.setattr(SCHED, "db", env)
+    out = run(SCHED.run_scheduled_backups())
+    assert out["errors"] == 0 and out["created"] == 2  # both tenants
+    assert len([d for d in env.full_backups.docs
+                if d["kind"] == "scheduled"]) == 2
+    # Same-day re-run: every tenant's slot is already claimed.
+    out2 = run(SCHED.run_scheduled_backups())
+    assert out2["created"] == 0 and len(out2["skipped"]) == 2
+    assert len(env.full_backups.docs) == 2
 
 
 def test_retention_pruning(env, tmp_path):
@@ -416,6 +448,91 @@ def test_backup_now_and_download(env):
     with pytest.raises(HTTPException) as ei:
         run(dataout.download_backup(doc["id"], user=USER2))
     assert ei.value.status_code == 404
+
+
+# ============ Journal verification on production-shaped data ============
+# Safeguard fix (audit 2026-11-19, gap 1): production journal entries
+# carry NO embedded lines — lines live in journal_lines with plain
+# debit/credit fields (lib/ledger._write_lines). The old manifest check
+# summed embedded lines only, so on real books it compared 0 == 0.
+# Every test below FAILS against that old check.
+
+PROD_TID = "tenant-prod"
+
+
+def _seed_production_shape(db):
+    db.tenants.docs.append({"id": PROD_TID, "name": "Prod Shape Co",
+                            "currency": "USD"})
+    db.journal_entries.docs += [
+        {"id": "pe-1", "tenant_id": PROD_TID, "number": 1,
+         "entry_date": "2026-11-01", "status": "posted",
+         "source": "invoice", "total_cents": 4200},
+        {"id": "pe-2", "tenant_id": PROD_TID, "number": None,
+         "entry_date": "2026-11-02", "status": "draft",
+         "source": "manual", "total_cents": 500},
+    ]
+    db.journal_lines.docs += [
+        {"id": "pl-1", "tenant_id": PROD_TID, "entry_id": "pe-1",
+         "entry_number": 1, "entry_date": "2026-11-01",
+         "account_code": "1010", "debit": 4200, "credit": 0,
+         "status": "posted"},
+        {"id": "pl-2", "tenant_id": PROD_TID, "entry_id": "pe-1",
+         "entry_number": 1, "entry_date": "2026-11-01",
+         "account_code": "4010", "debit": 0, "credit": 4200,
+         "status": "posted"},
+        {"id": "pl-3", "tenant_id": PROD_TID, "entry_id": "pe-2",
+         "entry_number": None, "entry_date": "2026-11-02",
+         "account_code": "1010", "debit": 500, "credit": 0,
+         "status": "draft"},
+    ]
+
+
+def test_journal_totals_production_shape(env):
+    _seed_production_shape(env)
+    zip_bytes, manifest = run(FX.build_full_export(env, PROD_TID))
+    # The old check produced 0/0 here (no embedded lines to sum).
+    assert manifest["journal"] == {"posted_entries": 1, "debit_cents": 4200,
+                                   "credit_cents": 4200, "balanced": True}
+    ok, errors, *_ = FX.parse_and_validate(zip_bytes)
+    assert ok, errors
+    # The report views are built from the same lines — they must not be
+    # empty on production-shaped data either.
+    zf = zipfile.ZipFile(io.BytesIO(zip_bytes))
+    assert "42.00" in zf.read("reports/trial_balance.csv").decode()
+    assert "42.00" in zf.read("reports/general_ledger.csv").decode()
+
+
+def test_validate_refuses_tampered_journal_lines(env):
+    _seed_production_shape(env)
+    zip_bytes, _ = run(FX.build_full_export(env, PROD_TID))
+
+    def shave(n, c):
+        if n == "data/journal_lines.json":
+            docs = json.loads(c)
+            docs[0]["debit"] -= 1  # one cent quietly disappears
+            return json.dumps(docs).encode()
+        return c
+    ok, errors, *_ = FX.parse_and_validate(_tampered(zip_bytes, shave))
+    assert not ok and any("journal" in e for e in errors)
+
+
+def test_verify_detects_corrupted_restored_lines(env):
+    _seed_production_shape(env)
+    zip_bytes, manifest = run(FX.build_full_export(env, PROD_TID))
+    ok, errors, _m, data, attachments = FX.parse_and_validate(zip_bytes)
+    assert ok, errors
+    scratch = "__restore_test__verify"
+    run(FX.restore_into(env, scratch, data, attachments))
+    ver = run(FX.verify_against_manifest(env, scratch, manifest))
+    assert ver["ok"], ver["problems"]
+    # Corrupt one restored line: verification must now FAIL. On the old
+    # check the totals were 0 == 0 no matter what the lines held.
+    for d in env.journal_lines.docs:
+        if d.get("tenant_id") == scratch and d.get("account_code") == "1010":
+            d["debit"] = 1
+    ver = run(FX.verify_against_manifest(env, scratch, manifest))
+    assert not ver["ok"]
+    assert any("journal" in p for p in ver["problems"])
 
 
 # ============================ Legacy paths untouched ============================

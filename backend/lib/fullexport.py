@@ -78,7 +78,7 @@ FULL_COLLECTIONS = [
 ]
 
 DEFAULT_KEEP = 8
-DEFAULT_CADENCE_DAYS = 7
+DEFAULT_CADENCE_DAYS = 1
 
 
 # --------------------------------------------------------------------------
@@ -90,17 +90,72 @@ def _jsonable(doc):
     return json.loads(json.dumps(doc, default=str))
 
 
-def _journal_totals(entries):
-    """Verification anchor: sums over POSTED journal entries' embedded lines."""
+def _line_amounts(ln):
+    """(debit, credit) integer cents from one journal line record.
+
+    Production lines (lib/ledger._write_lines) carry plain ``debit`` /
+    ``credit`` fields; early exports and fixtures used ``debit_cents`` /
+    ``credit_cents``. Both namings are honored so old archives verify."""
+    d = ln.get("debit")
+    if d is None:
+        d = ln.get("debit_cents")
+    c = ln.get("credit")
+    if c is None:
+        c = ln.get("credit_cents")
+    return int(d or 0), int(c or 0)
+
+
+def _lines_by_entry(lines):
+    by_entry = {}
+    for ln in lines or []:
+        by_entry.setdefault(ln.get("entry_id"), []).append(ln)
+    return by_entry
+
+
+def _effective_lines(entry, by_entry):
+    """The lines that count for one entry, amounts normalized to
+    debit_cents/credit_cents: its journal_lines records when they exist
+    (the production shape), else lines embedded in the entry document
+    (archives written before journal_lines existed). Never both — an
+    entry is counted from exactly one shape."""
+    flat = by_entry.get(entry.get("id")) or []
+    if flat:
+        out = []
+        for ln in flat:
+            if ln.get("status") not in (None, "posted"):
+                continue
+            d, c = _line_amounts(ln)
+            out.append({"account_code": ln.get("account_code"),
+                        "debit_cents": d, "credit_cents": c})
+        return out
+    return [{"account_code": ln.get("account_code"),
+             "debit_cents": _line_amounts(ln)[0],
+             "credit_cents": _line_amounts(ln)[1]}
+            for ln in entry.get("lines", []) or []]
+
+
+def _journal_totals(entries, lines=None):
+    """Verification anchor: sums over POSTED journal entries, recomputed
+    from the journal_lines store.
+
+    Production journal entries carry NO embedded lines — the lines live
+    in the journal_lines collection keyed by entry_id (see
+    lib/ledger._write_lines). The previous version of this function
+    summed lines embedded in the entry document, a shape production
+    never writes, so on real books it compared 0 == 0 and proved
+    nothing. Entries with no flattened lines (pre-journal_lines
+    archives) fall back to their embedded lines so old exports still
+    verify."""
+    by_entry = _lines_by_entry(lines)
     debit = credit = 0
     posted = 0
     for e in entries or []:
         if e.get("status") != "posted":
             continue
         posted += 1
-        for ln in e.get("lines", []) or []:
-            debit += int(ln.get("debit_cents") or 0)
-            credit += int(ln.get("credit_cents") or 0)
+        for ln in _effective_lines(e, by_entry):
+            debit += ln["debit_cents"]
+            credit += ln["credit_cents"]
     return {"posted_entries": posted, "debit_cents": debit,
             "credit_cents": credit, "balanced": debit == credit}
 
@@ -158,8 +213,9 @@ it. Any spreadsheet opens the CSVs; any programmer can work with the JSON.
 
 ## Collections (data/*.json)
 
-accounts (chart of accounts), journal_entries (ledger entries; lines are
-embedded), journal_lines (the same lines, flattened), fiscal_periods,
+accounts (chart of accounts), journal_entries (ledger entries),
+journal_lines (the entries' lines, flattened — the manifest's journal
+totals are recomputed from these records), fiscal_periods,
 book_closes, invoices, customer_credits, estimates, bills,
 vendor_credits, expenses, purchase_orders, sales, payment_transactions,
 payment_reminders, recurring_invoices, recurring, customers, vendors,
@@ -221,7 +277,8 @@ def build_manifest(tenant_id, tenant, data, attachments, missing):
         "generator": "Bookkeeping full export (Top-20 #20)",
         "collections": counts,
         "documents": sum(counts.values()),
-        "journal": _journal_totals(data.get("journal_entries", [])),
+        "journal": _journal_totals(data.get("journal_entries", []),
+                                   data.get("journal_lines", [])),
         "attachments": {
             "count": len(attachments),
             "bytes": sum(len(b) for b in attachments.values()),
@@ -236,10 +293,11 @@ def _reports_csvs(data):
     out = {}
     tb_rows = []
     bals = {}
+    by_entry = _lines_by_entry(data.get("journal_lines", []))
     for e in data.get("journal_entries", []):
         if e.get("status") != "posted":
             continue
-        for ln in e.get("lines", []) or []:
+        for ln in _effective_lines(e, by_entry):
             b = bals.setdefault(ln.get("account_code"), [0, 0])
             b[0] += int(ln.get("debit_cents") or 0)
             b[1] += int(ln.get("credit_cents") or 0)
@@ -262,7 +320,7 @@ def _reports_csvs(data):
                     key=lambda x: str(x.get("entry_date") or "")):
         if e.get("status") != "posted":
             continue
-        for ln in e.get("lines", []) or []:
+        for ln in _effective_lines(e, by_entry):
             w.writerow([e.get("entry_date"), e.get("number"), e.get("memo", ""),
                         ln.get("account_code"),
                         NAME_OF.get(ln.get("account_code"), ""),
@@ -380,7 +438,8 @@ def parse_and_validate(zip_bytes, expect_tenant_id=None):
                 f"{name}: the manifest says {want} record(s) but the file "
                 f"holds {len(docs)}. The export is damaged or was changed.")
     if not errors:
-        jt = _journal_totals(data.get("journal_entries", []))
+        jt = _journal_totals(data.get("journal_entries", []),
+                             data.get("journal_lines", []))
         mj = manifest.get("journal") or {}
         if (jt["debit_cents"] != mj.get("debit_cents")
                 or jt["credit_cents"] != mj.get("credit_cents")
@@ -455,7 +514,10 @@ async def verify_against_manifest(db, tenant_id, manifest):
             problems.append(f"{name}: restored {n}, manifest says {want}")
     entries = await db.journal_entries.find(
         {"tenant_id": tenant_id}, {"_id": 0}).to_list(length=500000)
-    jt = _journal_totals([_jsonable(e) for e in entries])
+    lines = await db.journal_lines.find(
+        {"tenant_id": tenant_id}, {"_id": 0}).to_list(length=500000)
+    jt = _journal_totals([_jsonable(e) for e in entries],
+                         [_jsonable(ln) for ln in lines])
     mj = manifest.get("journal") or {}
     if (jt["debit_cents"] != mj.get("debit_cents")
             or jt["credit_cents"] != mj.get("credit_cents")):
@@ -493,7 +555,10 @@ async def get_settings(db, tenant_id):
     doc = await db.backup_settings.find_one({"tenant_id": tenant_id},
                                             {"_id": 0})
     if not doc:
-        doc = {"tenant_id": tenant_id, "enabled": False,
+        # Default ON, daily (safeguard audit 2026-11-19, gap 3): a
+        # workspace that never touches backup settings is protected
+        # from day one; opting out is an explicit settings write.
+        doc = {"tenant_id": tenant_id, "enabled": True,
                "cadence_days": DEFAULT_CADENCE_DAYS, "keep": DEFAULT_KEEP,
                "last_run_at": None}
     return doc
@@ -537,8 +602,10 @@ async def prune_backups(db, tenant_id):
 
 async def maybe_run_scheduled(db, tenant_id, now=None):
     """If scheduled backups are ON and one is due, make it. Returns the new
-    backup doc, or None. Called opportunistically (backup list reads) and by
-    the run-due endpoint — no hidden scheduler is claimed."""
+    backup doc, or None. The real scheduler (lib/scheduler.py, daily job)
+    calls this for every tenant; backup list reads and the run-due
+    endpoint call it too, as a catch-up. This function is the single
+    decision point for enabled/due, whichever caller asks."""
     settings = await get_settings(db, tenant_id)
     if not settings.get("enabled"):
         return None
@@ -555,9 +622,18 @@ async def maybe_run_scheduled(db, tenant_id, now=None):
     if not due:
         return None
     doc = await create_stored_backup(db, tenant_id, kind="scheduled")
+    # Persist the EFFECTIVE settings alongside last_run_at: with the
+    # default-ON shape there may be no settings doc yet, and a doc
+    # holding only last_run_at would read back as enabled=None (off)
+    # on the next check — the default would silently cancel itself.
     await db.backup_settings.update_one(
         {"tenant_id": tenant_id},
-        {"$set": {"tenant_id": tenant_id, "last_run_at": now_iso()}},
+        {"$set": {"tenant_id": tenant_id,
+                  "enabled": bool(settings.get("enabled")),
+                  "cadence_days": int(settings.get("cadence_days")
+                                      or DEFAULT_CADENCE_DAYS),
+                  "keep": int(settings.get("keep") or DEFAULT_KEEP),
+                  "last_run_at": now_iso()}},
         upsert=True)
     return doc
 

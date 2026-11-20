@@ -19,6 +19,7 @@ from db import db
 from lib.base import Scoped, new_id, now_iso, today_str, to_cents, cents_to_dollars
 from lib.auth import require, get_current_user
 from lib.coa import ACCOUNT_TYPE_OF, NAME_OF
+from lib.audit import audit
 from lib.pii import last4, masked, pii_encrypt
 from lib import ledger as L
 from lib import posting as P
@@ -154,6 +155,10 @@ async def delete_vendor(vendor_id: str, force: bool = False,
                         "Delete anyway? Re-submit with ?force=true."),
             )
     await db.vendors.delete_one({"id": vendor_id, "tenant_id": user["tenant_id"]})
+    # Hard deletes are audited (safeguard audit 2026-11-19, gap 4):
+    # the row is gone, so the chain is the only record it ever existed.
+    await audit(user, "vendor.delete", "vendor", vendor_id,
+                {"name": v.get("name"), "force": bool(force)})
     return {"ok": True, "deleted_id": vendor_id}
 
 

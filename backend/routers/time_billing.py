@@ -41,6 +41,7 @@ from typing import Optional
 from db import db
 from lib.base import Scoped, new_id, now_iso, today_str, to_cents, cents_to_dollars
 from lib.auth import require
+from lib.audit import append_audit
 from lib import ledger as L
 from lib import posting as P
 
@@ -67,7 +68,10 @@ def jobs_coll(user):
 
 
 async def _audit(user, action, entity, entity_id, details=None):
-    await db.audit_log.insert_one({
+    # Through append_audit so time-billing events join the hash chain
+    # (safeguard audit 2026-11-19, gap 4) — the raw insert this
+    # replaced bypassed the chain entirely.
+    await append_audit(db, {
         "id": new_id(), "tenant_id": user["tenant_id"],
         "actor_id": user["id"], "actor_name": user.get("name"),
         "actor_role": user.get("role"), "action": action, "entity": entity,

@@ -8,6 +8,7 @@ from db import db
 from lib.base import Scoped, new_id, now_iso, today_str, to_cents, cents_to_dollars
 from lib.auth import require, get_current_user
 from lib import idempotency as idem
+from lib import duplicates as DUP
 from lib import developer as dev
 from lib.integration_auth import actor_label, get_sync_actor
 from lib import ledger as L
@@ -63,6 +64,10 @@ class InvoiceBody(BaseModel):
     # "use the tenant's pay-config default"; 0 turns it off for this one.
     early_pay_percent: Optional[float] = None
     early_pay_days: Optional[int] = None
+    # Duplicate guard (lib/duplicates.py): a same-customer + same-total
+    # + same-day invoice 409s unless the caller confirms it is a
+    # deliberate second document.
+    allow_duplicate: bool = False
 
 
 def _compute_invoice_tax(*, body, jur, customer, engine_lines, subtotal):
@@ -237,6 +242,22 @@ async def issue_invoice(body: InvoiceBody,
             ep_percent = float(cfg.get("early_pay_percent") or 0)
             ep_days = int(cfg.get("early_pay_days") or 0)
         gross = subtotal + tax_cents
+        if not body.allow_duplicate:
+            # Duplicate guard — BEFORE the journal entry posts, so a
+            # refused duplicate leaves no ledger trace (the customer
+            # create path's 409 shape: name the existing record).
+            dup = DUP.find_duplicate_invoice(
+                await coll(user).find_list({"total_cents": gross}),
+                customer_id=body.customer_id, client_name=body.client_name,
+                total_cents=gross, issue_date=today_str())
+            if dup:
+                raise HTTPException(status_code=409, detail={
+                    "message": "Possible duplicate invoice",
+                    "existing_id": dup.get("id"),
+                    "existing_name": dup.get("client_name"),
+                    "existing_issue_date": dup.get("issue_date"),
+                    "existing_total_cents": dup.get("total_cents"),
+                })
         inv_id = new_id()
         entry = await L.post_journal_entry(db, user["tenant_id"], user, P.build_invoice_issue(
             revenue_lines=rev_lines, tax_cents=tax_cents, cogs_cents=0,
@@ -281,6 +302,7 @@ class PayBody(BaseModel):
     credit_id: Optional[str] = None      # apply a customer credit
     pay_date: Optional[str] = None
     payment_currency: Optional[str] = None  # currency actually moved; defaults to the invoice currency
+    allow_duplicate: bool = False        # confirm a same amount+date+method payment is deliberate
 
 
 @router.post("/{invoice_id}/pay")
@@ -378,6 +400,23 @@ async def _pay_invoice_inner(invoice_id: str, body: PayBody, user: dict,
 
     applied_to_ar = min(settled + discount_applied, balance)
     overpay = (settled + discount_applied) - applied_to_ar
+
+    if not idem_key and not body.allow_duplicate:
+        # Unkeyed duplicate-payment guard: an identical payment (same
+        # amount applied, same date, same method) is already recorded
+        # on this invoice — a re-submission must not post it twice.
+        # Keyed pushes are exempt: the idempotency machinery above is
+        # their dedupe.
+        dup_pmt = DUP.find_duplicate_payment(
+            inv.get("payments"), amount_cents=applied_to_ar,
+            pay_date=pay_date, method=body.payment_method)
+        if dup_pmt:
+            raise HTTPException(status_code=409, detail={
+                "message": "Possible duplicate payment",
+                "existing_entry": dup_pmt.get("entry"),
+                "existing_date": dup_pmt.get("date"),
+                "existing_amount_cents": dup_pmt.get("amount_cents"),
+            })
 
     jl = []
     if cash_received > 0:

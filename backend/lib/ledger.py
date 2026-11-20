@@ -44,9 +44,12 @@ async def audit(db, tenant_id, user, action, detail):
 
 async def _period_audit(db, tenant_id, user, action, period_key, details):
     """Audit row in the rich shape the owner/accountant viewer reads
-    (same fields as lib/audit.py / the routers' _audit helpers)."""
-    await Scoped(db.audit_log, tenant_id).insert_one({
-        "id": new_id(),
+    (same fields as lib/audit.py / the routers' _audit helpers).
+    Written through append_audit so period events join the hash chain
+    (safeguard audit 2026-11-19, gap 4) — the raw insert this replaced
+    bypassed the chain entirely."""
+    await append_audit(db, {
+        "id": new_id(), "tenant_id": tenant_id,
         "actor_id": (user or {}).get("id", "system"),
         "actor_name": (user or {}).get("name") or (user or {}).get("email") or "system",
         "actor_role": (user or {}).get("role", "system"),

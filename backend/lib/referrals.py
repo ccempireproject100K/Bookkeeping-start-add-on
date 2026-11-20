@@ -95,7 +95,9 @@ CONFIG = {
     "friend_benefit_half_off_months": 2,
     "paper_check_fee_cents": 200,
     # Books plan ladder for the friend benefit (R-3): light $18.99 /
-    # medium $39.99 standalone; heavy is top (volume/custom priced).
+    # medium $39.99 standalone; heavy is top — $99/mo base covering up
+    # to 3 shops + $21/mo per extra shop (owner stamp 2026-11-19), so
+    # it has no single fixed price and stays None below.
     "books_plan_ladder": ["light", "medium", "heavy"],
     "books_plan_prices_cents": {"light": 1899, "medium": 3999,
                                 "heavy": None},

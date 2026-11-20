@@ -54,8 +54,9 @@ async def export_zip(user: dict = Depends(require("ledger:admin"))):
 @router.get("/backups")
 async def list_backups(user: dict = Depends(require("ledger:read"))):
     tenant_id = user["tenant_id"]
-    # Opportunistic scheduling: if a scheduled backup is due, it is made
-    # when the owner opens this list (plus the explicit run-due endpoint).
+    # The daily scheduler job (lib/scheduler.py) runs scheduled backups
+    # for every tenant; this call is a catch-up so a due backup is also
+    # made when the owner opens this list (plus the run-due endpoint).
     await FX.maybe_run_scheduled(db, tenant_id)
     docs = await db.full_backups.find({"tenant_id": tenant_id},
                                       {"_id": 0}).to_list(length=1000)
@@ -105,7 +106,9 @@ async def test_backup(bid: str, user: dict = Depends(require("ledger:admin"))):
 
 
 class ScheduleBody(BaseModel):
-    enabled: bool = False
+    # Scheduled backups are ON by default (daily full export); the
+    # settings write is how a workspace opts out or changes cadence.
+    enabled: bool = True
     cadence_days: int = FX.DEFAULT_CADENCE_DAYS
     keep: int = FX.DEFAULT_KEEP
 

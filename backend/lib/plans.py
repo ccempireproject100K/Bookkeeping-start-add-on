@@ -5,7 +5,8 @@ may use what):
 
   Books Light   $10/mo add-on  / $18.99/mo standalone   -> "light"
   Books Medium  $20/mo add-on  / $39.99/mo standalone   -> "medium"
-  Books Heavy   volume-based   / custom                 -> "heavy"
+  Books Heavy   $99/mo standalone covering up to 3 shops,
+                + $21/mo per extra shop (owner stamp 2026-11-19) -> "heavy"
 
 A tenant stores its purchased ``plan`` ("light"/"medium"/"heavy"). Every new
 workspace gets a 14-day Medium trial (``trial_ends_at``; owner ruling
@@ -59,7 +60,7 @@ PLAN_INFO = {
     "heavy": {
         "name": "Books Heavy",
         "addon_price": "volume-based",
-        "standalone_price": "custom",
+        "standalone_price": "$99/mo (up to 3 shops, +$21/mo per extra shop)",
         "tagline": "Everything in Medium, plus multi-entity, white-label, "
                    "and API access.",
     },

@@ -15,6 +15,7 @@ from lib.base import Scoped, new_id, now_iso, today_str, to_cents, cents_to_doll
 from lib.auth import require, get_current_user
 from lib import ledger as L
 from lib import posting as P
+from lib import duplicates as DUP
 from lib import fx as FX
 from lib import fx_posting as FXP
 from lib import currencies as C
@@ -55,6 +56,10 @@ class BillBody(BaseModel):
     discount_date: Optional[str] = None        # pay on/before this date to earn the discount
     job_id: Optional[str] = None        # link the bill to a job (retainage source)
     retainage_pct: Optional[float] = None   # % we hold back from this vendor (None = the job's payable %)
+    # Duplicate guard (lib/duplicates.py): a same-vendor bill with the
+    # same bill_ref, or the same gross amount on the same date, 409s
+    # unless the caller confirms it is a deliberate second document.
+    allow_duplicate: bool = False
 
 
 def _enrich(b):
@@ -88,6 +93,29 @@ async def create_bill(body: BillBody, user: dict = Depends(require("ops:manage")
     amount = sum(li["amount_cents"] for li in line_items)
     if amount <= 0:
         raise HTTPException(status_code=422, detail="Bill amount must be positive")
+
+    if not body.allow_duplicate:
+        # Duplicate guard — BEFORE the journal entry posts, so a
+        # refused duplicate leaves no ledger trace. Double-entering a
+        # bill must not silently post it twice (the customer create
+        # path's 409 shape: name the existing record).
+        candidates = await coll(user).find_list({"gross_cents": amount})
+        if body.bill_ref:
+            candidates += await coll(user).find_list(
+                {"bill_ref": body.bill_ref})
+        dup = DUP.find_duplicate_bill(
+            candidates, vendor_id=body.vendor_id, vendor=body.vendor,
+            gross_cents=amount, bill_date=bdate, bill_ref=body.bill_ref)
+        if dup:
+            raise HTTPException(status_code=409, detail={
+                "message": "Possible duplicate bill",
+                "existing_id": dup.get("id"),
+                "existing_name": dup.get("vendor"),
+                "existing_bill_ref": dup.get("bill_ref"),
+                "existing_bill_date": dup.get("bill_date"),
+                "existing_amount_cents": dup.get("gross_cents",
+                                                 dup.get("amount_cents")),
+            })
 
     # Retainage (payable side): a holdback we keep from a sub is
     # RECORDED, never paid out by this lane. The net rides regular AP
@@ -153,6 +181,7 @@ class PayBody(BaseModel):
     pay_date: Optional[str] = None
     payment_currency: Optional[str] = None  # currency actually moved; defaults to the bill currency
     reference: Optional[str] = None      # check no. / transfer ref for a payment made outside Books
+    allow_duplicate: bool = False        # confirm a same amount+date+method payment is deliberate
 
 
 @router.post("/{bill_id}/pay")
@@ -194,6 +223,21 @@ async def pay_bill(bill_id: str, body: PayBody, user: dict = Depends(require("op
         pay_minor_for_fx = target
     if target <= 0 or target > balance:
         raise HTTPException(status_code=422, detail="Invalid payment amount")
+
+    if not body.allow_duplicate:
+        # Duplicate-payment guard: bills have no idempotency-key
+        # machinery, so an identical re-submitted payment (same amount,
+        # same date, same method) is the double-post this stops.
+        dup_pmt = DUP.find_duplicate_payment(
+            bill.get("payments"), amount_cents=target,
+            pay_date=pay_date, method=body.payment_method)
+        if dup_pmt:
+            raise HTTPException(status_code=409, detail={
+                "message": "Possible duplicate payment",
+                "existing_entry": dup_pmt.get("entry"),
+                "existing_date": dup_pmt.get("date"),
+                "existing_amount_cents": dup_pmt.get("amount_cents"),
+            })
 
     credit_applied = 0
     if body.credit_id:
@@ -376,7 +420,10 @@ async def run_due_bills_for_user(user: dict) -> dict:
                 vendor=t["vendor"], vendor_id=t.get("vendor_id"),
                 amount=t.get("amount", 0), expense_code=t.get("expense_code", "5700"),
                 lines=[BillLine(**l) for l in t["lines"]] if t.get("lines") else None,
-                bill_date=next_run, due_date=due, currency=t.get("currency", "USD"))
+                bill_date=next_run, due_date=due, currency=t.get("currency", "USD"),
+                # Scheduled materialization: the template's next_run
+                # bookkeeping is the dedupe — exempt from the guard.
+                allow_duplicate=True)
             try:
                 bill = await create_bill(body, user)
             except Exception:

@@ -76,6 +76,7 @@ import PortalView from "@/pages/PortalView";
 import ClientPage from "@/pages/ClientPage";
 import Payroll from "@/pages/Payroll";
 import Budget from "@/pages/Budget";
+import Household from "@/pages/Household";
 import Tax from "@/pages/Tax";
 import Settings from "@/pages/Settings";
 import Marketplace from "@/pages/Marketplace";
@@ -178,6 +179,7 @@ function App() {
               <Route path="time" element={<Time />} />
               <Route path="payroll" element={<Payroll />} />
               <Route path="budget" element={<Budget />} />
+              <Route path="household" element={<Household />} />
               <Route path="tax" element={<Tax />} />
               <Route path="audit" element={<AuditLog />} />
               <Route path="referral-payouts" element={<ReferralPayouts />} />

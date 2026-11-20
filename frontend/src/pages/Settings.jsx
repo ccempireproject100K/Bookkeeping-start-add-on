@@ -221,6 +221,12 @@ function BillingCard() {
         const res = await api.post("/billing/checkout", {
           plan: planKey, origin_url: window.location.origin });
         window.location.href = res.checkout_url;
+      } else if (kind === "resync") {
+        const res = await api.post("/billing/heavy/resync", {});
+        toast.success(`Heavy billing synced — ${res.shops} shop${res.shops === 1 ? "" : "s"}, $${(res.amount_cents / 100).toFixed(2)}/mo.`);
+        const fresh = await api.get("/billing/status");
+        setData(fresh);
+        setBusy("");
       } else {
         const res = await api.post("/billing/portal-session", {
           origin_url: window.location.origin });
@@ -254,12 +260,13 @@ function BillingCard() {
       <p className="text-sm text-gray-500">
         Online billing isn&apos;t switched on yet — plans are recorded by your
         provider, and subscribing here unlocks once Stripe is configured.
-        Light is $18.99/mo and Medium is $39.99/mo when it opens.
+        Light is $18.99/mo, Medium is $39.99/mo, and Heavy is $99/mo
+        (up to 3 shops, +$21/mo per extra shop) when it opens.
       </p>
     ) : isOwner ? (
       <div className="space-y-3">
         <div className="flex flex-wrap items-center gap-2">
-          {["light", "medium"].map(p => {
+          {["light", "medium", "heavy"].map(p => {
             const current = billing?.plan === p && billing?.status === "active";
             return (
               <Button key={p} size="sm" variant={current ? "default" : "outline"}
@@ -275,6 +282,12 @@ function BillingCard() {
               Manage billing
             </Button>
           )}
+          {billing?.plan === "heavy" && billing?.status === "active" && (
+            <Button size="sm" variant="outline" disabled={!!busy}
+                    onClick={() => go("resync")}>
+              Sync shop count
+            </Button>
+          )}
         </div>
         <p className="text-xs text-gray-500">
           Manage billing opens Stripe&apos;s portal — cancel, switch plans, or
@@ -286,9 +299,11 @@ function BillingCard() {
       <p className="text-sm text-gray-500">Only the workspace owner can change billing.</p>
     )}
     <p className="text-xs text-gray-500 mt-3">
-      Books Heavy ({catalog.heavy?.display || "volume-based"}) isn&apos;t sold
-      online — it&apos;s sized to your books and set up one-to-one. Contact the
-      Mind At Ease team to set it up.
+      Books Heavy is $99/mo covering up to 3 shops, plus $21/mo for each
+      additional shop — priced from the shops on your login
+      {data.shop_count ? ` (you own ${data.shop_count} now)` : ""}. All
+      transactions are included. When you add a shop, use Sync shop count
+      and the price adjusts from that day.
     </p>
   </Card>;
 }

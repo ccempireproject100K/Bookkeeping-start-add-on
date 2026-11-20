@@ -1,11 +1,13 @@
 """In-app scheduler for background jobs (APScheduler).
 
-Runs five jobs: the daily collections autopilot, the daily FX-rate
+Runs seven jobs: the daily collections autopilot, the daily FX-rate
 refresh, an hourly recurring-invoice materializer, a periodic Plaid
-bank-transaction sync, and an hourly sweep for per-tenant scheduled
+bank-transaction sync, an hourly sweep for per-tenant scheduled
 duplicate scans (opt-in per tenant in the Cleanup Console; scans only
-ever create suggestions — nothing merges automatically). The scheduler
-is guarded three ways:
+ever create suggestions — nothing merges automatically), the
+daily full-export backup sweep (per-tenant backup settings, default
+ON daily — lib/fullexport), and the daily audit-chain integrity
+pass (lib/integrity). The scheduler is guarded three ways:
 
 1. It only starts when ``ENABLE_SCHEDULER=true`` (default off).
 2. A MongoDB distributed lock (``scheduler_locks``) means only one app
@@ -27,11 +29,22 @@ Env vars:
     FX_RATES_RUN_TIME     "HH:MM" 24h daily run time (default "07:00")
     RECURRING_INVOICES_ENABLED  "true" to run the recurring-invoice job
                           (default "true")
+    PERSONAL_GOAL_FUNDING_ENABLED  "true" to run the hourly personal
+                          goal self-funding catch-up for household tenants
+                          (default "true")
     BANK_SYNC_ENABLED     "true" to run the bank sync job (default "true")
     BANK_SYNC_INTERVAL_HOURS  hours between bank sync sweeps (default 6)
     DEDUPE_SCANS_ENABLED  "true" to run the scheduled duplicate-scan
                           sweep (default "true"); the per-tenant opt-in
                           lives in the tenant's dedupe schedule config
+    BACKUPS_ENABLED       "true" to run the daily backup sweep
+                          (default "true"); per-tenant enablement and
+                          cadence live in backup_settings (default ON,
+                          daily)
+    BACKUP_RUN_TIME       "HH:MM" 24h daily run time (default "05:30")
+    INTEGRITY_ENABLED     "true" to run the daily audit-chain
+                          integrity pass (default "true")
+    INTEGRITY_RUN_TIME    "HH:MM" 24h daily run time (default "05:45")
     SCHEDULER_TZ          IANA timezone for the schedule
                           (default "America/Chicago")
 """
@@ -60,8 +73,11 @@ LOCK_TTL_SECONDS = 900  # 15 min; the heartbeat renews every 5
 JOB_ID = "collections-autopilot"
 FX_JOB_ID = "fx-rates-daily"
 RECURRING_JOB_ID = "recurring-invoices"
+GOAL_FUNDING_JOB_ID = "personal-goal-funding"
 BANK_SYNC_JOB_ID = "bank-sync"
 DEDUPE_JOB_ID = "dedupe-scans"
+BACKUP_JOB_ID = "scheduled-backups"
+INTEGRITY_JOB_ID = "integrity-pass"
 DATACLEAN_JOB_ID = "dataclean-jobs"
 DATACLEAN_LISTS_JOB_ID = "dataclean-list-scans"
 
@@ -74,10 +90,16 @@ _state = {
     "fx_last_outcome": None,
     "recurring_next_run": None,
     "recurring_last_outcome": None,
+    "goal_funding_next_run": None,
+    "goal_funding_last_outcome": None,
     "bank_next_run": None,
     "bank_last_outcome": None,
     "dedupe_next_run": None,
     "dedupe_last_outcome": None,
+    "backup_next_run": None,
+    "backup_last_outcome": None,
+    "integrity_next_run": None,
+    "integrity_last_outcome": None,
 }
 
 _scheduler: AsyncIOScheduler | None = None
@@ -122,12 +144,34 @@ def recurring_invoices_enabled() -> bool:
     return os.environ.get("RECURRING_INVOICES_ENABLED", "true").lower() == "true"
 
 
+def goal_funding_enabled() -> bool:
+    return os.environ.get("PERSONAL_GOAL_FUNDING_ENABLED", "true").lower() == "true"
+
+
 def bank_sync_enabled() -> bool:
     return os.environ.get("BANK_SYNC_ENABLED", "true").lower() == "true"
 
 
 def dedupe_scans_enabled() -> bool:
     return os.environ.get("DEDUPE_SCANS_ENABLED", "true").lower() == "true"
+
+
+def backups_enabled() -> bool:
+    return os.environ.get("BACKUPS_ENABLED", "true").lower() == "true"
+
+
+def _backup_run_time() -> tuple:
+    raw = os.environ.get("BACKUP_RUN_TIME", "05:30")
+    return _parse_hhmm(raw, "BACKUP_RUN_TIME", (5, 30))
+
+
+def integrity_enabled() -> bool:
+    return os.environ.get("INTEGRITY_ENABLED", "true").lower() == "true"
+
+
+def _integrity_run_time() -> tuple:
+    raw = os.environ.get("INTEGRITY_RUN_TIME", "05:45")
+    return _parse_hhmm(raw, "INTEGRITY_RUN_TIME", (5, 45))
 
 
 async def run_dataclean_powerup_sweeps() -> dict:
@@ -359,6 +403,46 @@ async def run_recurring_invoices() -> dict:
     return outcome
 
 
+# ---------------- the personal goal-funding job (slice 2) ----------------
+async def run_personal_goal_funding() -> dict:
+    """Catch up self-funding savings goals for every HOUSEHOLD tenant.
+
+    Calls the same code path as POST /personal/goals/fund-due
+    (``routers.personal.run_goal_funding_for_user``). Safe to re-run:
+    each household is claimed at most once per hour, and funding periods
+    are recorded per goal, so a duplicate run is a no-op. Business
+    tenants are never touched — the query filters kind == "household"
+    and the router re-checks the gate."""
+    from routers.personal import run_goal_funding_for_user
+
+    window = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H")
+    outcome = {"window": window, "tenants": 0, "funded_events": 0,
+               "added_cents": 0, "errors": 0, "skipped": []}
+    tenants = await db.tenants.find({"kind": "household"}, {"id": 1}).to_list(1000)
+    for t in tenants:
+        tid = t["id"]
+        run_id = await _claim_run(GOAL_FUNDING_JOB_ID, tid, window)
+        if run_id is None:
+            outcome["skipped"].append({"tenant_id": tid,
+                                       "reason": "already_ran_this_hour"})
+            continue
+        try:
+            sys_user = _system_user(tid, "Goal funding scheduler")
+            res = await run_goal_funding_for_user(sys_user)
+            outcome["tenants"] += 1
+            outcome["funded_events"] += int(res.get("funded_events", 0))
+            outcome["added_cents"] += int(res.get("added_cents", 0))
+            await _finish_run(run_id, "done",
+                              funded_events=res.get("funded_events", 0))
+        except Exception as exc:
+            await _finish_run(run_id, "failed", reason=str(exc)[:300])
+            outcome["errors"] += 1
+            logger.exception("Goal funding run failed for tenant %s", tid)
+    _state["goal_funding_last_outcome"] = outcome
+    logger.info("Goal funding run finished: %s", outcome)
+    return outcome
+
+
 # ---------------- the bank-sync job ----------------
 async def run_bank_sync() -> dict:
     """Sync Plaid transactions for every tenant with a bank connection.
@@ -467,6 +551,76 @@ async def run_dedupe_scans() -> dict:
     return outcome
 
 
+# ---------------- the scheduled-backup job ----------------
+async def run_scheduled_backups() -> dict:
+    """Daily full-export backup for every tenant (safeguard audit
+    2026-11-19, gap 3).
+
+    Backups used to fire only when someone opened the backups page —
+    a workspace nobody visited got none. Per-tenant enablement and
+    cadence live in lib/fullexport's backup_settings (default ON,
+    daily); ``maybe_run_scheduled`` stays the single decision point
+    for enabled/due, and the backups page still calls it as a
+    catch-up. Each tenant is claimed at most once per day here, and
+    maybe_run_scheduled itself no-ops when a backup is not yet due,
+    so re-runs are safe.
+    """
+    from lib import fullexport as FX
+    window = today_str()
+    outcome = {"window": window, "tenants": 0, "created": 0,
+               "errors": 0, "skipped": []}
+    tenants = await db.tenants.find({}, {"id": 1}).to_list(1000)
+    for t in tenants:
+        tid = t["id"]
+        run_id = await _claim_run(BACKUP_JOB_ID, tid, window)
+        if run_id is None:
+            outcome["skipped"].append({"tenant_id": tid,
+                                       "reason": "already_ran_today"})
+            continue
+        try:
+            doc = await FX.maybe_run_scheduled(db, tid)
+            outcome["tenants"] += 1
+            if doc:
+                outcome["created"] += 1
+                logger.info("Scheduled backup: tenant %s backup=%s",
+                            tid, doc.get("id"))
+            await _finish_run(run_id, "done", created=bool(doc),
+                              backup_id=(doc or {}).get("id"))
+        except Exception as exc:
+            await _finish_run(run_id, "failed", reason=str(exc)[:300])
+            outcome["errors"] += 1
+            logger.exception("Scheduled backup failed for tenant %s", tid)
+    _state["backup_last_outcome"] = outcome
+    logger.info("Scheduled backup run finished: %s", outcome)
+    return outcome
+
+
+# ---------------- the integrity-pass job ----------------
+async def run_integrity_checks() -> dict:
+    """Daily audit-chain verification (safeguard audit 2026-11-19,
+    gap 4). The chain is global, not per-tenant, so this is a single
+    pass — claimed once per day under a global tenant slot. The pass
+    itself (lib/integrity.py) records its outcome in integrity_checks
+    and logs any break at ERROR level; it also runs once at startup.
+    """
+    from lib.integrity import run_integrity_pass
+    window = today_str()
+    run_id = await _claim_run(INTEGRITY_JOB_ID, "__global__", window)
+    if run_id is None:
+        return {"window": window, "skipped": "already_ran_today"}
+    try:
+        row = await run_integrity_pass(db)
+        await _finish_run(run_id, "done", ok=row.get("ok"))
+        _state["integrity_last_outcome"] = {
+            "at": row.get("at"), "ok": row.get("ok"),
+            "checked": row.get("checked"), "break": row.get("break")}
+        return row
+    except Exception as exc:
+        await _finish_run(run_id, "failed", reason=str(exc)[:300])
+        logger.exception("Integrity pass job failed")
+        return {"window": window, "error": str(exc)[:300]}
+
+
 # ---------------- lifecycle ----------------
 async def start() -> bool:
     """Start the scheduler if enabled and the instance lock is acquired."""
@@ -525,6 +679,46 @@ async def start() -> bool:
     else:
         logger.info("Scheduler: FX rate refresh disabled "
                     "(FX_RATES_ENABLED != true).")
+    if backups_enabled():
+        bk_hour, bk_minute = _backup_run_time()
+        _scheduler.add_job(
+            run_scheduled_backups,
+            CronTrigger(hour=bk_hour, minute=bk_minute),
+            id=BACKUP_JOB_ID,
+            replace_existing=True,
+            max_instances=1,
+            coalesce=True,
+            misfire_grace_time=3600,
+        )
+        bk_job = _scheduler.get_job(BACKUP_JOB_ID)
+        _state["backup_next_run"] = (
+            bk_job.next_run_time.isoformat()
+            if bk_job and bk_job.next_run_time else None)
+        logger.info("Scheduler: scheduled backups daily at %02d:%02d %s",
+                    bk_hour, bk_minute, _tz())
+    else:
+        logger.info("Scheduler: scheduled backups disabled "
+                    "(BACKUPS_ENABLED != true).")
+    if integrity_enabled():
+        in_hour, in_minute = _integrity_run_time()
+        _scheduler.add_job(
+            run_integrity_checks,
+            CronTrigger(hour=in_hour, minute=in_minute),
+            id=INTEGRITY_JOB_ID,
+            replace_existing=True,
+            max_instances=1,
+            coalesce=True,
+            misfire_grace_time=3600,
+        )
+        in_job = _scheduler.get_job(INTEGRITY_JOB_ID)
+        _state["integrity_next_run"] = (
+            in_job.next_run_time.isoformat()
+            if in_job and in_job.next_run_time else None)
+        logger.info("Scheduler: integrity pass daily at %02d:%02d %s",
+                    in_hour, in_minute, _tz())
+    else:
+        logger.info("Scheduler: integrity pass disabled "
+                    "(INTEGRITY_ENABLED != true).")
     if recurring_invoices_enabled():
         _scheduler.add_job(
             run_recurring_invoices,
@@ -543,6 +737,24 @@ async def start() -> bool:
     else:
         logger.info("Scheduler: recurring invoices disabled "
                     "(RECURRING_INVOICES_ENABLED != true).")
+    if goal_funding_enabled():
+        _scheduler.add_job(
+            run_personal_goal_funding,
+            IntervalTrigger(hours=1),
+            id=GOAL_FUNDING_JOB_ID,
+            replace_existing=True,
+            max_instances=1,
+            coalesce=True,
+            misfire_grace_time=900,
+        )
+        gf_job = _scheduler.get_job(GOAL_FUNDING_JOB_ID)
+        _state["goal_funding_next_run"] = (
+            gf_job.next_run_time.isoformat()
+            if gf_job and gf_job.next_run_time else None)
+        logger.info("Scheduler: personal goal funding hourly")
+    else:
+        logger.info("Scheduler: personal goal funding disabled "
+                    "(PERSONAL_GOAL_FUNDING_ENABLED != true).")
     if bank_sync_enabled():
         interval = bank_sync_interval_hours()
         _scheduler.add_job(
@@ -622,7 +834,7 @@ async def stop():
         _scheduler = None
     _state.update(running=False, instance_id=None, next_run=None,
                   fx_next_run=None, recurring_next_run=None, bank_next_run=None,
-                  dedupe_next_run=None)
+                  dedupe_next_run=None, goal_funding_next_run=None)
 
 
 def status() -> dict:

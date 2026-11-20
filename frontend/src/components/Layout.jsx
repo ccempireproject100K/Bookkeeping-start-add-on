@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
-import { LayoutDashboard, BookOpen, FileText, Scale, ScrollText, Landmark, TrendingUp, Lock, Scissors, Receipt, Wallet, Package, LogOut, ShieldCheck, Hourglass, Gift, Coins, Briefcase, PieChart, Users, Building2, FileSignature, Waves, Target, BarChart3, ReceiptText, Repeat, DatabaseBackup, Bot, Clock, FileCheck2, Camera, Car, HandCoins, Calculator, Activity, Tag, SlidersHorizontal, Rocket, Gauge, Mic, Layers, Sparkles, ClipboardList, Link2, Store, KeyRound } from "lucide-react";
+import { LayoutDashboard, BookOpen, FileText, Scale, ScrollText, Landmark, TrendingUp, Lock, Scissors, Receipt, Wallet, Package, LogOut, ShieldCheck, Hourglass, Gift, Coins, Briefcase, PieChart, Users, Building2, FileSignature, Waves, Target, BarChart3, ReceiptText, Repeat, DatabaseBackup, Bot, Clock, FileCheck2, Camera, Car, HandCoins, Calculator, Activity, Tag, SlidersHorizontal, Rocket, Gauge, Mic, Layers, Sparkles, ClipboardList, Link2, Store, KeyRound, Home } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
@@ -409,6 +409,17 @@ const NAV = [{
   roles: ALL,
   groupKey: "navGroup.reports"
 }, {
+  // Personal-finance layer (slice 2): shown ONLY in a household workspace.
+  // Business workspaces never see personal surfaces (the backend 403s the
+  // /personal API for them too — the wall is absolute, nav is cosmetic).
+  to: "/household",
+  labelKey: "nav.household",
+  icon: Home,
+  testid: "nav-household",
+  roles: ALL,
+  householdOnly: true,
+  groupKey: "navGroup.reports"
+}, {
   to: "/tax",
   labelKey: "nav.tax1099s",
   icon: FileCheck2,
@@ -498,7 +509,9 @@ export default function Layout() {
     barber: "roles.barber"
   };
   const role = user?.role;
-  const groups = [...new Set(NAV.filter(n => n.roles.includes(role)).map(n => n.groupKey))];
+  const isHousehold = user?.tenant?.kind === "household";
+  const navVisible = (n) => n.roles.includes(role) && (!n.householdOnly || isHousehold);
+  const groups = [...new Set(NAV.filter(navVisible).map(n => n.groupKey))];
   const handleSwitch = async r => {
     setSwitching(true);
     try {
@@ -527,7 +540,7 @@ export default function Layout() {
           {groups.map(g => <div key={g}>
               <div className="px-2 mb-2 text-[10px] uppercase tracking-widest text-gray-500 font-semibold">{t(g)}</div>
               <div className="space-y-1">
-                {NAV.filter(n => n.groupKey === g && n.roles.includes(role)).map(n => <NavLink key={n.to} to={n.to} end={n.to === "/"} data-testid={n.testid} className={({
+                {NAV.filter(n => n.groupKey === g && navVisible(n)).map(n => <NavLink key={n.to} to={n.to} end={n.to === "/"} data-testid={n.testid} className={({
               isActive
             }) => `flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${isActive ? "bg-amber-500/10 text-amber-400 border border-amber-500/30" : "text-gray-400 hover:text-gray-100 hover:bg-[#161b25] border border-transparent"}`}>
                     <n.icon size={17} />

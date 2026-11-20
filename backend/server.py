@@ -235,6 +235,17 @@ async def startup():
         await _sched.start()
     except Exception as e:
         logger.warning(f"Scheduler not started: {e}")
+    try:
+        # Audit-chain integrity pass at startup (safeguard audit
+        # 2026-11-19, gap 4): verify the hash chain once per boot, in
+        # the background — a break is recorded in integrity_checks
+        # and logged at ERROR by lib/integrity, never blocks startup.
+        # The scheduler also runs it daily.
+        import asyncio as _asyncio
+        from lib.integrity import run_integrity_pass
+        _asyncio.create_task(run_integrity_pass(db))
+    except Exception as e:
+        logger.warning(f"Startup integrity pass not scheduled: {e}")
     logger.info("Mind at Ease Solutions — Books API started; indexes ensured.")
 
 

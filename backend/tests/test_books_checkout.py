@@ -208,8 +208,11 @@ def test_catalog_prices_match_plan_info():
     assert B.CATALOG["medium"]["amount_cents"] == 3999
     assert PLAN_INFO["light"]["standalone_price"] == "$18.99/mo"
     assert PLAN_INFO["medium"]["standalone_price"] == "$39.99/mo"
-    assert B.CATALOG["heavy"]["self_serve"] is False
-    assert set(B.SELF_SERVE_PLANS) == {"light", "medium"}
+    # Heavy joined self-serve on the owner's 2026-11-19 stamp:
+    # $99/mo base covering up to 3 shops, +$21/mo per extra shop.
+    assert B.CATALOG["heavy"]["self_serve"] is True
+    assert B.CATALOG["heavy"]["amount_cents"] == 9900
+    assert set(B.SELF_SERVE_PLANS) == {"light", "medium", "heavy"}
 
 
 # ---------------- key-gating ----------------
@@ -251,17 +254,26 @@ def test_portal_session_503_when_unconfigured(monkeypatch):
 
 
 # ---------------- checkout creation ----------------
-def test_checkout_heavy_is_not_self_serve(monkeypatch):
+def test_checkout_heavy_is_self_serve(monkeypatch):
+    # Supersedes the pre-2026-11-19 "Heavy is never sold online" rule:
+    # the owner stamped Heavy self-serve at $99/mo for up to 3 shops,
+    # +$21/mo per extra shop. A one-shop login buys the base item only.
     async def _run():
-        fdb = _fx(monkeypatch, _fake_stripe())
+        fake = _fake_stripe()
+        fdb = _fx(monkeypatch, fake)
         _set_keys(monkeypatch)
         _seed_tenant(fdb)
-        with pytest.raises(HTTPException) as e:
-            await R.subscribe_checkout(
-                R.CheckoutIn(plan="heavy", origin_url="https://books.example.com"),
-                _Req(), USER)
-        assert e.value.status_code == 422
-        assert "volume" in e.value.detail.lower()
+        res = await R.subscribe_checkout(
+            R.CheckoutIn(plan="heavy", origin_url="https://books.example.com"),
+            _Req(), USER)
+        assert res["checkout_url"].startswith("https://checkout.stripe.com/")
+        assert res["shops"] == 1
+        assert res["amount_cents"] == 9900
+        items = fake.created["line_items"]
+        assert len(items) == 1
+        assert items[0]["price_data"]["unit_amount"] == 9900
+        assert fake.created["metadata"]["plan"] == "heavy"
+        assert fake.created["metadata"]["shops"] == "1"
     asyncio.run(_run())
 
 
@@ -618,7 +630,11 @@ def test_billing_status_shape(monkeypatch):
         cat = {c["plan"]: c for c in out["catalog"]}
         assert cat["light"]["amount_cents"] == 1899
         assert cat["medium"]["amount_cents"] == 3999
-        assert cat["heavy"]["self_serve"] is False
+        assert cat["heavy"]["self_serve"] is True
+        assert cat["heavy"]["amount_cents"] == 9900
+        assert cat["heavy"]["included_shops"] == 3
+        assert cat["heavy"]["extra_shop_cents"] == 2100
+        assert out["shop_count"] == 1
     asyncio.run(_run())
 
 

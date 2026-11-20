@@ -1110,7 +1110,7 @@ function PhaseSection({ detail, isOwner, refresh }) {
   };
 
   const delPhase = async (phaseId) => {
-    try { await api.delete(`/jobs/${detail.id}/phases/${phaseId}`); toast.success("Phase removed"); refresh(); }
+    try { await api.del(`/jobs/${detail.id}/phases/${phaseId}`); toast.success("Phase removed"); refresh(); }
     catch (e) { toast.error(errMsg(e)); }
   };
 

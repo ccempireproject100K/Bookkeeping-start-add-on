@@ -258,7 +258,10 @@ async def convert_to_bill(po_id: str, body: ConvertBody,
         lines=[BillLine(expense_code=GRNI_CODE,
                         description=f"PO {po['number']} — {l['product_name']} x{l['received_qty']}",
                         amount=l["received_qty"] * l["unit_cost_cents"] / 100)
-               for l in recv_lines]), user)
+               for l in recv_lines],
+        # The PO's own already-converted 409 above is the dedupe; two
+        # POs from one vendor may legitimately total the same.
+        allow_duplicate=True), user)
     # Record the billed amount: a job-linked PO's money now moves from
     # committed to actual in the job budget view (never both).
     billed_cents = sum(l["received_qty"] * l["unit_cost_cents"] for l in recv_lines)

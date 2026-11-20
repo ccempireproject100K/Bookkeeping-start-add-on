@@ -309,11 +309,16 @@ async def health_score(user: dict = Depends(get_current_user)):
     from datetime import date, timedelta
     tid = user["tenant_id"]
     today = date.fromisoformat(today_str())
-    recs = await Scoped(db.bank_reconciliations, tid).find_list(
+    # Reconciliations are written to db.reconciliations by the banking
+    # router, anchored on statement_date. This used to read a
+    # `bank_reconciliations` collection no code writes (safeguard
+    # audit 2026-11-19, gap 5), so freshness always reported "never
+    # reconciled" no matter how current the books were.
+    recs = await Scoped(db.reconciliations, tid).find_list(
         sort=[("created_at", -1)], limit=1)
     days = None
     if recs:
-        stamp = (recs[0].get("period_end") or recs[0].get("created_at") or "")[:10]
+        stamp = (recs[0].get("statement_date") or recs[0].get("created_at") or "")[:10]
         try:
             days = (today - date.fromisoformat(stamp)).days
         except ValueError:

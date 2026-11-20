@@ -244,7 +244,8 @@ def test_early_pay_default_off_and_config_default(xenv):
     inv3 = run(INV.issue_invoice(INV.InvoiceBody(   # per-invoice opt-out
         client_name="Acme Co",
         lines=[INV.InvLine(name="Job", amount=100.0)],
-        early_pay_percent=0.0, early_pay_days=0), USER))
+        early_pay_percent=0.0, early_pay_days=0,
+        allow_duplicate=True), USER))  # third identical fixture invoice, deliberate
     assert inv3["early_pay"] == {"percent": 0.0, "days": 0}
 
 

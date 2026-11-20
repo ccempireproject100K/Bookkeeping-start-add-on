@@ -2,11 +2,20 @@
 
 Until now the tenant ``plan`` was an attribute set at registration or by
 an owner in Settings — "billing lives elsewhere" (lib/plans.py). This
-module is the elsewhere: a tenant admin subscribes to Books Light or
-Books Medium through Stripe Checkout, and the tenant's billing state
-(plan, Stripe ids, status, current period end) is driven EXCLUSIVELY by
-signature-verified webhook events. The checkout success redirect never
-changes anything — it is a browser hint, not a payment proof.
+module is the elsewhere: a tenant admin subscribes to Books Light,
+Books Medium, or Books Heavy through Stripe Checkout, and the tenant's
+billing state (plan, Stripe ids, status, current period end) is driven
+EXCLUSIVELY by signature-verified webhook events. The checkout success
+redirect never changes anything — it is a browser hint, not a payment
+proof.
+
+Books Heavy pricing (owner stamp 2026-11-19): $99/mo covering up to 3
+shops — a "shop" is a business with its own books, i.e. a tenant the
+login owns — plus $21/mo per additional shop. All transactions are
+included; there are no volume caps. Heavy is sold as TWO subscription
+items (base + per-extra-shop) so the extra-shop quantity can be
+adjusted when shops are added; see heavy_line_items() and
+update_subscription_shop_count().
 
 Key-gating follows the portal flow (routers/portal.py) and the Connect
 lib: until STRIPE_SECRET_KEY is set, every entry point refuses honestly
@@ -52,12 +61,18 @@ def configured() -> bool:
 
 # ---------------- plan catalog ----------------
 # Standalone subscription prices (lib/plans.py PLAN_INFO carries the same
-# figures as display strings). Light and Medium are self-serve; Heavy is
-# volume/custom and is NEVER sold through Checkout — the UI says so and
-# points at a human. A Stripe Price id from env wins when present
+# figures as display strings). All three plans are self-serve through
+# Checkout. Heavy is priced per shop (owner stamp 2026-11-19): a $99/mo
+# base covering up to HEAVY_INCLUDED_SHOPS shops, plus $21/mo for each
+# additional shop, carried as a second subscription item whose quantity
+# is the extra-shop count. A Stripe Price id from env wins when present
 # (dashboard-managed prices); otherwise the session carries inline
 # price_data, the portal checkout's pattern, so test mode works with
 # nothing but a secret key.
+
+HEAVY_INCLUDED_SHOPS = 3
+HEAVY_BASE_CENTS = 9900
+HEAVY_EXTRA_SHOP_CENTS = 2100
 
 CATALOG = {
     "light": {
@@ -74,9 +89,14 @@ CATALOG = {
     },
     "heavy": {
         "plan": "heavy", "name": "Books Heavy",
-        "amount_cents": None, "currency": "usd", "interval": "month",
-        "display": "volume-based", "price_env": None,
-        "self_serve": False,
+        "amount_cents": HEAVY_BASE_CENTS, "currency": "usd", "interval": "month",
+        "display": "$99/mo — up to 3 shops, +$21/mo per extra shop",
+        "price_env": "STRIPE_PRICE_HEAVY",
+        "self_serve": True,
+        "included_shops": HEAVY_INCLUDED_SHOPS,
+        "extra_shop_cents": HEAVY_EXTRA_SHOP_CENTS,
+        "extra_price_env": "STRIPE_PRICE_HEAVY_EXTRA_SHOP",
+        "extra_name": "Books Heavy — additional shop",
     },
 }
 
@@ -85,15 +105,28 @@ SELF_SERVE_PLANS = tuple(p for p, c in CATALOG.items() if c["self_serve"])
 
 def catalog_public() -> list:
     """The catalog as the billing page renders it (no env internals)."""
-    return [{
-        "plan": c["plan"], "name": c["name"], "display": c["display"],
-        "amount_cents": c["amount_cents"], "self_serve": c["self_serve"],
-    } for c in CATALOG.values()]
+    out = []
+    for c in CATALOG.values():
+        row = {
+            "plan": c["plan"], "name": c["name"], "display": c["display"],
+            "amount_cents": c["amount_cents"], "self_serve": c["self_serve"],
+        }
+        if c["plan"] == "heavy":
+            row["included_shops"] = c["included_shops"]
+            row["extra_shop_cents"] = c["extra_shop_cents"]
+        out.append(row)
+    return out
 
 
 def price_id_for(plan: str) -> str:
     """The dashboard Price id configured for a plan, or "" (inline mode)."""
     env = CATALOG[plan]["price_env"]
+    return (os.environ.get(env) or "").strip() if env else ""
+
+
+def extra_price_id_for(plan: str = "heavy") -> str:
+    """The dashboard Price id for Heavy's per-extra-shop item, or ""."""
+    env = CATALOG[plan].get("extra_price_env")
     return (os.environ.get(env) or "").strip() if env else ""
 
 
@@ -105,6 +138,8 @@ def plan_for_price_id(price_id: str) -> str:
         return ""
     for plan in SELF_SERVE_PLANS:
         if price_id_for(plan) == price_id:
+            return plan
+        if extra_price_id_for(plan) == price_id:
             return plan
     return ""
 
@@ -123,6 +158,120 @@ def line_item(plan: str) -> dict:
         },
         "quantity": 1,
     }
+
+
+# ---------------- Heavy per-shop pricing ----------------
+
+def heavy_extra_shops(shop_count) -> int:
+    """Shops billed on top of the Heavy base: every shop past the
+    included three. An account always has at least the shop it is
+    checking out from, so counts below 1 clamp to 1."""
+    n = max(1, int(shop_count or 1))
+    return max(0, n - HEAVY_INCLUDED_SHOPS)
+
+
+def heavy_amount_cents(shop_count) -> int:
+    """The full monthly Heavy price for a shop count: $99 covering up
+    to 3 shops, + $21 per extra shop (1→9900, 3→9900, 5→14100,
+    10→24600). All transactions included — no volume term exists."""
+    return HEAVY_BASE_CENTS + HEAVY_EXTRA_SHOP_CENTS * heavy_extra_shops(shop_count)
+
+
+def _heavy_extra_item(shop_count) -> dict:
+    c = CATALOG["heavy"]
+    pid = extra_price_id_for("heavy")
+    if pid:
+        return {"price": pid, "quantity": heavy_extra_shops(shop_count)}
+    return {
+        "price_data": {
+            "currency": c["currency"],
+            "unit_amount": c["extra_shop_cents"],
+            "recurring": {"interval": c["interval"]},
+            "product_data": {"name": c["extra_name"]},
+        },
+        "quantity": heavy_extra_shops(shop_count),
+    }
+
+
+def line_items(plan: str, shop_count=None) -> list:
+    """The Checkout/subscription line items for a plan. Light and
+    Medium are a single quantity-1 item; Heavy is the base item plus,
+    when the account owns more than the included shops, the
+    per-extra-shop item at quantity = extra shops."""
+    items = [line_item(plan)]
+    if plan == "heavy" and heavy_extra_shops(shop_count or 1) > 0:
+        items.append(_heavy_extra_item(shop_count or 1))
+    return items
+
+
+def _item_price(item) -> dict:
+    p = item.get("price") if isinstance(item, dict) else getattr(item, "price", None)
+    if isinstance(p, dict):
+        return p
+    if p is None:
+        return {}
+    return {"id": getattr(p, "id", None),
+            "unit_amount": getattr(p, "unit_amount", None)}
+
+
+def heavy_shops_from_items(items) -> int:
+    """Billed shop count from a Heavy subscription's items: the base
+    item covers HEAVY_INCLUDED_SHOPS shops and the extra item's
+    quantity is the rest. Returns None when no Heavy base item is
+    present. Items are matched by env-configured Price ids when set,
+    else by unit amount (9900 base / 2100 extra — amounts no other
+    Books item uses)."""
+    base_found = False
+    extra_qty = 0
+    base_pid = price_id_for("heavy")
+    extra_pid = extra_price_id_for("heavy")
+    for item in items or []:
+        price = _item_price(item)
+        qty = item.get("quantity") if isinstance(item, dict) else getattr(item, "quantity", 0)
+        if (base_pid and price.get("id") == base_pid) or \
+                (not base_pid and price.get("unit_amount") == HEAVY_BASE_CENTS):
+            base_found = True
+        elif (extra_pid and price.get("id") == extra_pid) or \
+                (not extra_pid and price.get("unit_amount") == HEAVY_EXTRA_SHOP_CENTS):
+            extra_qty = int(qty or 0)
+    if not base_found:
+        return None
+    return HEAVY_INCLUDED_SHOPS + extra_qty
+
+
+def update_subscription_shop_count(subscription_id: str, shop_count):
+    """Adjust a live Heavy subscription to a new shop count: the base
+    item stays at quantity 1; the extra-shop item is created, resized,
+    or removed to match. Prorations are created (Stripe's default for
+    a quantity change), so an added shop is billed from when it is
+    added. Returns the modified subscription."""
+    stripe = _stripe()
+    sub = stripe.Subscription.retrieve(subscription_id)
+    data = (sub.get("items") or {}).get("data") or []
+    base_pid = price_id_for("heavy")
+    extra_pid = extra_price_id_for("heavy")
+    base_item = extra_item = None
+    for item in data:
+        price = _item_price(item)
+        iid = item.get("id") if isinstance(item, dict) else getattr(item, "id", None)
+        if (base_pid and price.get("id") == base_pid) or \
+                (not base_pid and price.get("unit_amount") == HEAVY_BASE_CENTS):
+            base_item = iid
+        elif (extra_pid and price.get("id") == extra_pid) or \
+                (not extra_pid and price.get("unit_amount") == HEAVY_EXTRA_SHOP_CENTS):
+            extra_item = iid
+    if not base_item:
+        raise ValueError("subscription has no Books Heavy base item")
+    extra = heavy_extra_shops(shop_count)
+    items = [{"id": base_item, "quantity": 1}]
+    if extra > 0 and extra_item:
+        items.append({"id": extra_item, "quantity": extra})
+    elif extra > 0:
+        items.append(_heavy_extra_item(shop_count))
+    elif extra_item:
+        items.append({"id": extra_item, "deleted": True})
+    return stripe.Subscription.modify(
+        subscription_id, items=items, proration_behavior="create_prorations")
 
 
 # ---------------- subscription status mapping ----------------
@@ -195,17 +344,23 @@ def ensure_first_month_coupon() -> str:
 
 
 def create_checkout_session(*, tenant_id: str, plan: str, user_email: str,
-                            customer_id: str, origin: str, coupon_id: str = ""):
+                            customer_id: str, origin: str, coupon_id: str = "",
+                            shop_count=None):
     """A subscription-mode Checkout Session for the tenant. Metadata
     rides on BOTH the session and the subscription it creates, so every
     later subscription/invoice event can find its tenant. A coupon_id
     (the first-month welcome coupon, card-door conversions only) rides
-    as a session discount — Stripe applies it to the first invoice."""
+    as a session discount — Stripe applies it to the first invoice.
+    For Heavy, ``shop_count`` is the account's owned-shop count at
+    checkout: it sizes the extra-shop line item and is stamped into
+    the metadata as ``shops``."""
     stripe = _stripe()
     meta = {"kind": "books_subscription", "tenant_id": tenant_id, "plan": plan}
+    if plan == "heavy":
+        meta["shops"] = str(max(1, int(shop_count or 1)))
     kwargs = {
         "mode": "subscription",
-        "line_items": [line_item(plan)],
+        "line_items": line_items(plan, shop_count),
         "metadata": meta,
         "subscription_data": {"metadata": meta},
         "success_url": f"{origin}/settings?billing=success&session_id={{CHECKOUT_SESSION_ID}}",
@@ -255,7 +410,8 @@ def setup_intent_payment_method(setup_intent_id: str) -> str:
 
 def create_subscription_off_session(*, customer_id: str, plan: str,
                                     coupon_id: str, tenant_id: str,
-                                    payment_method_id: str = ""):
+                                    payment_method_id: str = "",
+                                    shop_count=None):
     """Door 2's auto-conversion: create the subscription against the
     card on file, first month discounted by the welcome coupon.
     error_if_incomplete means a card that cannot be charged fails
@@ -265,9 +421,11 @@ def create_subscription_off_session(*, customer_id: str, plan: str,
     stripe = _stripe()
     meta = {"kind": "books_subscription", "tenant_id": tenant_id, "plan": plan,
             "source": "trial_auto_convert"}
+    if plan == "heavy":
+        meta["shops"] = str(max(1, int(shop_count or 1)))
     kwargs = {
         "customer": customer_id,
-        "items": [line_item(plan)],
+        "items": line_items(plan, shop_count),
         "metadata": meta,
         "off_session": True,
         "payment_behavior": "error_if_incomplete",

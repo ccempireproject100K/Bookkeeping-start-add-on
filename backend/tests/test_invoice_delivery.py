@@ -390,7 +390,12 @@ def make_invoice(env, amount=100.0, client="Acme Co", customer_id=None,
                  email=None, due=None):
     body = INV.InvoiceBody(
         client_name=client, customer_id=customer_id,
-        lines=[INV.InvLine(name="Service", amount=amount)], due_date=due)
+        lines=[INV.InvLine(name="Service", amount=amount)], due_date=due,
+        # Fixture helper: suites issue several identical invoices on
+        # purpose — deliberate duplicates, exempt from the guard
+        # (lib/duplicates.py; the guard itself is tested in
+        # test_duplicate_guards.py).
+        allow_duplicate=True)
     inv = run(INV.issue_invoice(body, env.user))
     if email:
         run(Scoped(env.db.invoices, TID).update_one(

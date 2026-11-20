@@ -1,7 +1,8 @@
 """Books subscription billing: Stripe Checkout for the workspace's own
-plan (Light / Medium self-serve; Heavy is volume/custom and never sold
-online), the Customer Portal for managing it, and the webhook that is
-the ONLY writer of subscription-driven billing state.
+plan (Light / Medium / Heavy, all self-serve; Heavy is priced per shop
+— $99/mo covering up to 3 shops, +$21/mo per extra shop, owner stamp
+2026-11-19), the Customer Portal for managing it, and the webhook that
+is the ONLY writer of subscription-driven billing state.
 
 The tenant's ``billing`` subdoc — provider ids, plan, status, current
 period end — plus the stored ``plan`` entitlement change ONLY inside
@@ -30,6 +31,7 @@ from lib.audit import append_audit
 from lib import billing, plans
 from lib.auth import get_current_user, require
 from lib.base import new_id, now_iso
+from lib.memberships import memberships
 
 router = APIRouter(prefix="/billing", tags=["billing"])
 logger = logging.getLogger(__name__)
@@ -68,13 +70,23 @@ async def _audit_system(tenant_id, action, details=None):
     })
 
 
+def _shop_count(user) -> int:
+    """The account's shop count for Heavy pricing: every workspace
+    (tenant with its own books) this login OWNS — the same count the
+    consolidated entities view shows. At least 1: the workspace the
+    login is operating from always counts."""
+    owned = [m for m in memberships(user) if m.get("role") == "owner"]
+    return max(1, len(owned))
+
+
 # ---------------------------------------------------------------- status
 
 @router.get("/status")
 async def billing_status(user: dict = Depends(get_current_user)):
     """What the billing page renders: the stored plan, the Stripe
     billing state (if any), whether online billing is configured at
-    all, and the plan catalog."""
+    all, the plan catalog, and the account's shop count (Heavy is
+    priced from it)."""
     tenant = await db.tenants.find_one({"id": user["tenant_id"]}, {"_id": 0}) or {}
     b = tenant.get("billing") or {}
     return {
@@ -82,9 +94,11 @@ async def billing_status(user: dict = Depends(get_current_user)):
         "plan": plans.stored_plan(tenant),
         "effective_plan": plans.effective_plan(tenant),
         "trial_active": plans.trial_active(tenant),
+        "shop_count": _shop_count(user),
         "billing": {
             "status": b.get("status"),
             "plan": b.get("plan"),
+            "shops": b.get("shops"),
             "current_period_end": b.get("current_period_end"),
             "cancel_at_period_end": bool(b.get("cancel_at_period_end")),
             "has_billing_account": bool(b.get("stripe_customer_id")),
@@ -105,33 +119,40 @@ async def subscribe_checkout(body: CheckoutIn, request: Request,
                              user: dict = Depends(require("settings:write"))):
     """Start Stripe Checkout for a self-serve plan. Creates the session
     and NOTHING else — the tenant's plan and billing state change only
-    when the webhook confirms the subscription."""
+    when the webhook confirms the subscription. Heavy is priced from
+    the account's owned-shop count at checkout time."""
     _require_billing()  # 503 BEFORE any SDK import when keys are absent
     plan = plans.validate_plan(body.plan)  # 422 on an unknown plan
     if plan not in billing.SELF_SERVE_PLANS:
         raise HTTPException(
             status_code=422,
-            detail="Books Heavy is volume-based and isn't sold online — "
-                   "contact us and we'll set it up with you.")
+            detail=f"Books {plan} isn't sold online.")
     tenant = await db.tenants.find_one({"id": user["tenant_id"]}, {"_id": 0}) or {}
     origin = _origin(body.origin_url, request)
     if not origin or not origin.startswith("http"):
         raise HTTPException(status_code=422, detail="origin_url is required")
+    shops = _shop_count(user) if plan == "heavy" else None
     try:
         session = billing.create_checkout_session(
             tenant_id=user["tenant_id"], plan=plan,
             user_email=user.get("email") or "",
             customer_id=(tenant.get("billing") or {}).get("stripe_customer_id") or "",
-            origin=origin)
+            origin=origin, shop_count=shops)
     except Exception as e:
         # Log the SDK error server-side; never echo provider internals.
         logger.warning("billing checkout create failed tenant=%s plan=%s %s",
                        user["tenant_id"], plan, type(e).__name__)
         raise HTTPException(status_code=502,
                             detail="Billing is unavailable — please try again.")
-    await _audit_user(user, "billing.checkout_started",
-                      {"plan": plan, "session_id": session.id})
-    return {"checkout_url": session.url, "session_id": session.id}
+    details = {"plan": plan, "session_id": session.id}
+    if shops is not None:
+        details["shops"] = shops
+        details["amount_cents"] = billing.heavy_amount_cents(shops)
+    await _audit_user(user, "billing.checkout_started", details)
+    return {"checkout_url": session.url, "session_id": session.id,
+            **({"shops": shops,
+                "amount_cents": billing.heavy_amount_cents(shops)}
+               if shops is not None else {})}
 
 
 class PortalSessionIn(BaseModel):
@@ -164,6 +185,48 @@ async def billing_portal_session(body: PortalSessionIn, request: Request,
                             detail="Billing is unavailable — please try again.")
     await _audit_user(user, "billing.portal_opened", {})
     return {"url": session.url}
+
+
+@router.post("/heavy/resync")
+async def heavy_resync(user: dict = Depends(require("settings:write"))):
+    """Re-price the account's Heavy subscription from the shops the
+    login owns RIGHT NOW — the adjustment that runs when shops are
+    added (or removed). The subscription may be stamped on any of the
+    account's workspaces' billing subdocs; the first live Heavy one
+    found is adjusted and re-stamped with the new shop count."""
+    _require_billing()
+    shops = _shop_count(user)
+    owned_ids = [m["tenant_id"] for m in memberships(user)
+                 if m.get("role") == "owner"]
+    target = None
+    for tid in owned_ids:
+        t = await db.tenants.find_one({"id": tid}, {"_id": 0})
+        b = (t or {}).get("billing") or {}
+        if (b.get("plan") == "heavy" and b.get("subscription_id")
+                and b.get("status") in ("active", "past_due")):
+            target = t
+            break
+    if target is None:
+        raise HTTPException(
+            status_code=409,
+            detail="This account has no live Books Heavy subscription "
+                   "to adjust — subscribe to Heavy first.")
+    sub_id = target["billing"]["subscription_id"]
+    try:
+        billing.update_subscription_shop_count(sub_id, shops)
+    except Exception as e:
+        logger.warning("heavy resync failed tenant=%s sub=%s %s",
+                       target["id"], sub_id, type(e).__name__)
+        raise HTTPException(status_code=502,
+                            detail="Billing is unavailable — please try again.")
+    await _set_billing(target, {"shops": shops})
+    await _audit_user(user, "billing.heavy_resync",
+                      {"shops": shops,
+                       "amount_cents": billing.heavy_amount_cents(shops),
+                       "subscription_id": sub_id})
+    return {"shops": shops,
+            "amount_cents": billing.heavy_amount_cents(shops),
+            "subscription_id": sub_id}
 
 
 # ---------------------------------------------------------------- webhook state
@@ -248,6 +311,8 @@ async def _on_checkout_completed(obj):
     }
     if plan:
         fields["plan"] = plan
+    if plan == "heavy" and str(meta.get("shops") or "").isdigit():
+        fields["shops"] = int(meta["shops"])
     # The intended plan is recorded on the billing subdoc at once, but
     # the stored entitlement moves only when money has actually landed;
     # subscription/invoice events govern from there.
@@ -292,6 +357,13 @@ async def _on_subscription_upsert(obj):
     }
     if plan:
         fields["plan"] = plan
+    if plan == "heavy":
+        # The subscription's own items are the billed truth: base item
+        # = 3 shops, extra item quantity = the rest.
+        shops = billing.heavy_shops_from_items(
+            ((obj.get("items") or {}).get("data") or []))
+        if shops is not None:
+            fields["shops"] = shops
     # A canceled subscription falls back to Light (the default tier a
     # fresh workspace starts on); live states carry their plan.
     new_plan = "light" if status == "canceled" else (

@@ -120,6 +120,17 @@ async def compute_checklist(db, tenant_id, key):
     unreconciled_bank = await txns.count({
         "status": {"$in": ["cleared", "matched"]},
         "reconciled": {"$ne": True}, "txn_date": in_period})
+    # A reconciliation that finished OUT OF BALANCE (status
+    # "in_progress", difference != 0) blocks the close too (safeguard
+    # audit 2026-11-19, gap 5): before this item, close was blocked
+    # only by unreconciled transactions, so a period could close over
+    # a reconciliation that never tied out.
+    period_recs = await Scoped(db.reconciliations, tenant_id).find_list(
+        {"statement_date": in_period})
+    out_of_balance_recs = sum(
+        1 for r in period_recs
+        if r.get("status") != "completed"
+        or (r.get("difference_cents") or 0) != 0)
 
     open_bills = await Scoped(db.bills, tenant_id).find_list(
         {"status": {"$in": ["open", "partial"]}, "bill_date": in_period})
@@ -137,6 +148,9 @@ async def compute_checklist(db, tenant_id, key):
         {"key": "unreconciled_bank_txns", "blocking": True,
          "label": "Posted bank transactions in this period not yet reconciled",
          "count": unreconciled_bank},
+        {"key": "out_of_balance_reconciliations", "blocking": True,
+         "label": "Bank reconciliations dated in this period that finished out of balance",
+         "count": out_of_balance_recs},
         {"key": "open_bills", "blocking": False,
          "label": "Bills dated in this period still open (unpaid) at close",
          "count": len(open_bills),

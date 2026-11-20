@@ -628,7 +628,10 @@ async def split_invoice(invoice_id: str, body: SplitBody,
             lines=[InvLine(kind="service",
                            name=f"{p.label} — invoice {parent.get('issue_entry') or parent['id'][:8]}",
                            amount=p.amount)],
-            due_date=p.due_date, terms=parent.get("terms")), user)
+            due_date=p.due_date, terms=parent.get("terms"),
+            # Split parts may legitimately be equal amounts on the
+            # same day; the parent's already-split 409 is the dedupe.
+            allow_duplicate=True), user)
         child_set = {"split_parent_id": invoice_id, "split_label": p.label}
         # Contract+sign: the agreement rides on the FIRST part only (the
         # deposit) — the client signs once, before paying the deposit.
